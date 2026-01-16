@@ -1,0 +1,12 @@
+[
+    {
+        "id": "TICK-1001",
+        "userId": "user_demo_id",
+        "email": "demo@example.com",
+        "subject": "Order #552 Not Received",
+        "message": "I paid for the Reddit account but didn't get the email.",
+        "status": "open",
+        "date": "2026-01-16T12:00:00.000Z",
+        "replies": []
+    }
+]
