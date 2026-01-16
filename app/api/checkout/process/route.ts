@@ -80,7 +80,10 @@ export async function POST(req: Request) {
         }
 
         // B. CRYPTOMUS
-        if (method === 'cryptomus' && settings.cryptomusKey && settings.cryptomusId) {
+        const cryptoKey = process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey;
+        const cryptoId = process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId;
+
+        if (method === 'cryptomus' && cryptoKey && cryptoId) {
             try {
                 const crypto = require('crypto');
                 const payload = {
@@ -95,12 +98,12 @@ export async function POST(req: Request) {
                 };
 
                 const data = Buffer.from(JSON.stringify(payload)).toString('base64');
-                const sign = crypto.createHash('md5').update(data + settings.cryptomusKey).digest('hex');
+                const sign = crypto.createHash('md5').update(data + cryptoKey).digest('hex');
 
                 const cryptoRes = await fetch('https://api.cryptomus.com/v1/payment', {
                     method: 'POST',
                     headers: {
-                        'merchant': settings.cryptomusId,
+                        'merchant': cryptoId,
                         'sign': sign,
                         'Content-Type': 'application/json'
                     },
