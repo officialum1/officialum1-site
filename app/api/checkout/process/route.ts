@@ -174,8 +174,14 @@ export async function POST(req: Request) {
             status: orderStatus,
             date: new Date().toISOString()
         };
-        orders.push(newOrder);
-        await fs.writeFile(ORDERS_PATH, JSON.stringify(orders, null, 2));
+
+        // Vercel is Read-Only, so we try to save but don't crash if it fails
+        try {
+            orders.push(newOrder);
+            await fs.writeFile(ORDERS_PATH, JSON.stringify(orders, null, 2));
+        } catch (err) {
+            console.warn("Could not save order to local file (Read-Only System). Skipping.");
+        }
 
         if (paymentUrl) return NextResponse.json({ success: true, paymentUrl, orderId: newOrder.orderId });
 
