@@ -38,7 +38,9 @@ export default function Navbar() {
                     <li><Link href="/services" className="nav-link">Services</Link></li>
                     <li><Link href="/shop" className="nav-link" style={{ color: '#00ff88' }}>Buy Accounts</Link></li>
                     <li><Link href="/reviews" className="nav-link">Reviews</Link></li>
+                    <li><Link href="/store" className="nav-link">Rent Sites</Link></li>
                     <li><Link href="/work" className="nav-link">Work</Link></li>
+                    <li><Link href="/blog" className="nav-link">Insights</Link></li>
                     <li><Link href="/about" className="nav-link">About</Link></li>
                 </ul>
 
