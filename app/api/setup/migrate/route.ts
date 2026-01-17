@@ -54,6 +54,21 @@ export async function GET() {
         `);
         console.log('Created ticket_replies table');
 
+        // 4. Create Products Table
+        await query(`
+            CREATE TABLE IF NOT EXISTS products (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                platform VARCHAR(50),
+                type VARCHAR(50), -- 'account' or 'service'
+                price VARCHAR(50),
+                description TEXT,
+                credentials TEXT,
+                image VARCHAR(255)
+            )
+        `);
+        console.log('Created products table');
+
         return NextResponse.json({ success: true, message: "Migration Complete" });
 
     } catch (e: any) {

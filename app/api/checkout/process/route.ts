@@ -45,12 +45,14 @@ export async function POST(req: Request) {
         const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1 } = await req.json();
 
         // 1. Load Data
-        const products = await load(PRODUCTS_PATH);
+        // const products = await load(PRODUCTS_PATH); 
         const users = await load(USERS_PATH);
         // orders are now in DB, no need to load JSON
         const settings = await getSettings();
 
-        const product = products.find((p: any) => p.id.toString() === productId.toString());
+        // Fetch Product from DB
+        const productRows = await query("SELECT * FROM products WHERE id = ?", [productId]) as any[];
+        const product = productRows[0];
 
         // Handle User (Registered or Guest)
         let user: any = null;
