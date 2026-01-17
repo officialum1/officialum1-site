@@ -120,11 +120,11 @@ export async function POST(req: Request) {
                 // Cryptomus requires: MD5(Base64(JSON_STRING) + API_KEY)
                 // IMPORTANT: Node's JSON.stringify doesn't escape slashes, but PHP's json_encode does.
                 // Cryptomus expects escaped slashes (e.g. "https:\/\/")
-                const jsonPayload = JSON.stringify(payload).replace(/\//g, '\\/');
+                const jsonPayload = JSON.stringify(payload);
 
                 // Encode to Base64 (handling UTF-8)
                 const dataBase64 = Buffer.from(jsonPayload).toString('base64');
-                const sign = crypto.createHash('md5').update(dataBase64 + cryptoKey).digest('hex');
+                const sign = crypto.createHash('md5').update(dataBase64 + cryptoKey.trim()).digest('hex');
 
                 console.log("[Cryptomus Debug] Payload:", jsonPayload);
                 console.log("[Cryptomus Debug] Sign:", sign);
