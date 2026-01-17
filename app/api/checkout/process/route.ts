@@ -15,7 +15,7 @@ async function load(filePath: string) {
 
 async function getSettings() {
     try {
-        const rows = await query("SELECT * FROM settings");
+        const rows = await query("SELECT setting_key, setting_value FROM settings") as any[];
         // Convert rows array to a single object
         if (Array.isArray(rows)) {
             return rows.reduce((acc: any, row: any) => {
@@ -42,7 +42,7 @@ async function sendTelegramAlert(token: string, chatId: string, message: string)
 
 export async function POST(req: Request) {
     try {
-        const { userId, productId, method, guestEmail, promoCode, finalPrice } = await req.json();
+        const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1 } = await req.json();
 
         // 1. Load Data
         const products = await load(PRODUCTS_PATH);
@@ -63,7 +63,8 @@ export async function POST(req: Request) {
         if (!product || !user) return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
 
         // Calculate Amount to Charge
-        const amountToCharge = finalPrice ? finalPrice : product.price; // Use discounted price if valid
+        const safeQuantity = parseInt(quantity as string, 10) || 1;
+        const amountToCharge = finalPrice ? finalPrice : (parseFloat(product.price) * safeQuantity).toFixed(2);
 
         // 2. Process Payment
         let paymentUrl = null;
@@ -78,9 +79,9 @@ export async function POST(req: Request) {
                 const params = new URLSearchParams();
                 params.append('payment_method_types[]', 'card');
                 params.append('line_items[0][price_data][currency]', 'usd');
-                params.append('line_items[0][price_data][product_data][name]', product.name + (promoCode ? ` (Promo: ${promoCode})` : ''));
-                params.append('line_items[0][price_data][unit_amount]', (parseFloat(amountToCharge) * 100).toFixed(0)); // Convert to cents
-                params.append('line_items[0][quantity]', '1');
+                params.append('line_items[0][price_data][product_data][name]', `${product.name} (x${safeQuantity})` + (promoCode ? ` [${promoCode}]` : ''));
+                params.append('line_items[0][price_data][unit_amount]', (parseFloat(amountToCharge) * 100).toFixed(0)); // Total Amount
+                params.append('line_items[0][quantity]', '1'); // We are charging the TOTAL as one line item
                 params.append('mode', 'payment');
                 params.append('success_url', `${req.headers.get('origin')}/order-success?session_id={CHECKOUT_SESSION_ID}&orderId=${Date.now()}`);
                 params.append('cancel_url', `${req.headers.get('origin')}/checkout?id=${productId}`);
@@ -97,7 +98,6 @@ export async function POST(req: Request) {
         }
 
         // B. CRYPTOMUS
-        // PRIORITY: Database > Env Var > Settings File
         const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...') ? settings.cryptomusKey : (process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey);
         const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...') ? settings.cryptomusId : (process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId);
 
@@ -116,15 +116,12 @@ export async function POST(req: Request) {
                     to_currency: "USDT"
                 };
 
-                // Ensure payload is properly formatted for signature
-                // Cryptomus requires: MD5(Base64(JSON_STRING) + API_KEY)
-                // IMPORTANT: Node's JSON.stringify doesn't escape slashes, but PHP's json_encode does.
-                // Cryptomus expects escaped slashes (e.g. "https:\/\/")
-                const jsonPayload = JSON.stringify(payload);
+                const safeKey = cryptoKey.trim();
+                const safeId = cryptoId.trim();
 
-                // Encode to Base64 (handling UTF-8)
+                const jsonPayload = JSON.stringify(payload);
                 const dataBase64 = Buffer.from(jsonPayload).toString('base64');
-                const sign = crypto.createHash('md5').update(dataBase64 + cryptoKey.trim()).digest('hex');
+                const sign = crypto.createHash('md5').update(dataBase64 + safeKey).digest('hex');
 
                 console.log("[Cryptomus Debug] Payload:", jsonPayload);
                 console.log("[Cryptomus Debug] Sign:", sign);
@@ -132,7 +129,7 @@ export async function POST(req: Request) {
                 const cryptoRes = await fetch('https://api.cryptomus.com/v1/payment', {
                     method: 'POST',
                     headers: {
-                        'merchant': cryptoId,
+                        'merchant': safeId,
                         'sign': sign,
                         'Content-Type': 'application/json'
                     },
@@ -145,13 +142,11 @@ export async function POST(req: Request) {
                     paymentUrl = cryptoData.result.url;
                     orderStatus = 'pending';
                 } else {
-                    // Pass specific error to frontend
                     const errorMsg = cryptoData.message || JSON.stringify(cryptoData);
                     throw new Error("Cryptomus Error: " + errorMsg);
                 }
             } catch (e: any) {
                 console.error('Cryptomus Error Details:', e);
-                // Return the clean error message to the user
                 throw new Error(e.message || "Cryptomus Payment Failed");
             }
         }
@@ -203,12 +198,10 @@ export async function POST(req: Request) {
             } catch (e: any) { throw new Error("Binance Error: " + e.message); }
         }
 
-        // CRITICAL CHECK: If not free, MUST have a payment URL
+        // CRITICAL CHECK
         if (parseFloat(amountToCharge) > 0 && !paymentUrl) {
             throw new Error("Payment Gateway Initialization Failed. Please check Admin Settings.");
         }
-
-        // If amount is 0, status is paid immediately
         if (parseFloat(amountToCharge) === 0) {
             orderStatus = 'paid';
         }
@@ -224,14 +217,15 @@ export async function POST(req: Request) {
             promoCode: promoCode || null,
             method,
             status: orderStatus,
+            quantity: safeQuantity, // ADDED
             date: new Date()
         };
 
         // Save to Hostinger Database
         try {
             await query(`
-                INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity, date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 newOrder.orderId,
                 newOrder.userId,
@@ -242,34 +236,33 @@ export async function POST(req: Request) {
                 newOrder.promoCode,
                 newOrder.method,
                 newOrder.status,
+                newOrder.quantity,
                 newOrder.date
             ]);
         } catch (dbError) {
             console.error("Failed to save order to Database:", dbError);
-            // Continue processed because payment might be successful
         }
 
         if (paymentUrl) {
-            // Optional: Send Notification to Admin that payment is INITIATED
             const adminEmail = process.env.ADMIN_EMAIL || settings.smtpUser;
             if (adminEmail) {
                 await sendAuditReport(adminEmail, "New Order Initiated #" + newOrder.orderId, {
                     da: "NEW ORDER PENDING",
                     pa: product.name,
                     links: Number(amountToCharge || 0),
-                    details: `Customer: ${user.email} has initiated a ${method} payment for $${amountToCharge}. Order status: ${orderStatus}.`
+                    details: `Customer: ${user.email} has initiated a ${method} payment for $${amountToCharge} (Qty: ${safeQuantity}). Order status: ${orderStatus}.`
                 }, settings);
             }
             return NextResponse.json({ success: true, paymentUrl, orderId: newOrder.orderId });
         }
 
-        // 4. DELIVERY AUTOMATION (Free Product)
+        // 4. DELIVERY AUTOMATION
         let emailBody = "";
         let telegramBody = "";
 
         if (product.type === 'service') {
-            emailBody = `Thank you for your purchase!\n\nWe have received your order for ${product.name}.\nOur team will begin processing your boost shortly.\nYou will receive updates via email or Telegram.`;
-            telegramBody = `Order Confirmed: ${product.name}\n\nStatus: Processing\nWe will update you soon!`;
+            emailBody = `Thank you for your purchase!\n\nWe have received your order for ${product.name} (x${safeQuantity}).\nOur team will begin processing your boost shortly.\nYou will receive updates via email or Telegram.`;
+            telegramBody = `Order Confirmed: ${product.name} (x${safeQuantity})\n\nStatus: Processing\nWe will update you soon!`;
         } else {
             const credentials = product.creds || "Contact Support for Access";
             emailBody = `Your Credentials:\n\n${credentials}\n\nPlease change your passwords immediately.`;
@@ -293,7 +286,7 @@ export async function POST(req: Request) {
                 da: "FREE ORDER CLAIMED",
                 pa: product.name,
                 links: 0,
-                details: `Customer: ${user.email} received ${product.name} for free.`
+                details: `Customer: ${user.email} received ${product.name} (x${safeQuantity}) for free.`
             }, settings);
         }
 
@@ -304,7 +297,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true, orderId: newOrder.orderId });
 
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
         return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown Checkout Error" }, { status: 500 });
     }

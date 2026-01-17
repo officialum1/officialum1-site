@@ -18,6 +18,7 @@ function CheckoutContent() {
     const [promoCode, setPromoCode] = useState('');
     const [rating, setRating] = useState<number>(0);
     const [discount, setDiscount] = useState<number>(0); // Percentage
+    const [quantity, setQuantity] = useState<number>(1);
     const [promoStatus, setPromoStatus] = useState<'none' | 'success' | 'invalid'>('none');
 
     useEffect(() => {
@@ -59,11 +60,12 @@ function CheckoutContent() {
     const getFinalPrice = () => {
         if (!product) return 0;
         const original = parseFloat(product.price.replace('$', ''));
+        const baseTotal = original * quantity;
         if (discount > 0) {
-            const d = original * (discount / 100);
-            return (original - d).toFixed(2);
+            const d = baseTotal * (discount / 100);
+            return (baseTotal - d).toFixed(2);
         }
-        return original.toFixed(2);
+        return baseTotal.toFixed(2);
     };
 
     const handlePayment = async () => {
@@ -78,6 +80,7 @@ function CheckoutContent() {
                     userId: user ? user.id : 'guest',
                     guestEmail: email,
                     productId: product.id,
+                    quantity: quantity,
                     method: paymentMethod,
                     promoCode: discount > 0 ? promoCode : null,
                     finalPrice: getFinalPrice()
@@ -218,6 +221,16 @@ function CheckoutContent() {
                             </div>
                         </div>
 
+                        {/* Quantity Selector */}
+                        <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px' }}>
+                            <span style={{ fontSize: '0.9rem', color: '#ccc' }}>Quantity</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ background: '#333', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>-</button>
+                                <span style={{ fontWeight: 'bold' }}>{quantity}</span>
+                                <button onClick={() => setQuantity(q => q + 1)} style={{ background: '#4f46e5', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>+</button>
+                            </div>
+                        </div>
+
                         {/* Promo Input */}
                         <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
                             <input
@@ -239,7 +252,7 @@ function CheckoutContent() {
                         <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed rgba(255,255,255,0.2)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
                                 <span>Subtotal</span>
-                                <span>${product.price}</span>
+                                <span>${product.price} {quantity > 1 ? `x ${quantity}` : ''}</span>
                             </div>
                             {discount > 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#00ff88' }}>

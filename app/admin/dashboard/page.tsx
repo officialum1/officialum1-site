@@ -5,11 +5,33 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 
 type PageKey = 'terms' | 'privacy' | 'about';
-type TabKey = 'blogs' | 'pages' | 'services' | 'reviews' | 'projects' | 'messages' | 'rentals' | 'promocodes' | 'tickets';
+type TabKey = 'blogs' | 'pages' | 'services' | 'reviews' | 'projects' | 'messages' | 'rentals' | 'promocodes' | 'tickets' | 'orders';
 
 export default function AdminDashboard() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabKey | 'settings' | 'products' | 'inbox'>('inbox');
+
+    // Orders State
+    const [orders, setOrders] = useState<any[]>([]);
+    const [deliveryNote, setDeliveryNote] = useState('');
+    const [deliveringId, setDeliveringId] = useState<string | null>(null);
+
+    const fetchOrders = async () => { try { const res = await fetch('/api/admin/orders'); if (res.ok) setOrders(await res.json()); } catch { } };
+
+    const handleDeliverOrder = async () => {
+        if (!deliveringId || !deliveryNote) return;
+        try {
+            await fetch('/api/admin/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: deliveringId, status: 'completed', deliveryInfo: deliveryNote })
+            });
+            alert('Order Delivered & Email Sent!');
+            setDeliveringId(null);
+            setDeliveryNote('');
+            fetchOrders();
+        } catch (e) { alert('Delivery Failed'); }
+    };
 
     // ... (existing state) ...
 
@@ -124,6 +146,7 @@ export default function AdminDashboard() {
                     fetchProducts();
                     fetchPromoCodes();
                     fetchTickets();
+                    fetchOrders();
                 }
             } catch (err) {
                 router.push('/admin/login');
@@ -325,8 +348,89 @@ export default function AdminDashboard() {
                     <button onClick={() => setActiveTab('products')} className={`btn ${activeTab === 'products' ? 'btn-primary' : 'btn-outline'}`}>Manage Shop</button>
                     <button onClick={() => setActiveTab('promocodes')} className={`btn ${activeTab === 'promocodes' ? 'btn-primary' : 'btn-outline'}`}>Promo Codes</button>
                     <button onClick={() => setActiveTab('tickets')} className={`btn ${activeTab === 'tickets' ? 'btn-primary' : 'btn-outline'}`}>Support Tickets</button>
+                    <button onClick={() => setActiveTab('orders')} className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline'}`}>Manage Orders</button>
                     <button onClick={() => setActiveTab('inbox')} className={`btn ${activeTab === 'inbox' ? 'btn-primary' : 'btn-outline'}`}>Inbox</button>
                 </div>
+
+                {/* Orders Tab */}
+                {activeTab === 'orders' && (
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2>Orders ({orders.length})</h2>
+                            <button onClick={fetchOrders} className="btn btn-outline" style={{ fontSize: '0.9rem' }}>Refresh</button>
+                        </div>
+
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#ccc' }}>
+                                <thead>
+                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                        <th style={{ padding: '1rem' }}>Order ID</th>
+                                        <th style={{ padding: '1rem' }}>User / Email</th>
+                                        <th style={{ padding: '1rem' }}>Product</th>
+                                        <th style={{ padding: '1rem' }}>Qty</th>
+                                        <th style={{ padding: '1rem' }}>Amount</th>
+                                        <th style={{ padding: '1rem' }}>Status</th>
+                                        <th style={{ padding: '1rem' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orders.map((o: any) => (
+                                        <tr key={o.orderId} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <td style={{ padding: '1rem', fontFamily: 'monospace' }}>#{o.orderId.substring(6)}</td>
+                                            <td style={{ padding: '1rem' }}>{o.guestEmail || o.userId}</td>
+                                            <td style={{ padding: '1rem' }}>{o.productId}</td>
+                                            <td style={{ padding: '1rem' }}>{o.quantity || 1}</td>
+                                            <td style={{ padding: '1rem' }}>${o.amount}</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <span style={{
+                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem',
+                                                    background: o.status === 'paid' ? 'green' : o.status === 'completed' ? 'blue' : 'orange',
+                                                    color: 'white'
+                                                }}>
+                                                    {o.status}
+                                                </span>
+                                                {o.delivery_status === 'delivered' && <span style={{ marginLeft: '5px' }}>✅</span>}
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                {o.status !== 'completed' && (
+                                                    <button
+                                                        onClick={() => setDeliveringId(o.orderId)}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+                                                    >
+                                                        Deliver
+                                                    </button>
+                                                )}
+                                                {o.status === 'completed' && <span style={{ color: '#00ff88', fontSize: '0.8rem' }}>Sent</span>}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Delivery Modal */}
+                        {deliveringId && (
+                            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 100 }}>
+                                <div className="glass" style={{ padding: '2rem', width: '500px', maxWidth: '90%', borderRadius: '16px', background: '#111' }}>
+                                    <h3 style={{ marginBottom: '1rem' }}>Deliver Order #{deliveringId}</h3>
+                                    <p style={{ marginBottom: '1rem', color: '#888' }}>Enter the credentials, file link, or message to send to the customer via email.</p>
+                                    <textarea
+                                        className="input-field"
+                                        placeholder="Download Link: https://... &#10;User: ... &#10;Pass: ..."
+                                        style={{ height: '200px', fontFamily: 'monospace', marginBottom: '1rem' }}
+                                        value={deliveryNote}
+                                        onChange={e => setDeliveryNote(e.target.value)}
+                                    />
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                        <button onClick={() => { setDeliveringId(null); setDeliveryNote(''); }} className="btn btn-outline">Cancel</button>
+                                        <button onClick={handleDeliverOrder} className="btn btn-primary">Send & Complete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Tickets Tab */}
                 {activeTab === 'tickets' && (

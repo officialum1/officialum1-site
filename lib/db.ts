@@ -71,6 +71,35 @@ export async function initDB() {
         )
     `);
 
+    // Migration: Add Quantity & Delivery Info (Safe Alter)
+    try { await query("ALTER TABLE orders ADD COLUMN quantity INT DEFAULT 1"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN delivery_info TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN delivery_status VARCHAR(50) DEFAULT 'pending'"); } catch (e) { }
+
+    // Tickets Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS tickets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50) NOT NULL,
+            subject VARCHAR(255) NOT NULL,
+            message TEXT NOT NULL,
+            status VARCHAR(50) DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Ticket Replies Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS ticket_replies (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            ticket_id INT NOT NULL,
+            sender VARCHAR(50) NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE
+        )
+    `);
+
     // Settings Table (Key-Value Store)
     await query(`
         CREATE TABLE IF NOT EXISTS settings (
