@@ -122,18 +122,20 @@ export async function POST(req: Request) {
                     body: JSON.stringify(payload)
                 });
                 const cryptoData = await cryptoRes.json();
-                console.log("Cryptomus Response:", cryptoData); // Log for debugging
+                console.log("Cryptomus Response:", JSON.stringify(cryptoData));
 
                 if (cryptoData.result && cryptoData.result.url) {
                     paymentUrl = cryptoData.result.url;
                     orderStatus = 'pending';
                 } else {
-                    // Fallback: If no URL, throw error so we see it on frontend
-                    throw new Error("Cryptomus Error: " + JSON.stringify(cryptoData));
+                    // Pass specific error to frontend
+                    const errorMsg = cryptoData.message || JSON.stringify(cryptoData);
+                    throw new Error("Cryptomus Error: " + errorMsg);
                 }
-            } catch (e) {
-                console.error('Cryptomus Error', e);
-                throw e; // Re-throw to show on frontend
+            } catch (e: any) {
+                console.error('Cryptomus Error Details:', e);
+                // Return the clean error message to the user
+                throw new Error(e.message || "Cryptomus Payment Failed");
             }
         }
 
