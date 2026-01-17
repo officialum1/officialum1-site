@@ -510,7 +510,6 @@ export default function AdminDashboard() {
                                                 value={customPlatform}
                                                 onChange={e => setCustomPlatform(e.target.value)}
                                                 className="input-field"
-                                                required
                                             />
                                         )}
                                     </div>
@@ -521,12 +520,11 @@ export default function AdminDashboard() {
 
                                 {prodType === 'account' && (
                                     <textarea
-                                        placeholder="Login Details / Download Link (Hidden until purchased)"
+                                        placeholder="Login Details / Download Link (Optional)"
                                         value={prodCreds}
                                         onChange={e => setProdCreds(e.target.value)}
                                         className="input-field"
                                         style={{ height: '100px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.3)', borderColor: '#00ff88' }}
-                                        required
                                     />
                                 )}
 
