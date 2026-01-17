@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 
 type PageKey = 'terms' | 'privacy' | 'about';
-type TabKey = 'blogs' | 'pages' | 'services' | 'reviews' | 'projects' | 'messages' | 'rentals' | 'promocodes' | 'tickets' | 'orders';
+type TabKey = 'blogs' | 'pages' | 'services' | 'reviews' | 'projects' | 'messages' | 'rentals' | 'promocodes' | 'tickets' | 'orders' | 'seo';
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -156,6 +156,10 @@ export default function AdminDashboard() {
         };
         checkAuth();
     }, []);
+
+    // SEO Blog Generator State
+    const [seoTopic, setSeoTopic] = useState('');
+    const [isSeoGenerating, setIsSeoGenerating] = useState(false);
 
     const handleTicketReply = async (ticketId: string) => {
         if (!replyMsg) return;
@@ -364,6 +368,7 @@ export default function AdminDashboard() {
                     <button onClick={() => setActiveTab('tickets')} className={`btn ${activeTab === 'tickets' ? 'btn-primary' : 'btn-outline'}`}>Support Tickets</button>
                     <button onClick={() => setActiveTab('orders')} className={`btn ${activeTab === 'orders' ? 'btn-primary' : 'btn-outline'}`}>Manage Orders</button>
                     <button onClick={() => setActiveTab('inbox')} className={`btn ${activeTab === 'inbox' ? 'btn-primary' : 'btn-outline'}`}>Inbox</button>
+                    <button onClick={() => setActiveTab('seo')} className={`btn ${activeTab === 'seo' ? 'btn-primary' : 'btn-outline'}`}>SEO Generator</button>
                 </div>
 
                 {/* Orders Tab */}
@@ -601,6 +606,57 @@ export default function AdminDashboard() {
                                         <button onClick={() => handleDeletePromo(code.id)} style={{ background: 'red', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* SEO Blog Generator Tab */}
+                {activeTab === 'seo' && (
+                    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                        <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', textAlign: 'center' }}>
+                            <h2 className="text-3xl font-bold mb-4">🚀 AI SEO Blog Generator</h2>
+                            <p style={{ color: '#aaa', marginBottom: '2rem' }}>
+                                Automatically write and publish high-ranking articles for Google. <br />
+                                Just enter a topic, and AI will do the rest.
+                            </p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '500px', margin: '0 auto' }}>
+                                <input
+                                    placeholder="Enter Topic (e.g. How to grow on TikTok in 2026)"
+                                    value={seoTopic}
+                                    onChange={e => setSeoTopic(e.target.value)}
+                                    className="input-field"
+                                    style={{ padding: '1rem', fontSize: '1.1rem' }}
+                                />
+                                <button
+                                    className="btn btn-primary"
+                                    disabled={isSeoGenerating || !seoTopic}
+                                    onClick={async () => {
+                                        setIsSeoGenerating(true);
+                                        try {
+                                            const res = await fetch('/api/admin/generate-blog', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ topic: seoTopic })
+                                            });
+                                            const data = await res.json();
+                                            if (data.success) {
+                                                alert(`✅ Published: "${data.title}"`);
+                                                setSeoTopic('');
+                                            } else {
+                                                alert("Error: " + data.error);
+                                            }
+                                        } catch (e) {
+                                            alert("Failed to contact AI.");
+                                        } finally {
+                                            setIsSeoGenerating(false);
+                                        }
+                                    }}
+                                    style={{ padding: '1rem', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                >
+                                    {isSeoGenerating ? '✨ AI is Writing...' : 'Generate & Publish'}
+                                </button>
                             </div>
                         </div>
                     </div>

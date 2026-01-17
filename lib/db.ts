@@ -99,6 +99,20 @@ export async function initDB() {
         )
     `);
 
+    // Blogs Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS blogs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            excerpt TEXT,
+            content LONGTEXT,
+            category VARCHAR(100),
+            image VARCHAR(255),
+            author VARCHAR(100) DEFAULT 'Admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Newsletter Table
     await query(`
         CREATE TABLE IF NOT EXISTS newsletter (
