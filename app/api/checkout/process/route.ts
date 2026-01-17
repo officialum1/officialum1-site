@@ -19,7 +19,7 @@ async function getSettings() {
         // Convert rows array to a single object
         if (Array.isArray(rows)) {
             return rows.reduce((acc: any, row: any) => {
-                acc[row.key] = row.value;
+                acc[row.setting_key] = row.setting_value;
                 return acc;
             }, {});
         }
