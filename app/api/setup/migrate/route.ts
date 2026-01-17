@@ -94,6 +94,22 @@ export async function GET() {
         `);
         console.log('Testimonials table ready');
 
+        // 6. Seed Initial Reviews (If empty)
+        try {
+            const reviews: any = await query("SELECT COUNT(*) as count FROM testimonials");
+            if (reviews[0].count === 0) {
+                console.log('Seeding initial reviews...');
+                await query(`
+                    INSERT INTO testimonials (name, role, review, rating, approved) VALUES 
+                    ('Alex Morgan', 'Buyer - Instagram Followers', 'Incredible service! Delivered 10k followers in under an hour. Highly recommended.', 5, TRUE),
+                    ('Sarah Jenkins', 'Buyer - Reddit Account', 'The account was high quality and aged properly. Will buy again.', 5, TRUE),
+                    ('Michael Chen', 'Client - Web Design', 'OfficialUM1 built a stunning portfolio for me. The design is top notch.', 5, TRUE)
+                `);
+            }
+        } catch (e) {
+            console.log('Seeding skipped');
+        }
+
         return NextResponse.json({ success: true, message: "Migration Complete and Tables Reset" });
 
     } catch (e: any) {

@@ -111,6 +111,19 @@ export async function initDB() {
     // Migration: Support Ticket Attachments
     try { await query("ALTER TABLE tickets ADD COLUMN attachment TEXT"); } catch (e) { }
 
+    // Testimonials Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS testimonials (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            role VARCHAR(255),
+            review TEXT NOT NULL,
+            rating INT DEFAULT 5,
+            approved BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Settings Table (Key-Value Store)
     await query(`
         CREATE TABLE IF NOT EXISTS settings (
