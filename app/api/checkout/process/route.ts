@@ -55,10 +55,11 @@ export async function POST(req: Request) {
 
         // 2. Process Payment
         let paymentUrl = null;
-        let orderStatus = 'paid';
+        let orderStatus = 'pending'; // Default to pending, NOT paid
 
         // A. STRIPE
-        if (method === 'stripe' && settings.stripeSecret) {
+        if (method === 'stripe') {
+            if (!settings.stripeSecret) throw new Error("Stripe is not configured by Admin.");
             try {
                 const params = new URLSearchParams();
                 params.append('payment_method_types[]', 'card');
@@ -76,8 +77,9 @@ export async function POST(req: Request) {
                     body: params
                 });
                 const stripeData = await stripeRes.json();
+                if (stripeData.error) throw new Error(stripeData.error.message);
                 if (stripeData.url) { paymentUrl = stripeData.url; orderStatus = 'pending'; }
-            } catch (err) { }
+            } catch (err: any) { throw new Error("Stripe Error: " + err.message); }
         }
 
         // B. CRYPTOMUS
@@ -85,7 +87,8 @@ export async function POST(req: Request) {
         const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...') ? settings.cryptomusKey : (process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey);
         const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...') ? settings.cryptomusId : (process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId);
 
-        if (method === 'cryptomus' && cryptoKey && cryptoId) {
+        if (method === 'cryptomus') {
+            if (!cryptoKey || !cryptoId) throw new Error("Cryptomus is not configured by Admin.");
             try {
                 const crypto = require('crypto');
                 const payload = {
@@ -135,7 +138,8 @@ export async function POST(req: Request) {
         }
 
         // C. BINANCE PAY
-        if (method === 'binance' && settings.binanceKey && settings.binanceSecret) {
+        if (method === 'binance') {
+            if (!settings.binanceKey || !settings.binanceSecret) throw new Error("Binance Pay is not configured.");
             try {
                 const crypto = require('crypto');
                 const requestBody = JSON.stringify({
@@ -174,8 +178,20 @@ export async function POST(req: Request) {
                 if (binanceData.status === 'SUCCESS' && binanceData.data && binanceData.data.checkoutUrl) {
                     paymentUrl = binanceData.data.checkoutUrl;
                     orderStatus = 'pending';
+                } else {
+                    throw new Error("Binance Error: " + JSON.stringify(binanceData));
                 }
-            } catch (e) { console.error('Binance Error', e); }
+            } catch (e: any) { throw new Error("Binance Error: " + e.message); }
+        }
+
+        // CRITICAL CHECK: If not free, MUST have a payment URL
+        if (parseFloat(amountToCharge) > 0 && !paymentUrl) {
+            throw new Error("Payment Gateway Initialization Failed. Please check Admin Settings.");
+        }
+
+        // If amount is 0, status is paid immediately
+        if (parseFloat(amountToCharge) === 0) {
+            orderStatus = 'paid';
         }
 
         // 3. Create Order
