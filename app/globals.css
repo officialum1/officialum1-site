@@ -204,6 +204,7 @@ p {
   }
 }
 
+
 /* Navbar specific */
 .navbar {
   position: fixed;
@@ -216,7 +217,7 @@ p {
 }
 
 .navbar.scrolled {
-  background: rgba(3, 3, 5, 0.85);
+  background: rgba(3, 3, 5, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--glass-border);
 }
@@ -232,6 +233,15 @@ p {
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.05em;
+  color: white;
+  text-decoration: none;
+}
+
+/* Desktop Menu Layout */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
 }
 
 .nav-links {
@@ -241,14 +251,132 @@ p {
 }
 
 .nav-link {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
   transition: color 0.2s;
+  cursor: pointer;
 }
 
 .nav-link:hover {
   color: white;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 1.5rem;
+}
+
+.user-menu,
+.guest-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1002;
+}
+
+.bar {
+  width: 100%;
+  height: 3px;
+  background-color: white;
+  border-radius: 3px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hamburger Animation */
+.bar.open:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.bar.open:nth-child(2) {
+  opacity: 0;
+}
+
+.bar.open:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile Responsive */
+@media (max-width: 960px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #050505;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  .nav-menu.active {
+    transform: translateX(0);
+  }
+
+  .nav-links {
+    flex-direction: column;
+    text-align: center;
+    gap: 2.5rem;
+  }
+
+  .nav-link {
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    gap: 2rem;
+    border-left: none;
+    padding-left: 0;
+    margin-top: 1rem;
+  }
+
+  .user-menu,
+  .guest-menu {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 }
 
 /* Hero Section */
@@ -338,8 +466,12 @@ p {
   padding-left: 1.5rem;
   color: var(--text-muted);
 }
+
 /* Global Form Elements */
-input, textarea, select, .input-field {
+input,
+textarea,
+select,
+.input-field {
   width: 100%;
   padding: 1rem;
   border-radius: 12px;
@@ -350,7 +482,10 @@ input, textarea, select, .input-field {
   transition: all 0.2s ease;
 }
 
-input:focus, textarea:focus, select:focus, .input-field:focus {
+input:focus,
+textarea:focus,
+select:focus,
+.input-field:focus {
   outline: none;
   border-color: var(--primary);
   background-color: rgba(255, 255, 255, 0.08) !important;
@@ -359,12 +494,12 @@ input:focus, textarea:focus, select:focus, .input-field:focus {
 
 /* Fix for Chrome Autofill */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #0f1014 inset !important;
-    -webkit-text-fill-color: white !important;
-    transition: background-color 5000s ease-in-out 0s;
+  -webkit-box-shadow: 0 0 0 30px #0f1014 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 select option {
@@ -380,4 +515,3 @@ label {
   font-weight: 500;
   margin-left: 4px;
 }
-
