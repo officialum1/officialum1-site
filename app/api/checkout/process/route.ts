@@ -112,6 +112,9 @@ export async function POST(req: Request) {
                 const dataBase64 = Buffer.from(jsonPayload).toString('base64');
                 const sign = crypto.createHash('md5').update(dataBase64 + cryptoKey).digest('hex');
 
+                console.log("[Cryptomus Debug] Payload:", jsonPayload);
+                console.log("[Cryptomus Debug] Sign:", sign);
+
                 const cryptoRes = await fetch('https://api.cryptomus.com/v1/payment', {
                     method: 'POST',
                     headers: {
