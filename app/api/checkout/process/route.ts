@@ -7,8 +7,6 @@ import { query } from '@/lib/db';
 // Paths
 const PRODUCTS_PATH = path.join(process.cwd(), 'data', 'products.json');
 const USERS_PATH = path.join(process.cwd(), 'data', 'users.json');
-const ORDERS_PATH = path.join(process.cwd(), 'data', 'orders.json');
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'settings.json');
 
 // Helper to load JSON
 async function load(filePath: string) {
@@ -28,7 +26,8 @@ async function getSettings() {
         return {};
     } catch (e) {
         console.error("Failed to load settings from DB:", e);
-        return {};
+        // THROW error so we know if DB is failing
+        throw new Error("Database Configuration Error: " + (e instanceof Error ? e.message : String(e)));
     }
 }
 
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
         // 1. Load Data
         const products = await load(PRODUCTS_PATH);
         const users = await load(USERS_PATH);
-        const orders = await load(ORDERS_PATH);
+        // orders are now in DB, no need to load JSON
         const settings = await getSettings();
 
         const product = products.find((p: any) => p.id.toString() === productId.toString());
@@ -71,8 +70,10 @@ export async function POST(req: Request) {
         let orderStatus = 'pending'; // Default to pending, NOT paid
 
         // A. STRIPE
+        const stripeSecret = (settings.stripeSecret && settings.stripeSecret !== '...') ? settings.stripeSecret : process.env.STRIPE_SECRET_KEY;
+
         if (method === 'stripe') {
-            if (!settings.stripeSecret) throw new Error("Stripe is not configured by Admin.");
+            if (!stripeSecret) throw new Error("Stripe is not configured by Admin (Missing Secret Key).");
             try {
                 const params = new URLSearchParams();
                 params.append('payment_method_types[]', 'card');
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
 
                 const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${settings.stripeSecret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 'Authorization': `Bearer ${stripeSecret}`, 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params
                 });
                 const stripeData = await stripeRes.json();
@@ -248,9 +249,21 @@ export async function POST(req: Request) {
             // Continue processed because payment might be successful
         }
 
-        if (paymentUrl) return NextResponse.json({ success: true, paymentUrl, orderId: newOrder.orderId });
+        if (paymentUrl) {
+            // Optional: Send Notification to Admin that payment is INITIATED
+            const adminEmail = process.env.ADMIN_EMAIL || settings.smtpUser;
+            if (adminEmail) {
+                await sendAuditReport(adminEmail, "New Order Initiated #" + newOrder.orderId, {
+                    da: "NEW ORDER PENDING",
+                    pa: product.name,
+                    links: Number(amountToCharge || 0),
+                    details: `Customer: ${user.email} has initiated a ${method} payment for $${amountToCharge}. Order status: ${orderStatus}.`
+                }, settings);
+            }
+            return NextResponse.json({ success: true, paymentUrl, orderId: newOrder.orderId });
+        }
 
-        // 4. DELIVERY AUTOMATION
+        // 4. DELIVERY AUTOMATION (Free Product)
         let emailBody = "";
         let telegramBody = "";
 
@@ -263,18 +276,28 @@ export async function POST(req: Request) {
             telegramBody = `Thanks for buying ${product.name}!\n\nHere are your details:\n${credentials}`;
         }
 
-        // A. Email Delivery
+        // A. Email Delivery to User
         if (user.email) {
-            console.log(`[Email] Sending order update to ${user.email}`);
             await sendAuditReport(user.email, "Order #" + newOrder.orderId, {
                 da: "ORDER CONFIRMED",
                 pa: product.name,
-                links: amountToCharge, // Using amount as 'links' placeholder
+                links: Number(amountToCharge || 0),
                 details: emailBody
             }, settings);
         }
 
-        // B. Telegram Delivery
+        // B. Email Alert to Admin
+        const adminEmail = process.env.ADMIN_EMAIL || settings.smtpUser;
+        if (adminEmail) {
+            await sendAuditReport(adminEmail, "New FREE Order #" + newOrder.orderId, {
+                da: "FREE ORDER CLAIMED",
+                pa: product.name,
+                links: 0,
+                details: `Customer: ${user.email} received ${product.name} for free.`
+            }, settings);
+        }
+
+        // C. Telegram Delivery
         if (user.telegram && settings.telegramToken) {
             await sendTelegramAlert(settings.telegramToken, user.telegram, telegramBody);
         }
