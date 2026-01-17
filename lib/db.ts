@@ -99,6 +99,18 @@ export async function initDB() {
         )
     `);
 
+    // Newsletter Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS newsletter (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Migration: Support Ticket Attachments
+    try { await query("ALTER TABLE tickets ADD COLUMN attachment TEXT"); } catch (e) { }
+
     // Settings Table (Key-Value Store)
     await query(`
         CREATE TABLE IF NOT EXISTS settings (

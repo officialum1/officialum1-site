@@ -5,6 +5,7 @@ import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ScrollProgress from "@/components/ScrollProgress";
+import TrustPulse from "@/components/TrustPulse";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -144,6 +145,7 @@ export default function RootLayout({
         </Script>
         <CookieBanner />
         <ScrollProgress />
+        <TrustPulse />
         {/* <WhatsAppButton /> */}
         {children}
       </body>

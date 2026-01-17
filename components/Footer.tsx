@@ -44,10 +44,30 @@ export default function Footer() {
                     </div>
 
                     <div style={{ flex: 1, maxWidth: '400px' }}>
-                        <form style={{ display: 'flex', gap: '0.5rem' }} onSubmit={(e) => e.preventDefault()}>
+                        <form style={{ display: 'flex', gap: '0.5rem' }} onSubmit={async (e) => {
+                            e.preventDefault();
+                            const input = (e.target as any)[0] as HTMLInputElement;
+                            const email = input.value;
+                            if (!email) return;
+
+                            try {
+                                const res = await fetch('/api/newsletter', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email })
+                                });
+                                if (res.ok) {
+                                    alert('Subscribed Successfully!');
+                                    input.value = '';
+                                }
+                            } catch (err) {
+                                alert('Error subscribing. Try again.');
+                            }
+                        }}>
                             <input
                                 type="email"
                                 placeholder="Enter your email"
+                                required
                                 style={{
                                     padding: '0.8rem 1.2rem',
                                     borderRadius: '50px',
@@ -58,7 +78,7 @@ export default function Footer() {
                                     outline: 'none'
                                 }}
                             />
-                            <button className="btn btn-primary" style={{ padding: '0.8rem 1.5rem', borderRadius: '50px', whiteSpace: 'nowrap' }}>
+                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 1.5rem', borderRadius: '50px', whiteSpace: 'nowrap' }}>
                                 Subscribe
                             </button>
                         </form>

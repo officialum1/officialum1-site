@@ -668,6 +668,17 @@ export default function AdminDashboard() {
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid #333', color: 'white' }}
                                         />
                                     </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#aaa' }}>Telegram Chat ID (Your ID)</label>
+                                        <input
+                                            type="text"
+                                            value={settings.telegramChatId || ''}
+                                            onChange={e => setSettings({ ...settings, telegramChatId: e.target.value })}
+                                            placeholder="e.g. 987654321"
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid #333', color: 'white' }}
+                                        />
+                                        <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>Get your ID by messaging @userinfobot on Telegram.</p>
+                                    </div>
                                 </div>
                             </div>
 

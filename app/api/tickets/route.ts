@@ -1,69 +1,67 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { query } from '@/lib/db';
+import { sendTelegramAdminAlert } from '@/lib/telegram';
 
-const ticketsFile = path.join(process.cwd(), 'data', 'tickets.json');
-
-// GET: Fetch tickets
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
-    const isAdmin = searchParams.get('isAdmin');
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get('userId');
+    const isAdmin = searchParams.get('isAdmin') === 'true';
 
     try {
-        const data = await fs.readFile(ticketsFile, 'utf8');
-        let tickets = JSON.parse(data);
+        let sql = "SELECT * FROM tickets";
+        let params: any[] = [];
 
-        // Filter: Admin sees all, User sees only theirs
-        if (!isAdmin && email) {
-            tickets = tickets.filter((t: any) => t.email === email);
+        if (!isAdmin && userId) {
+            sql += " WHERE user_id = ?";
+            params.push(userId);
+        }
+
+        sql += " ORDER BY created_at DESC";
+        const tickets = await query(sql, params) as any[];
+
+        // Fetch replies for each ticket
+        for (let t of tickets) {
+            t.replies = await query("SELECT * FROM ticket_replies WHERE ticket_id = ? ORDER BY created_at ASC", [t.id]);
         }
 
         return NextResponse.json(tickets);
     } catch (e) {
-        return NextResponse.json([], { status: 200 }); // Return empty if file missing
+        return NextResponse.json([], { status: 500 });
     }
 }
 
-// POST: Create ticket or Reply
-export async function POST(request: Request) {
+export async function POST(req: Request) {
     try {
-        const body = await request.json();
-        const data = await fs.readFile(ticketsFile, 'utf8');
-        const tickets = JSON.parse(data);
+        const body = await req.json();
 
         if (body.action === 'reply') {
-            // Add reply
-            const ticketIndex = tickets.findIndex((t: any) => t.id === body.ticketId);
-            if (ticketIndex === -1) return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
+            await query(
+                "INSERT INTO ticket_replies (ticket_id, sender, message) VALUES (?, ?, ?)",
+                [body.ticketId, body.sender, body.message]
+            );
 
-            tickets[ticketIndex].replies.push({
-                sender: body.sender, // 'admin' or 'user'
-                message: body.message,
-                date: new Date().toISOString()
-            });
-            // If admin replies, status might stay open or change. If user replies, keep open.
-            if (body.sender === 'user') tickets[ticketIndex].status = 'open';
+            // Notification for Admin if User Replies
+            if (body.sender === 'user') {
+                await sendTelegramAdminAlert(`💬 <b>New Ticket Reply!</b>\nTicket ID: #${body.ticketId}\nMessage: ${body.message}`);
+            }
 
+            return NextResponse.json({ success: true });
         } else {
             // Create New Ticket
-            const newTicket = {
-                id: `TICK-${Math.floor(1000 + Math.random() * 9000)}`,
-                userId: body.userId || 'guest',
-                email: body.email,
-                subject: body.subject,
-                message: body.message,
-                status: 'open',
-                date: new Date().toISOString(),
-                replies: []
-            };
-            tickets.unshift(newTicket);
+            const { userId, subject, message, attachment, email } = body;
+            const res: any = await query(
+                "INSERT INTO tickets (user_id, subject, message, attachment) VALUES (?, ?, ?, ?)",
+                [userId, subject, message, attachment || null]
+            );
+
+            const newId = res.insertId;
+
+            // Telegram Alert
+            await sendTelegramAdminAlert(`🎫 <b>New Support Ticket!</b>\nFrom: ${email}\nSubject: ${subject}\nMessage: ${message}\nAttachment: ${attachment || 'None'}`);
+
+            return NextResponse.json({ success: true, id: newId });
         }
-
-        await fs.writeFile(ticketsFile, JSON.stringify(tickets, null, 2));
-        return NextResponse.json({ success: true });
-
     } catch (e) {
-        return NextResponse.json({ error: 'Failed' }, { status: 500 });
+        return NextResponse.json({ error: "Failed to handle ticket" }, { status: 500 });
     }
 }

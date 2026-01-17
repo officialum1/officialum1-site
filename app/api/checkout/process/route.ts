@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { sendAuditReport } from '@/lib/email';
 import { query } from '@/lib/db';
+import { sendTelegramMessage, sendTelegramAdminAlert } from '@/lib/telegram';
 
 // Paths
 const PRODUCTS_PATH = path.join(process.cwd(), 'data', 'products.json');
@@ -31,14 +32,6 @@ async function getSettings() {
     }
 }
 
-// Simulated Telegram Alert
-async function sendTelegramAlert(token: string, chatId: string, message: string) {
-    if (!token || !chatId) return;
-    try {
-        // In real app: fetch(`https://api.telegram.org/bot${token}/sendMessage`, { body: ... })
-        console.log(`[Telegram] Sending to ${chatId}: ${message}`);
-    } catch { }
-}
 
 export async function POST(req: Request) {
     try {
@@ -246,6 +239,9 @@ export async function POST(req: Request) {
         }
 
         if (paymentUrl) {
+            // Telegram Alert
+            await sendTelegramAdminAlert(`💰 <b>New Order Initiated!</b>\nOrder ID: #${newOrder.orderId}\nProduct: ${product.name}\nAmount: $${amountToCharge}\nCustomer: ${user.email}\nMethod: ${method}`);
+
             const adminEmail = process.env.ADMIN_EMAIL || settings.smtpUser;
             if (adminEmail) {
                 await sendAuditReport(adminEmail, "New Order Initiated #" + newOrder.orderId, {
@@ -294,7 +290,7 @@ export async function POST(req: Request) {
 
         // C. Telegram Delivery
         if (user.telegram && settings.telegramToken) {
-            await sendTelegramAlert(settings.telegramToken, user.telegram, telegramBody);
+            await sendTelegramMessage(user.telegram, telegramBody, settings.telegramToken);
         }
 
         return NextResponse.json({ success: true, orderId: newOrder.orderId });

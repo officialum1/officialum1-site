@@ -11,6 +11,7 @@ export default function SupportPage() {
     const [tickets, setTickets] = useState<any[]>([]);
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
+    const [attachment, setAttachment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTicket, setActiveTicket] = useState<number | null>(null);
     const [replyMsg, setReplyMsg] = useState('');
@@ -37,9 +38,9 @@ export default function SupportPage() {
             await fetch('/api/tickets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, email: user.email, subject, message })
+                body: JSON.stringify({ userId: user.id, email: user.email, subject, message, attachment })
             });
-            setSubject(''); setMessage('');
+            setSubject(''); setMessage(''); setAttachment('');
             fetchTickets(user.id);
             alert('Ticket Created');
         } catch { alert('Failed to create ticket'); }
@@ -77,6 +78,7 @@ export default function SupportPage() {
                             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <input placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} className="input-field" required />
                                 <textarea placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} className="input-field" style={{ height: '150px' }} required />
+                                <input placeholder="Attachment URL (Screenshot/Discord link - Optional)" value={attachment} onChange={e => setAttachment(e.target.value)} className="input-field" />
                                 <button type="submit" disabled={isSubmitting} className="btn btn-primary">{isSubmitting ? 'Sending...' : 'Submit Ticket'}</button>
                             </form>
                         </div>
@@ -99,6 +101,14 @@ export default function SupportPage() {
                                             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
                                                 {t.message}
                                             </div>
+
+                                            {t.attachment && (
+                                                <div style={{ marginBottom: '1rem' }}>
+                                                    <a href={t.attachment} target="_blank" rel="noopener noreferrer" style={{ color: '#00ff88', fontSize: '0.8rem', textDecoration: 'underline' }}>
+                                                        📎 View Attachment
+                                                    </a>
+                                                </div>
+                                            )}
 
                                             {/* Replies */}
                                             {t.replies && t.replies.map((r: any, i: number) => (
