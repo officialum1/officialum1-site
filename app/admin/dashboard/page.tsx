@@ -580,7 +580,8 @@ export default function AdminDashboard() {
 
                             <button
                                 type="submit"
-                                className="bg-primary text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity"
+                                className="btn btn-primary"
+                                style={{ width: '100%', padding: '1rem', fontWeight: 'bold' }}
                             >
                                 Save System Configuration
                             </button>
