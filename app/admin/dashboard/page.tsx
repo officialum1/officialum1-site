@@ -866,11 +866,29 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Reviews Tab */}
                 {activeTab === 'reviews' && (
                     <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
                         <div className="glass" style={{ flex: 1, padding: '2rem', borderRadius: '16px', minWidth: '300px' }}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Add Testimonial (Admin)</h2>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ margin: 0 }}>Add Testimonial</h2>
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm("Generate 5 random 5-star reviews?")) return;
+                                        try {
+                                            await fetch('/api/admin/generate-reviews', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ count: 5 })
+                                            });
+                                            fetchReviews();
+                                            alert("5 Reviews Added!");
+                                        } catch (e) { alert("Failed"); }
+                                    }}
+                                    style={{ fontSize: '0.8rem', background: '#333', color: '#aaa', border: '1px solid #444', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer' }}
+                                >
+                                    ⚡ Auto-Seed (5)
+                                </button>
+                            </div>
                             <form onSubmit={handleReviewSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <input placeholder="Client Name" value={revName} onChange={e => setRevName(e.target.value)} className="input-field" required />
                                 <input placeholder="Role (e.g. CEO)" value={revRole} onChange={e => setRevRole(e.target.value)} className="input-field" required />

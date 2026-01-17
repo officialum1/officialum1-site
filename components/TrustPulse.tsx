@@ -6,41 +6,53 @@ export default function TrustPulse() {
     const [notification, setNotification] = useState<any>(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    const activities = [
-        { name: "Someone from USA", action: "purchased 500 Discord Members", time: "2 mins ago" },
-        { name: "John from UK", action: "bought 5 Instagram Accounts", time: "10 mins ago" },
-        { name: "A user from Canada", action: "rented a niche website", time: "1 hour ago" },
-        { name: "OfficialUM1 Client", action: "left a 5-star review", time: "just now" },
-        { name: "Someone from Germany", action: "purchased Reddit Upvotes", time: "15 mins ago" },
-        { name: "M. Umar", action: "is working on a new project", time: "Live" },
-        { name: "New Sale", action: "TikTok Account Sold", time: "5 mins ago" }
-    ];
+    const [items, setItems] = useState<string[]>([]);
 
     useEffect(() => {
+        // Fetch Real Products for "Live" Social Proof
+        const f = async () => {
+            try {
+                const res = await fetch('/api/products');
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setItems(data.map((p: any) => p.name));
+                }
+            } catch { }
+        };
+        f();
+    }, []);
+
+    useEffect(() => {
+        if (items.length === 0) return;
+
         const showNextReview = () => {
-            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-            setNotification(randomActivity);
+            const randomItem = items[Math.floor(Math.random() * items.length)];
+            const locations = ["USA", "UK", "Canada", "Germany", "Australia", "France", "Dubai"];
+            const loc = locations[Math.floor(Math.random() * locations.length)];
+            const time = Math.floor(Math.random() * 59) + 1 + " mins ago";
+
+            const activity = {
+                name: `Someone from ${loc}`,
+                action: `purchased ${randomItem}`,
+                time: time
+            };
+
+            setNotification(activity);
             setIsVisible(true);
 
-            // Hide after 5 seconds
             setTimeout(() => {
                 setIsVisible(false);
             }, 5000);
         };
 
-        // Initial delay
         const initialDelay = setTimeout(showNextReview, 3000);
-
-        // Repeat every 20-30 seconds
-        const interval = setInterval(() => {
-            showNextReview();
-        }, 25000);
+        const interval = setInterval(showNextReview, 20000 + Math.random() * 10000);
 
         return () => {
             clearTimeout(initialDelay);
             clearInterval(interval);
         };
-    }, []);
+    }, [items]);
 
     if (!notification) return null;
 
