@@ -712,8 +712,18 @@ export default function AdminDashboard() {
                             </div>
 
                             <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                                <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>Delivery Automation</h3>
+                                <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>AI & Automation</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#aaa' }}>Gemini API Key (For Blog Generator)</label>
+                                        <input
+                                            type="password"
+                                            value={settings.geminiKey || ''}
+                                            onChange={e => setSettings({ ...settings, geminiKey: e.target.value })}
+                                            placeholder="Enter Gemini API Key"
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid #333', color: 'white' }}
+                                        />
+                                    </div>
                                     <div>
                                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#aaa' }}>Telegram Bot Token (For Alerts)</label>
                                         <input

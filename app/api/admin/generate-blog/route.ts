@@ -9,7 +9,13 @@ export async function POST(req: Request) {
 
         if (!topic) return NextResponse.json({ error: "Topic is required" }, { status: 400 });
 
-        if (!GEMINI_API_KEY) {
+        let apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            const rows = await query("SELECT setting_value FROM settings WHERE setting_key = 'geminiKey'") as any[];
+            if (rows.length > 0) apiKey = rows[0].setting_value;
+        }
+
+        if (!apiKey) {
             return NextResponse.json({ error: "Gemini API Key Missing" }, { status: 500 });
         }
 
@@ -24,7 +30,7 @@ export async function POST(req: Request) {
         - Do NOT include 'Here is the blog post' or typical AI intros. Just the content.
         - Start with the Title on the first line prefixed with '# '.`;
 
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
