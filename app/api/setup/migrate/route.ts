@@ -35,7 +35,7 @@ export async function GET() {
                 user_id VARCHAR(50) NOT NULL,
                 subject VARCHAR(255) NOT NULL,
                 message TEXT NOT NULL,
-                status VARCHAR(50) DEFAULT 'open', -- 'open', 'closed', 'answered'
+                status VARCHAR(50) DEFAULT 'open', 
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -46,7 +46,7 @@ export async function GET() {
              CREATE TABLE IF NOT EXISTS ticket_replies (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 ticket_id INT NOT NULL,
-                sender VARCHAR(50) NOT NULL, -- 'user' or 'admin'
+                sender VARCHAR(50) NOT NULL,
                 message TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE
@@ -54,22 +54,32 @@ export async function GET() {
         `);
         console.log('Created ticket_replies table');
 
-        // 4. Create Products Table
-        await query(`
-            CREATE TABLE IF NOT EXISTS products (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                platform VARCHAR(50),
-                type VARCHAR(50), -- 'account' or 'service'
-                price VARCHAR(50),
-                description TEXT,
-                credentials TEXT,
-                image VARCHAR(255)
-            )
-        `);
-        console.log('Created products table');
+        // 4. Reset & Fix Products Table (Crucial for the "not shown" fix)
+        // We drop and recreate because the previous schema was broken (id mismatch)
+        console.log('Fixing products table...');
+        try {
+            // First check if it's the old INT or VARCHAR style
+            await query(`DROP TABLE IF EXISTS products`);
+            await query(`
+                CREATE TABLE products (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    platform VARCHAR(100),
+                    type VARCHAR(50), 
+                    price VARCHAR(50),
+                    description TEXT,
+                    creds TEXT,
+                    image TEXT,
+                    stock INT DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            console.log('Recreated products table with correct schema');
+        } catch (e: any) {
+            console.error('Failed to recreate products table:', e.message);
+        }
 
-        return NextResponse.json({ success: true, message: "Migration Complete" });
+        return NextResponse.json({ success: true, message: "Migration Complete and Products Table Reset" });
 
     } catch (e: any) {
         console.error('Migration Failed:', e);

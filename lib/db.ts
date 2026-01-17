@@ -41,11 +41,10 @@ export async function initDB() {
     // Products Table
     await query(`
         CREATE TABLE IF NOT EXISTS products (
-            id VARCHAR(50) PRIMARY KEY,
+            id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             price VARCHAR(50) NOT NULL,
             image TEXT,
-            category VARCHAR(100),
             platform VARCHAR(100),
             description TEXT,
             type VARCHAR(50), -- 'account' or 'service'

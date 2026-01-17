@@ -53,7 +53,7 @@ export default function ShopPage() {
                                     {item.platform}
                                 </div>
                                 <h3 style={{ marginBottom: '0.5rem' }}>{item.name}</h3>
-                                <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.desc}</p>
+                                <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
 
                                 <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
                                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>{item.price}</div>

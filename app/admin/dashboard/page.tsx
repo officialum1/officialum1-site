@@ -293,7 +293,7 @@ export default function AdminDashboard() {
         e.preventDefault(); setIsProdSaving(true);
         try {
             const finalPlatform = prodPlatform === 'Other' ? customPlatform : prodPlatform;
-            await fetch('/api/products', {
+            const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -306,8 +306,19 @@ export default function AdminDashboard() {
                     image: prodImage || 'https://img.icons8.com/color/480/shop.png'
                 })
             });
-            setProdName(''); setProdPrice(''); setProdDesc(''); setProdCreds(''); setProdImage(''); setCustomPlatform(''); fetchProducts(); alert('Item Added!');
-        } catch (err) { console.error(err); alert('Failed to add product'); } finally { setIsProdSaving(false); }
+
+            if (res.ok) {
+                setProdName(''); setProdPrice(''); setProdDesc(''); setProdCreds(''); setProdImage(''); setCustomPlatform(''); fetchProducts(); alert('Item Added Successfully!');
+            } else {
+                const data = await res.json();
+                alert('Error: ' + (data.error || 'Failed to add item'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Failed to add product');
+        } finally {
+            setIsProdSaving(false);
+        }
     };
     const handleDeleteProduct = async (id: number) => {
         if (!confirm('Are you sure?')) return;

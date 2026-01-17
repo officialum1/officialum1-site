@@ -20,14 +20,17 @@ export async function POST(req: Request) {
             // Create New
             const { name, platform, type, price, desc, creds, image } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, ''); // Remove $ and other non-numeric chars
+
+            // Using 'creds' and 'description' to match lib/db.ts
             await query(
-                "INSERT INTO products (name, platform, type, price, description, credentials, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO products (name, platform, type, price, description, creds, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [name, platform, type, cleanPrice, desc, creds, image]
             );
         }
 
         return NextResponse.json({ success: true });
-    } catch (e) {
-        return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+    } catch (e: any) {
+        console.error("Product API Error:", e.message);
+        return NextResponse.json({ error: "Failed to update product: " + e.message }, { status: 500 });
     }
 }
