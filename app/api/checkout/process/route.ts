@@ -97,8 +97,12 @@ export async function POST(req: Request) {
                     to_currency: "USDT"
                 };
 
-                const data = Buffer.from(JSON.stringify(payload)).toString('base64');
-                const sign = crypto.createHash('md5').update(data + cryptoKey).digest('hex');
+                // Ensure payload is properly formatted for signature
+                // Cryptomus requires: MD5(Base64(JSON_STRING) + API_KEY)
+                // Note: JSON.stringify must produce the exact string used in MD5
+                const jsonPayload = JSON.stringify(payload);
+                const dataBase64 = Buffer.from(jsonPayload).toString('base64');
+                const sign = crypto.createHash('md5').update(dataBase64 + cryptoKey).digest('hex');
 
                 const cryptoRes = await fetch('https://api.cryptomus.com/v1/payment', {
                     method: 'POST',
