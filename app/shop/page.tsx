@@ -16,7 +16,7 @@ export default function ShopPage() {
     }, []);
 
     const filtered = filter === 'All' ? products : products.filter(p => p.platform === filter);
-    const platforms = ['All', 'Reddit', 'Instagram', 'Facebook', 'Discord'];
+    const platforms = ['All', ...Array.from(new Set(products.map((p: any) => p.platform)))];
 
     return (
         <main>

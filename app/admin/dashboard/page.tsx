@@ -109,6 +109,7 @@ export default function AdminDashboard() {
     const [productsInventory, setProductsInventory] = useState<any[]>([]);
     const [prodName, setProdName] = useState('');
     const [prodPlatform, setProdPlatform] = useState('Reddit');
+    const [customPlatform, setCustomPlatform] = useState('');
     const [prodType, setProdType] = useState('account'); // 'account' or 'service'
     const [prodPrice, setProdPrice] = useState('');
     const [prodDesc, setProdDesc] = useState('');
@@ -291,12 +292,13 @@ export default function AdminDashboard() {
     const handleProductSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); setIsProdSaving(true);
         try {
+            const finalPlatform = prodPlatform === 'Other' ? customPlatform : prodPlatform;
             await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: prodName,
-                    platform: prodPlatform,
+                    platform: finalPlatform,
                     type: prodType,
                     price: prodPrice,
                     desc: prodDesc,
@@ -304,7 +306,7 @@ export default function AdminDashboard() {
                     image: prodImage || 'https://img.icons8.com/color/480/shop.png'
                 })
             });
-            setProdName(''); setProdPrice(''); setProdDesc(''); setProdCreds(''); setProdImage(''); fetchProducts(); alert('Item Added!');
+            setProdName(''); setProdPrice(''); setProdDesc(''); setProdCreds(''); setProdImage(''); setCustomPlatform(''); fetchProducts(); alert('Item Added!');
         } catch (err) { console.error(err); alert('Failed to add product'); } finally { setIsProdSaving(false); }
     };
     const handleDeleteProduct = async (id: number) => {
@@ -494,13 +496,24 @@ export default function AdminDashboard() {
                                         <option value="account">Type: Account (Instant Delivery)</option>
                                         <option value="service">Type: Boosting Service (Manual)</option>
                                     </select>
-                                    <select value={prodPlatform} onChange={e => setProdPlatform(e.target.value)} className="input-field" style={{ flex: 1 }}>
-                                        <option value="Reddit">Reddit</option>
-                                        <option value="Instagram">Instagram</option>
-                                        <option value="Facebook">Facebook</option>
-                                        <option value="Discord">Discord</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        <select value={prodPlatform} onChange={e => setProdPlatform(e.target.value)} className="input-field" style={{ width: '100%' }}>
+                                            <option value="Reddit">Reddit</option>
+                                            <option value="Instagram">Instagram</option>
+                                            <option value="Facebook">Facebook</option>
+                                            <option value="Discord">Discord</option>
+                                            <option value="Other">Other (Custom)</option>
+                                        </select>
+                                        {prodPlatform === 'Other' && (
+                                            <input
+                                                placeholder="Enter Platform Name (e.g. Snapchat)"
+                                                value={customPlatform}
+                                                onChange={e => setCustomPlatform(e.target.value)}
+                                                className="input-field"
+                                                required
+                                            />
+                                        )}
+                                    </div>
                                 </div>
                                 <input placeholder="Product Name (e.g. 1000 Discord Members)" value={prodName} onChange={e => setProdName(e.target.value)} className="input-field" required />
                                 <input placeholder="Price (e.g. $45)" value={prodPrice} onChange={e => setProdPrice(e.target.value)} className="input-field" required />
