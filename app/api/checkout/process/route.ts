@@ -81,8 +81,9 @@ export async function POST(req: Request) {
         }
 
         // B. CRYPTOMUS
-        const cryptoKey = process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey;
-        const cryptoId = process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId;
+        // PRIORITY: Database > Env Var > Settings File
+        const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...') ? settings.cryptomusKey : (process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey);
+        const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...') ? settings.cryptomusId : (process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId);
 
         if (method === 'cryptomus' && cryptoKey && cryptoId) {
             try {
