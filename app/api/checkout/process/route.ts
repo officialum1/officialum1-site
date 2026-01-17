@@ -16,7 +16,20 @@ async function load(filePath: string) {
 }
 
 async function getSettings() {
-    try { return JSON.parse(await fs.readFile(SETTINGS_PATH, 'utf8')); } catch { return {}; }
+    try {
+        const rows = await query("SELECT * FROM settings");
+        // Convert rows array to a single object
+        if (Array.isArray(rows)) {
+            return rows.reduce((acc: any, row: any) => {
+                acc[row.key] = row.value;
+                return acc;
+            }, {});
+        }
+        return {};
+    } catch (e) {
+        console.error("Failed to load settings from DB:", e);
+        return {};
+    }
 }
 
 // Simulated Telegram Alert
