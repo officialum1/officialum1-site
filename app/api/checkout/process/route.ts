@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { sendAuditReport } from '@/lib/email';
+import { query } from '@/lib/db';
 
 // Paths
 const PRODUCTS_PATH = path.join(process.cwd(), 'data', 'products.json');
@@ -184,15 +185,29 @@ export async function POST(req: Request) {
             promoCode: promoCode || null,
             method,
             status: orderStatus,
-            date: new Date().toISOString()
+            date: new Date()
         };
 
-        // Vercel is Read-Only, so we try to save but don't crash if it fails
+        // Save to Hostinger Database
         try {
-            orders.push(newOrder);
-            await fs.writeFile(ORDERS_PATH, JSON.stringify(orders, null, 2));
-        } catch (err) {
-            console.warn("Could not save order to local file (Read-Only System). Skipping.");
+            await query(`
+                INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                newOrder.orderId,
+                newOrder.userId,
+                newOrder.guestEmail,
+                newOrder.productId,
+                newOrder.amount,
+                newOrder.originalPrice,
+                newOrder.promoCode,
+                newOrder.method,
+                newOrder.status,
+                newOrder.date
+            ]);
+        } catch (dbError) {
+            console.error("Failed to save order to Database:", dbError);
+            // Continue processed because payment might be successful
         }
 
         if (paymentUrl) return NextResponse.json({ success: true, paymentUrl, orderId: newOrder.orderId });
