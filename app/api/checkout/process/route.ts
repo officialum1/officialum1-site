@@ -110,11 +110,19 @@ export async function POST(req: Request) {
                     body: JSON.stringify(payload)
                 });
                 const cryptoData = await cryptoRes.json();
+                console.log("Cryptomus Response:", cryptoData); // Log for debugging
+
                 if (cryptoData.result && cryptoData.result.url) {
                     paymentUrl = cryptoData.result.url;
                     orderStatus = 'pending';
+                } else {
+                    // Fallback: If no URL, throw error so we see it on frontend
+                    throw new Error("Cryptomus Error: " + JSON.stringify(cryptoData));
                 }
-            } catch (e) { console.error('Cryptomus Error', e); }
+            } catch (e) {
+                console.error('Cryptomus Error', e);
+                throw e; // Re-throw to show on frontend
+            }
         }
 
         // C. BINANCE PAY
