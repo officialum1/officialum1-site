@@ -54,14 +54,11 @@ export async function GET() {
         `);
         console.log('Created ticket_replies table');
 
-        // 4. Reset & Fix Products Table (Crucial for the "not shown" fix)
-        // We drop and recreate because the previous schema was broken (id mismatch)
-        console.log('Fixing products table...');
+        // 4. Products Table (Safe Creation)
+        console.log('Checking products table...');
         try {
-            // First check if it's the old INT or VARCHAR style
-            await query(`DROP TABLE IF EXISTS products`);
             await query(`
-                CREATE TABLE products (
+                CREATE TABLE IF NOT EXISTS products (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
                     platform VARCHAR(100),
@@ -74,9 +71,9 @@ export async function GET() {
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             `);
-            console.log('Recreated products table with correct schema');
+            console.log('Products table checked/created');
         } catch (e: any) {
-            console.error('Failed to recreate products table:', e.message);
+            console.error('Failed to create products table:', e.message);
         }
 
         // 5. Create Testimonials (Reviews) Table
