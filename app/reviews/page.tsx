@@ -6,12 +6,55 @@ import Footer from '@/components/Footer';
 
 export default function ReviewsPage() {
     const [reviews, setReviews] = useState<any[]>([]);
+    const [name, setName] = useState('');
+    const [service, setService] = useState('Reddit Account');
+    const [review, setReview] = useState('');
+    const [rating, setRating] = useState(5);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const fetchReviews = async () => {
+        try {
+            const res = await fetch('/api/testimonials');
+            const data = await res.json();
+            setReviews(Array.isArray(data) ? data : []);
+        } catch (e) {
+            console.error("Failed to fetch reviews", e);
+        }
+    };
 
     useEffect(() => {
-        fetch('/api/testimonials')
-            .then(res => res.json())
-            .then(data => setReviews(data));
+        fetchReviews();
     }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            const res = await fetch('/api/testimonials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    role: 'Buyer - ' + service,
+                    review,
+                    rating
+                })
+            });
+            if (res.ok) {
+                alert('Review Submitted! It will appear after moderation.');
+                setName('');
+                setReview('');
+                setRating(5);
+                fetchReviews();
+            } else {
+                alert('Failed to submit review');
+            }
+        } catch (e) {
+            alert('Error submitting review');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <main>
@@ -34,32 +77,26 @@ export default function ReviewsPage() {
                 </div>
 
                 {/* Submit Review Form */}
-                <div style={{ maxWidth: '600px', margin: '0 auto 4rem auto' }} className="glass p-8 rounded-xl">
-                    <h3 className="text-2xl font-bold mb-4 text-center">Share Your Experience</h3>
-                    <form onSubmit={async (e) => {
-                        e.preventDefault();
-                        const form = e.target as HTMLFormElement;
-                        const data = {
-                            name: (form[0] as HTMLInputElement).value,
-                            role: 'Buyer - ' + (form[1] as HTMLSelectElement).value,
-                            review: (form[2] as HTMLTextAreaElement).value
-                        };
-
-                        await fetch('/api/testimonials', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        });
-                        alert('Review Submitted! It will appear after moderation.');
-                        form.reset();
-                    }}>
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Name</label>
-                            <input required style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }} placeholder="John D." />
+                <div style={{ maxWidth: '600px', margin: '0 auto 4rem auto' }} className="glass p-8 rounded-xl shadow-2xl">
+                    <h3 className="text-2xl font-bold mb-6 text-center">Share Your Experience</h3>
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Full Name</label>
+                            <input
+                                required
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }}
+                                placeholder="Your name or alias"
+                            />
                         </div>
-                        <div style={{ marginBottom: '1rem' }}>
+                        <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Service Purchased</label>
-                            <select style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }}>
+                            <select
+                                value={service}
+                                onChange={e => setService(e.target.value)}
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }}
+                            >
                                 <option>Instagram Followers</option>
                                 <option>Discord Members</option>
                                 <option>Reddit Account</option>
@@ -69,28 +106,69 @@ export default function ReviewsPage() {
                                 <option>Other</option>
                             </select>
                         </div>
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Feedback</label>
-                            <textarea required rows={3} style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }} placeholder="Great service..."></textarea>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Rating</label>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setRating(star)}
+                                        style={{
+                                            fontSize: '1.5rem',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            color: star <= rating ? '#00ff88' : '#333',
+                                            transition: 'transform 0.2s'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    >
+                                        ★
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <button className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>Submit Review</button>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Review Message</label>
+                            <textarea
+                                required
+                                value={review}
+                                onChange={e => setReview(e.target.value)}
+                                rows={4}
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }}
+                                placeholder="Tell us how we did..."
+                            ></textarea>
+                        </div>
+                        <button disabled={isSubmitting} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontWeight: 'bold' }}>
+                            {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                        </button>
                     </form>
                 </div>
 
-                <div className="grid-3">
-                    {reviews.map((item, i) => (
-                        <div key={i} className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                                <div style={{ color: '#00ff88' }}>★★★★★</div>
+                {reviews.length === 0 ? (
+                    <div style={{ textAlign: 'center', color: '#666', padding: '4rem' }}>
+                        No reviews yet. Be the first to share your experience!
+                    </div>
+                ) : (
+                    <div className="grid-3">
+                        {reviews.map((item, i) => (
+                            <div key={i} className="glass card-hover" style={{ padding: '2rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{item.name}</div>
+                                    <div style={{ color: '#00ff88' }}>
+                                        {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                                    </div>
+                                </div>
+                                <p style={{ color: '#ccc', fontStyle: 'italic', marginBottom: '1.5rem', flex: 1 }}>"{item.review}"</p>
+                                <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>
+                                    {item.role}
+                                </div>
                             </div>
-                            <p style={{ color: '#ccc', fontStyle: 'italic', marginBottom: '1rem' }}>"{item.review}"</p>
-                            <div style={{ fontSize: '0.8rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                {item.role}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
             <Footer />
         </main>

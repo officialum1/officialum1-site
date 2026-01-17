@@ -85,6 +85,7 @@ export default function AdminDashboard() {
     const [revName, setRevName] = useState('');
     const [revRole, setRevRole] = useState('');
     const [revText, setRevText] = useState('');
+    const [revRating, setRevRating] = useState(5);
     const [isRevSaving, setIsRevSaving] = useState(false);
 
     // Projects State
@@ -329,8 +330,8 @@ export default function AdminDashboard() {
     const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); setIsRevSaving(true);
         try {
-            await fetch('/api/testimonials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: revName, role: revRole, review: revText, isAdmin: true }) });
-            setRevName(''); setRevRole(''); setRevText(''); fetchReviews(); alert('Review added!');
+            await fetch('/api/testimonials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: revName, role: revRole, review: revText, rating: revRating, isAdmin: true }) });
+            setRevName(''); setRevRole(''); setRevText(''); setRevRating(5); fetchReviews(); alert('Review added!');
         } catch (err) { console.error(err); alert('Failed to add review'); } finally { setIsRevSaving(false); }
     };
     const handleApproveReview = async (id: number) => {
@@ -862,6 +863,10 @@ export default function AdminDashboard() {
                             <form onSubmit={handleReviewSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                 <input placeholder="Client Name" value={revName} onChange={e => setRevName(e.target.value)} className="input-field" required />
                                 <input placeholder="Role (e.g. CEO)" value={revRole} onChange={e => setRevRole(e.target.value)} className="input-field" required />
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#888' }}>Rating: {revRating} Stars</label>
+                                    <input type="range" min="1" max="5" value={revRating} onChange={e => setRevRating(parseInt(e.target.value))} style={{ width: '100%' }} />
+                                </div>
                                 <textarea placeholder="Review Text" value={revText} onChange={e => setRevText(e.target.value)} className="input-field" style={{ height: '100px' }} required />
                                 <button type="submit" disabled={isRevSaving} className="btn btn-primary">{isRevSaving ? 'Saving...' : 'Add Review'}</button>
                             </form>
@@ -869,46 +874,23 @@ export default function AdminDashboard() {
                         <div style={{ flex: 1, minWidth: '300px' }}>
                             <h2 style={{ marginBottom: '1.5rem' }}>Manage Reviews</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {reviews.map((rev: any) => (
-                                    <div key={rev.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: rev.approved ? '4px solid green' : '4px solid orange' }}>
+                                {reviews.length === 0 ? <p style={{ color: '#666' }}>No reviews found.</p> : reviews.map((rev: any) => (
+                                    <div key={rev.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: rev.approved ? '4px solid #00ff88' : '4px solid #ffaa00' }}>
                                         <div style={{ flex: 1 }}>
-                                            <h4>{rev.name} <span style={{ fontSize: '0.8rem', opacity: 0.7, marginLeft: '0.5rem' }}>({rev.approved ? 'Live' : 'Pending'})</span></h4>
-                                            <p style={{ fontSize: '0.8rem', color: '#ccc' }}>{rev.review.substring(0, 50)}...</p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <h4 style={{ margin: 0 }}>{rev.name}</h4>
+                                                <span style={{ fontSize: '0.7rem', background: rev.approved ? '#006400' : '#8b4513', padding: '2px 6px', borderRadius: '4px' }}>
+                                                    {rev.approved ? 'LIVE' : 'PENDING'}
+                                                </span>
+                                            </div>
+                                            <div style={{ color: '#ffaa00', fontSize: '0.8rem', margin: '0.2rem 0' }}>{'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}</div>
+                                            <p style={{ fontSize: '0.8rem', color: '#ccc', margin: 0 }}>{rev.review.substring(0, 60)}...</p>
                                         </div>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                                             {!rev.approved && (
-                                                <button onClick={() => handleApproveReview(rev.id)} style={{ background: 'green', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Approve</button>
+                                                <button onClick={() => handleApproveReview(rev.id)} style={{ background: '#00ff88', border: 'none', color: '#000', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Approve</button>
                                             )}
-                                            <button
-                                                onClick={() => {
-                                                    setModalTitle('Promote to Portfolio?');
-                                                    setModalMessage(`Are you sure you want to turn ${rev.name}'s review into a featured Case Study on the Work page?`);
-                                                    setModalAction(() => async () => {
-                                                        try {
-                                                            await fetch('/api/projects', {
-                                                                method: 'POST',
-                                                                headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({
-                                                                    title: `Success Story: ${rev.name}`,
-                                                                    category: rev.role.replace('Buyer - ', ''),
-                                                                    description: rev.review,
-                                                                    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-                                                                })
-                                                            });
-                                                            alert('Promoted to Work Portfolio!');
-                                                        } catch (e) {
-                                                            console.error(e);
-                                                            alert('Failed to promote.');
-                                                        }
-                                                    });
-                                                    setModalOpen(true);
-                                                }}
-                                                style={{ background: '#4f46e5', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}
-                                                title="Convert to Case Study"
-                                            >
-                                                + Work
-                                            </button>
-                                            <button onClick={() => handleDeleteReview(rev.id)} style={{ background: 'red', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
+                                            <button onClick={() => handleDeleteReview(rev.id)} style={{ background: '#ff4444', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
                                         </div>
                                     </div>
                                 ))}

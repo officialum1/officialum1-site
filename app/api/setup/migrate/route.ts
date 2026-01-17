@@ -79,7 +79,22 @@ export async function GET() {
             console.error('Failed to recreate products table:', e.message);
         }
 
-        return NextResponse.json({ success: true, message: "Migration Complete and Products Table Reset" });
+        // 5. Create Testimonials (Reviews) Table
+        console.log('Setting up testimonials table...');
+        await query(`
+            CREATE TABLE IF NOT EXISTS testimonials (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                role VARCHAR(255),
+                review TEXT NOT NULL,
+                rating INT DEFAULT 5,
+                approved BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Testimonials table ready');
+
+        return NextResponse.json({ success: true, message: "Migration Complete and Tables Reset" });
 
     } catch (e: any) {
         console.error('Migration Failed:', e);
