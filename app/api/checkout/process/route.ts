@@ -218,6 +218,6 @@ export async function POST(req: Request) {
 
     } catch (e) {
         console.error(e);
-        return NextResponse.json({ error: "Checkout Error" }, { status: 500 });
+        return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown Checkout Error" }, { status: 500 });
     }
 }
