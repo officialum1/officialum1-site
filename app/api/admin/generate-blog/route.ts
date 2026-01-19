@@ -49,6 +49,7 @@ export async function POST(req: Request) {
 
         // Strategy 2: Gemini (Fallback)
         if (!content && geminiKey) {
+            console.log("Using Gemini API...");
             const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.`;
             const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
                 method: 'POST',
@@ -56,11 +57,19 @@ export async function POST(req: Request) {
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
             const geminiData = await geminiRes.json();
-            try { content = geminiData.candidates[0].content.parts[0].text; } catch (e) { }
+
+            if (geminiData.error) {
+                console.error("Gemini API Error:", JSON.stringify(geminiData.error));
+            }
+
+            try { content = geminiData.candidates[0].content.parts[0].text; } catch (e) {
+                console.error("Gemini Content Parsing Failed", e);
+            }
         }
 
         if (!content) {
-            return NextResponse.json({ error: "Failed to generate content. Please check API Keys." }, { status: 500 });
+            console.error("Keys Status:", { hasOpenAI: !!openaiKey, hasGemini: !!geminiKey });
+            return NextResponse.json({ error: "Failed to generate content. Please check API Keys in Settings." }, { status: 500 });
         }
 
         // 2. Parse Title and Content
