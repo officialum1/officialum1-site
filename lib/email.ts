@@ -48,3 +48,27 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
         return false;
     }
 }
+
+// Wrapper for existing calls (Backward Compatibility)
+export async function sendAuditReport(to: string, subject: string, data: any, settings: any) {
+    const html = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #333;">${subject}</h2>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;" />
+                
+                <h3 style="color: #0070f3;">${data.da || 'Notification'}</h3>
+                <p><strong>Ref:</strong> ${data.pa || 'N/A'}</p>
+                <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #0070f3; margin: 20px 0;">
+                    ${(data.details || '').replace(/\n/g, '<br/>')}
+                </div>
+                
+                <p style="font-size: 12px; color: #888; margin-top: 30px;">
+                    Sent by OfficialUM1 Automated System
+                </p>
+            </div>
+        </div>
+    `;
+
+    return await sendEmail({ to, subject, html });
+}
