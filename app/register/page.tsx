@@ -8,12 +8,13 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [telegram, setTelegram] = useState('');
+    const [referralCode, setReferralCode] = useState('');
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         const res = await fetch('/api/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password, telegram })
+            body: JSON.stringify({ email, password, telegram, referralCode })
         });
         const data = await res.json();
 
@@ -91,6 +92,19 @@ export default function RegisterPage() {
                                 className="input-field"
                                 value={telegram}
                                 onChange={e => setTelegram(e.target.value)}
+                                style={{ width: '100%', padding: '1rem 1.2rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.2s' }}
+                                onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                            />
+                        </div>
+                        <div style={{ textAlign: 'left' }}>
+                            <label style={{ fontFamily: 'var(--font-outfit)', fontSize: '0.85rem', fontWeight: 500, color: '#ccc', marginLeft: '0.2rem', marginBottom: '0.5rem', display: 'block' }}>Referral Code (Optional)</label>
+                            <input
+                                type="text"
+                                placeholder="Enter code if you have one"
+                                className="input-field"
+                                value={referralCode}
+                                onChange={e => setReferralCode(e.target.value)}
                                 style={{ width: '100%', padding: '1rem 1.2rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff', fontSize: '1rem', outline: 'none', transition: 'all 0.2s' }}
                                 onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
                                 onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}

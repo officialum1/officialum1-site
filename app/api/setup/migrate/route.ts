@@ -6,7 +6,23 @@ export async function GET() {
     try {
         console.log('Starting Migration via API...');
 
-        // 1. Update Orders Table
+        // 1. Users Table (Migration from JSON)
+        await query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                telegram VARCHAR(100),
+                wallet_balance DECIMAL(10,2) DEFAULT 0.00,
+                referral_code VARCHAR(50) UNIQUE,
+                referred_by VARCHAR(50),
+                reset_token VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Users table ready');
+
+        // 2. Update Orders Table
         try {
             await query(`ALTER TABLE orders ADD COLUMN quantity INT DEFAULT 1`);
             console.log('Added quantity to orders');
