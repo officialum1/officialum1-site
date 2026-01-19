@@ -15,21 +15,25 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User already exists" }, { status: 400 });
         }
 
-        // 3. Generate Referral Code for New User
+        // 3. Generate Codes
         const newRefCode = Math.random().toString(36).substring(7).toUpperCase();
+        const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-        // 4. Create User
+        // 4. Create User (Including Verification Token and is_verified=False)
         const result: any = await query(
-            "INSERT INTO users (email, password, telegram, referral_code, referred_by) VALUES (?, ?, ?, ?, ?)",
-            [email, password, telegram || '', newRefCode, referralCode || null]
+            "INSERT INTO users (email, password, telegram, referral_code, referred_by, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, FALSE)",
+            [email, password, telegram || '', newRefCode, referralCode || null, verificationToken]
         );
 
-        // 5. Send Welcome Email
-        await sendAuditReport(email, "Welcome to OfficialUM1!", {
-            da: "ACCOUNT CREATED",
-            pa: "Welcome Aboard",
+        // 5. Send Verification Email
+        const origin = req.headers.get('origin') || 'https://officialum1.com';
+        const verifyLink = `${origin}/verify-email?token=${verificationToken}`;
+
+        await sendAuditReport(email, "Verify Your Account - OfficialUM1", {
+            da: "ACTION REQUIRED",
+            pa: "Verify Email",
             links: 0,
-            details: `Thanks for signing up! \n\nYour Referral Code is: ${newRefCode}\nShare this to earn 5% commission on friends' purchases!`
+            details: `Thanks for signing up! Please verify your email to unlock all features.\n\n<a href="${verifyLink}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:white;text-decoration:none;border-radius:5px;">Verify Account</a>\n\nOr click here: ${verifyLink}`
         }, {});
 
         return NextResponse.json({

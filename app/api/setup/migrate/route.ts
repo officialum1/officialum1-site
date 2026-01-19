@@ -136,6 +136,15 @@ export async function GET() {
             console.log('Added referred_by to users');
         } catch (e) { }
 
+        try {
+            await query("ALTER TABLE users ADD COLUMN verification_token VARCHAR(100)");
+            console.log('Added verification_token to users');
+        } catch (e) { }
+        try {
+            await query("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE");
+            console.log('Added is_verified to users');
+        } catch (e) { }
+
         await query(`
             CREATE TABLE IF NOT EXISTS transactions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
