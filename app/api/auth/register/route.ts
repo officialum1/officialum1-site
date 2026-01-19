@@ -32,7 +32,15 @@ export async function POST(req: Request) {
             details: `Thanks for signing up! \n\nYour Referral Code is: ${newRefCode}\nShare this to earn 5% commission on friends' purchases!`
         }, {});
 
-        return NextResponse.json({ success: true, userId: result.insertId });
+        return NextResponse.json({
+            success: true,
+            user: {
+                id: result.insertId,
+                email,
+                telegram: telegram || '',
+                referralCode: newRefCode
+            }
+        });
 
     } catch (e: any) {
         console.error(e);

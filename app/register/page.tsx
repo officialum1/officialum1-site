@@ -10,19 +10,34 @@ export default function RegisterPage() {
     const [telegram, setTelegram] = useState('');
     const [referralCode, setReferralCode] = useState('');
 
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await fetch('/api/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({ email, password, telegram, referralCode })
-        });
-        const data = await res.json();
+        setIsLoading(true);
+        setErrorMsg('');
 
-        if (data.success) {
-            alert('Registration Successful! Please login.');
-            window.location.href = '/login';
-        } else {
-            alert('Error: ' + data.error);
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ email, password, telegram, referralCode })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // Auto-Login: Save user to session (local storage)
+                localStorage.setItem('user', JSON.stringify(data.user));
+
+                // Redirect to Dashboard
+                window.location.href = '/dashboard';
+            } else {
+                setErrorMsg(data.error || 'Registration failed');
+                setIsLoading(false);
+            }
+        } catch (err) {
+            setErrorMsg('Network Error. Please try again.');
+            setIsLoading(false);
         }
     };
 
@@ -54,6 +69,12 @@ export default function RegisterPage() {
                             Create a buyer account for faster checkout & history
                         </p>
                     </div>
+
+                    {errorMsg && (
+                        <div style={{ background: 'rgba(255, 68, 68, 0.1)', color: '#ff4444', padding: '0.8rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', border: '1px solid rgba(255, 68, 68, 0.2)' }}>
+                            {errorMsg}
+                        </div>
+                    )}
 
                     <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                         <div style={{ textAlign: 'left' }}>
@@ -114,21 +135,23 @@ export default function RegisterPage() {
                         <button
                             className="btn"
                             type="submit"
+                            disabled={isLoading}
                             style={{
                                 marginTop: '1rem',
                                 padding: '1rem',
                                 fontSize: '1.1rem',
                                 fontWeight: 600,
                                 fontFamily: 'var(--font-outfit)',
-                                background: 'linear-gradient(135deg, #4f46e5 0%, #ec4899 100%)',
-                                color: '#fff',
+                                background: isLoading ? '#333' : 'linear-gradient(135deg, #4f46e5 0%, #ec4899 100%)',
+                                color: isLoading ? '#888' : '#fff',
                                 border: 'none',
                                 borderRadius: '12px',
-                                cursor: 'pointer',
-                                boxShadow: '0 4px 15px rgba(79, 70, 229, 0.4)'
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
+                                boxShadow: isLoading ? 'none' : '0 4px 15px rgba(79, 70, 229, 0.4)',
+                                transition: 'all 0.3s'
                             }}
                         >
-                            Create Account
+                            {isLoading ? 'Creating Account...' : 'Create Account'}
                         </button>
                     </form>
 
