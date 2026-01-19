@@ -106,6 +106,32 @@ export async function GET() {
         `);
         console.log('Blogs table ready');
 
+        // 7. Wallet & Affiliate System
+        try {
+            await query("ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00");
+            console.log('Added wallet_balance to users');
+        } catch (e) { }
+        try {
+            await query("ALTER TABLE users ADD COLUMN referral_code VARCHAR(50) UNIQUE");
+            console.log('Added referral_code to users');
+        } catch (e) { }
+        try {
+            await query("ALTER TABLE users ADD COLUMN referred_by VARCHAR(50)");
+            console.log('Added referred_by to users');
+        } catch (e) { }
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                userId VARCHAR(50) NOT NULL,
+                type VARCHAR(50), -- deposit, purchase, refund, referral_bonus
+                amount DECIMAL(10,2) NOT NULL,
+                description VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Transactions table ready');
+
         // 6. Seed Initial Reviews (If empty)
         try {
             const reviews: any = await query("SELECT COUNT(*) as count FROM testimonials");

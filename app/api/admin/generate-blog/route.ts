@@ -9,43 +9,58 @@ export async function POST(req: Request) {
 
         if (!topic) return NextResponse.json({ error: "Topic is required" }, { status: 400 });
 
-        let apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            const rows = await query("SELECT setting_value FROM settings WHERE setting_key = 'geminiKey'") as any[];
-            if (rows.length > 0) apiKey = rows[0].setting_value;
+        // Fetch Keys
+        let geminiKey = process.env.GEMINI_API_KEY;
+        let openaiKey = process.env.OPENAI_API_KEY;
+
+        if (!geminiKey || !openaiKey) {
+            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('geminiKey', 'openaiKey')") as any[];
+            rows.forEach((r: any) => {
+                if (r.setting_key === 'geminiKey') geminiKey = r.setting_value;
+                if (r.setting_key === 'openaiKey') openaiKey = r.setting_value;
+            });
         }
-
-        if (!apiKey) {
-            return NextResponse.json({ error: "Gemini API Key Missing" }, { status: 500 });
-        }
-
-        // 1. Generate Blog Content using Gemini
-        const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". 
-        The post should be formatted in Markdown.
-        Structure:
-        - Catchy Title
-        - Introduction (Hook the reader)
-        - 3-4 H2 Sections with detailed advice
-        - Conclusion
-        - Do NOT include 'Here is the blog post' or typical AI intros. Just the content.
-        - Start with the Title on the first line prefixed with '# '.`;
-
-        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
-
-        const geminiData = await geminiRes.json();
 
         let content = "";
-        try {
-            content = geminiData.candidates[0].content.parts[0].text;
-        } catch (e) {
-            console.error("Gemini Response Error:", JSON.stringify(geminiData));
-            return NextResponse.json({ error: "Failed to generate content from AI" }, { status: 500 });
+
+        // Strategy 1: OpenAI (Preferred if available)
+        if (openaiKey) {
+            try {
+                const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${openaiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: "You are an expert SEO Blog Writer." },
+                            { role: "user", content: `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.` }
+                        ]
+                    })
+                });
+                const openaiData = await openaiRes.json();
+                content = openaiData.choices[0].message.content;
+            } catch (e) {
+                console.error("OpenAI Failed, trying Gemini...");
+            }
+        }
+
+        // Strategy 2: Gemini (Fallback)
+        if (!content && geminiKey) {
+            const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.`;
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const geminiData = await geminiRes.json();
+            try { content = geminiData.candidates[0].content.parts[0].text; } catch (e) { }
+        }
+
+        if (!content) {
+            return NextResponse.json({ error: "Failed to generate content. Please check API Keys." }, { status: 500 });
         }
 
         // 2. Parse Title and Content

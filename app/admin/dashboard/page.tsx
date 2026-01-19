@@ -49,7 +49,8 @@ export default function AdminDashboard() {
         stripePublic: '', stripeSecret: '',
         cryptomusId: '', cryptomusKey: '',
         binanceKey: '', binanceSecret: '',
-        telegramToken: ''
+        telegramToken: '',
+        geminiKey: '', openaiKey: ''
     });
 
     // Modal State
@@ -721,6 +722,16 @@ export default function AdminDashboard() {
                                             value={settings.geminiKey || ''}
                                             onChange={e => setSettings({ ...settings, geminiKey: e.target.value })}
                                             placeholder="Enter Gemini API Key"
+                                            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid #333', color: 'white' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#aaa' }}>OpenAI API Key (Optional Alternative)</label>
+                                        <input
+                                            type="password"
+                                            value={settings.openaiKey || ''}
+                                            onChange={e => setSettings({ ...settings, openaiKey: e.target.value })}
+                                            placeholder="sk-..."
                                             style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: '1px solid #333', color: 'white' }}
                                         />
                                     </div>
