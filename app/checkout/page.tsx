@@ -115,7 +115,7 @@ function CheckoutContent() {
                 <p style={{ fontFamily: 'var(--font-inter)', color: '#888' }}>Complete your purchase securely</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '2rem' }}>
+            <div className="checkout-grid">
 
                 {/* LEFT COLUMN: Payment & Contact */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

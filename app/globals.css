@@ -527,3 +527,19 @@ label {
   font-weight: 500;
   margin-left: 4px;
 }
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column-reverse;
+    /* Show Summary on Top? Or Bottom? usually bottom on mobile or very top. Let's do column-reverse to put Summary at TOP? or Bottom. User said "product not showing", maybe it was hidden. Let's keep it simple column (Summary at bottom) OR column-reverse (Summary at top). I'll stick to column (Summary below) but usually Summary is good at top. Actually, user expects to see product. Let's Keep standard order (Left column first = Forms, Right column second = Summary). So Flex-Direction Column. */
+    flex-direction: column;
+  }
+}

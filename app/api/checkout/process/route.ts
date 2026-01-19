@@ -37,25 +37,27 @@ export async function POST(req: Request) {
     try {
         const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1 } = await req.json();
 
-        // 1. Load Data
-        // const products = await load(PRODUCTS_PATH); 
-        const users = await load(USERS_PATH);
-        // orders are now in DB, no need to load JSON
+        // 1. Load Settings
         const settings = await getSettings();
 
-        // Fetch Product from DB
+        // 2. Fetch Product from DB
         const productRows = await query("SELECT * FROM products WHERE id = ?", [productId]) as any[];
         const product = productRows[0];
 
-        // Handle User (Registered or Guest)
+        // Create/Get User Object
         let user: any = null;
+
         if (userId === 'guest') {
             user = { id: 'guest', email: guestEmail, telegram: null };
         } else {
-            user = users.find((u: any) => u.id.toString() === userId.toString());
+            // Fetch from DB
+            const userRows = await query("SELECT id, email, telegram FROM users WHERE id = ?", [userId]) as any[];
+            if (userRows.length > 0) {
+                user = userRows[0];
+            }
         }
 
-        if (!product || !user) return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
+        if (!product || !user) return NextResponse.json({ error: "Invalid Request: User or Product not found" }, { status: 400 });
 
         // Calculate Amount to Charge
         const safeQuantity = parseInt(quantity as string, 10) || 1;
