@@ -47,29 +47,37 @@ export async function POST(req: Request) {
             }
         }
 
+        let lastError = null;
+
         // Strategy 2: Gemini (Fallback)
         if (!content && geminiKey) {
             console.log("Using Gemini API...");
             const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.`;
-            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const geminiData = await geminiRes.json();
+            try {
+                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const geminiData = await geminiRes.json();
 
-            if (geminiData.error) {
-                console.error("Gemini API Error:", JSON.stringify(geminiData.error));
-            }
-
-            try { content = geminiData.candidates[0].content.parts[0].text; } catch (e) {
-                console.error("Gemini Content Parsing Failed", e);
+                if (geminiData.error) {
+                    lastError = geminiData.error.message || JSON.stringify(geminiData.error);
+                    console.error("Gemini API Error:", lastError);
+                } else if (geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    content = geminiData.candidates[0].content.parts[0].text;
+                } else {
+                    lastError = "Gemini returned no content candidates.";
+                }
+            } catch (e: any) {
+                console.error("Gemini Request Failed", e);
+                lastError = e.message;
             }
         }
 
         if (!content) {
             console.error("Keys Status:", { hasOpenAI: !!openaiKey, hasGemini: !!geminiKey });
-            return NextResponse.json({ error: "Failed to generate content. Please check API Keys in Settings." }, { status: 500 });
+            return NextResponse.json({ error: lastError || "Failed to generate content. Please check API Keys in Settings." }, { status: 500 });
         }
 
         // 2. Parse Title and Content
