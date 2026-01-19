@@ -8,11 +8,16 @@ import Link from 'next/link';
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [filter, setFilter] = useState('All');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetch('/api/products')
             .then(res => res.json())
-            .then(data => setProducts(data));
+            .then(data => {
+                setProducts(data);
+                setLoading(false);
+            })
+            .catch(e => setLoading(false));
     }, []);
 
     const filtered = filter === 'All' ? products : products.filter(p => p.platform === filter);
@@ -21,7 +26,7 @@ export default function ShopPage() {
     return (
         <main>
             <Navbar />
-            <div style={{ paddingTop: '150px', paddingBottom: '100px' }} className="container">
+            <div className="container page-header">
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
                     <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
@@ -42,38 +47,47 @@ export default function ShopPage() {
                 </div>
 
                 {/* Product Grid */}
-                <div className="grid-3">
-                    {filtered.map(item => (
-                        <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                <img src={item.image} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-                            </div>
-                            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                    {item.platform}
-                                </div>
-                                <h3 style={{ marginBottom: '0.5rem' }}>{item.name}</h3>
-                                <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
-
-                                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>{item.price}</div>
-                                    <Link
-                                        href={`/checkout?id=${item.id}`}
-                                        className="btn btn-outline"
-                                        style={{ fontSize: '0.9rem' }}
-                                    >
-                                        Buy Now
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {filtered.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-                        No accounts available in this category right now.
+                {loading ? (
+                    <div style={{ padding: '4rem', textAlign: 'center' }}>
+                        <div className="loader" style={{ margin: '0 auto 1rem' }}></div>
+                        <p style={{ color: '#888' }}>Loading products...</p>
                     </div>
+                ) : (
+                    <>
+                        <div className="grid-3">
+                            {filtered.map(item => (
+                                <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                        <img src={item.image} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                    </div>
+                                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                            {item.platform}
+                                        </div>
+                                        <h3 style={{ marginBottom: '0.5rem' }}>{item.name}</h3>
+                                        <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
+
+                                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>{item.price}</div>
+                                            <Link
+                                                href={`/checkout?id=${item.id}`}
+                                                className="btn btn-outline"
+                                                style={{ fontSize: '0.9rem' }}
+                                            >
+                                                Buy Now
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {filtered.length === 0 && (
+                            <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+                                No accounts available in this category right now.
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
             <Footer />

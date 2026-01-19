@@ -70,6 +70,18 @@ a {
   padding: 100px 0;
 }
 
+.page-header {
+  padding-top: 150px;
+  padding-bottom: 100px;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding-top: 100px;
+    padding-bottom: 60px;
+  }
+}
+
 /* Typography */
 h1,
 h2,
