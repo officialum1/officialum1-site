@@ -72,6 +72,9 @@ export default function AdminDashboard() {
 
     // View Mode for Inventory
     const [viewMode, setViewMode] = useState<'summary' | 'list'>('summary');
+    const [catalog, setCatalog] = useState<any[]>([]);
+    const [showAddProduct, setShowAddProduct] = useState(false);
+    const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
 
     useEffect(() => {
         fetchData();
@@ -79,14 +82,15 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes] = await Promise.all([
+            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
                 fetch('/api/leads'),
                 fetch('/api/social'),
                 fetch('/api/admin/settings'),
                 fetch('/api/hr/employees'),
-                fetch('/api/admin/logs')
+                fetch('/api/admin/logs'),
+                fetch('/api/products')
             ]);
 
             const invData = await invRes.json();
@@ -96,6 +100,7 @@ export default function AdminDashboard() {
             const settingsData = await settingsRes.json();
             const empData = await empRes.json();
             const logsData = await logsRes.json();
+            const catData = await catRes.json();
 
             // Fail-safe Ticket Fetch (Don't crash if DB is down)
             let ticketData = [];
@@ -111,6 +116,7 @@ export default function AdminDashboard() {
             setSettings(settingsData);
             setEmployees(empData);
             setLogs(logsData);
+            setCatalog(catData);
             setTickets(ticketData);
             calculateStats(balData, empData, invData);
         } catch (e) {
@@ -228,6 +234,18 @@ export default function AdminDashboard() {
         fetchData();
     };
 
+    const handleAddProduct = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...newProduct, action: 'create' })
+        });
+        setShowAddProduct(false);
+        setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
+        fetchData();
+    };
+
     const handleAddInventory = async (e: React.FormEvent) => {
         e.preventDefault();
         await fetch('/api/admin/inventory', {
@@ -320,22 +338,35 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Tab Navigation */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    {['Inventory', 'Sales', 'Leads', 'Support', 'Marketing', 'HR', 'Logs', 'Settings'].map(tab => (
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem', overflowX: 'auto' }}>
+                    {[
+                        { id: 'inventory', label: '📦 Orders' },
+                        { id: 'catalog', label: '🛍️ Catalog' },
+                        { id: 'sales', label: '💰 Finance' },
+                        { id: 'leads', label: '👥 Leads' },
+                        { id: 'support', label: '🎫 Support' },
+                        { id: 'marketing', label: '📢 Marketing' },
+                        { id: 'hr', label: '👔 HR' },
+                        { id: 'logs', label: '📜 Logs' },
+                        { id: 'settings', label: '⚙️ Settings' }
+                    ].map(tab => (
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab.toLowerCase())}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
                             style={{
-                                background: 'transparent',
+                                background: activeTab === tab.id ? 'rgba(0,255,136,0.1)' : 'transparent',
                                 border: 'none',
-                                color: activeTab === tab.toLowerCase() ? '#00ff88' : '#888',
-                                fontSize: '1.2rem',
+                                color: activeTab === tab.id ? '#00ff88' : '#888',
+                                fontSize: '1rem',
                                 cursor: 'pointer',
-                                padding: '0.5rem 1rem',
-                                borderBottom: activeTab === tab.toLowerCase() ? '2px solid #00ff88' : 'none'
+                                padding: '0.6rem 1.2rem',
+                                borderRadius: '8px',
+                                transition: 'all 0.2s',
+                                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                whiteSpace: 'nowrap'
                             }}
                         >
-                            {tab}
+                            {tab.label}
                         </button>
                     ))}
                 </div>
@@ -602,8 +633,55 @@ export default function AdminDashboard() {
                     </>
                 )}
 
+                {/* CATALOG TAB */}
+                {activeTab === 'catalog' && (
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ margin: 0 }}>🛍️ Shop Product Catalog</h2>
+                            <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                            {catalog.map((prod: any) => (
+                                <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                        <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
+                                            {prod.image && prod.image.length > 10 ? <img src={prod.image} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : '📦'}
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '1.5rem' }}>
+                                        <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>{prod.name}</h3>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                                            <span>{prod.platform}</span>
+                                            <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
+                                        </div>
+                                        <button className="btn btn-outline" style={{ width: '100%', fontSize: '0.8rem' }}>Edit Details</button>
+                                    </div>
+                                </div>
+                            ))}
+                            {catalog.length === 0 && <p style={{ color: '#666' }}>No products in catalog. Add one to start selling.</p>}
+                        </div>
+
+                        {showAddProduct && (
+                            <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
+                                <h3 style={{ marginBottom: '1rem' }}>Add New Product to Shop</h3>
+                                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
+                                    <div><label style={{ color: '#ccc' }}>Platform</label><select className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} style={{ width: '100%' }}><option>Z2U</option><option>G2G</option><option>Direct</option><option>Other</option></select></div>
+                                    <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                    <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
+                                    <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
+                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                        <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
+                                        <button type="submit" className="btn btn-primary">Create Product</button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* SALES TAB */}
-                {/* SALES / FINANCE TAB */}
                 {activeTab === 'sales' && (
                     <>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
