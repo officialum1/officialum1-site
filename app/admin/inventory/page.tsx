@@ -936,6 +936,28 @@ export default function AdminDashboard() {
 
                             <button type="submit" className="btn btn-primary" style={{ padding: '1rem' }}>💾 Save Configuration</button>
                         </form>
+
+                        {/* DANGER ZONE */}
+                        <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #ff4444', borderRadius: '16px', background: 'rgba(255, 68, 68, 0.05)' }}>
+                            <h3 style={{ color: '#ff4444', marginBottom: '1rem' }}>Danger Zone</h3>
+                            <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>This action will wipe all inventory, sales history, and social posts. It cannot be undone.</p>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (confirm('⚠️ ARE YOU SURE? This will DELETE ALL DATA forever.')) {
+                                        if (confirm('Really? Click OK to confirm wiping your entire database.')) {
+                                            await fetch('/api/admin/reset', { method: 'POST' });
+                                            alert('System Reset Complete.');
+                                            window.location.reload();
+                                        }
+                                    }
+                                }}
+                                className="btn"
+                                style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '1rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}
+                            >
+                                🗑️ RESET SYSTEM / CLEAR ALL DATA
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
