@@ -253,7 +253,30 @@ export default function AdminDashboard() {
         fetchData();
     };
 
-    if (loading) return <div style={{ background: '#050505', minHeight: '100vh', color: '#fff', padding: '100px' }}>Loading Admin Board...</div>;
+    if (loading) return (
+        <div style={{
+            background: '#050505',
+            minHeight: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            gap: '1.5rem'
+        }}>
+            <div className="loader" style={{ width: '60px', height: '60px', borderTopColor: '#00ff88', borderRightColor: 'rgba(0, 255, 136, 0.2)', borderBottomColor: 'rgba(0, 255, 136, 0.2)', borderLeftColor: 'rgba(0, 255, 136, 0.2)' }}></div>
+            <h2 style={{
+                color: '#fff',
+                fontSize: '1.5rem',
+                background: 'linear-gradient(90deg, #fff, #444)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 'bold',
+                letterSpacing: '1px'
+            }}>
+                LOADING WORKSPACE
+            </h2>
+        </div>
+    );
 
     return (
         <main style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
