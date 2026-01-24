@@ -56,6 +56,12 @@ export default function Navbar() {
                         <li><Link href="/work" className="nav-link" onClick={() => setIsOpen(false)}>Work</Link></li>
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Insights</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
+                        {/* Admin/HR Links - Restricted */}
+                        {user && user.email === 'admin@officialum1.com' ? (
+                            <>
+                                <li><Link href="/admin/inventory" className="nav-link" style={{ color: '#00ccff' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
+                            </>
+                        ) : null}
                     </ul>
 
                     <div className="auth-buttons">

@@ -17,7 +17,17 @@ export default function LoginPage() {
         const data = await res.json();
 
         if (data.success) {
+            // SECURITY: Prevent Admin Login from Public Portal
+            if (data.user.email === 'admin@officialum1.com') {
+                alert("Security Alert: Administrators must use the dedicated Admin Portal.");
+                // Clear any potential session
+                localStorage.removeItem('buyer_user');
+                return;
+            }
+
             localStorage.setItem('buyer_user', JSON.stringify(data.user));
+            document.cookie = "admin_session=; path=/; max-age=0"; // Ensure no admin cookie
+
             window.location.href = '/shop'; // Redirect to Shop
         } else {
             alert('Login Failed: ' + data.error);
