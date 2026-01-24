@@ -9,8 +9,22 @@ export async function GET(request: Request) {
     try {
         if (type === 'balance') {
             if (role === 'staff') return NextResponse.json([]);
-            const transactions = await query("SELECT * FROM transactions ORDER BY date DESC");
-            return NextResponse.json(transactions);
+
+            const transactions: any = await query("SELECT * FROM transactions ORDER BY date DESC");
+            // Fetch deliveries to map tokens
+            const deliveries: any = await query("SELECT orderId, token, views FROM deliveries");
+
+            // Merge
+            const merged = transactions.map((t: any) => {
+                const delivery = deliveries.find((d: any) => d.orderId === t.id);
+                return {
+                    ...t,
+                    deliveryToken: delivery ? delivery.token : null,
+                    deliveryViews: delivery ? delivery.views || 0 : 0
+                };
+            });
+
+            return NextResponse.json(merged);
         }
 
         // Default: Inventory

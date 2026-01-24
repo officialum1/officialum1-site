@@ -59,6 +59,8 @@ export default function AdminDashboard() {
     const [showAddPost, setShowAddPost] = useState(false);
     const [newPost, setNewPost] = useState({ content: '', platform: 'Twitter' });
     const [newSale, setNewSale] = useState({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
+    const [deliveryLink, setDeliveryLink] = useState('');
+    const [showDeliveryModal, setShowDeliveryModal] = useState(false);
 
     useEffect(() => {
         fetchData();
@@ -252,7 +254,7 @@ export default function AdminDashboard() {
 
                 {/* Tab Navigation */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    {['Inventory', 'Leads', 'Support', 'Marketing', 'HR', 'Settings'].map(tab => (
+                    {['Inventory', 'Sales', 'Leads', 'Support', 'Marketing', 'HR', 'Settings'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab.toLowerCase())}
@@ -391,7 +393,7 @@ export default function AdminDashboard() {
                                         ))}
                                     </select>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
                                         <input placeholder="Description / Order ID" value={newSale.description} onChange={e => setNewSale({ ...newSale, description: e.target.value })} className="input-field" required />
                                         <select value={newSale.platform} onChange={e => setNewSale({ ...newSale, platform: e.target.value })} className="input-field">
                                             <option value="Z2U">Z2U</option>
@@ -400,7 +402,6 @@ export default function AdminDashboard() {
                                             <option value="Direct">Direct</option>
                                         </select>
                                         <input type="number" placeholder="Sale Price ($)" value={newSale.salePrice} onChange={e => setNewSale({ ...newSale, salePrice: e.target.value })} className="input-field" required />
-                                        <input placeholder="Sold By (Staff)" value={newSale.staffName} onChange={e => setNewSale({ ...newSale, staffName: e.target.value })} className="input-field" />
                                     </div>
 
                                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
@@ -431,66 +432,82 @@ export default function AdminDashboard() {
                             </div>
                         )}
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                            {/* Inventory List */}
-                            <div>
-                                <h2 style={{ marginBottom: '1rem' }}>📦 Inventory Stock</h2>
-                                <div className="glass" style={{ maxHeight: '400px', overflowY: 'auto', borderRadius: '16px' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: 'rgba(255,255,255,0.05)', position: 'sticky', top: 0 }}>
-                                            <tr>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Item</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Cost</th>
+                        <div style={{ marginTop: '2rem' }}>
+                            <h2 style={{ marginBottom: '1rem' }}>📦 Inventory Stock</h2>
+                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                        <tr>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {inventory.map((item: any) => (
+                                            <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem' }}>{item.name}</td>
+                                                <td style={{ padding: '1rem' }}>{item.platform}</td>
+                                                <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
+                                                <td style={{ padding: '1rem' }}><span style={{ color: item.status === 'In Stock' ? '#00ff88' : '#aaa' }}>{item.status}</span></td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {inventory.map((item: any) => (
-                                                <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <td style={{ padding: '0.8rem 1rem' }}>{item.name}</td>
-                                                    <td style={{ padding: '0.8rem 1rem' }}>{item.platform}</td>
-                                                    <td style={{ padding: '0.8rem 1rem', color: '#ff4444' }}>-${item.purchasePrice}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            {/* Sales History */}
-                            <div>
-                                <h2 style={{ marginBottom: '1rem' }}>💰 Sales History</h2>
-                                <div className="glass" style={{ maxHeight: '400px', overflowY: 'auto', borderRadius: '16px' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: 'rgba(255,255,255,0.05)', position: 'sticky', top: 0 }}>
-                                            <tr>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Desc</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Sold By</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Price</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {balanceHistory.slice().reverse().map((sale: any) => (
-                                                <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <td style={{ padding: '0.8rem 1rem' }}>{sale.description}</td>
-                                                    <td style={{ padding: '0.8rem 1rem' }}>
-                                                        <span style={{
-                                                            padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem',
-                                                            background: sale.platform === 'Z2U' ? 'rgba(0,100,255,0.2)' : sale.platform === 'PlayerUp' ? 'rgba(255,100,0,0.2)' : 'rgba(0,255,0,0.1)',
-                                                            color: '#fff'
-                                                        }}>{sale.platform}</span>
-                                                    </td>
-                                                    <td style={{ padding: '0.8rem 1rem' }}>{sale.processedBy}</td>
-                                                    <td style={{ padding: '0.8rem 1rem', color: '#00ff88' }}>+${sale.amount}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        ))}
+                                        {inventory.length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </>
+                )}
+
+                {/* SALES TAB */}
+                {activeTab === 'sales' && (
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                        <h2 style={{ marginBottom: '1.5rem', color: '#ffd700' }}>💰 Sales History</h2>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                <tr>
+                                    <th style={{ padding: '1rem' }}>Description</th>
+                                    <th style={{ padding: '1rem' }}>Platform</th>
+                                    <th style={{ padding: '1rem' }}>Processed By</th>
+                                    <th style={{ padding: '1rem' }}>Date</th>
+                                    <th style={{ padding: '1rem' }}>Amount</th>
+                                    <th style={{ padding: '1rem' }}>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
+                                    <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '1rem' }}>{sale.description}</td>
+                                        <td style={{ padding: '1rem' }}>{sale.platform}</td>
+                                        <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
+                                        <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                        <td style={{ padding: '1rem', color: '#00ff88', fontWeight: 'bold' }}>+${Number(sale.amount).toFixed(2)}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            {sale.deliveryToken ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    <button
+                                                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`); alert("Link Copied!"); }}
+                                                        style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid #00ff88', color: '#00ff88', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                    >
+                                                        🔗 Copy Link
+                                                    </button>
+                                                    <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                                                        👁️ {sale.deliveryViews || 0}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span style={{ color: '#666', fontSize: '0.8rem' }}>Direct Sale</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No sales recorded yet.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
 
                 {/* LEADS TAB */}
