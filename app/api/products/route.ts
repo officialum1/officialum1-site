@@ -3,34 +3,47 @@ import { query } from '@/lib/db';
 
 export async function GET() {
     try {
-        const products = await query("SELECT * FROM products ORDER BY id DESC");
+        // 1. Fetch In-Stock Inventory
+        const items: any = await query("SELECT * FROM inventory WHERE status = 'In Stock'");
+
+        // 2. Group items by Name to create "Products"
+        const productMap: any = {};
+
+        items.forEach((item: any) => {
+            // Normalize name to group accurately
+            const key = item.name.trim();
+
+            if (!productMap[key]) {
+                productMap[key] = {
+                    id: `prod_${key.replace(/\s+/g, '_')}`, // Virtual Product ID
+                    name: key,
+                    platform: item.platform,
+                    // Use purchasePrice as Price for now (User can edit this logic later if needed)
+                    price: `$${Number(item.purchasePrice || 0).toFixed(2)}`,
+                    rawPrice: Number(item.purchasePrice || 0),
+                    description: `Instant Delivery. Verified ${item.platform} Account.`,
+                    // Dynamic Image Placeholder
+                    image: `https://ui-avatars.com/api/?name=${item.platform}&background=random&color=fff&size=128`,
+                    stock: 0,
+                    type: 'Auto-Delivery'
+                };
+            }
+            productMap[key].stock++;
+        });
+
+        const products = Object.values(productMap);
+
+        // Sort by Stock or Price
+        products.sort((a: any, b: any) => b.stock - a.stock);
+
         return NextResponse.json(products);
-    } catch (e) {
-        return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    } catch (e: any) {
+        console.error("Shop API Error:", e.message);
+        return NextResponse.json([], { status: 500 });
     }
 }
 
-export async function POST(req: Request) {
-    try {
-        const body = await req.json();
-
-        if (body.action === 'delete') {
-            await query("DELETE FROM products WHERE id = ?", [body.id]);
-        } else {
-            // Create New
-            const { name, platform, type, price, desc, creds, image } = body;
-            const cleanPrice = price.toString().replace(/[^0-9.]/g, ''); // Remove $ and other non-numeric chars
-
-            // Using 'creds' and 'description' to match lib/db.ts
-            await query(
-                "INSERT INTO products (name, platform, type, price, description, creds, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                [name, platform, type, cleanPrice, desc, creds, image]
-            );
-        }
-
-        return NextResponse.json({ success: true });
-    } catch (e: any) {
-        console.error("Product API Error:", e.message);
-        return NextResponse.json({ error: "Failed to update product: " + e.message }, { status: 500 });
-    }
+// POST not needed for public shop (only Admin adds)
+export async function POST() {
+    return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
