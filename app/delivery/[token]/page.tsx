@@ -13,6 +13,25 @@ export default function DeliveryPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // Review State
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+    const handleSubmitReview = async () => {
+        if (rating === 0) return;
+        try {
+            const res = await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: params?.token, rating, comment })
+            });
+            if (res.ok) {
+                setReviewSubmitted(true);
+            }
+        } catch (e) { console.error(e); }
+    };
+
     useEffect(() => {
         if (params?.token) {
             fetchOrder(params.token as string);
@@ -107,6 +126,67 @@ export default function DeliveryPage() {
                         <br />
                         <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>Link Viewed: {order.views || 0} times</span>
                     </p>
+
+                    {/* Review Section */}
+                    <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', textAlign: 'center' }}>
+                        {!reviewSubmitted ? (
+                            <>
+                                <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Rate Your Experience</h3>
+                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            onClick={() => setRating(star)}
+                                            style={{
+                                                fontSize: '2rem',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                color: star <= rating ? '#ffd700' : '#333',
+                                                transition: 'color 0.2s'
+                                            }}
+                                        >
+                                            ★
+                                        </button>
+                                    ))}
+                                </div>
+                                <textarea
+                                    placeholder="Leave a comment (optional)..."
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        border: '1px solid #333',
+                                        borderRadius: '8px',
+                                        padding: '1rem',
+                                        color: '#fff',
+                                        marginBottom: '1rem',
+                                        minHeight: '80px',
+                                        resize: 'none'
+                                    }}
+                                />
+                                <button
+                                    onClick={handleSubmitReview}
+                                    disabled={rating === 0}
+                                    className="btn btn-primary"
+                                    style={{
+                                        width: '100%',
+                                        opacity: rating === 0 ? 0.5 : 1,
+                                        cursor: rating === 0 ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    Submit Review
+                                </button>
+                            </>
+                        ) : (
+                            <div style={{ padding: '2rem', background: 'rgba(0,255,136,0.1)', borderRadius: '16px', border: '1px solid #00ff88' }}>
+                                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✅</div>
+                                <h3 style={{ color: '#00ff88' }}>Thank You!</h3>
+                                <p style={{ color: '#ccc' }}>Your feedback helps us improve.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
             <Footer />
