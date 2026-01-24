@@ -548,35 +548,30 @@ export default function AdminDashboard() {
 
                             {viewMode === 'summary' ? (
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {Array.from(new Set(inventory.map(i => i.name))).map(name => {
+                                    {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
                                         const items = inventory.filter(i => i.name === name);
-                                        const inStock = items.filter(i => i.status === 'In Stock').length;
-                                        const sold = items.filter(i => i.status !== 'In Stock').length;
-                                        const platform = items[0]?.platform || 'Unknown';
+                                        const activeItems = items.filter(i => i.status === 'In Stock');
+                                        const inStock = activeItems.length;
+                                        const platform = activeItems[0]?.platform || 'Unknown';
+
+                                        if (inStock === 0) return null;
 
                                         return (
                                             <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: inStock > 0 ? 'rgba(0,255,136,0.2)' : 'rgba(255,68,68,0.2)', color: inStock > 0 ? '#00ff88' : '#ff4444', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                                                    {inStock > 0 ? 'ACTIVE' : 'SOLD OUT'}
+                                                <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                    ACTIVE
                                                 </div>
                                                 <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
                                                 <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
 
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', alignItems: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available</div>
-                                                    </div>
-                                                    <div style={{ width: '1px', height: '100%', background: '#333' }}></div>
-                                                    <div style={{ textAlign: 'center' }}>
-                                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#666' }}>{sold}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Sold</div>
-                                                    </div>
+                                                <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available Stock</div>
                                                 </div>
                                             </div>
                                         );
                                     })}
-                                    {inventory.length === 0 && <div style={{ color: '#666' }}>No inventory items found.</div>}
+                                    {inventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
                                 </div>
                             ) : (
                                 <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
@@ -590,15 +585,15 @@ export default function AdminDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {inventory.map((item: any) => (
+                                            {inventory.filter(i => i.status === 'In Stock').map((item: any) => (
                                                 <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                     <td style={{ padding: '1rem' }}>{item.name}</td>
                                                     <td style={{ padding: '1rem' }}>{item.platform}</td>
                                                     <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
-                                                    <td style={{ padding: '1rem' }}><span style={{ color: item.status === 'In Stock' ? '#00ff88' : '#aaa' }}>{item.status}</span></td>
+                                                    <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
                                                 </tr>
                                             ))}
-                                            {inventory.length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
+                                            {inventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
                                         </tbody>
                                     </table>
                                 </div>
