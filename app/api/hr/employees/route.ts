@@ -1,47 +1,44 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const employeesFile = path.join(process.cwd(), 'data', 'employees.json');
-
-function getEmployees() {
-    if (!fs.existsSync(employeesFile)) {
-        return [];
-    }
-    const data = fs.readFileSync(employeesFile, 'utf8');
-    return JSON.parse(data);
-}
-
-function saveEmployees(employees: any[]) {
-    fs.writeFileSync(employeesFile, JSON.stringify(employees, null, 2));
-}
+import { query } from '@/lib/db';
 
 export async function GET() {
     try {
-        const employees = getEmployees();
-        return NextResponse.json(employees);
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch employees' }, { status: 500 });
+        const employees: any = await query("SELECT * FROM employees ORDER BY joinDate DESC");
+        const parsed = employees.map((e: any) => ({
+            ...e,
+            allowedPlatforms: e.allowedPlatforms ? JSON.parse(e.allowedPlatforms) : []
+        }));
+        return NextResponse.json(parsed);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const employees = getEmployees();
 
-        const newEmployee = {
+        const newEmp = {
             id: `emp_${Date.now()}`,
-            ...body,
-            joinDate: body.joinDate || new Date().toISOString().split('T')[0],
-            status: 'Active' // Default status
+            name: body.name,
+            email: body.email,
+            password: body.password, // Ideally hash this
+            position: body.position,
+            department: body.department,
+            salary: Number(body.salary || 0),
+            commissionRate: Number(body.commissionRate || 0),
+            compensationType: body.compensationType,
+            allowedPlatforms: JSON.stringify(body.allowedPlatforms || []),
+            status: 'Active'
         };
 
-        employees.push(newEmployee);
-        saveEmployees(employees);
+        await query(
+            "INSERT INTO employees (id, name, email, password, position, department, salary, commissionRate, compensationType, allowedPlatforms, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [newEmp.id, newEmp.name, newEmp.email, newEmp.password, newEmp.position, newEmp.department, newEmp.salary, newEmp.commissionRate, newEmp.compensationType, newEmp.allowedPlatforms, newEmp.status]
+        );
 
-        return NextResponse.json(newEmployee);
-    } catch (error) {
-        return NextResponse.json({ error: 'Failed to add employee' }, { status: 500 });
+        return NextResponse.json(newEmp);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

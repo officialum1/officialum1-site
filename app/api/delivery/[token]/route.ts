@@ -1,28 +1,30 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { query } from '@/lib/db';
 
 export async function GET(request: Request, context: { params: Promise<{ token: string }> }) {
     try {
         const { token } = await context.params;
 
-        const deliveriesFile = path.join(process.cwd(), 'data', 'deliveries.json');
-        if (!fs.existsSync(deliveriesFile)) {
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        // Fetch delivery
+        const orders: any = await query("SELECT * FROM deliveries WHERE token = ?", [token]);
+
+        if (orders.length === 0) {
+            return NextResponse.json({ error: 'Order not found or Expired Link' }, { status: 404 });
         }
 
-        const deliveries = JSON.parse(fs.readFileSync(deliveriesFile, 'utf8'));
-        const order = deliveries.find((d: any) => d.token === token);
-
-        if (!order) {
-            return NextResponse.json({ error: 'Invalid Link' }, { status: 404 });
-        }
+        const order = orders[0];
 
         // Increment Views
-        order.views = (order.views || 0) + 1;
-        fs.writeFileSync(deliveriesFile, JSON.stringify(deliveries, null, 2));
+        await query("UPDATE deliveries SET views = views + 1 WHERE token = ?", [token]);
 
-        return NextResponse.json(order);
+        // Parse JSON details
+        const parsedOrder = {
+            ...order,
+            details: order.details ? JSON.parse(order.details) : {},
+            views: (order.views || 0) + 1
+        };
+
+        return NextResponse.json(parsedOrder);
     } catch (error) {
         return NextResponse.json({ error: 'Server Error' }, { status: 500 });
     }

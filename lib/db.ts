@@ -145,4 +145,89 @@ export async function initDB() {
             setting_value TEXT
         )
     `);
+
+    // --- NEW ADMIN TABLES ---
+
+    // 1. Inventory
+    await query(`
+        CREATE TABLE IF NOT EXISTS inventory (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(255),
+            platform VARCHAR(50),
+            purchasePrice DECIMAL(10,2),
+            status VARCHAR(50) DEFAULT 'In Stock',
+            purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            accountDetails LONGTEXT
+        )
+    `);
+
+    // 2. Transactions (Balance History)
+    await query(`
+        CREATE TABLE IF NOT EXISTS transactions (
+            id VARCHAR(50) PRIMARY KEY,
+            type VARCHAR(50),
+            platform VARCHAR(50),
+            amount DECIMAL(10,2),
+            description TEXT,
+            processedBy VARCHAR(100),
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            inventoryId VARCHAR(50)
+        )
+    `);
+
+    // 3. Leads (CRM)
+    await query(`
+        CREATE TABLE IF NOT EXISTS leads (
+            id VARCHAR(50) PRIMARY KEY,
+            clientName VARCHAR(255),
+            platform VARCHAR(50),
+            budget DECIMAL(10,2),
+            status VARCHAR(50),
+            notes TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 4. Employees (HR)
+    await query(`
+        CREATE TABLE IF NOT EXISTS employees (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(255),
+            email VARCHAR(255),
+            password VARCHAR(255),
+            position VARCHAR(100),
+            department VARCHAR(100),
+            salary DECIMAL(10,2),
+            commissionRate DECIMAL(5,2),
+            compensationType VARCHAR(50),
+            allowedPlatforms TEXT,
+            status VARCHAR(50),
+            joinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 5. Deliveries
+    await query(`
+        CREATE TABLE IF NOT EXISTS deliveries (
+            token VARCHAR(100) PRIMARY KEY,
+            orderId VARCHAR(50),
+            itemName VARCHAR(255),
+            details LONGTEXT,
+            proofImage LONGTEXT,
+            views INT DEFAULT 0,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 6. Social Posts
+    await query(`
+        CREATE TABLE IF NOT EXISTS social_posts (
+            id VARCHAR(50) PRIMARY KEY,
+            content TEXT,
+            platform VARCHAR(50),
+            status VARCHAR(50),
+            likes INT DEFAULT 0,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }

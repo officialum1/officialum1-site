@@ -1,32 +1,35 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { query } from '@/lib/db';
 
-const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
-
-function getSettings() {
-    if (!fs.existsSync(settingsFile)) return {};
-    return JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
-}
-
-function saveSettings(data: any) {
-    fs.writeFileSync(settingsFile, JSON.stringify(data, null, 2));
-}
-
-export async function GET(request: Request) {
-    // SECURITY: In a real app, ensure only Admin can call this.
-    // For now, we rely on the Admin Dashboard context.
-    return NextResponse.json(getSettings());
+export async function GET() {
+    try {
+        const settingsRes: any = await query("SELECT * FROM settings");
+        const settings: any = {};
+        settingsRes.forEach((s: any) => settings[s.setting_key] = s.setting_value);
+        return NextResponse.json(settings);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
 }
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const current = getSettings();
-        const updated = { ...current, ...body };
-        saveSettings(updated);
-        return NextResponse.json({ success: true, settings: updated });
-    } catch (e) {
-        return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
+
+        // Loop through keys and save/update
+        const keys = Object.keys(body);
+        for (const key of keys) {
+            // Check if exists
+            const existing: any = await query("SELECT setting_key FROM settings WHERE setting_key = ?", [key]);
+            if (existing.length > 0) {
+                await query("UPDATE settings SET setting_value = ? WHERE setting_key = ?", [body[key], key]);
+            } else {
+                await query("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)", [key, body[key]]);
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
