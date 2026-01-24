@@ -93,6 +93,8 @@ export async function POST(request: Request) {
         }
 
         if (action === 'record_sale') {
+            const transactionId = `trans_${Date.now()}`;
+
             // Update Inventory (if sold from inventory)
             let deliveryData = null;
 
@@ -105,7 +107,9 @@ export async function POST(request: Request) {
                     const item = items[0];
                     const details = item.accountDetails ? JSON.parse(item.accountDetails) : {};
 
-                    const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                    // Generate Short Token (8 chars)
+                    const token = Math.random().toString(36).substring(2, 10);
+
                     deliveryData = {
                         token,
                         details,
@@ -115,14 +119,14 @@ export async function POST(request: Request) {
 
                     await query(
                         "INSERT INTO deliveries (token, orderId, itemName, details, proofImage) VALUES (?, ?, ?, ?, ?)",
-                        [token, `trans_${Date.now()}`, item.name, JSON.stringify(details), body.proofImage || null]
+                        [token, transactionId, item.name, JSON.stringify(details), body.proofImage || null]
                     );
                 }
             }
 
             // Record Transaction
             const newTransaction = {
-                id: `trans_${Date.now()}`,
+                id: transactionId,
                 type: 'sale',
                 platform: body.platform,
                 amount: Number(body.salePrice),
