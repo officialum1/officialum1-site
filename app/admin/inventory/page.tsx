@@ -65,19 +65,25 @@ export default function AdminDashboard() {
     const [showAddFunds, setShowAddFunds] = useState(false);
     const [fundForm, setFundForm] = useState({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
 
+    // Bulk Import State
+    const [isBulk, setIsBulk] = useState(false);
+    const [bulkData, setBulkData] = useState('');
+    const [logs, setLogs] = useState<any[]>([]);
+
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
         try {
-            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes] = await Promise.all([
+            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
                 fetch('/api/leads'),
                 fetch('/api/social'),
                 fetch('/api/admin/settings'),
-                fetch('/api/hr/employees')
+                fetch('/api/hr/employees'),
+                fetch('/api/admin/logs')
             ]);
 
             const invData = await invRes.json();
@@ -86,6 +92,7 @@ export default function AdminDashboard() {
             const postsData = await postsRes.json();
             const settingsData = await settingsRes.json();
             const empData = await empRes.json();
+            const logsData = await logsRes.json();
 
             // Fail-safe Ticket Fetch (Don't crash if DB is down)
             let ticketData = [];
@@ -100,6 +107,7 @@ export default function AdminDashboard() {
             setPosts(postsData);
             setSettings(settingsData);
             setEmployees(empData);
+            setLogs(logsData);
             setTickets(ticketData);
             calculateStats(balData, empData, invData);
         } catch (e) {
@@ -225,7 +233,25 @@ export default function AdminDashboard() {
             body: JSON.stringify({ action: 'add_inventory', ...newItem })
         });
         setShowAddInv(false);
-        setNewItem({ name: '', platform: 'Z2U', purchasePrice: '', username: '', password: '', email: '', extraInfo: '' });
+        setNewItem({ name: '', platform: 'Z2U', purchasePrice: '' });
+        fetchData();
+    };
+
+    const handleBulkImport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await fetch('/api/admin/inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'bulk_import',
+                bulkData,
+                platform: newItem.platform,
+                purchasePrice: newItem.purchasePrice,
+                namePrefix: newItem.name
+            })
+        });
+        setShowAddInv(false);
+        setBulkData('');
         fetchData();
     };
 
@@ -292,7 +318,7 @@ export default function AdminDashboard() {
 
                 {/* Tab Navigation */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    {['Inventory', 'Sales', 'Leads', 'Support', 'Marketing', 'HR', 'Settings'].map(tab => (
+                    {['Inventory', 'Sales', 'Leads', 'Support', 'Marketing', 'HR', 'Logs', 'Settings'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab.toLowerCase())}
@@ -371,35 +397,37 @@ export default function AdminDashboard() {
                         {/* Forms Area */}
                         {showAddInv && (
                             <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)' }}>
-                                <h3 style={{ marginBottom: '1rem' }}>Add Inventory Stock</h3>
-                                <form onSubmit={handleAddInventory} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr', alignItems: 'end' }}>
-                                    <div style={{ paddingRight: '1rem' }}>
-                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Basic Info</label>
-                                        <input placeholder="Item Name (e.g. Fortnite Acc)" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} className="input-field" required style={{ width: '100%', marginBottom: '1rem' }} />
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            <select value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} className="input-field" style={{ flex: 1 }}>
-                                                <option value="Z2U">Z2U</option>
-                                                <option value="PlayerUp">PlayerUp</option>
-                                                <option value="G2G">G2G</option>
-                                                <option value="Direct">Direct</option>
-                                            </select>
-                                            <input type="number" placeholder="Cost ($)" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} className="input-field" required style={{ flex: 1 }} />
-                                        </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ margin: 0 }}>{isBulk ? 'Bulk Import Accounts' : 'Add Inventory Stock'}</h3>
+                                    <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', padding: '4px', borderRadius: '8px' }}>
+                                        <button type="button" onClick={() => setIsBulk(false)} style={{ padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', background: !isBulk ? '#00ff88' : 'transparent', color: !isBulk ? '#000' : '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Single</button>
+                                        <button type="button" onClick={() => setIsBulk(true)} style={{ padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', background: isBulk ? '#00ff88' : 'transparent', color: isBulk ? '#000' : '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Bulk</button>
                                     </div>
+                                </div>
 
-                                    <div style={{ paddingLeft: '1rem', borderLeft: '1px solid #333' }}>
-                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Account Credentials (Optional)</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                                            <input placeholder="Username/Login" value={newItem.username || ''} onChange={e => setNewItem({ ...newItem, username: e.target.value })} className="input-field" />
-                                            <input placeholder="Password" value={newItem.password || ''} onChange={e => setNewItem({ ...newItem, password: e.target.value })} className="input-field" />
+                                <form onSubmit={isBulk ? handleBulkImport : handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform / Game</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
+                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name / Prefix</label><input type="text" className="input-field" required={!isBulk} value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder={isBulk ? "e.g. Fortnite Acc" : "Product Title"} style={{ width: '100%' }} /></div>
+                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
+
+                                    {!isBulk ? (
+                                        <>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Username / Login</label><input type="text" className="input-field" value={newItem.username || ''} onChange={e => setNewItem({ ...newItem, username: e.target.value })} style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" className="input-field" value={newItem.password || ''} onChange={e => setNewItem({ ...newItem, password: e.target.value })} style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Access (Optional)</label><input type="text" className="input-field" value={newItem.email || ''} onChange={e => setNewItem({ ...newItem, email: e.target.value })} style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Extra Info (2FA/Recovery)</label><input type="text" className="input-field" value={newItem.extraInfo || ''} onChange={e => setNewItem({ ...newItem, extraInfo: e.target.value })} style={{ width: '100%' }} /></div>
+                                        </>
+                                    ) : (
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Paste Accounts (One per line)</label>
+                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>Format: <code>username:password</code> or <code>username:password:email</code></p>
+                                            <textarea value={bulkData} onChange={e => setBulkData(e.target.value)} className="input-field" style={{ height: '150px', fontFamily: 'monospace', width: '100%' }} placeholder="user1:pass1&#10;user2:pass2:email2" />
                                         </div>
-                                        <input placeholder="Email Access (e.g. mail:pass)" value={newItem.email || ''} onChange={e => setNewItem({ ...newItem, email: e.target.value })} className="input-field" style={{ width: '100%', marginBottom: '1rem' }} />
-                                        <textarea placeholder="Extra Info / Notes" value={newItem.extraInfo || ''} onChange={e => setNewItem({ ...newItem, extraInfo: e.target.value })} className="input-field" style={{ width: '100%', height: '60px' }} />
-                                    </div>
+                                    )}
 
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary">Save Item</button>
+                                    <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                         <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
+                                        <button type="submit" className="btn btn-primary">{isBulk ? 'Bulk Import' : 'Add Item'}</button>
                                     </div>
                                 </form>
                             </div>
@@ -902,6 +930,35 @@ export default function AdminDashboard() {
                             </table>
                         </div>
                     </>
+                )}
+
+                {/* LOGS TAB */}
+                {activeTab === 'logs' && (
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Security & Activity Logs</h2>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                            <thead>
+                                <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                    <th style={{ padding: '1rem' }}>Time</th>
+                                    <th style={{ padding: '1rem' }}>User</th>
+                                    <th style={{ padding: '1rem' }}>Action</th>
+                                    <th style={{ padding: '1rem' }}>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {logs && logs.length > 0 ? logs.map((log: any) => (
+                                    <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{log.date ? new Date(log.date).toLocaleString() : 'N/A'}</td>
+                                        <td style={{ padding: '1rem' }}>{log.user}</td>
+                                        <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{log.action}</span></td>
+                                        <td style={{ padding: '1rem', color: '#ccc' }}>{log.details}</td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No logs recorded yet.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
 
                 {/* SETTINGS TAB */}

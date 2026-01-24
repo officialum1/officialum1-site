@@ -89,6 +89,12 @@ export async function POST(request: Request) {
                 "INSERT INTO inventory (id, name, platform, purchasePrice, status, accountDetails) VALUES (?, ?, ?, ?, ?, ?)",
                 [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails]
             );
+
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Add Inventory', `Added ${newItem.name} (${newItem.platform})`]
+            );
+
             return NextResponse.json(newItem);
         }
 
@@ -140,7 +146,57 @@ export async function POST(request: Request) {
                 [newTransaction.id, newTransaction.type, newTransaction.platform, newTransaction.amount, newTransaction.description, newTransaction.processedBy, newTransaction.inventoryId]
             );
 
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, newTransaction.processedBy, 'Record Sale', `Sold item for $${newTransaction.amount} (${newTransaction.platform})`]
+            );
+
             return NextResponse.json({ success: true, transaction: newTransaction, delivery: deliveryData });
+        }
+
+        if (action === 'bulk_import') {
+            const { bulkData, platform, purchasePrice, namePrefix } = body;
+            const lines = bulkData.split('\n');
+            const created = [];
+
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                // Simple parsing: user:pass or user:pass:email
+                const parts = line.trim().split(':');
+                const username = parts[0]?.trim();
+                const password = parts[1]?.trim();
+                const email = parts[2]?.trim() || '';
+
+                if (!username || !password) continue;
+
+                const newItem = {
+                    id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                    name: namePrefix || `${platform} Account`,
+                    platform: platform,
+                    purchasePrice: Number(purchasePrice) || 0,
+                    status: 'In Stock',
+                    accountDetails: JSON.stringify({
+                        username,
+                        password,
+                        email,
+                        extraInfo: 'Bulk Imported'
+                    })
+                };
+
+                await query(
+                    "INSERT INTO inventory (id, name, platform, purchasePrice, status, accountDetails) VALUES (?, ?, ?, ?, ?, ?)",
+                    [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails]
+                );
+                created.push(newItem);
+            }
+
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Bulk Import', `Imported ${created.length} accounts for ${platform}`]
+            );
+
+            return NextResponse.json({ success: true, count: created.length });
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
