@@ -57,7 +57,7 @@ export default function AdminDashboard() {
         extraInfo?: string;
     }>({ name: '', platform: 'Z2U', purchasePrice: '' });
     const [showAddPost, setShowAddPost] = useState(false);
-    const [newPost, setNewPost] = useState({ content: '', platform: 'Twitter' });
+    const [newPost, setNewPost] = useState<{ content: string; platforms: string[] }>({ content: '', platforms: ['All'] });
     const [newSale, setNewSale] = useState({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
     const [deliveryLink, setDeliveryLink] = useState('');
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
             body: JSON.stringify({ action: 'create', ...newPost, staffName: 'Admin' })
         });
         setShowAddPost(false);
-        setNewPost({ content: '', platform: 'Twitter' });
+        setNewPost({ content: '', platforms: ['All'] });
         fetchData();
     };
 
@@ -620,7 +620,7 @@ export default function AdminDashboard() {
                                         <p style={{ marginBottom: '1rem', color: '#eee' }}>{post.content}</p>
 
                                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                                            {post.platform === 'All' || post.platform === 'Twitter' ? (
+                                            {(post.platform && (post.platform.includes('All') || post.platform.includes('Twitter'))) ? (
                                                 <a
                                                     href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`}
                                                     target="_blank"
@@ -631,14 +631,14 @@ export default function AdminDashboard() {
                                                 </a>
                                             ) : null}
 
-                                            {post.platform === 'All' || post.platform === 'Facebook' || post.platform === 'LinkedIn' ? (
+                                            {(post.platform && (post.platform.includes('All') || post.platform.includes('Facebook') || post.platform.includes('LinkedIn'))) ? (
                                                 <button
                                                     className="btn btn-outline"
                                                     style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(post.content);
-                                                        alert('Content copied! Ready to paste on Facebook/LinkedIn.');
                                                     }}
+                                                    title="Click to Copy"
                                                 >
                                                     📋 Copy for FB/LinkedIn
                                                 </button>
@@ -656,15 +656,25 @@ export default function AdminDashboard() {
                             <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
                                 <h3>Draft Social Post</h3>
                                 <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <select className="input-field" value={newPost.platform} onChange={e => setNewPost({ ...newPost, platform: e.target.value })} style={{ flex: 1 }}>
-                                            <option value="Twitter">Twitter / X</option>
-                                            <option value="Facebook">Facebook</option>
-                                            <option value="Instagram">Instagram</option>
-                                            <option value="LinkedIn">LinkedIn</option>
-                                            <option value="Telegram">Telegram Channel</option>
-                                            <option value="All">All Platforms (Broadcast)</option>
-                                        </select>
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                            {['All', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                                <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: newPost.platforms.includes(p) ? '1px solid #00ff88' : '1px solid transparent' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newPost.platforms.includes(p)}
+                                                        onChange={e => {
+                                                            const current = newPost.platforms;
+                                                            if (e.target.checked) setNewPost({ ...newPost, platforms: [...current, p] });
+                                                            else setNewPost({ ...newPost, platforms: current.filter(x => x !== p) });
+                                                        }}
+                                                    />
+                                                    <span style={{ color: newPost.platforms.includes(p) ? '#00ff88' : '#ccc', fontSize: '0.9rem' }}>
+                                                        {p === 'All' ? 'All (Broadcast)' : p}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                     <textarea placeholder="Post Content (Description, Hashtags...)" className="input-field" style={{ height: '100px' }} value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} required />
                                     <div style={{ display: 'flex', gap: '1rem' }}>

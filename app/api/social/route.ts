@@ -16,11 +16,8 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        // Simulating Posting Logic (Telegram/FB/Twitter integration remains same as before conceptually, but saving to DB now)
-        // Note: The logic to actually CALL external APIs (Telegram/FB) needs to be preserved or re-added.
-        // For brevity in migration, I will focus on the DB Save part, but I should copy the API call logic from previous file if possible.
-        // The user asked to "update all data saved to our database".
-        // I will re-implement the Telegram Sending logic here quickly since I have it fresh in context.
+        // Support multi-select
+        const platforms = Array.isArray(body.platforms) ? body.platforms : [body.platform || 'All'];
 
         // Get Settings for API Keys
         const settingsRes: any = await query("SELECT * FROM settings");
@@ -30,7 +27,7 @@ export async function POST(request: Request) {
         const autoPostLog: string[] = [];
 
         // Telegram Sending Logic
-        if ((body.platform === 'Telegram' || body.platform === 'All') && settings.telegram_bot_token && settings.telegram_chat_id) {
+        if ((platforms.includes('Telegram') || platforms.includes('All')) && settings.telegram_bot_token && settings.telegram_chat_id) {
             try {
                 await fetch(`https://api.telegram.org/bot${settings.telegram_bot_token}/sendMessage`, {
                     method: 'POST',
@@ -49,9 +46,9 @@ export async function POST(request: Request) {
         const newPost = {
             id: `post_${Date.now()}`,
             content: body.content,
-            platform: body.platform,
+            platform: platforms.join(', '),
             status: 'Posted',
-            date: new Date().toISOString() // SQL conversion might happen auto or need formatting
+            date: new Date().toISOString()
         };
 
         // Use NOW() for SQL date
