@@ -222,8 +222,8 @@ export default function AdminDashboard() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'add_inventory', ...newItem })
         });
-        alert('Item Added');
         setShowAddInv(false);
+        setNewItem({ name: '', platform: 'Z2U', purchasePrice: '', username: '', password: '', email: '', extraInfo: '' });
         fetchData();
     };
 
@@ -234,8 +234,8 @@ export default function AdminDashboard() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'record_sale', ...newSale })
         });
-        alert('Sale Recorded');
         setShowRecordSale(false);
+        setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
         fetchData();
     };
 
