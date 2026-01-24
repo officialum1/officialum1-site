@@ -70,6 +70,9 @@ export default function AdminDashboard() {
     const [bulkData, setBulkData] = useState('');
     const [logs, setLogs] = useState<any[]>([]);
 
+    // View Mode for Inventory
+    const [viewMode, setViewMode] = useState<'summary' | 'list'>('summary');
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -535,30 +538,71 @@ export default function AdminDashboard() {
                         )}
 
                         <div style={{ marginTop: '2rem' }}>
-                            <h2 style={{ marginBottom: '1rem' }}>📦 Inventory Stock</h2>
-                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                        <tr>
-                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
-                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {inventory.map((item: any) => (
-                                            <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <td style={{ padding: '1rem' }}>{item.name}</td>
-                                                <td style={{ padding: '1rem' }}>{item.platform}</td>
-                                                <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
-                                                <td style={{ padding: '1rem' }}><span style={{ color: item.status === 'In Stock' ? '#00ff88' : '#aaa' }}>{item.status}</span></td>
-                                            </tr>
-                                        ))}
-                                        {inventory.length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
-                                    </tbody>
-                                </table>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ margin: 0 }}>📦 Inventory Stock</h2>
+                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
+                                    <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
+                                    <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
+                                </div>
                             </div>
+
+                            {viewMode === 'summary' ? (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                    {Array.from(new Set(inventory.map(i => i.name))).map(name => {
+                                        const items = inventory.filter(i => i.name === name);
+                                        const inStock = items.filter(i => i.status === 'In Stock').length;
+                                        const sold = items.filter(i => i.status !== 'In Stock').length;
+                                        const platform = items[0]?.platform || 'Unknown';
+
+                                        return (
+                                            <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: inStock > 0 ? 'rgba(0,255,136,0.2)' : 'rgba(255,68,68,0.2)', color: inStock > 0 ? '#00ff88' : '#ff4444', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                    {inStock > 0 ? 'ACTIVE' : 'SOLD OUT'}
+                                                </div>
+                                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
+                                                <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
+
+                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', alignItems: 'center', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                                                    <div style={{ textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available</div>
+                                                    </div>
+                                                    <div style={{ width: '1px', height: '100%', background: '#333' }}></div>
+                                                    <div style={{ textAlign: 'center' }}>
+                                                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#666' }}>{sold}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Sold</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    {inventory.length === 0 && <div style={{ color: '#666' }}>No inventory items found.</div>}
+                                </div>
+                            ) : (
+                                <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                        <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                            <tr>
+                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
+                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
+                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
+                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {inventory.map((item: any) => (
+                                                <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '1rem' }}>{item.name}</td>
+                                                    <td style={{ padding: '1rem' }}>{item.platform}</td>
+                                                    <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
+                                                    <td style={{ padding: '1rem' }}><span style={{ color: item.status === 'In Stock' ? '#00ff88' : '#aaa' }}>{item.status}</span></td>
+                                                </tr>
+                                            ))}
+                                            {inventory.length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
