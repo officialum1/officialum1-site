@@ -62,6 +62,8 @@ export default function AdminDashboard() {
     const [deliveryLink, setDeliveryLink] = useState('');
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [showAddFunds, setShowAddFunds] = useState(false);
+    const [fundForm, setFundForm] = useState({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
 
     useEffect(() => {
         fetchData();
@@ -236,6 +238,18 @@ export default function AdminDashboard() {
         });
         setShowRecordSale(false);
         setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
+        fetchData();
+    };
+
+    const handleAddFunds = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await fetch('/api/finance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_funds', ...fundForm, staffName: 'Admin' })
+        });
+        setShowAddFunds(false);
+        setFundForm({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
         fetchData();
     };
 
@@ -463,66 +477,152 @@ export default function AdminDashboard() {
                 )}
 
                 {/* SALES TAB */}
+                {/* SALES / FINANCE TAB */}
                 {activeTab === 'sales' && (
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                        <h2 style={{ marginBottom: '1.5rem', color: '#ffd700' }}>💰 Sales History</h2>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                <tr>
-                                    <th style={{ padding: '1rem' }}>Description</th>
-                                    <th style={{ padding: '1rem' }}>Platform</th>
-                                    <th style={{ padding: '1rem' }}>Processed By</th>
-                                    <th style={{ padding: '1rem' }}>Date</th>
-                                    <th style={{ padding: '1rem' }}>Amount</th>
-                                    <th style={{ padding: '1rem' }}>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
-                                    <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem' }}>{sale.description}</td>
-                                        <td style={{ padding: '1rem' }}>{sale.platform}</td>
-                                        <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
-                                        <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
-                                        <td style={{ padding: '1rem', color: '#00ff88', fontWeight: 'bold' }}>+${Number(sale.amount).toFixed(2)}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            {sale.deliveryToken ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    <button
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
-                                                            setCopiedId(sale.id);
-                                                            setTimeout(() => setCopiedId(null), 2000);
-                                                        }}
-                                                        style={{
-                                                            background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
-                                                            border: '1px solid #00ff88',
-                                                            color: '#00ff88',
-                                                            borderRadius: '4px',
-                                                            padding: '0.4rem 0.8rem',
-                                                            cursor: 'pointer',
-                                                            fontSize: '0.8rem',
-                                                            minWidth: '100px',
-                                                            transition: 'all 0.2s'
-                                                        }}
-                                                    >
-                                                        {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
-                                                    </button>
-                                                    <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                                                        👁️ {sale.deliveryViews || 0}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span style={{ color: '#666', fontSize: '0.8rem' }}>Direct Sale</span>
-                                            )}
-                                        </td>
+                    <>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                            {/* PKR Wallet */}
+                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                    <span style={{ color: '#ccc' }}>Meezan Bank</span>
+                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#ccc' }}>UBL / Other</span>
+                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            {/* USD Wallet */}
+                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
+                                <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                    <span style={{ color: '#ccc' }}>Z2U</span>
+                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                    <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
+                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span style={{ color: '#ccc' }}>RedotPay</span>
+                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'RedotPay').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ color: '#ffd700', margin: 0 }}>💰 Transaction History</h2>
+                                <button onClick={() => setShowAddFunds(true)} className="btn btn-primary" style={{ background: 'rgba(255,255,255,0.1)' }}>+ Add Funds / Adjustment</button>
+                            </div>
+
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                    <tr>
+                                        <th style={{ padding: '1rem' }}>Description</th>
+                                        <th style={{ padding: '1rem' }}>Source</th>
+                                        <th style={{ padding: '1rem' }}>By</th>
+                                        <th style={{ padding: '1rem' }}>Date</th>
+                                        <th style={{ padding: '1rem' }}>Amount</th>
+                                        <th style={{ padding: '1rem' }}>Action</th>
                                     </tr>
-                                )) : (
-                                    <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No sales recorded yet.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
+                                        <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '1rem' }}>{sale.description}</td>
+                                            <td style={{ padding: '1rem' }}>{sale.platform}</td>
+                                            <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
+                                            <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                            <td style={{ padding: '1rem', color: Number(sale.amount) >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
+                                                {sale.currency === 'PKR' ? '₨ ' : '$ '}
+                                                {Number(sale.amount).toLocaleString()}
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                {sale.deliveryToken ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
+                                                                setCopiedId(sale.id);
+                                                                setTimeout(() => setCopiedId(null), 2000);
+                                                            }}
+                                                            style={{
+                                                                background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
+                                                                border: '1px solid #00ff88',
+                                                                color: '#00ff88',
+                                                                borderRadius: '4px',
+                                                                padding: '0.4rem 0.8rem',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem',
+                                                                minWidth: '100px',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                        >
+                                                            {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
+                                                        </button>
+                                                        <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                                                            👁️ {sale.deliveryViews || 0}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : 'Direct Sale'}</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Add Funds Modal */}
+                        {showAddFunds && (
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
+                                <h3 style={{ marginBottom: '1.5rem' }}>Add / Subtract Funds</h3>
+                                <form onSubmit={handleAddFunds} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform / Bank</label>
+                                        <select className="input-field" value={fundForm.platform} onChange={e => {
+                                            const p = e.target.value;
+                                            const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
+                                            setFundForm({ ...fundForm, platform: p, currency: c });
+                                        }} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                            <option value="Meezan">Meezan Bank</option>
+                                            <option value="UBL">UBL</option>
+                                            <option value="Z2U">Z2U</option>
+                                            <option value="PlayerUp">PlayerUp</option>
+                                            <option value="G2G">G2G</option>
+                                            <option value="RedotPay">RedotPay</option>
+                                            <option value="Direct">Cash / Other</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Amount ({fundForm.currency})</label>
+                                        <input type="number" required className="input-field" value={fundForm.amount} onChange={e => setFundForm({ ...fundForm, amount: e.target.value })} placeholder="e.g. 5000 or -50" style={{ width: '100%' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Currency</label>
+                                        <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                            <option value="USD">USD ($)</option>
+                                            <option value="PKR">PKR (₨)</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ gridColumn: 'span 2' }}>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Description</label>
+                                        <input type="text" className="input-field" placeholder="Reason for adjustment..." value={fundForm.description} onChange={e => setFundForm({ ...fundForm, description: e.target.value })} style={{ width: '100%' }} />
+                                    </div>
+                                    <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                        <button type="button" onClick={() => setShowAddFunds(false)} className="btn btn-outline">Cancel</button>
+                                        <button type="submit" className="btn btn-primary">Save Transaction</button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* LEADS TAB */}
