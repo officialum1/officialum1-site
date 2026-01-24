@@ -420,21 +420,41 @@ export default function AdminDashboard() {
                                     ) : (
                                         <div style={{ gridColumn: 'span 2' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                                <label style={{ display: 'block', color: '#ccc' }}>Paste Accounts (One per line)</label>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const element = document.createElement("a");
-                                                        const file = new Blob(["# Format: username:password OR username:password:email\n# Example:\nuser1:pass123\ngamer2:hunter2:recovery@email.com\npro_player:secret99"], { type: 'text/plain' });
-                                                        element.href = URL.createObjectURL(file);
-                                                        element.download = "accounts_template.txt";
-                                                        document.body.appendChild(element);
-                                                        element.click();
-                                                    }}
-                                                    style={{ background: 'transparent', border: 'none', color: '#00ff88', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
-                                                >
-                                                    ⬇️ Download Template
-                                                </button>
+                                                <label style={{ display: 'block', color: '#ccc' }}>Paste Accounts / Upload File</label>
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <label style={{ cursor: 'pointer', color: '#00ff88', fontSize: '0.8rem', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                        📂 Upload File
+                                                        <input
+                                                            type="file"
+                                                            accept=".txt,.csv"
+                                                            style={{ display: 'none' }}
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (!file) return;
+                                                                const reader = new FileReader();
+                                                                reader.onload = (ev) => {
+                                                                    const text = ev.target?.result as string;
+                                                                    setBulkData(text);
+                                                                };
+                                                                reader.readAsText(file);
+                                                            }}
+                                                        />
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const element = document.createElement("a");
+                                                            const file = new Blob(["# Format: username:password OR username:password:email\n# Example:\nuser1:pass123\ngamer2:hunter2:recovery@email.com\npro_player:secret99"], { type: 'text/plain' });
+                                                            element.href = URL.createObjectURL(file);
+                                                            element.download = "accounts_template.txt";
+                                                            document.body.appendChild(element);
+                                                            element.click();
+                                                        }}
+                                                        style={{ background: 'transparent', border: 'none', color: '#888', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                                                    >
+                                                        ⬇️ Download Template
+                                                    </button>
+                                                </div>
                                             </div>
                                             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>Format: <code>username:password</code> or <code>username:password:email</code></p>
                                             <textarea value={bulkData} onChange={e => setBulkData(e.target.value)} className="input-field" style={{ height: '150px', fontFamily: 'monospace', width: '100%' }} placeholder="user1:pass1&#10;user2:pass2:email2" />
