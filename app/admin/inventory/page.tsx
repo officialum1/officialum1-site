@@ -61,6 +61,7 @@ export default function AdminDashboard() {
     const [newSale, setNewSale] = useState({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
     const [deliveryLink, setDeliveryLink] = useState('');
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -488,10 +489,24 @@ export default function AdminDashboard() {
                                             {sale.deliveryToken ? (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                                     <button
-                                                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`); alert("Link Copied!"); }}
-                                                        style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid #00ff88', color: '#00ff88', borderRadius: '4px', padding: '0.4rem 0.8rem', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
+                                                            setCopiedId(sale.id);
+                                                            setTimeout(() => setCopiedId(null), 2000);
+                                                        }}
+                                                        style={{
+                                                            background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
+                                                            border: '1px solid #00ff88',
+                                                            color: '#00ff88',
+                                                            borderRadius: '4px',
+                                                            padding: '0.4rem 0.8rem',
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.8rem',
+                                                            minWidth: '100px',
+                                                            transition: 'all 0.2s'
+                                                        }}
                                                     >
-                                                        🔗 Copy Link
+                                                        {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
                                                     </button>
                                                     <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
                                                         👁️ {sale.deliveryViews || 0}
