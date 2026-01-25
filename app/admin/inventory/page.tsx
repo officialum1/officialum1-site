@@ -400,6 +400,7 @@ export default function AdminDashboard() {
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem', overflowX: 'auto' }}>
                     {[
                         { id: 'inventory', label: '📦 Orders' },
+                        { id: 'stock', label: '📊 Stock' },
                         { id: 'catalog', label: '🛍️ Catalog' },
                         { id: 'sales', label: '💰 Finance' },
                         { id: 'leads', label: '👥 Leads' },
@@ -519,8 +520,13 @@ export default function AdminDashboard() {
                             </div>
                         )}
 
-                        {/* RESTORED: Inventory & Manual Sales */}
-                        <div style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    </div>
+                )}
+
+                {/* STOCK TAB */}
+                {activeTab === 'stock' && (
+                    <div className="FadeIn">
+                        <div style={{ marginBottom: '2rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                 <div>
                                     <h2 style={{ fontSize: '1.4rem', margin: 0 }}>📦 Stock Inventory</h2>
