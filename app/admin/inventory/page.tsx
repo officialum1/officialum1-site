@@ -289,7 +289,15 @@ export default function AdminDashboard() {
         // Parsing Logic for Single Box
         if (newItem.credentials) {
             const text = newItem.credentials.trim();
-            if (text.includes(':')) {
+
+            if (text.includes('\n')) {
+                // Multi-line / Complex Format
+                finalExtra = text;
+                finalPass = 'See Details';
+                // Try to extract a username if possible, otherwise generic
+                const firstLine = text.split('\n')[0];
+                finalUser = firstLine.length < 30 ? firstLine : 'Digital Asset';
+            } else if (text.includes(':')) {
                 const parts = text.split(':');
                 finalUser = parts[0];
                 finalPass = parts[1];

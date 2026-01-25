@@ -77,27 +77,51 @@ export default function DeliveryPage() {
                     </div>
 
                     <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px' }}>
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Login / Username</label>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
-                                {order.details.username}
+                        {(order.details.extraInfo && order.details.extraInfo.includes('\n')) ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {order.details.extraInfo.split('\n').map((line: string, i: number) => {
+                                    const isValue = line.trim().startsWith(':');
+                                    return (
+                                        <div key={i} style={{
+                                            padding: isValue ? '1rem' : '0.5rem 0',
+                                            background: isValue ? '#000' : 'transparent',
+                                            color: isValue ? '#00ff88' : '#888',
+                                            borderRadius: '8px',
+                                            fontWeight: isValue ? 'bold' : 'normal',
+                                            fontSize: isValue ? '1.1rem' : '0.9rem',
+                                            userSelect: 'all',
+                                            marginTop: isValue ? '0' : '0.5rem'
+                                        }}>
+                                            {isValue ? line.replace(/^:\s*/, '') : line}
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        </div>
-
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Password</label>
-                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px', color: '#00ff88' }}>
-                                {order.details.password}
-                            </div>
-                        </div>
-
-                        {order.details.email && (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Email Access</label>
-                                <div style={{ fontSize: '1rem', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
-                                    {order.details.email}
+                        ) : (
+                            <>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Login / Username</label>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
+                                        {order.details.username}
+                                    </div>
                                 </div>
-                            </div>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Password</label>
+                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px', color: '#00ff88' }}>
+                                        {order.details.password}
+                                    </div>
+                                </div>
+
+                                {order.details.email && (
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Email Access</label>
+                                        <div style={{ fontSize: '1rem', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
+                                            {order.details.email}
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {order.details.extraInfo && (
