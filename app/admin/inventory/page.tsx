@@ -413,6 +413,19 @@ export default function AdminDashboard() {
         } catch (e) { alert('Network Error'); }
     };
 
+    const handleCleanupDescriptions = async () => {
+        if (!confirm('This will remove "Imported from Z2U store" from all products and replace it with a professional description. Proceed?')) return;
+        try {
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cleanup_descriptions' })
+            });
+            fetchData();
+            alert('Descriptions Cleaned!');
+        } catch { alert('Failed to clean descriptions'); }
+    };
+
     const handleDeleteProduct = async (id: number) => {
         if (!confirm('Are you sure you want to delete this product from the shop?')) return;
         try {
@@ -993,7 +1006,10 @@ export default function AdminDashboard() {
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h2 style={{ margin: 0 }}>🛍️ Shop Product Catalog</h2>
-                                <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <button onClick={handleCleanupDescriptions} className="btn btn-outline" style={{ borderStyle: 'dashed', opacity: 0.7 }}>🧹 Clean Descriptions</button>
+                                    <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
+                                </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>

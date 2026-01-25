@@ -17,6 +17,11 @@ export async function POST(req: Request) {
 
         if (body.action === 'delete') {
             await query("DELETE FROM products WHERE id = ?", [body.id]);
+        } else if (body.action === 'cleanup_descriptions') {
+            await query(
+                "UPDATE products SET description = ? WHERE description LIKE ?",
+                ['Premium quality account verified and ready for use.', '%Imported from Z2U store%']
+            );
         } else if (body.action === 'bulk_import') {
             const { bulkData } = body;
             const lines = bulkData.split('\n');
