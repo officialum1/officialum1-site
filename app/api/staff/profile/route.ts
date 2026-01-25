@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
     try {
@@ -8,7 +9,8 @@ export async function POST(request: Request) {
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
         if (password) {
-            await query("UPDATE employees SET email = ?, password = ? WHERE id = ?", [email, password, id]);
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await query("UPDATE employees SET email = ?, password = ? WHERE id = ?", [email, hashedPassword, id]);
         } else {
             await query("UPDATE employees SET email = ? WHERE id = ?", [email, id]);
         }

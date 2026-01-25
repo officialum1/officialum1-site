@@ -15,14 +15,15 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "User already exists" }, { status: 400 });
         }
 
-        // 3. Generate Codes
+        // 3. Generate Codes & ID
+        const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7).toUpperCase()}`;
         const newRefCode = Math.random().toString(36).substring(7).toUpperCase();
         const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
         // 4. Create User (Including Verification Token and is_verified=False)
-        const result: any = await query(
-            "INSERT INTO users (email, password, telegram, referral_code, referred_by, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, FALSE)",
-            [email, password, telegram || '', newRefCode, referralCode || null, verificationToken]
+        await query(
+            "INSERT INTO users (id, email, password, telegram, role, referral_code, referred_by, verification_token, is_verified) VALUES (?, ?, ?, ?, 'buyer', ?, ?, ?, FALSE)",
+            [userId, email, password, telegram || '', newRefCode, referralCode || null, verificationToken]
         );
 
         // 5. Send Verification Email
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             user: {
-                id: result.insertId,
+                id: userId,
                 email,
                 telegram: telegram || '',
                 referralCode: newRefCode

@@ -33,7 +33,12 @@ export async function initDB() {
             email VARCHAR(255) UNIQUE NOT NULL,
             password VARCHAR(255),
             telegram VARCHAR(255),
-            role VARCHAR(50) DEFAULT 'user', -- 'admin' or 'user'
+            role VARCHAR(50) DEFAULT 'buyer', -- 'admin', 'buyer', or 'seller'
+            referral_code VARCHAR(50),
+            referred_by VARCHAR(50),
+            verification_token VARCHAR(255),
+            is_verified BOOLEAN DEFAULT FALSE,
+            reset_token VARCHAR(100),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);

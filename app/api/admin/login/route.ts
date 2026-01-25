@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import bcrypt from 'bcryptjs';
 
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "famemake_secure_2024";
 
@@ -10,17 +11,38 @@ export async function POST(request: NextRequest) {
         const { password } = body;
 
         // Check DB for custom password
-        let adminPass = DEFAULT_ADMIN_PASSWORD;
+        let storedPass = DEFAULT_ADMIN_PASSWORD;
+        let isDefault = true;
+
         try {
             const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'admin_password'");
             if (rows.length > 0 && rows[0].setting_value) {
-                adminPass = rows[0].setting_value;
+                storedPass = rows[0].setting_value;
+                isDefault = false;
             }
         } catch (e) {
             // Table might not exist yet if initDB hasn't run, fallback to default
         }
 
-        if (password === adminPass) {
+        let isValid = false;
+
+        if (isDefault) {
+            // Default is always plain text
+            if (password === storedPass) isValid = true;
+        } else {
+            // Check if it matches hash
+            const isMatch = await bcrypt.compare(password, storedPass).catch(() => false);
+            if (isMatch) {
+                isValid = true;
+            } else if (password === storedPass) {
+                // Fallback: It was stored as plain text, match and migrate
+                isValid = true;
+                const newHash = await bcrypt.hash(password, 10);
+                await query("UPDATE settings SET setting_value = ? WHERE setting_key = 'admin_password'", [newHash]);
+            }
+        }
+
+        if (isValid) {
             const response = NextResponse.json({ success: true });
             response.cookies.set('admin_token', 'authenticated_session_v1', {
                 httpOnly: true,
@@ -33,6 +55,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
     }
 }

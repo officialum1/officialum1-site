@@ -14,27 +14,19 @@ export default function StaffLogin() {
         setLoading(true);
 
         try {
-            // Fetch employees to verify email & password
-            const res = await fetch('/api/hr/employees');
-            const employees = await res.json();
+            const res = await fetch('/api/staff/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
 
-            // Find staff by email
-            const validStaff = employees.find((emp: any) => emp.email.toLowerCase() === email.toLowerCase());
-
-            if (validStaff) {
-                // Check Password (MVP: Direct comparison)
-                // If existing staff has no password, allow temporary access or force fail.
-                // WE DECIDE: Force Fail effectively, or check if password matches.
-
-                if (validStaff.password === password) {
-                    // Success
-                    localStorage.setItem('staff_user', JSON.stringify(validStaff));
-                    window.location.href = '/staff/dashboard';
-                } else {
-                    alert('Invalid Credentials. Please check password (or ask Admin to set one).');
-                }
+            if (data.success) {
+                // Success
+                localStorage.setItem('staff_user', JSON.stringify(data.user));
+                window.location.href = '/staff/dashboard';
             } else {
-                alert('Invalid Staff Email. Please ask Admin to add you.');
+                alert(data.message || 'Login failed');
             }
         } catch (error) {
             console.error('Login error', error);

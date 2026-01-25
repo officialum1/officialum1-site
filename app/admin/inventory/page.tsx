@@ -84,13 +84,50 @@ export default function AdminDashboard() {
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [fulfillDetails, setFulfillDetails] = useState('');
 
+    // Tools State
+    const [toolUrl, setToolUrl] = useState('');
+    const [toolMetrics, setToolMetrics] = useState<any>(null);
+    const [toolLoading, setToolLoading] = useState(false);
+    const [blogTopic, setBlogTopic] = useState('');
+    const [blogLoading, setBlogLoading] = useState(false);
+
+    // RESTORED: Website Content State
+    const [manualBlogs, setManualBlogs] = useState<any[]>([]);
+    const [pages, setPages] = useState<Record<string, string>>({});
+    const [services, setServices] = useState<any[]>([]);
+    const [projects, setProjects] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [rentals, setRentals] = useState<any[]>([]);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [promoCodes, setPromoCodes] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+
+    // RESTORED: Form States
+    const [blogForm, setBlogForm] = useState({ title: '', excerpt: '', content: '', category: '', image: '' });
+    const [websiteTab, setWebsiteTab] = useState('blogs');
+    const [marketingTab, setMarketingTab] = useState('all');
+    const [pageKey, setPageKey] = useState('terms');
+    const [pageContent, setPageContent] = useState('');
+    const [serviceForm, setServiceForm] = useState({ title: '', desc: '', icon: '' });
+    const [projectForm, setProjectForm] = useState({ title: '', category: '', description: '', image: '' });
+    const [rentalForm, setRentalForm] = useState({ domain: '', niche: '', price: '', traffic: '', status: 'Available', image: '' });
+    const [promoForm, setPromoForm] = useState({ code: '', discount: '' });
+    const [reviewForm, setReviewForm] = useState({ name: '', role: '', review: '', rating: 5 });
+
+    // User Editing State
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [showUserEdit, setShowUserEdit] = useState(false);
+    const [userForm, setUserForm] = useState({ email: '', password: '', telegram: '', role: 'buyer' });
+
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
         try {
-            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes] = await Promise.all([
+            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
+                blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes
+            ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
                 fetch('/api/leads'),
@@ -98,10 +135,18 @@ export default function AdminDashboard() {
                 fetch('/api/admin/settings'),
                 fetch('/api/hr/employees'),
                 fetch('/api/admin/logs'),
-                // We should also fetch generic settings table if we want to show current admin email, but keeping it simple for now (write-only for password)
-
                 fetch('/api/products'),
-                fetch('/api/admin/orders')
+                fetch('/api/admin/orders'),
+                // Restored Fetches
+                fetch('/api/blogs'),
+                fetch('/api/pages'),
+                fetch('/api/services'),
+                fetch('/api/projects'),
+                fetch('/api/testimonials?all=true'),
+                fetch('/api/rentals'),
+                fetch('/api/messages'),
+                fetch('/api/promocodes'),
+                fetch('/api/admin/users')
             ]);
 
             const invData = await invRes.json();
@@ -131,6 +176,18 @@ export default function AdminDashboard() {
             setCatalog(catData);
             setOrders(ordersData);
             setTickets(ticketData);
+
+            // Set Restored Data with Array Validation
+            try { const b = await blogsRes.json(); setManualBlogs(Array.isArray(b) ? b : []); } catch { setManualBlogs([]); }
+            try { setPages(await pagesRes.json()); } catch { setPages({}); }
+            try { const s = await servRes.json(); setServices(Array.isArray(s) ? s : []); } catch { setServices([]); }
+            try { const p = await projRes.json(); setProjects(Array.isArray(p) ? p : []); } catch { setProjects([]); }
+            try { const r = await revRes.json(); setReviews(Array.isArray(r) ? r : []); } catch { setReviews([]); }
+            try { const rt = await rentRes.json(); setRentals(Array.isArray(rt) ? rt : []); } catch { setRentals([]); }
+            try { const m = await msgRes.json(); setMessages(Array.isArray(m) ? m : []); } catch { setMessages([]); }
+            try { const pc = await promoRes.json(); setPromoCodes(Array.isArray(pc) ? pc : []); } catch { setPromoCodes([]); }
+            try { const u = await usersRes.json(); setUsers(Array.isArray(u) ? u : []); } catch { setUsers([]); }
+
             calculateStats(balData, empData, invData);
         } catch (e) {
             console.error("Failed to load admin data", e);
@@ -180,6 +237,32 @@ export default function AdminDashboard() {
 
         if (newStats.total > 0) newStats.margin = (newStats.profit / newStats.total) * 100;
         setStats(newStats);
+    };
+
+    const handleUpdateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                body: JSON.stringify({ id: selectedUser.id, ...userForm })
+            });
+            if (res.ok) {
+                alert('User updated successfully');
+                setShowUserEdit(false);
+                fetchData();
+            }
+        } catch (e) { alert('Update failed'); }
+    };
+
+    const handleResendUserEmail = async (userId: string, email: string, action: string) => {
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'POST',
+                body: JSON.stringify({ action, userId, email })
+            });
+            if (res.ok) alert('Communication sent successfully');
+            else alert('Failed to send email. Check logs.');
+        } catch (e) { alert('Failed to send email'); }
     };
 
     const handleAddEmployee = async (e: React.FormEvent) => {
@@ -249,6 +332,36 @@ export default function AdminDashboard() {
             console.error(e);
             alert('Error updating profile');
         }
+    };
+
+    const handleBacklinkCheck = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setToolLoading(true); setToolMetrics(null);
+        try {
+            const res = await fetch('/api/backlinks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: toolUrl, email: 'admin@internal.com' })
+            });
+            setToolMetrics(await res.json());
+        } catch { alert('Check failed'); }
+        finally { setToolLoading(false); }
+    };
+
+    const handleGenerateBlog = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBlogLoading(true);
+        try {
+            const res = await fetch('/api/admin/generate-blog', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic: blogTopic })
+            });
+            const data = await res.json();
+            if (data.success) alert(`Blog Published: ${data.title}`);
+            else alert('Failed: ' + data.error);
+        } catch { alert('Analysis failed'); }
+        finally { setBlogLoading(false); }
     };
 
     const handleSaveSettings = async (e: React.FormEvent) => {
@@ -371,6 +484,60 @@ export default function AdminDashboard() {
         fetchData();
     };
 
+    /* --- RESTORED HANDLERS --- */
+    const handlePromoSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/promocodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(promoForm) });
+            if (res.ok) { setPromoForm({ code: '', discount: '' }); fetchData(); alert('Promo Created'); }
+        } catch { }
+    };
+    const handleDeletePromo = async (id: any) => {
+        if (!confirm('Delete?')) return;
+        await fetch('/api/promocodes', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        fetchData();
+    };
+
+    const handleBlogSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await fetch('/api/blogs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...blogForm, readTime: '5 min read' }) });
+            setBlogForm({ title: '', excerpt: '', content: '', category: '', image: '' }); fetchData(); alert('Blog Posted');
+        } catch { }
+    };
+
+    const handlePageSave = async () => {
+        try {
+            await fetch('/api/pages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ page: pageKey, content: pageContent }) });
+            alert('Page Updated');
+            setPages(prev => ({ ...prev, [pageKey]: pageContent }));
+        } catch { }
+    };
+
+    const handleServiceSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try { await fetch('/api/services', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(serviceForm) }); setServiceForm({ title: '', desc: '', icon: '' }); fetchData(); } catch { }
+    };
+    const handleDeleteService = async (id: any) => { await fetch('/api/services', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); fetchData(); };
+
+    const handleProjectSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try { await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectForm) }); setProjectForm({ title: '', category: '', description: '', image: '' }); fetchData(); } catch { }
+    };
+    const handleDeleteProject = async (id: any) => { await fetch('/api/projects', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); fetchData(); };
+
+    const handleRentalSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try { await fetch('/api/rentals', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rentalForm) }); setRentalForm({ domain: '', niche: '', price: '', traffic: '', status: 'Available', image: '' }); fetchData(); } catch { }
+    };
+    const handleDeleteRental = async (id: any) => { await fetch('/api/rentals', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); fetchData(); };
+
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try { await fetch('/api/testimonials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...reviewForm, isAdmin: true }) }); setReviewForm({ name: '', role: '', review: '', rating: 5 }); fetchData(); } catch { }
+    };
+    const handleDeleteReview = async (id: any) => { await fetch('/api/testimonials', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); fetchData(); };
+
     const handleRecordSale = async (e: React.FormEvent) => {
         e.preventDefault();
         await fetch('/api/admin/inventory', {
@@ -423,490 +590,410 @@ export default function AdminDashboard() {
     return (
         <main style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
             <Navbar />
-            <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
+            <div style={{ display: 'flex', paddingTop: '80px', minHeight: '100vh' }}>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-                    <h1 className="text-gradient" style={{ fontSize: '2.5rem' }}>Admin Workspace</h1>
-                    <button onClick={() => { localStorage.removeItem('admin_user'); window.location.href = '/admin/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444' }}>
-                        Logout
-                    </button>
-                </div>
+                {/* SIDEBAR NAVIGATION */}
+                <div style={{
+                    width: '280px',
+                    flexShrink: 0,
+                    padding: '2rem 1rem',
+                    borderRight: '1px solid #222',
+                    background: '#0a0a0a',
+                    position: 'sticky',
+                    top: '80px',
+                    height: 'calc(100vh - 80px)',
+                    overflowY: 'auto'
+                }}>
+                    <h1 className="text-gradient" style={{ fontSize: '1.8rem', marginBottom: '2rem', paddingLeft: '1rem' }}>Admin Workspace</h1>
 
-                {/* Tab Navigation */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem', overflowX: 'auto' }}>
-                    {[
-                        { id: 'inventory', label: '📦 Orders' },
-                        { id: 'stock', label: '📊 Stock' },
-                        { id: 'sell', label: '💸 Sales' },
-                        { id: 'finance', label: '💰 Finance' },
-                        { id: 'catalog', label: '🛍️ Catalog' },
-                        { id: 'leads', label: '👥 Leads' },
-                        { id: 'support', label: '🎫 Support' },
-                        { id: 'marketing', label: '📢 Marketing' },
-                        { id: 'hr', label: '👔 HR' },
-                        { id: 'logs', label: '📜 Logs' },
-                        { id: 'settings', label: '⚙️ Settings' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            style={{
-                                background: activeTab === tab.id ? 'rgba(0,255,136,0.1)' : 'transparent',
-                                border: 'none',
-                                color: activeTab === tab.id ? '#00ff88' : '#888',
-                                fontSize: '1rem',
-                                cursor: 'pointer',
-                                padding: '0.6rem 1.2rem',
-                                borderRadius: '8px',
-                                transition: 'all 0.2s',
-                                fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-                                whiteSpace: 'nowrap'
-                            }}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* INVENTORY TAB */}
-                {/* ORDERS TAB (Formerly Inventory) */}
-                {activeTab === 'inventory' && (
-                    <div className="FadeIn">
-                        <h2 style={{ marginBottom: '1.5rem', fontFamily: 'var(--font-outfit)' }}>📦 Customer Orders</h2>
-
-                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                    <tr>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Order ID</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Product</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Customer</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.map((order: any) => (
-                                        <tr key={order.orderId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1rem' }}>{new Date(order.date).toLocaleDateString()}</td>
-                                            <td style={{ padding: '1rem', fontFamily: 'monospace' }}>#{order.orderId ? order.orderId.slice(-6) : 'N/A'}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div style={{ fontWeight: 'bold' }}>{order.product_name}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{order.platform}</div>
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div>{order.guestEmail || 'Registered User'}</div>
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <span style={{
-                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold',
-                                                    background: order.status === 'completed' ? 'rgba(0,255,136,0.2)' : 'rgba(255,165,0,0.2)',
-                                                    color: order.status === 'completed' ? '#00ff88' : '#ffa500'
-                                                }}>
-                                                    {order.status ? order.status.toUpperCase() : 'PENDING'}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                {order.status !== 'completed' && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedOrder(order);
-                                                            setShowFulfill(true);
-                                                        }}
-                                                        className="btn btn-primary"
-                                                        style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
-                                                    >
-                                                        Fulfill
-                                                    </button>
-                                                )}
-                                                {order.status === 'completed' && <span style={{ color: '#666', fontSize: '0.8rem' }}>Delivered</span>}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {orders.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No orders found yet.</td></tr>}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Fulfill Modal */}
-                        {showFulfill && selectedOrder && (
-                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', width: '500px', maxWidth: '90%' }}>
-                                    <h3 style={{ marginBottom: '1rem' }}>Fulfill Order #{selectedOrder.orderId.slice(-6)}</h3>
-                                    <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>Send delivery details for <b>{selectedOrder.product_name}</b> to <b>{selectedOrder.guestEmail}</b>.</p>
-
-                                    <form onSubmit={handleFulfill}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Credentials / Delivery Info</label>
-                                        <textarea
-                                            className="input-field"
-                                            rows={6}
-                                            placeholder="Enter Email:Password or Download Link here..."
-                                            value={fulfillDetails}
-                                            onChange={e => setFulfillDetails(e.target.value)}
-                                            required
-                                            style={{ width: '100%', marginBottom: '1.5rem', fontFamily: 'monospace' }}
-                                        />
-
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                            <button type="button" onClick={() => setShowFulfill(false)} className="btn btn-outline">Cancel</button>
-                                            <button type="submit" className="btn btn-primary">Complete & Send Email</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
-
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {[
+                            { id: 'inventory', label: '📦 Orders' },
+                            { id: 'stock', label: '📊 Stock' },
+                            { id: 'website', label: '🌐 Website' },
+                            { id: 'sell', label: '💸 Sales' },
+                            { id: 'finance', label: '💰 Finance' },
+                            { id: 'catalog', label: '🛍️ Catalog' },
+                            { id: 'leads', label: '👥 Leads' },
+                            { id: 'users', label: '👤 Buyers' },
+                            { id: 'support', label: '🎫 Support' },
+                            { id: 'promos', label: '🏷️ Promos' },
+                            { id: 'marketing', label: '📢 Marketing' },
+                            { id: 'tools', label: '🛠️ Tools' },
+                            { id: 'hr', label: '👔 Staff & Admins' },
+                            { id: 'logs', label: '📜 Logs' },
+                            { id: 'settings', label: '⚙️ Settings' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
+                                    border: 'none',
+                                    borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
+                                    color: activeTab === tab.id ? '#00ff88' : '#888',
+                                    fontSize: '1rem',
+                                    cursor: 'pointer',
+                                    padding: '0.8rem 1rem',
+                                    textAlign: 'left',
+                                    borderRadius: '0 8px 8px 0',
+                                    transition: 'all 0.2s',
+                                    fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                    width: '100%'
+                                }}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
-                )}
+                </div>
 
-                {/* STOCK TAB */}
-                {activeTab === 'stock' && (
-                    <div className="FadeIn">
-                        <div style={{ marginBottom: '2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <div>
-                                    <h2 style={{ fontSize: '1.4rem', margin: 0 }}>📦 Stock Inventory</h2>
-                                    <p style={{ color: '#666', fontSize: '0.9rem' }}>Manage bulk accounts and manual links.</p>
-                                </div>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => setShowAddInv(true)} className="btn btn-outline">+ Add Item</button>
-                                    <button onClick={() => setShowBulk(true)} className="btn btn-outline">Bulk</button>
+                {/* MAIN CONTENT AREA */}
+                <div style={{ flex: 1, padding: '2rem 3rem', maxWidth: '1600px', overflowX: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
+                        <button onClick={() => { localStorage.removeItem('admin_user'); window.location.href = '/admin/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
+                            Logout
+                        </button>
+                    </div>
 
-                                </div>
-                            </div>
+                    {/* INVENTORY TAB */}
+                    {/* ORDERS TAB (Formerly Inventory) */}
+                    {activeTab === 'inventory' && (
+                        <div className="FadeIn">
+                            <h2 style={{ marginBottom: '1.5rem', fontFamily: 'var(--font-outfit)' }}>📦 Customer Orders</h2>
 
-                            {/* STOCK VIEW TOGGLE */}
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                                    <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
-                                    <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
-                                </div>
-                            </div>
-
-                            {/* Stock Display */}
-                            {viewMode === 'summary' ? (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
-                                        const items = inventory.filter(i => i.name === name);
-                                        const activeItems = items.filter(i => i.status === 'In Stock');
-                                        const inStock = activeItems.length;
-                                        const platform = activeItems[0]?.platform || 'Unknown';
-
-                                        if (inStock === 0) return null;
-
-                                        return (
-                                            <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                                                    ACTIVE
-                                                </div>
-                                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
-                                                <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
-
-                                                <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available Stock</div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    {inventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
-                                </div>
-                            ) : (
-                                <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                            <tr>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                        <tr>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Order ID</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Product</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Customer</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left' }}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orders.map((order: any) => (
+                                            <tr key={order.orderId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem' }}>{new Date(order.date).toLocaleDateString()}</td>
+                                                <td style={{ padding: '1rem', fontFamily: 'monospace' }}>#{order.orderId ? order.orderId.slice(-6) : 'N/A'}</td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <div style={{ fontWeight: 'bold' }}>{order.product_name}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#666' }}>{order.platform}</div>
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <div>{order.guestEmail || 'Registered User'}</div>
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    <span style={{
+                                                        padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                        background: order.status === 'completed' ? 'rgba(0,255,136,0.2)' : 'rgba(255,165,0,0.2)',
+                                                        color: order.status === 'completed' ? '#00ff88' : '#ffa500'
+                                                    }}>
+                                                        {order.status ? order.status.toUpperCase() : 'PENDING'}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    {order.status !== 'completed' && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedOrder(order);
+                                                                setShowFulfill(true);
+                                                            }}
+                                                            className="btn btn-primary"
+                                                            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
+                                                        >
+                                                            Fulfill
+                                                        </button>
+                                                    )}
+                                                    {order.status === 'completed' && <span style={{ color: '#666', fontSize: '0.8rem' }}>Delivered</span>}
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {inventory.filter(i => i.status === 'In Stock').map((item: any) => (
-                                                <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <td style={{ padding: '1rem' }}>{item.name}</td>
-                                                    <td style={{ padding: '1rem' }}>{item.platform}</td>
-                                                    <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
-                                                    <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
-                                                </tr>
-                                            ))}
-                                            {inventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                                        ))}
+                                        {orders.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No orders found yet.</td></tr>}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                            {/* Forms for RESTORED Features */}
-                            {showAddInv && (
-                                <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', marginTop: '2rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ margin: 0 }}>Add Inventory Stock</h3>
-                                    </div>
+                            {/* Fulfill Modal */}
+                            {showFulfill && selectedOrder && (
+                                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px', width: '500px', maxWidth: '90%' }}>
+                                        <h3 style={{ marginBottom: '1rem' }}>Fulfill Order #{selectedOrder.orderId.slice(-6)}</h3>
+                                        <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>Send delivery details for <b>{selectedOrder.product_name}</b> to <b>{selectedOrder.guestEmail}</b>.</p>
 
-                                    <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
-                                        <div style={{ gridColumn: 'span 2' }}><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
-
-                                        <div style={{ gridColumn: 'span 2' }}>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Account Credentials (Paste Full)</label>
+                                        <form onSubmit={handleFulfill}>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Credentials / Delivery Info</label>
                                             <textarea
                                                 className="input-field"
-                                                value={newItem.credentials || ''}
-                                                onChange={e => setNewItem({ ...newItem, credentials: e.target.value })}
-                                                style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
-                                                placeholder="Paste detail here (e.g. user:pass:email or just user:pass)"
+                                                rows={6}
+                                                placeholder="Enter Email:Password or Download Link here..."
+                                                value={fulfillDetails}
+                                                onChange={e => setFulfillDetails(e.target.value)}
+                                                required
+                                                style={{ width: '100%', marginBottom: '1.5rem', fontFamily: 'monospace' }}
                                             />
+
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                <button type="button" onClick={() => setShowFulfill(false)} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary">Complete & Send Email</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
+                    )}
+
+                    {/* STOCK TAB */}
+                    {activeTab === 'stock' && (
+                        <div className="FadeIn">
+                            <div style={{ marginBottom: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <div>
+                                        <h2 style={{ fontSize: '1.4rem', margin: 0 }}>📦 Stock Inventory</h2>
+                                        <p style={{ color: '#666', fontSize: '0.9rem' }}>Manage bulk accounts and manual links.</p>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <button onClick={() => setShowAddInv(true)} className="btn btn-outline">+ Add Item</button>
+                                        <button onClick={() => setShowBulk(true)} className="btn btn-outline">Bulk</button>
+
+                                    </div>
+                                </div>
+
+                                {/* STOCK VIEW TOGGLE */}
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
+                                        <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
+                                        <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
+                                    </div>
+                                </div>
+
+                                {/* Stock Display */}
+                                {viewMode === 'summary' ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                        {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
+                                            const items = inventory.filter(i => i.name === name);
+                                            const activeItems = items.filter(i => i.status === 'In Stock');
+                                            const inStock = activeItems.length;
+                                            const platform = activeItems[0]?.platform || 'Unknown';
+
+                                            if (inStock === 0) return null;
+
+                                            return (
+                                                <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                                        ACTIVE
+                                                    </div>
+                                                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
+                                                    <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
+
+                                                    <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
+                                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available Stock</div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                        {inventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
+                                    </div>
+                                ) : (
+                                    <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                            <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                <tr>
+                                                    <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {inventory.filter(i => i.status === 'In Stock').map((item: any) => (
+                                                    <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '1rem' }}>{item.name}</td>
+                                                        <td style={{ padding: '1rem' }}>{item.platform}</td>
+                                                        <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
+                                                        <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
+                                                    </tr>
+                                                ))}
+                                                {inventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+                                {/* Forms for RESTORED Features */}
+                                {showAddInv && (
+                                    <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', marginTop: '2rem' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h3 style={{ margin: 0 }}>Add Inventory Stock</h3>
                                         </div>
 
-                                        <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                            <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
-                                            <button type="submit" className="btn btn-primary">Add Item</button>
+                                        <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
+                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
+                                            <div style={{ gridColumn: 'span 2' }}><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
+
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Account Credentials (Paste Full)</label>
+                                                <textarea
+                                                    className="input-field"
+                                                    value={newItem.credentials || ''}
+                                                    onChange={e => setNewItem({ ...newItem, credentials: e.target.value })}
+                                                    style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
+                                                    placeholder="Paste detail here (e.g. user:pass:email or just user:pass)"
+                                                />
+                                            </div>
+
+                                            <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                                <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary">Add Item</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
+
+                                {showBulk && (
+                                    <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #06b6d4', marginTop: '2rem' }}>
+                                        <h3 style={{ marginBottom: '1rem' }}>Bulk Import Inventory</h3>
+                                        <textarea
+                                            placeholder="Paste Account Lines Here..."
+                                            value={bulkData}
+                                            onChange={e => setBulkData(e.target.value)}
+                                            className="input-field"
+                                            style={{ width: '100%', height: '150px', fontFamily: 'monospace', fontSize: '0.8rem', marginBottom: '1rem' }}
+                                        />
+                                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                            <button onClick={handleBulkImport} className="btn btn-primary">Process Import</button>
+                                            <button onClick={() => setShowBulk(false)} className="btn btn-outline">Cancel</button>
+                                        </div>
+                                    </div>
+                                )}
+
+
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CATALOG TAB */}
+                    {activeTab === 'catalog' && (
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ margin: 0 }}>🛍️ Shop Product Catalog</h2>
+                                <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                {catalog.map((prod: any) => (
+                                    <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                            <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
+                                                {prod.image && prod.image.length > 10 ? <img src={prod.image} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : '📦'}
+                                            </div>
+                                        </div>
+                                        <div style={{ padding: '1.5rem' }}>
+                                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>{prod.name}</h3>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                                                <span>{prod.platform}</span>
+                                                <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
+                                            </div>
+                                            <button className="btn btn-outline" style={{ width: '100%', fontSize: '0.8rem' }}>Edit Details</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {catalog.length === 0 && <p style={{ color: '#666' }}>No products in catalog. Add one to start selling.</p>}
+                            </div>
+
+                            {showAddProduct && (
+                                <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
+                                    <h3 style={{ marginBottom: '1rem' }}>Add New Product to Shop</h3>
+                                    <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                        <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
+                                        <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
+                                        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                            <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
+                                            <button type="submit" className="btn btn-primary">Create Product</button>
                                         </div>
                                     </form>
                                 </div>
                             )}
+                        </div>
+                    )}
 
-                            {showBulk && (
-                                <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #06b6d4', marginTop: '2rem' }}>
-                                    <h3 style={{ marginBottom: '1rem' }}>Bulk Import Inventory</h3>
-                                    <textarea
-                                        placeholder="Paste Account Lines Here..."
-                                        value={bulkData}
-                                        onChange={e => setBulkData(e.target.value)}
+                    {/* SELL TAB */}
+                    {activeTab === 'sell' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88' }}>
+                                <h3 style={{ marginBottom: '1.5rem', color: '#00ff88', fontSize: '1.5rem' }}>💸 Create New Sale</h3>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Select an item from inventory to generate a secure delivery link instantly.</p>
+
+                                <form onSubmit={handleRecordSale} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {/* Inventory Selector */}
+                                    <label style={{ color: '#ccc', marginBottom: '-1rem' }}>Select Product from Stock</label>
+                                    <select
                                         className="input-field"
-                                        style={{ width: '100%', height: '150px', fontFamily: 'monospace', fontSize: '0.8rem', marginBottom: '1rem' }}
-                                    />
-                                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                        <button onClick={handleBulkImport} className="btn btn-primary">Process Import</button>
-                                        <button onClick={() => setShowBulk(false)} className="btn btn-outline">Cancel</button>
+                                        value={newSale.inventoryId}
+                                        onChange={e => {
+                                            const id = e.target.value;
+                                            const item = inventory.find(i => i.id === id);
+                                            if (item) {
+                                                setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform });
+                                            } else {
+                                                setNewSale({ ...newSale, inventoryId: '' });
+                                            }
+                                        }}
+                                        style={{ width: '100%', border: '1px solid #333', background: '#111', color: '#00ff88', padding: '1rem', fontSize: '1.1rem' }}
+                                    >
+                                        <option value="">-- Click to Choose Product --</option>
+                                        {inventory.filter(i => i.status === 'In Stock').map(i => (
+                                            <option key={i.id} value={i.id}>{i.platform} | {i.name} (${i.purchasePrice})</option>
+                                        ))}
+                                    </select>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Description / Order ID</label><input placeholder="Description" value={newSale.description} onChange={e => setNewSale({ ...newSale, description: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>
+                                            <select value={newSale.platform} onChange={e => setNewSale({ ...newSale, platform: e.target.value })} className="input-field" style={{ width: '100%' }}>
+                                                <option value="Z2U">Z2U</option>
+                                                <option value="PlayerUp">PlayerUp</option>
+                                                <option value="G2G">G2G</option>
+                                                <option value="Direct">Direct</option>
+                                            </select></div>
+                                        <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Price ($)</label><input type="number" placeholder="0.00" value={newSale.salePrice} onChange={e => setNewSale({ ...newSale, salePrice: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
                                     </div>
-                                </div>
-                            )}
 
-
-                        </div>
-                    </div>
-                )}
-
-                {/* CATALOG TAB */}
-                {activeTab === 'catalog' && (
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ margin: 0 }}>🛍️ Shop Product Catalog</h2>
-                            <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                            {catalog.map((prod: any) => (
-                                <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                        <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
-                                            {prod.image && prod.image.length > 10 ? <img src={prod.image} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : '📦'}
-                                        </div>
-                                    </div>
-                                    <div style={{ padding: '1.5rem' }}>
-                                        <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>{prod.name}</h3>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                                            <span>{prod.platform}</span>
-                                            <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
-                                        </div>
-                                        <button className="btn btn-outline" style={{ width: '100%', fontSize: '0.8rem' }}>Edit Details</button>
-                                    </div>
-                                </div>
-                            ))}
-                            {catalog.length === 0 && <p style={{ color: '#666' }}>No products in catalog. Add one to start selling.</p>}
-                        </div>
-
-                        {showAddProduct && (
-                            <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
-                                <h3 style={{ marginBottom: '1rem' }}>Add New Product to Shop</h3>
-                                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
-                                    <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
-                                    <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
-                                    <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
-                                    <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                        <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
-                                        <button type="submit" className="btn btn-primary">Create Product</button>
+                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                        <button type="submit" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>Generate Link & Record Sale</button>
                                     </div>
                                 </form>
                             </div>
-                        )}
-                    </div>
-                )}
 
-                {/* SELL TAB */}
-                {activeTab === 'sell' && (
-                    <div className="FadeIn">
-                        <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88' }}>
-                            <h3 style={{ marginBottom: '1.5rem', color: '#00ff88', fontSize: '1.5rem' }}>💸 Create New Sale</h3>
-                            <p style={{ color: '#888', marginBottom: '1.5rem' }}>Select an item from inventory to generate a secure delivery link instantly.</p>
-
-                            <form onSubmit={handleRecordSale} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                {/* Inventory Selector */}
-                                <label style={{ color: '#ccc', marginBottom: '-1rem' }}>Select Product from Stock</label>
-                                <select
-                                    className="input-field"
-                                    value={newSale.inventoryId}
-                                    onChange={e => {
-                                        const id = e.target.value;
-                                        const item = inventory.find(i => i.id === id);
-                                        if (item) {
-                                            setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform });
-                                        } else {
-                                            setNewSale({ ...newSale, inventoryId: '' });
-                                        }
-                                    }}
-                                    style={{ width: '100%', border: '1px solid #333', background: '#111', color: '#00ff88', padding: '1rem', fontSize: '1.1rem' }}
-                                >
-                                    <option value="">-- Click to Choose Product --</option>
-                                    {inventory.filter(i => i.status === 'In Stock').map(i => (
-                                        <option key={i.id} value={i.id}>{i.platform} | {i.name} (${i.purchasePrice})</option>
-                                    ))}
-                                </select>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
-                                    <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Description / Order ID</label><input placeholder="Description" value={newSale.description} onChange={e => setNewSale({ ...newSale, description: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
-                                    <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>
-                                        <select value={newSale.platform} onChange={e => setNewSale({ ...newSale, platform: e.target.value })} className="input-field" style={{ width: '100%' }}>
-                                            <option value="Z2U">Z2U</option>
-                                            <option value="PlayerUp">PlayerUp</option>
-                                            <option value="G2G">G2G</option>
-                                            <option value="Direct">Direct</option>
-                                        </select></div>
-                                    <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Price ($)</label><input type="number" placeholder="0.00" value={newSale.salePrice} onChange={e => setNewSale({ ...newSale, salePrice: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                    <button type="submit" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>Generate Link & Record Sale</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        {/* Recent Sales List */}
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                            <h3 style={{ marginBottom: '1.5rem' }}>Recent Manual Sales</h3>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <tr>
-                                        <th style={{ padding: '1rem' }}>Item</th>
-                                        <th style={{ padding: '1rem' }}>Date</th>
-                                        <th style={{ padding: '1rem' }}>Amount</th>
-                                        <th style={{ padding: '1rem' }}>Link / Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {balanceHistory && balanceHistory.filter((s: any) => s.deliveryToken).length > 0 ? balanceHistory.filter((s: any) => s.deliveryToken).slice(0, 10).map((sale: any) => (
-                                        <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1rem' }}>{sale.description}</td>
-                                            <td style={{ padding: '1rem', color: '#888' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
-                                            <td style={{ padding: '1rem', color: '#00ff88', fontWeight: 'bold' }}>${Number(sale.amount).toLocaleString()}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    <button
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
-                                                            setCopiedId(sale.id);
-                                                            setTimeout(() => setCopiedId(null), 2000);
-                                                        }}
-                                                        style={{
-                                                            background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
-                                                            border: '1px solid #00ff88',
-                                                            color: '#00ff88',
-                                                            borderRadius: '4px',
-                                                            padding: '0.4rem 0.8rem',
-                                                            cursor: 'pointer',
-                                                            fontSize: '0.8rem',
-                                                        }}
-                                                    >
-                                                        {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
-                                                    </button>
-                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>Views: {sale.deliveryViews || 0}</span>
-                                                </div>
-                                            </td>
+                            {/* Recent Sales List */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                <h3 style={{ marginBottom: '1.5rem' }}>Recent Manual Sales</h3>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                        <tr>
+                                            <th style={{ padding: '1rem' }}>Item</th>
+                                            <th style={{ padding: '1rem' }}>Date</th>
+                                            <th style={{ padding: '1rem' }}>Amount</th>
+                                            <th style={{ padding: '1rem' }}>Link / Action</th>
                                         </tr>
-                                    )) : (
-                                        <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No manual sales recorded yet.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
-                {/* FINANCE TAB (was Sales) */}
-                {activeTab === 'finance' && (
-                    <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                            {/* PKR Wallet */}
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                    <span style={{ color: '#ccc' }}>Meezan Bank</span>
-                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#ccc' }}>UBL / Other</span>
-                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            {/* USD Wallet */}
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
-                                <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                    <span style={{ color: '#ccc' }}>Z2U</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                    <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#ccc' }}>RedotPay</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'RedotPay').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h2 style={{ color: '#ffd700', margin: 0 }}>💰 Transaction History</h2>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => setShowAddFunds(true)} className="btn btn-primary" style={{ background: 'rgba(255,255,255,0.1)' }}>+ Add Funds</button>
-                                </div>
-                            </div>
-
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <tr>
-                                        <th style={{ padding: '1rem' }}>Description</th>
-                                        <th style={{ padding: '1rem' }}>Source</th>
-                                        <th style={{ padding: '1rem' }}>By</th>
-                                        <th style={{ padding: '1rem' }}>Date</th>
-                                        <th style={{ padding: '1rem' }}>Amount</th>
-                                        <th style={{ padding: '1rem' }}>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
-                                        <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1rem' }}>{sale.description}</td>
-                                            <td style={{ padding: '1rem' }}>{sale.platform}</td>
-                                            <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
-                                            <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
-                                            <td style={{ padding: '1rem', color: Number(sale.amount) >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
-                                                {sale.currency === 'PKR' ? '₨ ' : '$ '}
-                                                {Number(sale.amount).toLocaleString()}
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                {sale.deliveryToken ? (
+                                    </thead>
+                                    <tbody>
+                                        {balanceHistory && balanceHistory.filter((s: any) => s.deliveryToken).length > 0 ? balanceHistory.filter((s: any) => s.deliveryToken).slice(0, 10).map((sale: any) => (
+                                            <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem' }}>{sale.description}</td>
+                                                <td style={{ padding: '1rem', color: '#888' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                                <td style={{ padding: '1rem', color: '#00ff88', fontWeight: 'bold' }}>${Number(sale.amount).toLocaleString()}</td>
+                                                <td style={{ padding: '1rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                                                         <button
                                                             onClick={() => {
@@ -922,462 +1009,1203 @@ export default function AdminDashboard() {
                                                                 padding: '0.4rem 0.8rem',
                                                                 cursor: 'pointer',
                                                                 fontSize: '0.8rem',
-                                                                minWidth: '100px',
-                                                                transition: 'all 0.2s'
                                                             }}
                                                         >
                                                             {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
                                                         </button>
-                                                        <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                                                            👁️ {sale.deliveryViews || 0}
-                                                        </span>
+                                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>Views: {sale.deliveryViews || 0}</span>
                                                     </div>
-                                                ) : (
-                                                    <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Add Funds Modal */}
-                        {/* MOVED: Generate Link Modal */}
-
-
-                        {showAddFunds && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
-                                <h3 style={{ marginBottom: '1.5rem' }}>Add / Subtract Funds</h3>
-                                <form onSubmit={handleAddFunds} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform / Bank</label>
-                                        <select className="input-field" value={fundForm.platform} onChange={e => {
-                                            const p = e.target.value;
-                                            const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
-                                            setFundForm({ ...fundForm, platform: p, currency: c });
-                                        }} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                            <option value="Meezan">Meezan Bank</option>
-                                            <option value="UBL">UBL</option>
-                                            <option value="Z2U">Z2U</option>
-                                            <option value="PlayerUp">PlayerUp</option>
-                                            <option value="G2G">G2G</option>
-                                            <option value="RedotPay">RedotPay</option>
-                                            <option value="Direct">Cash / Other</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Amount ({fundForm.currency})</label>
-                                        <input type="number" required className="input-field" value={fundForm.amount} onChange={e => setFundForm({ ...fundForm, amount: e.target.value })} placeholder="e.g. 5000 or -50" style={{ width: '100%' }} />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Currency</label>
-                                        <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                            <option value="USD">USD ($)</option>
-                                            <option value="PKR">PKR (₨)</option>
-                                        </select>
-                                    </div>
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Description</label>
-                                        <input type="text" className="input-field" placeholder="Reason for adjustment..." value={fundForm.description} onChange={e => setFundForm({ ...fundForm, description: e.target.value })} style={{ width: '100%' }} />
-                                    </div>
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                        <button type="button" onClick={() => setShowAddFunds(false)} className="btn btn-outline">Cancel</button>
-                                        <button type="submit" className="btn btn-primary">Save Transaction</button>
-                                    </div>
-                                </form>
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No manual sales recorded yet.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
-                    </>
-                )}
-
-                {/* LEADS TAB */}
-                {activeTab === 'leads' && (
-                    <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                        <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <h2 style={{ color: '#00ff88' }}>All Company Leads</h2>
-                            <p style={{ color: '#666' }}>Full CRM Database</p>
                         </div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <th style={{ padding: '1.5rem' }}>Lead Name</th>
-                                    <th style={{ padding: '1.5rem' }}>Contact</th>
-                                    <th style={{ padding: '1.5rem' }}>Value</th>
-                                    <th style={{ padding: '1.5rem' }}>Status</th>
-                                    <th style={{ padding: '1.5rem' }}>Owner</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {leads.map((lead: any) => (
-                                    <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{lead.name}</td>
-                                        <td style={{ padding: '1.5rem', color: '#888' }}>{lead.contact}</td>
-                                        <td style={{ padding: '1.5rem' }}>${lead.value}</td>
-                                        <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,100,255,0.2)' }}>{lead.status}</span></td>
-                                        <td style={{ padding: '1.5rem', color: '#aaa' }}>{lead.createdBy}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                    )}
 
-                {/* SUPPORT TAB */}
-                {activeTab === 'support' && (
-                    <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden', padding: '2rem' }}>
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Support Tickets</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {tickets.length === 0 && <p style={{ color: '#666' }}>No tickets found.</p>}
-                            {tickets.map(t => (
-                                <div key={t.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.5rem', borderLeft: t.status === 'open' ? '4px solid #00ff88' : '4px solid #555' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', alignItems: 'center' }} onClick={() => setActiveTicketId(activeTicketId === t.id ? null : t.id)}>
-                                        <div>
-                                            <h4 style={{ color: '#fff', marginBottom: '0.2rem' }}>{t.subject}</h4>
-                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>User: {t.email} (ID: {t.user_id})</div>
-                                        </div>
-                                        <span style={{ padding: '4px 8px', borderRadius: '4px', background: t.status === 'open' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.1)', color: t.status === 'open' ? '#00ff88' : '#aaa', fontSize: '0.8rem' }}>{t.status.toUpperCase()}</span>
+                    {/* FINANCE TAB (was Sales) */}
+                    {activeTab === 'finance' && (
+                        <>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                {/* PKR Wallet */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                        <span style={{ color: '#ccc' }}>Meezan Bank</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
                                     </div>
-
-                                    {activeTicketId === t.id && (
-                                        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-                                            <div style={{ background: '#000', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
-                                                {t.message}
-                                            </div>
-                                            {/* Replies */}
-                                            <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                {t.replies && t.replies.map((r: any, i: number) => (
-                                                    <div key={i} style={{ alignSelf: r.sender === 'admin' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
-                                                        <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '2px', textAlign: r.sender === 'admin' ? 'right' : 'left' }}>{r.sender === 'admin' ? 'You' : 'User'}</div>
-                                                        <div style={{ background: r.sender === 'admin' ? '#00ff88' : '#333', color: r.sender === 'admin' ? '#000' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                                                            {r.message}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                                <input placeholder="Type a reply..." value={replyMsg} onChange={e => setReplyMsg(e.target.value)} className="input-field" style={{ flex: 1 }} />
-                                                <button onClick={() => handleReplyTicket(t.id)} className="btn btn-primary">Send Reply</button>
-                                            </div>
-                                        </div>
-                                    )}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#ccc' }}>UBL / Other</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
-                {/* MARKETING TAB */}
-                {activeTab === 'marketing' && (
-                    <>
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h2 style={{ color: '#00ff88' }}>Social Media Hub</h2>
-                                <button onClick={() => setShowAddPost(true)} className="btn btn-primary">+ Draft Post</button>
-                            </div>
-                            <div style={{ display: 'grid', gap: '1rem' }}>
-                                {posts.map((post: any) => (
-                                    <div key={post.id} className="glass" style={{ padding: '1.5rem', borderRadius: '12px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                            <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>{post.author || 'Staff'} <span style={{ color: '#888', fontWeight: 'normal' }}>on {post.platform}</span></span>
-                                            <span style={{ fontSize: '0.8rem', color: '#00ff88' }}>{post.status}</span>
-                                        </div>
-                                        <p style={{ marginBottom: '1rem', color: '#eee' }}>{post.content}</p>
-
-                                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                                            {(post.platform && (post.platform.includes('All') || post.platform.includes('Twitter'))) ? (
-                                                <a
-                                                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`}
-                                                    target="_blank"
-                                                    className="btn btn-outline"
-                                                    style={{ fontSize: '0.8rem', padding: '0.4rem 1rem', borderColor: '#1DA1F2', color: '#1DA1F2' }}
-                                                >
-                                                    🐦 Tweet
-                                                </a>
-                                            ) : null}
-
-                                            {(post.platform && (post.platform.includes('All') || post.platform.includes('Facebook') || post.platform.includes('LinkedIn'))) ? (
-                                                <button
-                                                    className="btn btn-outline"
-                                                    style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(post.content);
-                                                    }}
-                                                    title="Click to Copy"
-                                                >
-                                                    📋 Copy for FB/LinkedIn
-                                                </button>
-                                            ) : null}
-                                        </div>
-
-                                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{new Date(post.createdAt).toLocaleString()}</div>
+                                {/* USD Wallet */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
+                                    <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                        <span style={{ color: '#ccc' }}>Z2U</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
                                     </div>
-                                ))}
-                                {posts.length === 0 && <div className="glass" style={{ padding: '2rem', textAlign: 'center' }}>No posts yet.</div>}
-                            </div>
-                        </div>
-
-                        {showAddPost && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
-                                <h3>Draft Social Post</h3>
-                                <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-                                            {['All', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
-                                                <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: newPost.platforms.includes(p) ? '1px solid #00ff88' : '1px solid transparent' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={newPost.platforms.includes(p)}
-                                                        onChange={e => {
-                                                            const current = newPost.platforms;
-                                                            if (e.target.checked) setNewPost({ ...newPost, platforms: [...current, p] });
-                                                            else setNewPost({ ...newPost, platforms: current.filter(x => x !== p) });
-                                                        }}
-                                                    />
-                                                    <span style={{ color: newPost.platforms.includes(p) ? '#00ff88' : '#ccc', fontSize: '0.9rem' }}>
-                                                        {p === 'All' ? 'All (Broadcast)' : p}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                        <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
                                     </div>
-                                    <textarea placeholder="Post Content (Description, Hashtags...)" className="input-field" style={{ height: '100px' }} value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} required />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#ccc' }}>RedotPay</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'RedotPay').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h2 style={{ color: '#ffd700', margin: 0 }}>💰 Transaction History</h2>
                                     <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary">Save Draft</button>
-                                        <button type="button" onClick={() => setShowAddPost(false)} className="btn btn-outline">Cancel</button>
+                                        <button onClick={() => setShowAddFunds(true)} className="btn btn-primary" style={{ background: 'rgba(255,255,255,0.1)' }}>+ Add Funds</button>
                                     </div>
-                                </form>
+                                </div>
+
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                        <tr>
+                                            <th style={{ padding: '1rem' }}>Description</th>
+                                            <th style={{ padding: '1rem' }}>Source</th>
+                                            <th style={{ padding: '1rem' }}>By</th>
+                                            <th style={{ padding: '1rem' }}>Date</th>
+                                            <th style={{ padding: '1rem' }}>Amount</th>
+                                            <th style={{ padding: '1rem' }}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
+                                            <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem' }}>{sale.description}</td>
+                                                <td style={{ padding: '1rem' }}>{sale.platform}</td>
+                                                <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
+                                                <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                                <td style={{ padding: '1rem', color: Number(sale.amount) >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
+                                                    {sale.currency === 'PKR' ? '₨ ' : '$ '}
+                                                    {Number(sale.amount).toLocaleString()}
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    {sale.deliveryToken ? (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
+                                                                    setCopiedId(sale.id);
+                                                                    setTimeout(() => setCopiedId(null), 2000);
+                                                                }}
+                                                                style={{
+                                                                    background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
+                                                                    border: '1px solid #00ff88',
+                                                                    color: '#00ff88',
+                                                                    borderRadius: '4px',
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    minWidth: '100px',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
+                                                            </button>
+                                                            <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                                                                👁️ {sale.deliveryViews || 0}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                        )}
-                    </>
-                )}
-                {/* HR TAB */}
-                {activeTab === 'hr' && (
-                    <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ color: '#00ff88' }}>Staff Management</h2>
-                            <button onClick={() => setShowAddStaff(!showAddStaff)} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
-                        </div>
 
-                        {showAddStaff && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Add New Staff Member</h3>
-                                <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" required className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Department</label>
-                                        <select className="input-field" value={newEmp.department} onChange={e => setNewEmp({ ...newEmp, department: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                            <option value="" style={{ background: '#111' }}>Select Department</option>
-                                            <option value="Development" style={{ background: '#111' }}>Development</option>
-                                            <option value="Design" style={{ background: '#111' }}>Design</option>
-                                            <option value="Marketing" style={{ background: '#111' }}>Marketing</option>
-                                            <option value="Support" style={{ background: '#111' }}>Support</option>
-                                            <option value="Management" style={{ background: '#111' }}>Management</option>
-                                        </select>
-                                    </div>
+                            {/* Add Funds Modal */}
+                            {/* MOVED: Generate Link Modal */}
 
-                                    <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Compensation Type</label>
-                                            <select className="input-field" value={newEmp.compensationType} onChange={e => setNewEmp({ ...newEmp, compensationType: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                                <option value="Fixed" style={{ background: '#111' }}>Fixed Salary</option>
-                                                <option value="Commission" style={{ background: '#111' }}>Commission Based</option>
+
+                            {showAddFunds && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
+                                    <h3 style={{ marginBottom: '1.5rem' }}>Add / Subtract Funds</h3>
+                                    <form onSubmit={handleAddFunds} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform / Bank</label>
+                                            <select className="input-field" value={fundForm.platform} onChange={e => {
+                                                const p = e.target.value;
+                                                const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
+                                                setFundForm({ ...fundForm, platform: p, currency: c });
+                                            }} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                <option value="Meezan">Meezan Bank</option>
+                                                <option value="UBL">UBL</option>
+                                                <option value="Z2U">Z2U</option>
+                                                <option value="PlayerUp">PlayerUp</option>
+                                                <option value="G2G">G2G</option>
+                                                <option value="RedotPay">RedotPay</option>
+                                                <option value="Direct">Cash / Other</option>
                                             </select>
                                         </div>
                                         <div>
-                                            {newEmp.compensationType === 'Fixed' ? (
-                                                <>
-                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Monthly Salary ($)</label>
-                                                    <input type="number" required className="input-field" value={newEmp.salary} onChange={e => setNewEmp({ ...newEmp, salary: e.target.value })} style={{ width: '100%' }} />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Commission Rate (%)</label>
-                                                    <input type="number" required className="input-field" value={newEmp.commissionRate} onChange={e => setNewEmp({ ...newEmp, commissionRate: e.target.value })} style={{ width: '100%' }} />
-                                                </>
-                                            )}
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Amount ({fundForm.currency})</label>
+                                            <input type="number" required className="input-field" value={fundForm.amount} onChange={e => setFundForm({ ...fundForm, amount: e.target.value })} placeholder="e.g. 5000 or -50" style={{ width: '100%' }} />
                                         </div>
-                                    </div>
-
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc' }}>Platform Access</label>
-                                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                                            {['Z2U', 'PlayerUp', 'G2G', 'Direct'].map(platform => (
-                                                <label key={platform} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                                                    <input type="checkbox" checked={newEmp.allowedPlatforms.includes(platform)} onChange={e => { const current = newEmp.allowedPlatforms; if (e.target.checked) setNewEmp({ ...newEmp, allowedPlatforms: [...current, platform] }); else setNewEmp({ ...newEmp, allowedPlatforms: current.filter(p => p !== platform) }); }} />
-                                                    {platform}
-                                                </label>
-                                            ))}
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Currency</label>
+                                            <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                <option value="USD">USD ($)</option>
+                                                <option value="PKR">PKR (₨)</option>
+                                            </select>
                                         </div>
-                                    </div>
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Description</label>
+                                            <input type="text" className="input-field" placeholder="Reason for adjustment..." value={fundForm.description} onChange={e => setFundForm({ ...fundForm, description: e.target.value })} style={{ width: '100%' }} />
+                                        </div>
+                                        <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                            <button type="button" onClick={() => setShowAddFunds(false)} className="btn btn-outline">Cancel</button>
+                                            <button type="submit" className="btn btn-primary">Save Transaction</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </>
+                    )}
 
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
-                                        <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>Create Staff Account</button>
-                                    </div>
+                    {/* PROMOS TAB */}
+                    {activeTab === 'promos' && (
+                        <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
+                            <div className="glass" style={{ flex: 1, padding: '2rem', borderRadius: '16px', minWidth: '300px' }}>
+                                <h2 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Create Promo Code</h2>
+                                <form onSubmit={handlePromoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <input placeholder="Code (e.g. SUMMER20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} className="input-field" required style={{ textTransform: 'uppercase' }} />
+                                    <input type="number" placeholder="Discount %" value={promoForm.discount} onChange={e => setPromoForm({ ...promoForm, discount: e.target.value })} className="input-field" required min="1" max="100" />
+                                    <button type="submit" className="btn btn-primary">Create Code</button>
                                 </form>
                             </div>
-                        )}
+                            <div style={{ flex: 1, minWidth: '300px' }}>
+                                <h2 style={{ marginBottom: '1.5rem' }}>Active Codes</h2>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {promoCodes.length === 0 ? <p style={{ color: '#888' }}>No active codes.</p> : promoCodes.map((code: any) => (
+                                        <div key={code.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div><h4 style={{ color: '#00ff88', fontSize: '1.2rem' }}>{code.code}</h4><div style={{ fontSize: '0.9rem', color: '#ccc' }}>{code.discount}% Off</div></div>
+                                            <button onClick={() => handleDeletePromo(code.id)} style={{ background: 'red', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                        <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                    {/* WEBSITE TAB */}
+                    {activeTab === 'website' && (
+                        <div style={{ display: 'grid', gap: '2rem' }}>
+                            {/* Website Sub-Navigation */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '0.5rem',
+                                borderBottom: '1px solid #333',
+                                paddingBottom: '1rem',
+                                overflowX: 'auto',
+                                marginBottom: '1rem'
+                            }}>
+                                {['blogs', 'pages', 'services', 'projects', 'rentals', 'reviews', 'messages'].map(t => (
+                                    <button
+                                        key={t}
+                                        onClick={() => setWebsiteTab(t)}
+                                        style={{
+                                            padding: '0.5rem 1rem',
+                                            background: websiteTab === t ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                            color: websiteTab === t ? '#000' : '#888',
+                                            borderRadius: '6px',
+                                            border: 'none',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize'
+                                        }}
+                                    >
+                                        {t === 'blogs' ? '📝 Blogs' :
+                                            t === 'pages' ? '📄 Pages' :
+                                                t === 'services' ? '🛠️ Services' :
+                                                    t === 'projects' ? '🚀 Projects' :
+                                                        t === 'rentals' ? '🏘️ Rentals' :
+                                                            t === 'reviews' ? '⭐ Reviews' :
+                                                                '📬 Messages'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* 1. BLOGS */}
+                            {websiteTab === 'blogs' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span>📝</span> Publish New Blog Post
+                                        </h2>
+                                        <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Blog Title</label>
+                                                <input placeholder="Enter catchy title..." value={blogForm.title} onChange={e => setBlogForm({ ...blogForm, title: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Category</label>
+                                                <input placeholder="e.g. Technology, Lifestyle" value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Feature Image URL</label>
+                                                <input placeholder="https://..." value={blogForm.image} onChange={e => setBlogForm({ ...blogForm, image: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Excerpt</label>
+                                                <textarea placeholder="Brief summary of the post..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Full Content (Markdown)</label>
+                                                <textarea placeholder="Write your post content here..." value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} className="input-field" style={{ height: '250px' }} required />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Publish Post</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div className="glass" style={{ padding: '2rem', borderRadius: '20px' }}>
+                                        <h3 style={{ marginBottom: '1rem', opacity: 0.8 }}>Existing Posts ({manualBlogs.length})</h3>
+                                        <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                            {manualBlogs.map((b: any) => (
+                                                <div key={b.id} style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <h4 style={{ color: '#fff' }}>{b.title}</h4>
+                                                        <span style={{ fontSize: '0.8rem', color: '#00ff88' }}>{b.category || 'Uncategorized'}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                                        <button onClick={() => handleDeleteBlog(b.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Delete</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {manualBlogs.length === 0 && <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No blog posts found.</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 2. PAGES */}
+                            {websiteTab === 'pages' && (
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>📄</span> Content Management System
+                                    </h2>
+                                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem' }}>
+                                        {['terms', 'privacy', 'about'].map(p => (
+                                            <button
+                                                key={p}
+                                                onClick={() => { setPageKey(p); setPageContent(pages[p] || ''); }}
+                                                style={{
+                                                    padding: '0.8rem 1.5rem',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid #333',
+                                                    background: pageKey === p ? '#00ff88' : 'transparent',
+                                                    color: pageKey === p ? '#000' : '#888',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    flex: 1
+                                                }}
+                                            >
+                                                {p.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <label style={{ position: 'absolute', top: '-10px', left: '15px', background: '#000', padding: '0 5px', fontSize: '0.7rem', color: '#00ff88' }}>Content Editor</label>
+                                        <textarea
+                                            value={pageContent}
+                                            onChange={e => setPageContent(e.target.value)}
+                                            className="input-field"
+                                            style={{ width: '100%', height: '500px', fontFamily: 'monospace', padding: '1.5rem', lineHeight: '1.6' }}
+                                            placeholder={`Start writing content for ${pageKey} page...`}
+                                        />
+                                    </div>
+                                    <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+                                        <button onClick={handlePageSave} className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Update {pageKey} Page</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 3. SERVICES */}
+                            {websiteTab === 'services' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span>🛠️</span> Add New Service
+                                        </h2>
+                                        <form onSubmit={handleServiceSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Service Name</label>
+                                                    <input placeholder="e.g. Modern Web Design" value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} className="input-field" required />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Icon</label>
+                                                    <input placeholder="Emoji" value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })} className="input-field" maxLength={2} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Description</label>
+                                                <textarea placeholder="Tell clients what this service covers..." value={serviceForm.desc} onChange={e => setServiceForm({ ...serviceForm, desc: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Add Service</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                        {services.map((s: any) => (
+                                            <div key={s.id} className="card" style={{ padding: '1.5rem', position: 'relative', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
+                                                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{s.icon || '🛠️'}</div>
+                                                <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#fff' }}>{s.title}</h4>
+                                                <p style={{ fontSize: '0.9rem', color: '#888', lineHeight: '1.5' }}>{s.desc}</p>
+                                                <button onClick={() => handleDeleteService(s.id)} style={{ position: 'absolute', top: '15px', right: '15px', color: '#ff4444', background: 'rgba(255,0,0,0.1)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4. PROJECTS */}
+                            {websiteTab === 'projects' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🚀 Add Portfolio Project</h2>
+                                        <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Project Name</label>
+                                                <input placeholder="Project Name" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Description / URL</label>
+                                                <textarea placeholder="Give some context or a live link..." value={projectForm.description} onChange={e => setProjectForm({ ...projectForm, description: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary">Add Project</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div className="glass" style={{ padding: '1rem', borderRadius: '15px' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', color: '#00ff88', borderBottom: '1px solid #333' }}>
+                                                    <th style={{ padding: '1rem' }}>Project</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {projects.map((p: any) => (
+                                                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontWeight: 'bold' }}>{p.title}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>{p.description}</div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                                            <button onClick={() => handleDeleteProject(p.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 5. RENTALS */}
+                            {websiteTab === 'rentals' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🏘️ Add Rental Asset</h2>
+                                        <form onSubmit={handleRentalSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Domain / Name</label>
+                                                <input placeholder="example.com" value={rentalForm.domain} onChange={e => setRentalForm({ ...rentalForm, domain: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Monthly Rent Price</label>
+                                                <input placeholder="$99/mo" value={rentalForm.price} onChange={e => setRentalForm({ ...rentalForm, price: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary">Add Asset</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                        {rentals.map((r: any) => (
+                                            <div key={r.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{r.domain}</div>
+                                                    <div style={{ color: '#00ff88', fontSize: '0.9rem' }}>{r.price}</div>
+                                                </div>
+                                                <button onClick={() => handleDeleteRental(r.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 6. REVIEWS */}
+                            {websiteTab === 'reviews' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>⭐ Add Client Feedback</h2>
+                                        <form onSubmit={handleReviewSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Client Name</label>
+                                                    <input placeholder="e.g. John Doe" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} className="input-field" required />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Rating</label>
+                                                    <select
+                                                        value={reviewForm.rating}
+                                                        onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                                                        className="input-field"
+                                                        style={{ color: '#00ff88', fontWeight: 'bold' }}
+                                                    >
+                                                        {[5, 4, 3, 2, 1].map(num => <option key={num} value={num}>{num} Stars</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Review Content</label>
+                                                <textarea placeholder="What did they say about your work?" value={reviewForm.review} onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })} className="input-field" style={{ height: '100px' }} required />
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Add Review</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {reviews.map((r: any) => (
+                                            <div key={r.id} className="glass" style={{ padding: '1.5rem', borderRadius: '15px', position: 'relative' }}>
+                                                <div style={{ color: '#ffcc00', marginBottom: '0.5rem', fontSize: '1.2rem' }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
+                                                <p style={{ fontStyle: 'italic', color: '#eee', marginBottom: '1rem', lineHeight: '1.5' }}>"{r.review}"</p>
+                                                <div style={{ fontWeight: 'bold' }}>- {r.name}</div>
+                                                <button onClick={() => handleDeleteReview(r.id)} style={{ position: 'absolute', top: '20px', right: '20px', color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 7. MESSAGES */}
+                            {websiteTab === 'messages' && (
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📬 Website Inquiries</h2>
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {messages.length === 0 ? <p style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>Your inbox is clean. No messages!</p> : messages.map((m: any) => (
+                                            <div key={m.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                                    <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{m.name}</strong>
+                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>{new Date(m.createdAt).toLocaleString()}</span>
+                                                </div>
+                                                <div style={{ color: '#00ff88', fontSize: '0.9rem', marginBottom: '1rem' }}>{m.email}</div>
+                                                <div style={{ color: '#ccc', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>{m.message}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* LEADS TAB */}
+                    {activeTab === 'leads' && (
+                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                            <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h2 style={{ color: '#00ff88' }}>All Company Leads</h2>
+                                <p style={{ color: '#666' }}>Full CRM Database</p>
+                            </div>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1.5rem' }}>Name / Email</th><th style={{ padding: '1.5rem' }}>Role</th><th style={{ padding: '1.5rem' }}>Department</th><th style={{ padding: '1.5rem' }}>Joined</th><th style={{ padding: '1.5rem' }}>Compensation</th><th style={{ padding: '1.5rem' }}>Status</th>
+                                        <th style={{ padding: '1.5rem' }}>Lead Name</th>
+                                        <th style={{ padding: '1.5rem' }}>Contact</th>
+                                        <th style={{ padding: '1.5rem' }}>Value</th>
+                                        <th style={{ padding: '1.5rem' }}>Status</th>
+                                        <th style={{ padding: '1.5rem' }}>Owner</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {employees.map((emp: any) => (
-                                        <tr key={emp.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>{emp.name}</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{emp.email}</div></td>
-                                            <td style={{ padding: '1.5rem' }}>{emp.position}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,100,255,0.2)', color: '#4dacff' }}>{emp.department}</span></td>
-                                            <td style={{ padding: '1.5rem', color: '#aaa' }}>{emp.joinDate}</td>
-                                            <td style={{ padding: '1.5rem' }}>{emp.compensationType === 'Commission' ? <span style={{ color: '#ffd700' }}>{emp.commissionRate}% Commission</span> : <span>${Number(emp.salary).toLocaleString()} /mo</span>}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ color: emp.status === 'Active' ? '#00ff88' : '#ff4444' }}>• {emp.status}</span></td>
+                                    {leads.map((lead: any) => (
+                                        <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{lead.name}</td>
+                                            <td style={{ padding: '1.5rem', color: '#888' }}>{lead.contact}</td>
+                                            <td style={{ padding: '1.5rem' }}>${lead.value}</td>
+                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,100,255,0.2)' }}>{lead.status}</span></td>
+                                            <td style={{ padding: '1.5rem', color: '#aaa' }}>{lead.createdBy}</td>
                                         </tr>
                                     ))}
-                                    {employees.length === 0 && <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No staff members found.</td></tr>}
                                 </tbody>
                             </table>
                         </div>
-                    </>
-                )}
+                    )}
 
-                {/* LOGS TAB */}
-                {activeTab === 'logs' && (
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Security & Activity Logs</h2>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <th style={{ padding: '1rem' }}>Time</th>
-                                    <th style={{ padding: '1rem' }}>User</th>
-                                    <th style={{ padding: '1rem' }}>Action</th>
-                                    <th style={{ padding: '1rem' }}>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {logs && logs.length > 0 ? logs.map((log: any) => (
-                                    <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{log.date ? new Date(log.date).toLocaleString() : 'N/A'}</td>
-                                        <td style={{ padding: '1rem' }}>{log.user}</td>
-                                        <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{log.action}</span></td>
-                                        <td style={{ padding: '1rem', color: '#ccc' }}>{log.details}</td>
-                                    </tr>
-                                )) : (
-                                    <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No logs recorded yet.</td></tr>
+                    {/* USERS TAB (BUYERS) */}
+                    {activeTab === 'users' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <h2 style={{ color: '#00ff88' }}>Website Buyers</h2>
+                                        <p style={{ color: '#666' }}>Manage your site customers ({users.filter((u: any) => u.role === 'buyer').length} Total)</p>
+                                    </div>
+                                </div>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <th style={{ padding: '1.5rem' }}>Buyer Info</th>
+                                            <th style={{ padding: '1.5rem' }}>Status</th>
+                                            <th style={{ padding: '1.5rem' }}>Telegram</th>
+                                            <th style={{ padding: '1.5rem' }}>Joined</th>
+                                            <th style={{ padding: '1.5rem', textAlign: 'right' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {users.filter((u: any) => u.role === 'buyer').length === 0 ? (
+                                            <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No buyers found.</td></tr>
+                                        ) : users.filter((u: any) => u.role === 'buyer').map((u: any) => (
+                                            <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ fontWeight: 'bold' }}>{u.email}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#666', fontFamily: 'monospace' }}>ID: {u.id}</div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <span style={{
+                                                        padding: '4px 10px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.75rem',
+                                                        background: u.is_verified ? 'rgba(0,180,100,0.1)' : 'rgba(255,100,0,0.1)',
+                                                        color: u.is_verified ? '#00ff88' : '#ff9900',
+                                                        border: u.is_verified ? '1px solid #00ff8833' : '1px solid #ff990033'
+                                                    }}>
+                                                        {u.is_verified ? 'VERIFIED' : 'PENDING'}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1.5rem', color: '#888' }}>{u.telegram || 'No Telegram'}</td>
+                                                <td style={{ padding: '1.5rem', color: '#666' }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedUser(u);
+                                                                setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
+                                                                setShowUserEdit(true);
+                                                            }}
+                                                            className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleResendUserEmail(u.id, u.email, 'resend_registration')}
+                                                            className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#ffd700', borderColor: '#ffd70033' }}
+                                                        >
+                                                            Verify
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleResendUserEmail(u.id, u.email, 'resend_forgot')}
+                                                            className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00d1ff', borderColor: '#00d1ff33' }}
+                                                        >
+                                                            Reset
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm(`Delete buyer ${u.email}?`)) {
+                                                                    await fetch(`/api/admin/users?id=${u.id}`, { method: 'DELETE' });
+                                                                    fetchData();
+                                                                }
+                                                            }}
+                                                            style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* USER EDIT MODAL */}
+                            {showUserEdit && selectedUser && (
+                                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
+                                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                            <h3 style={{ color: '#00ff88' }}>Edit User profile</h3>
+                                            <button onClick={() => setShowUserEdit(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.5rem' }}>✕</button>
+                                        </div>
+                                        <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Email Address</label>
+                                                <input className="input-field" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} style={{ width: '100%' }} required />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>New Password (Leave blank to keep current)</label>
+                                                <input className="input-field" type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} style={{ width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Telegram</label>
+                                                <input className="input-field" value={userForm.telegram} onChange={e => setUserForm({ ...userForm, telegram: e.target.value })} style={{ width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>User Role</label>
+                                                <select className="input-field" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                                    <option value="buyer">Buyer / Customer</option>
+                                                    <option value="seller">Seller / Partner</option>
+                                                    <option value="admin">System Admin</option>
+                                                </select>
+                                            </div>
+                                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
+                                                <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Creation Details:</p>
+                                                <div style={{ fontSize: '0.85rem', color: '#eee' }}>Joined: {new Date(selectedUser.created_at).toLocaleString()}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#eee' }}>Referral Code: {selectedUser.referral_code || 'None'}</div>
+                                            </div>
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Update User Profile</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* SUPPORT TAB */}
+                    {activeTab === 'support' && (
+                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden', padding: '2rem' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Support Tickets</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {tickets.length === 0 && <p style={{ color: '#666' }}>No tickets found.</p>}
+                                {tickets.map(t => (
+                                    <div key={t.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.5rem', borderLeft: t.status === 'open' ? '4px solid #00ff88' : '4px solid #555' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', alignItems: 'center' }} onClick={() => setActiveTicketId(activeTicketId === t.id ? null : t.id)}>
+                                            <div>
+                                                <h4 style={{ color: '#fff', marginBottom: '0.2rem' }}>{t.subject}</h4>
+                                                <div style={{ fontSize: '0.8rem', color: '#888' }}>User: {t.email} (ID: {t.user_id})</div>
+                                            </div>
+                                            <span style={{ padding: '4px 8px', borderRadius: '4px', background: t.status === 'open' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.1)', color: t.status === 'open' ? '#00ff88' : '#aaa', fontSize: '0.8rem' }}>{t.status.toUpperCase()}</span>
+                                        </div>
+
+                                        {activeTicketId === t.id && (
+                                            <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+                                                <div style={{ background: '#000', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
+                                                    {t.message}
+                                                </div>
+                                                {/* Replies */}
+                                                <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {t.replies && t.replies.map((r: any, i: number) => (
+                                                        <div key={i} style={{ alignSelf: r.sender === 'admin' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '2px', textAlign: r.sender === 'admin' ? 'right' : 'left' }}>{r.sender === 'admin' ? 'You' : 'User'}</div>
+                                                            <div style={{ background: r.sender === 'admin' ? '#00ff88' : '#333', color: r.sender === 'admin' ? '#000' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                                                                {r.message}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <input placeholder="Type a reply..." value={replyMsg} onChange={e => setReplyMsg(e.target.value)} className="input-field" style={{ flex: 1 }} />
+                                                    <button onClick={() => handleReplyTicket(t.id)} className="btn btn-primary">Send Reply</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'marketing' && (
+                        <>
+                            <div style={{ display: 'grid', gap: '2rem' }}>
+                                {/* Marketing Sub-Navigation */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    borderBottom: '1px solid #333',
+                                    paddingBottom: '1rem',
+                                    overflowX: 'auto',
+                                    marginBottom: '1rem'
+                                }}>
+                                    {['all', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setMarketingTab(p)}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                background: marketingTab === p ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                                color: marketingTab === p ? '#000' : '#888',
+                                                borderRadius: '6px',
+                                                border: 'none',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                textTransform: 'capitalize'
+                                            }}
+                                        >
+                                            {p === 'all' ? '🌐 All Feed' : p}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h2 style={{ color: '#00ff88' }}>{marketingTab === 'all' ? 'Social Media Hub' : `${marketingTab} Feed`}</h2>
+                                        <button onClick={() => setShowAddPost(true)} className="btn btn-primary">+ Draft New Post</button>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                        {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).map((post: any) => (
+                                            <div key={post.id} className="glass" style={{ padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#00ff88', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' }}>
+                                                            {(post.author || 'S').charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: 'bold', color: '#fff' }}>{post.author || 'System Admin'}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>{new Date(post.createdAt).toLocaleString()}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                        <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '20px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                                            {post.platform}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.75rem', color: '#666' }}>{post.status}</span>
+                                                    </div>
+                                                </div>
+
+                                                <p style={{ color: '#eee', lineHeight: '1.6', fontSize: '1.05rem', marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
+                                                    {post.content}
+                                                </p>
+
+                                                <div style={{ display: 'flex', gap: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.2rem' }}>
+                                                    {(post.platform && (post.platform.includes('All') || post.platform.includes('Twitter'))) && (
+                                                        <a
+                                                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#1DA1F2', color: '#1DA1F2' }}
+                                                        >
+                                                            🐦 Tweet This
+                                                        </a>
+                                                    )}
+
+                                                    <button
+                                                        className="btn btn-outline"
+                                                        style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#444' }}
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(post.content);
+                                                            alert('Content copied to clipboard!');
+                                                        }}
+                                                    >
+                                                        📋 Copy Content
+                                                    </button>
+
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Delete this post draft?')) {
+                                                                await fetch(`/api/admin/marketing?id=${post.id}`, { method: 'DELETE' });
+                                                                window.location.reload();
+                                                            }
+                                                        }}
+                                                        style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                    >
+                                                        Delete Draft
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).length === 0 && (
+                                            <div className="glass" style={{ padding: '4rem', textAlign: 'center', opacity: 0.6 }}>
+                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+                                                <p>No posts found for {marketingTab}.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {showAddPost && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
+                                    <h3>Draft Social Post</h3>
+                                    <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                                {['All', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: newPost.platforms.includes(p) ? '1px solid #00ff88' : '1px solid transparent' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={newPost.platforms.includes(p)}
+                                                            onChange={e => {
+                                                                const current = newPost.platforms;
+                                                                if (e.target.checked) setNewPost({ ...newPost, platforms: [...current, p] });
+                                                                else setNewPost({ ...newPost, platforms: current.filter(x => x !== p) });
+                                                            }}
+                                                        />
+                                                        <span style={{ color: newPost.platforms.includes(p) ? '#00ff88' : '#ccc', fontSize: '0.9rem' }}>
+                                                            {p === 'All' ? 'All (Broadcast)' : p}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <textarea placeholder="Post Content (Description, Hashtags...)" className="input-field" style={{ height: '100px' }} value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} required />
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary">Save Draft</button>
+                                            <button type="button" onClick={() => setShowAddPost(false)} className="btn btn-outline">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    {/* TOOLS TAB (New) */}
+                    {activeTab === 'tools' && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+
+                            {/* Backlink Service */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🔗 Backlink Authority Checker</h2>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Check DA/PA metrics for any domain using Moz API.</p>
+                                <form onSubmit={handleBacklinkCheck} style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <input placeholder="https://example.com" value={toolUrl} onChange={e => setToolUrl(e.target.value)} className="input-field" style={{ flex: 1 }} required />
+                                    <button type="submit" className="btn btn-primary" disabled={toolLoading}>{toolLoading ? 'Scanning...' : 'Check'}</button>
+                                </form>
+                                {toolMetrics && (
+                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #333' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: '1rem' }}>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.da}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Domain Auth</div></div>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.pa}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Page Auth</div></div>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.links}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Backlinks</div></div>
+                                        </div>
+                                        <div style={{ fontSize: '0.9rem', color: '#ccc' }}>
+                                            <strong>Analysis:</strong>
+                                            <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
+                                                {toolMetrics.details?.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                                            </ul>
+                                        </div>
+                                    </div>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                            </div>
 
-                {/* SETTINGS TAB */}
-                {activeTab === 'settings' && (
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                            {/* AI Writer */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(138, 56, 255, 0.2)' }}>
+                                <h2 style={{ color: '#ae68ff', marginBottom: '1rem' }}>✨ AI Content Generator</h2>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Generate SEO-optimized blog posts instantly.</p>
+                                <form onSubmit={handleGenerateBlog} style={{ display: 'flex', gap: '1rem' }}>
+                                    <input placeholder="Topic (e.g. Best Game Accounts)" value={blogTopic} onChange={e => setBlogTopic(e.target.value)} className="input-field" style={{ flex: 1 }} required />
+                                    <button type="submit" className="btn btn-outline" style={{ color: '#ae68ff', borderColor: '#ae68ff' }} disabled={blogLoading}>{blogLoading ? 'Writing...' : 'Generate'}</button>
+                                </form>
+                            </div>
 
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Admin Security</h2>
-                        <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2rem' }}>
-                            <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Change Admin Credentials</h3>
-                            <form onSubmit={handleUpdateAdminProfile} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) auto', alignItems: 'end' }}>
-                                <div>
-                                    <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Email (Optional)</label>
-                                    <input type="email" name="email" placeholder="admin@example.com" className="input-field" style={{ width: '100%' }} />
+                            {/* Telegram Bot Setup */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0, 136, 204, 0.2)' }}>
+                                <h2 style={{ color: '#0088cc', marginBottom: '1rem' }}>🤖 Telegram Bot</h2>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Configure your bot for order notifications.</p>
+                                <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label>
+                                        <input type="password" value={settings.telegram_bot_token || settings.telegramToken || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="1234:ABC..." />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', color: '#aaa' }}>Chat ID</label>
+                                        <input type="text" value={settings.telegram_chat_id || settings.telegramChatId || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="@channel" />
+                                    </div>
+                                    <button type="submit" className="btn btn-primary">Save Configuration</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    )}
+
+                    {/* HR TAB */}
+                    {activeTab === 'hr' && (
+                        <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ color: '#00ff88' }}>Administrative Staff & Admins</h2>
+                                <button onClick={() => setShowAddStaff(!showAddStaff)} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
+                            </div>
+
+                            {showAddStaff && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                    <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Add New Staff Member</h3>
+                                    <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" required className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Department</label>
+                                            <select className="input-field" value={newEmp.department} onChange={e => setNewEmp({ ...newEmp, department: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                <option value="" style={{ background: '#111' }}>Select Department</option>
+                                                <option value="Development" style={{ background: '#111' }}>Development</option>
+                                                <option value="Design" style={{ background: '#111' }}>Design</option>
+                                                <option value="Marketing" style={{ background: '#111' }}>Marketing</option>
+                                                <option value="Support" style={{ background: '#111' }}>Support</option>
+                                                <option value="Management" style={{ background: '#111' }}>Management</option>
+                                            </select>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Compensation Type</label>
+                                                <select className="input-field" value={newEmp.compensationType} onChange={e => setNewEmp({ ...newEmp, compensationType: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                    <option value="Fixed" style={{ background: '#111' }}>Fixed Salary</option>
+                                                    <option value="Commission" style={{ background: '#111' }}>Commission Based</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                {newEmp.compensationType === 'Fixed' ? (
+                                                    <>
+                                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Monthly Salary ($)</label>
+                                                        <input type="number" required className="input-field" value={newEmp.salary} onChange={e => setNewEmp({ ...newEmp, salary: e.target.value })} style={{ width: '100%' }} />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Commission Rate (%)</label>
+                                                        <input type="number" required className="input-field" value={newEmp.commissionRate} onChange={e => setNewEmp({ ...newEmp, commissionRate: e.target.value })} style={{ width: '100%' }} />
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc' }}>Platform Access</label>
+                                            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                                {['Z2U', 'PlayerUp', 'G2G', 'Direct'].map(platform => (
+                                                    <label key={platform} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                                                        <input type="checkbox" checked={newEmp.allowedPlatforms.includes(platform)} onChange={e => { const current = newEmp.allowedPlatforms; if (e.target.checked) setNewEmp({ ...newEmp, allowedPlatforms: [...current, platform] }); else setNewEmp({ ...newEmp, allowedPlatforms: current.filter(p => p !== platform) }); }} />
+                                                        {platform}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>Create Staff Account</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div>
-                                    <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Password</label>
-                                    <input type="password" name="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
+                            )}
+
+                            <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <th style={{ padding: '1.5rem' }}>Name / Email</th><th style={{ padding: '1.5rem' }}>Role</th><th style={{ padding: '1.5rem' }}>Department</th><th style={{ padding: '1.5rem' }}>Joined</th><th style={{ padding: '1.5rem' }}>Compensation</th><th style={{ padding: '1.5rem' }}>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Internal Admins from Users Table */}
+                                        {users.filter(u => u.role === 'admin').map((u: any) => (
+                                            <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,255,136,0.02)' }}>
+                                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>System Admin</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{u.email}</div></td>
+                                                <td style={{ padding: '1.5rem' }}>Management / Owner</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>Core Admin</span></td>
+                                                <td style={{ padding: '1.5rem', color: '#aaa' }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                <td style={{ padding: '1.5rem' }}>Access to All</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ color: '#00ff88' }}>• ACTIVE</span></td>
+                                            </tr>
+                                        ))}
+                                        {/* Staff from Employees Table */}
+                                        {employees.map((emp: any) => (
+                                            <tr key={emp.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>{emp.name}</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{emp.email}</div></td>
+                                                <td style={{ padding: '1.5rem' }}>{emp.position}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,100,255,0.2)', color: '#4dacff' }}>{emp.department}</span></td>
+                                                <td style={{ padding: '1.5rem', color: '#aaa' }}>{emp.joinDate}</td>
+                                                <td style={{ padding: '1.5rem' }}>{emp.compensationType === 'Commission' ? <span style={{ color: '#ffd700' }}>{emp.commissionRate}% Commission</span> : <span>${Number(emp.salary).toLocaleString()} /mo</span>}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ color: emp.status === 'Active' ? '#00ff88' : '#ff4444' }}>• {emp.status}</span></td>
+                                            </tr>
+                                        ))}
+                                        {(employees.length === 0 && users.filter(u => u.role === 'admin').length === 0) && <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No administrative accounts found.</td></tr>}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+
+                    {/* LOGS TAB */}
+                    {activeTab === 'logs' && (
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Security & Activity Logs</h2>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                                <thead>
+                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                        <th style={{ padding: '1rem' }}>Time</th>
+                                        <th style={{ padding: '1rem' }}>User</th>
+                                        <th style={{ padding: '1rem' }}>Action</th>
+                                        <th style={{ padding: '1rem' }}>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {logs && logs.length > 0 ? logs.map((log: any) => (
+                                        <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{log.date ? new Date(log.date).toLocaleString() : 'N/A'}</td>
+                                            <td style={{ padding: '1rem' }}>{log.user}</td>
+                                            <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{log.action}</span></td>
+                                            <td style={{ padding: '1rem', color: '#ccc' }}>{log.details}</td>
+                                        </tr>
+                                    )) : (
+                                        <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No logs recorded yet.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* SETTINGS TAB */}
+                    {activeTab === 'settings' && (
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Admin Security</h2>
+                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2rem' }}>
+                                <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Change Admin Credentials</h3>
+                                <form onSubmit={handleUpdateAdminProfile} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) auto', alignItems: 'end' }}>
+                                    <div>
+                                        <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Email (Optional)</label>
+                                        <input type="email" name="email" placeholder="admin@example.com" className="input-field" style={{ width: '100%' }} />
+                                    </div>
+                                    <div>
+                                        <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Password</label>
+                                        <input type="password" name="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
+                                    </div>
+                                    <div>
+                                        <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Update Profile</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
+                            <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
+
+                            <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
+                                {/* Twitter */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(29, 161, 242, 0.1)', borderRadius: '12px' }}>
+                                    <h3 style={{ color: '#1DA1F2', marginBottom: '1rem' }}>Twitter / X</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Key</label><input type="password" value={settings.twitter_api_key || ''} onChange={e => setSettings({ ...settings, twitter_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Secret</label><input type="password" value={settings.twitter_api_secret || ''} onChange={e => setSettings({ ...settings, twitter_api_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.twitter_access_token || ''} onChange={e => setSettings({ ...settings, twitter_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Secret</label><input type="password" value={settings.twitter_access_secret || ''} onChange={e => setSettings({ ...settings, twitter_access_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Update Profile</button>
+
+                                {/* Facebook */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(24, 119, 242, 0.1)', borderRadius: '12px' }}>
+                                    <h3 style={{ color: '#1877F2', marginBottom: '1rem' }}>Facebook Page</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page ID</label><input type="text" value={settings.facebook_page_id || ''} onChange={e => setSettings({ ...settings, facebook_page_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page Access Token</label><input type="password" value={settings.facebook_page_token || ''} onChange={e => setSettings({ ...settings, facebook_page_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    </div>
                                 </div>
+
+                                {/* LinkedIn */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(0, 119, 181, 0.1)', borderRadius: '12px' }}>
+                                    <h3 style={{ color: '#0077b5', marginBottom: '1rem' }}>LinkedIn</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Person URN</label><input type="text" value={settings.linkedin_person_urn || ''} onChange={e => setSettings({ ...settings, linkedin_person_urn: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.linkedin_access_token || ''} onChange={e => setSettings({ ...settings, linkedin_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    </div>
+                                </div>
+
+                                {/* Telegram */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(0, 136, 204, 0.1)', borderRadius: '12px' }}>
+                                    <h3 style={{ color: '#0088cc', marginBottom: '1rem' }}>Telegram Channel</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label><input type="password" value={settings.telegram_bot_token || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Chat ID (e.g. @channelname)</label><input type="text" value={settings.telegram_chat_id || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    </div>
+                                </div>
+
+                                {/* Instagram */}
+                                <div style={{ padding: '1.5rem', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '12px' }}>
+                                    <h3 style={{ color: '#fff', marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Instagram Business</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#eee' }}>IG User ID (Linked to FB Page)</label><input type="text" value={settings.instagram_user_id || ''} onChange={e => setSettings({ ...settings, instagram_user_id: e.target.value })} className="input-field" style={{ width: '100%', background: 'rgba(0,0,0,0.3)', color: '#fff' }} /></div>
+                                    </div>
+                                </div>
+
+                                {/* RESTORED: Payment Gateways */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                                    <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Payment Processors</h3>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <h4 style={{ color: '#00ff88', gridColumn: 'span 2' }}>Stripe (Credit Card)</h4>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Public Key</label><input value={settings.stripePublic || ''} onChange={e => setSettings({ ...settings, stripePublic: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.stripeSecret || ''} onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                        <h4 style={{ color: '#ffaa00', gridColumn: 'span 2', marginTop: '1rem' }}>Cryptomus (Crypto)</h4>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Merchant ID</label><input value={settings.cryptomusId || ''} onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Payment Key</label><input type="password" value={settings.cryptomusKey || ''} onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                        <h4 style={{ color: '#f3ba2f', gridColumn: 'span 2', marginTop: '1rem' }}>Binance Pay</h4>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>API Key</label><input value={settings.binanceKey || ''} onChange={e => setSettings({ ...settings, binanceKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.binanceSecret || ''} onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    </div>
+                                </div>
+
+                                {/* RESTORED: Other Services */}
+                                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                                    <h3 style={{ marginBottom: '1rem', color: '#fff' }}>External Services</h3>
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Access ID (SEO)</label><input value={settings.mozId || ''} onChange={e => setSettings({ ...settings, mozId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Secret Key</label><input type="password" value={settings.mozKey || ''} onChange={e => setSettings({ ...settings, mozKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Gemini API Key (AI Blog)</label><input type="password" value={settings.geminiKey || ''} onChange={e => setSettings({ ...settings, geminiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>OpenAI API Key (AI Blog Backup)</label><input type="password" value={settings.openaiKey || ''} onChange={e => setSettings({ ...settings, openaiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                        <h4 style={{ color: '#aaa', marginTop: '1rem' }}>SMTP Email Server</h4>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Host</label><input value={settings.smtpHost || ''} onChange={e => setSettings({ ...settings, smtpHost: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>User</label><input value={settings.smtpUser || ''} onChange={e => setSettings({ ...settings, smtpUser: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Password</label><input type="password" value={settings.smtpPass || ''} onChange={e => setSettings({ ...settings, smtpPass: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" className="btn btn-primary" style={{ padding: '1rem' }}>💾 Save Configuration</button>
                             </form>
-                        </div>
 
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
-                        <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
-
-                        <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
-                            {/* Twitter */}
-                            <div style={{ padding: '1.5rem', background: 'rgba(29, 161, 242, 0.1)', borderRadius: '12px' }}>
-                                <h3 style={{ color: '#1DA1F2', marginBottom: '1rem' }}>Twitter / X</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Key</label><input type="password" value={settings.twitter_api_key || ''} onChange={e => setSettings({ ...settings, twitter_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Secret</label><input type="password" value={settings.twitter_api_secret || ''} onChange={e => setSettings({ ...settings, twitter_api_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.twitter_access_token || ''} onChange={e => setSettings({ ...settings, twitter_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Secret</label><input type="password" value={settings.twitter_access_secret || ''} onChange={e => setSettings({ ...settings, twitter_access_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                </div>
-                            </div>
-
-                            {/* Facebook */}
-                            <div style={{ padding: '1.5rem', background: 'rgba(24, 119, 242, 0.1)', borderRadius: '12px' }}>
-                                <h3 style={{ color: '#1877F2', marginBottom: '1rem' }}>Facebook Page</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page ID</label><input type="text" value={settings.facebook_page_id || ''} onChange={e => setSettings({ ...settings, facebook_page_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page Access Token</label><input type="password" value={settings.facebook_page_token || ''} onChange={e => setSettings({ ...settings, facebook_page_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                </div>
-                            </div>
-
-                            {/* LinkedIn */}
-                            <div style={{ padding: '1.5rem', background: 'rgba(0, 119, 181, 0.1)', borderRadius: '12px' }}>
-                                <h3 style={{ color: '#0077b5', marginBottom: '1rem' }}>LinkedIn</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Person URN</label><input type="text" value={settings.linkedin_person_urn || ''} onChange={e => setSettings({ ...settings, linkedin_person_urn: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.linkedin_access_token || ''} onChange={e => setSettings({ ...settings, linkedin_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                </div>
-                            </div>
-
-                            {/* Telegram */}
-                            <div style={{ padding: '1.5rem', background: 'rgba(0, 136, 204, 0.1)', borderRadius: '12px' }}>
-                                <h3 style={{ color: '#0088cc', marginBottom: '1rem' }}>Telegram Channel</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label><input type="password" value={settings.telegram_bot_token || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Chat ID (e.g. @channelname)</label><input type="text" value={settings.telegram_chat_id || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                </div>
-                            </div>
-
-                            {/* Instagram */}
-                            <div style={{ padding: '1.5rem', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '12px' }}>
-                                <h3 style={{ color: '#fff', marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Instagram Business</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                                    <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#eee' }}>IG User ID (Linked to FB Page)</label><input type="text" value={settings.instagram_user_id || ''} onChange={e => setSettings({ ...settings, instagram_user_id: e.target.value })} className="input-field" style={{ width: '100%', background: 'rgba(0,0,0,0.3)', color: '#fff' }} /></div>
-                                </div>
-                            </div>
-
-                            <button type="submit" className="btn btn-primary" style={{ padding: '1rem' }}>💾 Save Configuration</button>
-                        </form>
-
-                        {/* DANGER ZONE */}
-                        <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #ff4444', borderRadius: '16px', background: 'rgba(255, 68, 68, 0.05)' }}>
-                            <h3 style={{ color: '#ff4444', marginBottom: '1rem' }}>Danger Zone</h3>
-                            <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>This action will wipe all inventory, sales history, and social posts. It cannot be undone.</p>
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    if (confirm('⚠️ ARE YOU SURE? This will DELETE ALL DATA forever.')) {
-                                        if (confirm('Really? Click OK to confirm wiping your entire database.')) {
-                                            await fetch('/api/admin/reset', { method: 'POST' });
-                                            alert('System Reset Complete.');
-                                            window.location.reload();
+                            {/* DANGER ZONE */}
+                            <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #ff4444', borderRadius: '16px', background: 'rgba(255, 68, 68, 0.05)' }}>
+                                <h3 style={{ color: '#ff4444', marginBottom: '1rem' }}>Danger Zone</h3>
+                                <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>This action will wipe all inventory, sales history, and social posts. It cannot be undone.</p>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (confirm('⚠️ ARE YOU SURE? This will DELETE ALL DATA forever.')) {
+                                            if (confirm('Really? Click OK to confirm wiping your entire database.')) {
+                                                await fetch('/api/admin/reset', { method: 'POST' });
+                                                alert('System Reset Complete.');
+                                                window.location.reload();
+                                            }
                                         }
-                                    }
-                                }}
-                                className="btn"
-                                style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '1rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}
-                            >
-                                🗑️ RESET SYSTEM / CLEAR ALL DATA
-                            </button>
+                                    }}
+                                    className="btn"
+                                    style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '1rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                >
+                                    🗑️ RESET SYSTEM / CLEAR ALL DATA
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
             <Footer />
-        </main>
+        </main >
     );
 }

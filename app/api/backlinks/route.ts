@@ -2,15 +2,18 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { sendAuditReport } from '@/lib/email';
+import { query } from '@/lib/db';
 
 const METRICS_DB_PATH = path.join(process.cwd(), 'data', 'domain_metrics.json');
-const SETTINGS_PATH = path.join(process.cwd(), 'data', 'settings.json');
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function getSettings() {
     try {
-        const content = await fs.readFile(SETTINGS_PATH, 'utf8');
-        return JSON.parse(content);
+        // Fetch from SQL Settings Table
+        const rows: any = await query("SELECT * FROM settings");
+        const settings: any = {};
+        rows.forEach((r: any) => settings[r.setting_key] = r.setting_value);
+        return settings;
     } catch { return {}; }
 }
 
