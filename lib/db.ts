@@ -235,4 +235,15 @@ export async function initDB() {
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // 7. Activity Logs
+    await query(`
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id VARCHAR(50) PRIMARY KEY,
+            user VARCHAR(100),
+            action VARCHAR(100),
+            details TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }

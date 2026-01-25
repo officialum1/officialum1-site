@@ -506,6 +506,12 @@ export default function AdminDashboard() {
         } catch { }
     };
 
+    const handleDeleteBlog = async (id: any) => {
+        if (!confirm('Delete blog post?')) return;
+        await fetch('/api/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        fetchData();
+    };
+
     const handlePageSave = async () => {
         try {
             await fetch('/api/pages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ page: pageKey, content: pageContent }) });
