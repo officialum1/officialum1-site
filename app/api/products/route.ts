@@ -50,8 +50,21 @@ export async function POST(req: Request) {
             );
 
             return NextResponse.json({ success: true, count: created.length });
+        } else if (body.action === 'update') {
+            const { id, name, platform, price, description, image } = body;
+            const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
+
+            await query(
+                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ? WHERE id = ?",
+                [name, platform, cleanPrice, description, image, id]
+            );
+
+            // Log activity
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Update Product', `Updated settings for ${name}`]
+            );
         } else {
-            // Create / Update Product in Catalog
+            // Create Product in Catalog
             const { name, platform, price, description, image } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 

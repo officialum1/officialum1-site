@@ -80,6 +80,7 @@ export default function AdminDashboard() {
     const [orders, setOrders] = useState<any[]>([]);
     const [isBulkProduct, setIsBulkProduct] = useState(false);
     const [bulkProductData, setBulkProductData] = useState('');
+    const [editingProduct, setEditingProduct] = useState<any>(null);
 
     // Fulfillment
     const [showFulfill, setShowFulfill] = useState(false);
@@ -412,12 +413,17 @@ export default function AdminDashboard() {
 
     const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
+        const action = editingProduct ? 'update' : 'create';
+        const payload = editingProduct ? { ...newProduct, id: editingProduct.id, action } : { ...newProduct, action };
+
         await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...newProduct, action: 'create' })
+            body: JSON.stringify(payload)
         });
+
         setShowAddProduct(false);
+        setEditingProduct(null);
         setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
         fetchData();
     };
@@ -943,7 +949,24 @@ export default function AdminDashboard() {
                                                 <span>{prod.platform}</span>
                                                 <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
                                             </div>
-                                            <button className="btn btn-outline" style={{ width: '100%', fontSize: '0.8rem' }}>Edit Details</button>
+                                            <button
+                                                onClick={() => {
+                                                    setEditingProduct(prod);
+                                                    setNewProduct({
+                                                        name: prod.name,
+                                                        platform: prod.platform,
+                                                        price: prod.price,
+                                                        description: prod.description || '',
+                                                        image: prod.image || ''
+                                                    });
+                                                    setShowAddProduct(true);
+                                                    setIsBulkProduct(false);
+                                                }}
+                                                className="btn btn-outline"
+                                                style={{ width: '100%', fontSize: '0.8rem' }}
+                                            >
+                                                Edit Details
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -953,14 +976,18 @@ export default function AdminDashboard() {
                             {showAddProduct && (
                                 <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ margin: 0 }}>{isBulkProduct ? 'Bulk Import Shop Products' : 'Add New Product to Shop'}</h3>
-                                        <button
-                                            onClick={() => setIsBulkProduct(!isBulkProduct)}
-                                            className="btn btn-outline"
-                                            style={{ color: '#00ff88', borderColor: '#00ff88' }}
-                                        >
-                                            {isBulkProduct ? 'Switch to Single Entry' : 'Switch to Bulk CSV'}
-                                        </button>
+                                        <h3 style={{ margin: 0 }}>
+                                            {editingProduct ? '📝 Edit Shop Product' : (isBulkProduct ? 'Bulk Import Shop Products' : 'Add New Product to Shop')}
+                                        </h3>
+                                        {!editingProduct && (
+                                            <button
+                                                onClick={() => setIsBulkProduct(!isBulkProduct)}
+                                                className="btn btn-outline"
+                                                style={{ color: '#00ff88', borderColor: '#00ff88' }}
+                                            >
+                                                {isBulkProduct ? 'Switch to Single Entry' : 'Switch to Bulk CSV'}
+                                            </button>
+                                        )}
                                     </div>
 
                                     {!isBulkProduct ? (
@@ -971,8 +998,8 @@ export default function AdminDashboard() {
                                             <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
                                             <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
                                             <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
-                                                <button type="submit" className="btn btn-primary">Create Product</button>
+                                                <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' }); }} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                             </div>
                                         </form>
                                     ) : (
