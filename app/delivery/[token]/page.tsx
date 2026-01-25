@@ -79,20 +79,42 @@ export default function DeliveryPage() {
                     <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px' }}>
                         {(order.details.extraInfo && order.details.extraInfo.includes('\n')) ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {order.details.extraInfo.split('\n').map((line: string, i: number) => {
-                                    const isValue = line.trim().startsWith(':');
+                                {order.details.extraInfo.split('\n').filter((l: string) => l.trim()).map((line: string, i: number) => {
+                                    // Case 1: Value Line (starts with :)
+                                    if (line.trim().startsWith(':')) {
+                                        return (
+                                            <div key={i} style={{
+                                                padding: '1rem', background: '#000', color: '#00ff88', borderRadius: '8px',
+                                                fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'all', marginTop: '-0.2rem'
+                                            }}>
+                                                {line.replace(/^:\s*/, '')}
+                                            </div>
+                                        );
+                                    }
+                                    // Case 2: Label: Value (Inline)
+                                    else if (line.includes(':')) {
+                                        const [label, ...valParts] = line.split(':');
+                                        const val = valParts.join(':').trim();
+                                        // If value is empty, treat as Label
+                                        if (!val) {
+                                            return <div key={i} style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>{line}</div>;
+                                        }
+                                        return (
+                                            <div key={i} style={{ marginTop: '0.5rem' }}>
+                                                <div style={{ color: '#888', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{label}</div>
+                                                <div style={{
+                                                    padding: '1rem', background: '#000', color: '#00ff88', borderRadius: '8px',
+                                                    fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'all'
+                                                }}>
+                                                    {val}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    // Case 3: Label Only
                                     return (
-                                        <div key={i} style={{
-                                            padding: isValue ? '1rem' : '0.5rem 0',
-                                            background: isValue ? '#000' : 'transparent',
-                                            color: isValue ? '#00ff88' : '#888',
-                                            borderRadius: '8px',
-                                            fontWeight: isValue ? 'bold' : 'normal',
-                                            fontSize: isValue ? '1.1rem' : '0.9rem',
-                                            userSelect: 'all',
-                                            marginTop: isValue ? '0' : '0.5rem'
-                                        }}>
-                                            {isValue ? line.replace(/^:\s*/, '') : line}
+                                        <div key={i} style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                            {line}
                                         </div>
                                     );
                                 })}
@@ -124,7 +146,7 @@ export default function DeliveryPage() {
                             </>
                         )}
 
-                        {order.details.extraInfo && (
+                        {order.details.extraInfo && !order.details.extraInfo.includes('\n') && (
                             <div>
                                 <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Additional Notes</label>
                                 <div style={{ fontSize: '1rem', fontStyle: 'italic', color: '#ccc', background: '#000', padding: '1rem', borderRadius: '8px' }}>
