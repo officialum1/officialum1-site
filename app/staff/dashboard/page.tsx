@@ -138,6 +138,29 @@ export default function StaffDashboard() {
         setShowSaleForm(true);
     };
 
+    const handleUpdateStaffProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        try {
+            const res = await fetch('/api/staff/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: staff.id, email, password })
+            });
+
+            if (res.ok) {
+                alert('Profile Updated. Please re-login.');
+                localStorage.removeItem('staff_user');
+                window.location.href = '/staff/login';
+            } else {
+                alert('Update Failed');
+            }
+        } catch (e) { alert('Error updating profile'); }
+    };
+
     if (loading) return <div style={{ background: '#050505', minHeight: '100vh', padding: '100px', color: '#fff' }}>Loading Staff Portal...</div>;
 
     return (
@@ -157,7 +180,7 @@ export default function StaffDashboard() {
 
                 {/* Tab Navigation */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    {['Inventory', 'Leads', 'Marketing'].map(tab => (
+                    {['Inventory', 'Leads', 'Marketing', 'Settings'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab.toLowerCase())}
@@ -366,6 +389,24 @@ export default function StaffDashboard() {
                                 )}
                             </div>
                         </>
+                    )}
+
+                    {/* SETTINGS TAB */}
+                    {activeTab === 'settings' && (
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px', maxWidth: '600px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>My Profile</h2>
+                            <form onSubmit={handleUpdateStaffProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Update Email</label>
+                                    <input name="email" type="email" defaultValue={staff?.email} required className="input-field" style={{ width: '100%' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Change Password (Optional)</label>
+                                    <input name="password" type="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
+                                </div>
+                                <button type="submit" className="btn btn-primary">Save Changes & Logout</button>
+                            </form>
+                        </div>
                     )}
 
                 </div>

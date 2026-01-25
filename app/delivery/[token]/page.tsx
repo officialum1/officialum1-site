@@ -84,13 +84,13 @@ export default function DeliveryPage() {
                         {/* Header */}
                         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                             <div style={{
-                                width: '64px', height: '64px', background: '#fff', borderRadius: '50%',
+                                width: '80px', height: '80px', background: '#3b82f6', borderRadius: '50%',
                                 margin: '0 auto 1rem auto', display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                overflow: 'hidden'
+                                boxShadow: '0 4px 20px rgba(59,130,246,0.3)'
                             }}>
-                                <img src="/logo.png" alt="UM1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=UM1&background=random'; }} />
+                                <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#09090b', fontFamily: 'sans-serif' }}>UM</span>
                             </div>
-                            <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.2rem', color: '#fff' }}>officialum1</h1>
+                            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.2rem', color: '#fff' }}>officialum1</h1>
                             <p style={{ color: '#666', fontSize: '0.9rem' }}>Secure Account Delivery</p>
                         </div>
 

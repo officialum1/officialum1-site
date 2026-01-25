@@ -98,6 +98,8 @@ export default function AdminDashboard() {
                 fetch('/api/admin/settings'),
                 fetch('/api/hr/employees'),
                 fetch('/api/admin/logs'),
+                // We should also fetch generic settings table if we want to show current admin email, but keeping it simple for now (write-only for password)
+
                 fetch('/api/products'),
                 fetch('/api/admin/orders')
             ]);
@@ -221,6 +223,32 @@ export default function AdminDashboard() {
             alert('Reply Sent');
             fetchData();
         } catch { alert('Failed to send reply'); }
+    };
+
+    const handleUpdateAdminProfile = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        if (!email && !password) return;
+
+        try {
+            const res = await fetch('/api/admin/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (res.ok) {
+                alert('Admin Profile Updated!');
+                (e.target as HTMLFormElement).reset();
+            } else {
+                alert('Failed to update profile');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error updating profile');
+        }
     };
 
     const handleSaveSettings = async (e: React.FormEvent) => {
@@ -867,7 +895,7 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {balanceHistory && balanceHistory.filter((t: any) => !t.deliveryToken).length > 0 ? balanceHistory.filter((t: any) => !t.deliveryToken).map((sale: any) => (
+                                    {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
                                         <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                             <td style={{ padding: '1rem' }}>{sale.description}</td>
                                             <td style={{ padding: '1rem' }}>{sale.platform}</td>
@@ -878,11 +906,39 @@ export default function AdminDashboard() {
                                                 {Number(sale.amount).toLocaleString()}
                                             </td>
                                             <td style={{ padding: '1rem' }}>
-                                                <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
+                                                {sale.deliveryToken ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
+                                                                setCopiedId(sale.id);
+                                                                setTimeout(() => setCopiedId(null), 2000);
+                                                            }}
+                                                            style={{
+                                                                background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
+                                                                border: '1px solid #00ff88',
+                                                                color: '#00ff88',
+                                                                borderRadius: '4px',
+                                                                padding: '0.4rem 0.8rem',
+                                                                cursor: 'pointer',
+                                                                fontSize: '0.8rem',
+                                                                minWidth: '100px',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                        >
+                                                            {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
+                                                        </button>
+                                                        <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                                                            👁️ {sale.deliveryViews || 0}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
+                                                )}
                                             </td>
                                         </tr>
                                     )) : (
-                                        <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No generic transactions found (Check Sales Tab for orders).</td></tr>
+                                        <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -1225,6 +1281,25 @@ export default function AdminDashboard() {
                 {/* SETTINGS TAB */}
                 {activeTab === 'settings' && (
                     <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+
+                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Admin Security</h2>
+                        <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2rem' }}>
+                            <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Change Admin Credentials</h3>
+                            <form onSubmit={handleUpdateAdminProfile} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) auto', alignItems: 'end' }}>
+                                <div>
+                                    <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Email (Optional)</label>
+                                    <input type="email" name="email" placeholder="admin@example.com" className="input-field" style={{ width: '100%' }} />
+                                </div>
+                                <div>
+                                    <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Password</label>
+                                    <input type="password" name="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
+                                </div>
+                                <div>
+                                    <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Update Profile</button>
+                                </div>
+                            </form>
+                        </div>
+
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
                         <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
 
