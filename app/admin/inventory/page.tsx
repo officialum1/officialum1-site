@@ -75,6 +75,12 @@ export default function AdminDashboard() {
     const [catalog, setCatalog] = useState<any[]>([]);
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
+    const [orders, setOrders] = useState<any[]>([]);
+
+    // Fulfillment
+    const [showFulfill, setShowFulfill] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [fulfillDetails, setFulfillDetails] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -82,7 +88,7 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         try {
-            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes] = await Promise.all([
+            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
                 fetch('/api/leads'),
@@ -90,7 +96,8 @@ export default function AdminDashboard() {
                 fetch('/api/admin/settings'),
                 fetch('/api/hr/employees'),
                 fetch('/api/admin/logs'),
-                fetch('/api/products')
+                fetch('/api/products'),
+                fetch('/api/admin/orders')
             ]);
 
             const invData = await invRes.json();
@@ -101,6 +108,7 @@ export default function AdminDashboard() {
             const empData = await empRes.json();
             const logsData = await logsRes.json();
             const catData = await catRes.json();
+            const ordersData = await ordersRes.json();
 
             // Fail-safe Ticket Fetch (Don't crash if DB is down)
             let ticketData = [];
@@ -117,6 +125,7 @@ export default function AdminDashboard() {
             setEmployees(empData);
             setLogs(logsData);
             setCatalog(catData);
+            setOrders(ordersData);
             setTickets(ticketData);
             calculateStats(balData, empData, invData);
         } catch (e) {
@@ -232,6 +241,28 @@ export default function AdminDashboard() {
         setShowAddPost(false);
         setNewPost({ content: '', platforms: ['All'] });
         fetchData();
+    };
+
+    const handleFulfill = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedOrder || !fulfillDetails) return;
+
+        try {
+            const res = await fetch('/api/admin/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: selectedOrder.orderId, credentials: fulfillDetails })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Order Fulfilled Successfully! Email sent to customer.');
+                setShowFulfill(false);
+                setFulfillDetails('');
+                fetchData();
+            } else {
+                alert('Fulfillment Error: ' + data.error);
+            }
+        } catch (e) { alert('Network Error'); }
     };
 
     const handleAddProduct = async (e: React.FormEvent) => {
@@ -372,265 +403,94 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* INVENTORY TAB */}
+                {/* ORDERS TAB (Formerly Inventory) */}
                 {activeTab === 'inventory' && (
-                    <>
-                        {/* Balance Cards */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: 'rgba(0,100,255,0.1)' }}>
-                                <h3 style={{ color: '#888', fontSize: '0.9rem' }}>Z2U Balance</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.z2u.toFixed(2)}</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: 'rgba(255,100,0,0.1)' }}>
-                                <h3 style={{ color: '#888', fontSize: '0.9rem' }}>PlayerUp Balance</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.playerup.toFixed(2)}</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: 'rgba(255,0,0,0.1)' }}>
-                                <h3 style={{ color: '#888', fontSize: '0.9rem' }}>G2G Balance</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.g2g.toFixed(2)}</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: 'rgba(0,255,136,0.1)' }}>
-                                <h3 style={{ color: '#888', fontSize: '0.9rem' }}>Direct / Other</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.direct.toFixed(2)}</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid #00ff88' }}>
-                                <h3 style={{ color: '#00ff88', fontSize: '0.9rem' }}>TOTAL REVENUE</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.total.toFixed(2)}</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid #ffd700' }}>
-                                <h3 style={{ color: '#ffd700', fontSize: '0.9rem' }}>NET PROFIT</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.profit.toFixed(2)}</div>
-                                <div style={{ fontSize: '0.8rem', color: stats.margin > 30 ? '#00ff88' : 'orange' }}>{stats.margin.toFixed(1)}% Margin</div>
-                            </div>
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid #aaa' }}>
-                                <h3 style={{ color: '#aaa', fontSize: '0.9rem' }}>ASSETS (STOCK)</h3>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>${stats.stockValue.toFixed(2)}</div>
-                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Unsold Inventory</div>
-                            </div>
-                        </div>
+                    <div className="FadeIn">
+                        <h2 style={{ marginBottom: '1.5rem', fontFamily: 'var(--font-outfit)' }}>📦 Customer Orders</h2>
 
-                        {/* Department Performance */}
-                        <div style={{ marginBottom: '3rem' }}>
-                            <h3 style={{ marginBottom: '1rem', color: '#888', fontSize: '1rem' }}>Sales by Department (Commission Pool)</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                                {Object.keys(stats.deptBreakdown || {}).length > 0 ? Object.keys(stats.deptBreakdown).map(dept => (
-                                    <div key={dept} className="glass" style={{ padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <h4 style={{ color: '#aaa', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{dept}</h4>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>${stats.deptBreakdown[dept].toFixed(2)}</div>
-                                    </div>
-                                )) : <div style={{ color: '#666' }}>No departmental sales data yet.</div>}
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-                            <button onClick={() => setShowAddInv(true)} className="btn btn-outline">+ Add Inventory Item</button>
-                            <button onClick={() => setShowRecordSale(true)} className="btn btn-primary">+ Record New Sale</button>
-                            <button onClick={() => fetchData()} className="btn btn-outline" style={{ marginLeft: 'auto' }}>↻ Refresh</button>
-                        </div>
-
-                        {/* Forms Area */}
-                        {showAddInv && (
-                            <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: 0 }}>{isBulk ? 'Bulk Import Accounts' : 'Add Inventory Stock'}</h3>
-                                    <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.1)', padding: '4px', borderRadius: '8px' }}>
-                                        <button type="button" onClick={() => setIsBulk(false)} style={{ padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', background: !isBulk ? '#00ff88' : 'transparent', color: !isBulk ? '#000' : '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Single</button>
-                                        <button type="button" onClick={() => setIsBulk(true)} style={{ padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', background: isBulk ? '#00ff88' : 'transparent', color: isBulk ? '#000' : '#fff', cursor: 'pointer', fontWeight: 'bold' }}>Bulk</button>
-                                    </div>
-                                </div>
-
-                                <form onSubmit={isBulk ? handleBulkImport : handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform / Game</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name / Prefix</label><input type="text" className="input-field" required={!isBulk} value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder={isBulk ? "e.g. Fortnite Acc" : "Product Title"} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
-
-                                    {!isBulk ? (
-                                        <>
-                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Username / Login</label><input type="text" className="input-field" value={newItem.username || ''} onChange={e => setNewItem({ ...newItem, username: e.target.value })} style={{ width: '100%' }} /></div>
-                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" className="input-field" value={newItem.password || ''} onChange={e => setNewItem({ ...newItem, password: e.target.value })} style={{ width: '100%' }} /></div>
-                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Access (Optional)</label><input type="text" className="input-field" value={newItem.email || ''} onChange={e => setNewItem({ ...newItem, email: e.target.value })} style={{ width: '100%' }} /></div>
-                                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Extra Info (2FA/Recovery)</label><input type="text" className="input-field" value={newItem.extraInfo || ''} onChange={e => setNewItem({ ...newItem, extraInfo: e.target.value })} style={{ width: '100%' }} /></div>
-                                        </>
-                                    ) : (
-                                        <div style={{ gridColumn: 'span 2' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                                <label style={{ display: 'block', color: '#ccc' }}>Paste Accounts / Upload File</label>
-                                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                                    <label style={{ cursor: 'pointer', color: '#00ff88', fontSize: '0.8rem', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        📂 Upload File
-                                                        <input
-                                                            type="file"
-                                                            accept=".txt,.csv"
-                                                            style={{ display: 'none' }}
-                                                            onChange={(e) => {
-                                                                const file = e.target.files?.[0];
-                                                                if (!file) return;
-                                                                const reader = new FileReader();
-                                                                reader.onload = (ev) => {
-                                                                    const text = ev.target?.result as string;
-                                                                    setBulkData(text);
-                                                                };
-                                                                reader.readAsText(file);
-                                                            }}
-                                                        />
-                                                    </label>
+                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                                <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                    <tr>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Order ID</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Product</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Customer</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                        <th style={{ padding: '1rem', textAlign: 'left' }}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {orders.map((order: any) => (
+                                        <tr key={order.orderId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '1rem' }}>{new Date(order.date).toLocaleDateString()}</td>
+                                            <td style={{ padding: '1rem', fontFamily: 'monospace' }}>#{order.orderId ? order.orderId.slice(-6) : 'N/A'}</td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <div style={{ fontWeight: 'bold' }}>{order.product_name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#666' }}>{order.platform}</div>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <div>{order.guestEmail || 'Registered User'}</div>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                <span style={{
+                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                    background: order.status === 'completed' ? 'rgba(0,255,136,0.2)' : 'rgba(255,165,0,0.2)',
+                                                    color: order.status === 'completed' ? '#00ff88' : '#ffa500'
+                                                }}>
+                                                    {order.status ? order.status.toUpperCase() : 'PENDING'}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '1rem' }}>
+                                                {order.status !== 'completed' && (
                                                     <button
-                                                        type="button"
                                                         onClick={() => {
-                                                            const element = document.createElement("a");
-                                                            const file = new Blob(["# Format: username:password OR username:password:email\n# Example:\nuser1:pass123\ngamer2:hunter2:recovery@email.com\npro_player:secret99"], { type: 'text/plain' });
-                                                            element.href = URL.createObjectURL(file);
-                                                            element.download = "accounts_template.txt";
-                                                            document.body.appendChild(element);
-                                                            element.click();
+                                                            setSelectedOrder(order);
+                                                            setShowFulfill(true);
                                                         }}
-                                                        style={{ background: 'transparent', border: 'none', color: '#888', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}
+                                                        className="btn btn-primary"
+                                                        style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
                                                     >
-                                                        ⬇️ Download Template
+                                                        Fulfill
                                                     </button>
-                                                </div>
-                                            </div>
-                                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>Format: <code>username:password</code> or <code>username:password:email</code></p>
-                                            <textarea value={bulkData} onChange={e => setBulkData(e.target.value)} className="input-field" style={{ height: '150px', fontFamily: 'monospace', width: '100%' }} placeholder="user1:pass1&#10;user2:pass2:email2" />
-                                        </div>
-                                    )}
-
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                        <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
-                                        <button type="submit" className="btn btn-primary">{isBulk ? 'Bulk Import' : 'Add Item'}</button>
-                                    </div>
-                                </form>
-                            </div>
-                        )}
-
-                        {showRecordSale && (
-                            <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88' }}>
-                                <h3 style={{ marginBottom: '1rem', color: '#00ff88' }}>Record a Sale & Deliver</h3>
-                                <form onSubmit={handleRecordSale} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-                                    {/* Inventory Selector */}
-                                    <select
-                                        className="input-field"
-                                        value={newSale.inventoryId}
-                                        onChange={e => {
-                                            const id = e.target.value;
-                                            const item = inventory.find(i => i.id === id);
-                                            if (item) {
-                                                setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform });
-                                            } else {
-                                                setNewSale({ ...newSale, inventoryId: '' });
-                                            }
-                                        }}
-                                        style={{ width: '100%', border: '1px solid #333', background: '#111', color: '#00ff88' }}
-                                    >
-                                        <option value="">-- Quick Select Inventory Item (Auto-Fill) --</option>
-                                        {inventory.filter(i => i.status === 'In Stock').map(i => (
-                                            <option key={i.id} value={i.id}>{i.platform} | {i.name}</option>
-                                        ))}
-                                    </select>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
-                                        <input placeholder="Description / Order ID" value={newSale.description} onChange={e => setNewSale({ ...newSale, description: e.target.value })} className="input-field" required />
-                                        <select value={newSale.platform} onChange={e => setNewSale({ ...newSale, platform: e.target.value })} className="input-field">
-                                            <option value="Z2U">Z2U</option>
-                                            <option value="PlayerUp">PlayerUp</option>
-                                            <option value="G2G">G2G</option>
-                                            <option value="Direct">Direct</option>
-                                        </select>
-                                        <input type="number" placeholder="Sale Price ($)" value={newSale.salePrice} onChange={e => setNewSale({ ...newSale, salePrice: e.target.value })} className="input-field" required />
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88', fontSize: '0.9rem' }}>Upload Proof of Delivery (Optional)</label>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) {
-                                                        const reader = new FileReader();
-                                                        reader.onloadend = () => {
-                                                            setNewSale({ ...newSale, proofImage: reader.result as string });
-                                                        };
-                                                        reader.readAsDataURL(file);
-                                                    }
-                                                }}
-                                                style={{ color: '#ccc', fontSize: '0.9rem' }}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Record & Deliver</button>
-                                            <button type="button" onClick={() => setShowRecordSale(false)} className="btn btn-outline">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        )}
-
-                        <div style={{ marginTop: '2rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h2 style={{ margin: 0 }}>📦 Inventory Stock</h2>
-                                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                                    <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
-                                    <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
-                                </div>
-                            </div>
-
-                            {viewMode === 'summary' ? (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
-                                        const items = inventory.filter(i => i.name === name);
-                                        const activeItems = items.filter(i => i.status === 'In Stock');
-                                        const inStock = activeItems.length;
-                                        const platform = activeItems[0]?.platform || 'Unknown';
-
-                                        if (inStock === 0) return null;
-
-                                        return (
-                                            <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
-                                                    ACTIVE
-                                                </div>
-                                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
-                                                <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
-
-                                                <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available Stock</div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    {inventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
-                                </div>
-                            ) : (
-                                <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                                        <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                            <tr>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Item Name</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
-                                                <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {inventory.filter(i => i.status === 'In Stock').map((item: any) => (
-                                                <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <td style={{ padding: '1rem' }}>{item.name}</td>
-                                                    <td style={{ padding: '1rem' }}>{item.platform}</td>
-                                                    <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
-                                                    <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
-                                                </tr>
-                                            ))}
-                                            {inventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                                                )}
+                                                {order.status === 'completed' && <span style={{ color: '#666', fontSize: '0.8rem' }}>Delivered</span>}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {orders.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No orders found yet.</td></tr>}
+                                </tbody>
+                            </table>
                         </div>
-                    </>
+
+                        {/* Fulfill Modal */}
+                        {showFulfill && selectedOrder && (
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', width: '500px', maxWidth: '90%' }}>
+                                    <h3 style={{ marginBottom: '1rem' }}>Fulfill Order #{selectedOrder.orderId.slice(-6)}</h3>
+                                    <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>Send delivery details for <b>{selectedOrder.product_name}</b> to <b>{selectedOrder.guestEmail}</b>.</p>
+
+                                    <form onSubmit={handleFulfill}>
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Credentials / Delivery Info</label>
+                                        <textarea
+                                            className="input-field"
+                                            rows={6}
+                                            placeholder="Enter Email:Password or Download Link here..."
+                                            value={fulfillDetails}
+                                            onChange={e => setFulfillDetails(e.target.value)}
+                                            required
+                                            style={{ width: '100%', marginBottom: '1.5rem', fontFamily: 'monospace' }}
+                                        />
+
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                            <button type="button" onClick={() => setShowFulfill(false)} className="btn btn-outline">Cancel</button>
+                                            <button type="submit" className="btn btn-primary">Complete & Send Email</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 )}
 
                 {/* CATALOG TAB */}
