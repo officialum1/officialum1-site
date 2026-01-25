@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             console.log("Using Gemini API...");
             const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.`;
             try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
