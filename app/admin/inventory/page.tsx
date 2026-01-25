@@ -80,6 +80,7 @@ export default function AdminDashboard() {
     const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
     const [orders, setOrders] = useState<any[]>([]);
     const [isBulkProduct, setIsBulkProduct] = useState(false);
+    const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u'>('manual');
     const [bulkProductData, setBulkProductData] = useState('');
     const [editingProduct, setEditingProduct] = useState<any>(null);
 
@@ -442,10 +443,46 @@ export default function AdminDashboard() {
             });
             setShowAddProduct(false);
             setBulkProductData('');
-            setIsBulkProduct(false);
+            setImportMode('manual');
             fetchData();
             alert('Bulk Products Imported!');
         } catch { alert('Failed to import products'); }
+    };
+
+    const handleZ2UMagicSync = (data: string) => {
+        // Regex to find titles and prices in Z2U copy-pasted text
+        // Usually looks like: "Product Title ... $ 10.00"
+        const products: string[] = [];
+
+        // This is a common pattern for Z2U listings in text form
+        // We look for titles followed by price components
+        const lines = data.split('\n');
+        let currentTitle = '';
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            // Detect Price line (Starts with $ or contains USD digits)
+            const priceMatch = line.match(/\$\s*([0-9.]+)/) || line.match(/USD\s*([0-9.]+)/);
+
+            if (priceMatch && currentTitle) {
+                const price = priceMatch[1];
+                products.push(`${currentTitle},Reddit,${price},Imported from Z2U store,`);
+                currentTitle = ''; // Reset
+            } else if (line.length > 20 && !line.includes('http') && !line.includes('Login')) {
+                // Heuristic for title: long text, not a link, not a UI element
+                currentTitle = line;
+            }
+        }
+
+        if (products.length > 0) {
+            setBulkProductData(products.join('\n'));
+            setImportMode('csv');
+            alert(`🪄 Magic Sync Found ${products.length} Products! Review them below and click 'Start Upload'`);
+        } else {
+            alert('❌ Could not find any products in the pasted text. Try copying the entire list including prices.');
+        }
     };
 
     const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -990,20 +1027,18 @@ export default function AdminDashboard() {
                                 <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                         <h3 style={{ margin: 0 }}>
-                                            {editingProduct ? '📝 Edit Shop Product' : (isBulkProduct ? 'Bulk Import Shop Products' : 'Add New Product to Shop')}
+                                            {editingProduct ? '📝 Edit Shop Product' : (importMode === 'manual' ? 'Add New Product' : 'Bulk Product Import')}
                                         </h3>
                                         {!editingProduct && (
-                                            <button
-                                                onClick={() => setIsBulkProduct(!isBulkProduct)}
-                                                className="btn btn-outline"
-                                                style={{ color: '#00ff88', borderColor: '#00ff88' }}
-                                            >
-                                                {isBulkProduct ? 'Switch to Single Entry' : 'Switch to Bulk CSV'}
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button onClick={() => setImportMode('manual')} className={`btn ${importMode === 'manual' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Single Entry</button>
+                                                <button onClick={() => setImportMode('csv')} className={`btn ${importMode === 'csv' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Bulk CSV</button>
+                                                <button onClick={() => setImportMode('z2u')} className={`btn ${importMode === 'z2u' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00ff88', borderColor: '#00ff88' }}>🪄 Z2U Magic Sync</button>
+                                            </div>
                                         )}
                                     </div>
 
-                                    {!isBulkProduct ? (
+                                    {importMode === 'manual' ? (
                                         <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                             <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
                                             <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
@@ -1015,6 +1050,36 @@ export default function AdminDashboard() {
                                                 <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                             </div>
                                         </form>
+                                    ) : importMode === 'z2u' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.05) 100%)', padding: '2rem', borderRadius: '16px', border: '1px solid #00ff88', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪄</div>
+                                                <h4 style={{ marginBottom: '1rem' }}>Express Z2U Sync</h4>
+                                                <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
+                                                    Z2U prevents automated tools from reading prices. To bypass this, simply:
+                                                    <br /><br />
+                                                    1. Go to your <a href="https://www.z2u.com/reddit/accounts-5-15132?seller=265820" target="_blank" style={{ color: '#00ff88' }}>Z2U Seller Page</a>
+                                                    <br />
+                                                    2. Press <b>Ctrl + A</b> (Select All) then <b>Ctrl + C</b> (Copy)
+                                                    <br />
+                                                    3. Paste everything in the box below
+                                                </p>
+
+                                                <textarea
+                                                    className="input-field"
+                                                    placeholder="Paste everything from Z2U page here..."
+                                                    style={{ width: '100%', height: '150px', background: 'rgba(0,0,0,0.5)', marginBottom: '1.5rem' }}
+                                                    onChange={(e) => handleZ2UMagicSync(e.target.value)}
+                                                />
+
+                                                <div style={{ color: '#888', fontSize: '0.8rem' }}>
+                                                    I will automatically extract all Product Titles and Prices for you.
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                <button type="button" onClick={() => setImportMode('manual')} className="btn btn-outline">Cancel</button>
+                                            </div>
+                                        </div>
                                     ) : (
                                         <form onSubmit={handleBulkProductImport} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                             <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
