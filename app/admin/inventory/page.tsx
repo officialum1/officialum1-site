@@ -56,6 +56,7 @@ export default function AdminDashboard() {
         password?: string;
         email?: string;
         extraInfo?: string;
+        credentials?: string;
     }>({ name: '', platform: 'Z2U', purchasePrice: '' });
     const [showAddPost, setShowAddPost] = useState(false);
     const [newPost, setNewPost] = useState<{ content: string; platforms: string[] }>({ content: '', platforms: ['All'] });
@@ -280,13 +281,39 @@ export default function AdminDashboard() {
 
     const handleAddInventory = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        let finalUser = newItem.username || '';
+        let finalPass = newItem.password || '';
+        let finalExtra = newItem.extraInfo || '';
+
+        // Parsing Logic for Single Box
+        if (newItem.credentials) {
+            const text = newItem.credentials.trim();
+            if (text.includes(':')) {
+                const parts = text.split(':');
+                finalUser = parts[0];
+                finalPass = parts[1];
+                finalExtra = parts.slice(2).join(':');
+            } else {
+                finalUser = text;
+            }
+        }
+
         await fetch('/api/admin/inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add_inventory', ...newItem })
+            body: JSON.stringify({
+                action: 'add_inventory',
+                name: newItem.name,
+                platform: newItem.platform,
+                purchasePrice: newItem.purchasePrice,
+                username: finalUser,
+                password: finalPass,
+                extraInfo: finalExtra
+            })
         });
         setShowAddInv(false);
-        setNewItem({ name: '', platform: 'Z2U', purchasePrice: '' });
+        setNewItem({ name: '', platform: 'Z2U', purchasePrice: '', credentials: '' });
         fetchData();
     };
 
@@ -578,10 +605,18 @@ export default function AdminDashboard() {
                                     <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
                                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Username / Login</label><input type="text" className="input-field" value={newItem.username || ''} onChange={e => setNewItem({ ...newItem, username: e.target.value })} style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" className="input-field" value={newItem.password || ''} onChange={e => setNewItem({ ...newItem, password: e.target.value })} style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Extra Info</label><input type="text" className="input-field" value={newItem.extraInfo || ''} onChange={e => setNewItem({ ...newItem, extraInfo: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div style={{ gridColumn: 'span 2' }}><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
+
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Account Credentials (Paste Full)</label>
+                                            <textarea
+                                                className="input-field"
+                                                value={newItem.credentials || ''}
+                                                onChange={e => setNewItem({ ...newItem, credentials: e.target.value })}
+                                                style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
+                                                placeholder="Paste detail here (e.g. user:pass:email or just user:pass)"
+                                            />
+                                        </div>
 
                                         <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                             <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
