@@ -413,6 +413,18 @@ export default function AdminDashboard() {
         } catch (e) { alert('Network Error'); }
     };
 
+    const handleDeleteProduct = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this product from the shop?')) return;
+        try {
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete', id })
+            });
+            fetchData();
+        } catch { alert('Failed to delete product'); }
+    };
+
     const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         const action = editingProduct ? 'update' : 'create';
@@ -479,7 +491,7 @@ export default function AdminDashboard() {
                 else if (lower.includes('google') || lower.includes('gmail')) platform = 'Google';
                 else if (lower.includes('viber')) platform = 'Viber';
 
-                products.push(`${currentTitle},${platform},${price},Imported from Z2U store,`);
+                products.push(`${currentTitle},${platform},${price},Premium quality account verified and ready for use.,`);
                 currentTitle = ''; // Reset
             } else if (line.length > 20 && !line.includes('http') && !line.includes('Login')) {
                 // Heuristic for title: long text, not a link, not a UI element
@@ -998,7 +1010,7 @@ export default function AdminDashboard() {
                                                 <span>{prod.platform}</span>
                                                 <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.4rem' }}>
                                                 <button
                                                     onClick={() => {
                                                         setEditingProduct(prod);
@@ -1010,22 +1022,30 @@ export default function AdminDashboard() {
                                                             image: prod.image || ''
                                                         });
                                                         setShowAddProduct(true);
-                                                        setIsBulkProduct(false);
+                                                        setImportMode('manual');
                                                     }}
                                                     className="btn btn-outline"
-                                                    style={{ flex: 1, fontSize: '0.8rem' }}
+                                                    style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }}
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(`${window.location.origin}/shop/${prod.id}`);
-                                                        alert('Link Copied to Clipboard!');
+                                                        alert('Link Copied!');
                                                     }}
                                                     className="btn btn-outline"
-                                                    style={{ flex: 1, fontSize: '0.8rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)' }}
+                                                    style={{ flex: 1, fontSize: '0.75rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)', padding: '0.5rem' }}
                                                 >
                                                     🔗 Link
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteProduct(prod.id)}
+                                                    className="btn btn-outline"
+                                                    style={{ flex: 0.5, fontSize: '0.75rem', color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', padding: '0.5rem' }}
+                                                    title="Delete Product"
+                                                >
+                                                    🗑️
                                                 </button>
                                             </div>
                                         </div>
@@ -1035,119 +1055,126 @@ export default function AdminDashboard() {
                             </div>
 
                             {showAddProduct && (
-                                <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ margin: 0 }}>
-                                            {editingProduct ? '📝 Edit Shop Product' : (importMode === 'manual' ? 'Add New Product' : 'Bulk Product Import')}
-                                        </h3>
-                                        {!editingProduct && (
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button onClick={() => setImportMode('manual')} className={`btn ${importMode === 'manual' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Single Entry</button>
-                                                <button onClick={() => setImportMode('csv')} className={`btn ${importMode === 'csv' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Bulk CSV</button>
-                                                <button onClick={() => setImportMode('z2u')} className={`btn ${importMode === 'z2u' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00ff88', borderColor: '#00ff88' }}>🪄 Z2U Magic Sync</button>
-                                            </div>
-                                        )}
-                                    </div>
+                                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                                    <div className="glass" style={{ width: '100%', maxWidth: '900px', padding: '3rem', borderRadius: '30px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
+                                        <button
+                                            onClick={() => { setShowAddProduct(false); setEditingProduct(null); }}
+                                            style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer', zIndex: 10 }}
+                                        >✕</button>
 
-                                    {importMode === 'manual' ? (
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
-                                            <div style={{ textAlign: 'center' }}>
-                                                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '16px', padding: '2rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                                    <img src={getPlatformIcon(newProduct.platform, newProduct.image)} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                            <h3 style={{ margin: 0 }}>
+                                                {editingProduct ? '📝 Edit Shop Product' : (importMode === 'manual' ? 'Add New Product' : 'Bulk Product Import')}
+                                            </h3>
+                                            {!editingProduct && (
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    <button onClick={() => setImportMode('manual')} className={`btn ${importMode === 'manual' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Single Entry</button>
+                                                    <button onClick={() => setImportMode('csv')} className={`btn ${importMode === 'csv' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Bulk CSV</button>
+                                                    <button onClick={() => setImportMode('z2u')} className={`btn ${importMode === 'z2u' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00ff88', borderColor: '#00ff88' }}>🪄 Z2U Magic Sync</button>
                                                 </div>
-                                                <p style={{ fontSize: '0.8rem', color: '#888' }}>Icon Preview</p>
+                                            )}
+                                        </div>
+
+                                        {importMode === 'manual' ? (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
+                                                <div style={{ textAlign: 'center' }}>
+                                                    <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '16px', padding: '2rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                        <img src={getPlatformIcon(newProduct.platform, newProduct.image)} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                                    </div>
+                                                    <p style={{ fontSize: '0.8rem', color: '#888' }}>Icon Preview</p>
+                                                </div>
+                                                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                                    <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
+                                                    <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
+                                                    <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                                    <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
+                                                    <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
+                                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' }); }} className="btn btn-outline">Cancel</button>
+                                                        <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
+                                                    </div>
+                                                </form>
                                             </div>
-                                            <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                                <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
-                                                <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
-                                                <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
-                                                <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
-                                                <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
-                                                <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                    <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' }); }} className="btn btn-outline">Cancel</button>
-                                                    <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
+                                        ) : importMode === 'z2u' ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                <div style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.05) 100%)', padding: '2rem', borderRadius: '16px', border: '1px solid #00ff88', textAlign: 'center' }}>
+                                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪄</div>
+                                                    <h4 style={{ marginBottom: '1rem' }}>Express Z2U Sync</h4>
+                                                    <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
+                                                        Z2U prevents automated tools from reading prices. To bypass this, simply:
+                                                        <br /><br />
+                                                        1. Go to your <a href="https://www.z2u.com/reddit/accounts-5-15132?seller=265820" target="_blank" style={{ color: '#00ff88' }}>Z2U Seller Page</a>
+                                                        <br />
+                                                        2. Press <b>Ctrl + A</b> (Select All) then <b>Ctrl + C</b> (Copy)
+                                                        <br />
+                                                        3. Paste everything in the box below
+                                                    </p>
+
+                                                    <textarea
+                                                        className="input-field"
+                                                        placeholder="Paste everything from Z2U page here..."
+                                                        style={{ width: '100%', height: '150px', background: 'rgba(0,0,0,0.5)', marginBottom: '1.5rem' }}
+                                                        onChange={(e) => handleZ2UMagicSync(e.target.value)}
+                                                    />
+
+                                                    <div style={{ color: '#888', fontSize: '0.8rem' }}>
+                                                        I will automatically extract all Product Titles and Prices for you.
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                    <button type="button" onClick={() => setImportMode('manual')} className="btn btn-outline">Cancel</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <form onSubmit={handleBulkProductImport} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                        <p style={{ color: '#00ff88', fontSize: '1rem', margin: 0, fontWeight: 'bold' }}>1. Get Template File</p>
+                                                        <a href="/catalog_template.csv" download className="btn btn-outline" style={{ color: '#00ff88', borderColor: '#00ff88', padding: '0.4rem 1rem', fontSize: '0.8rem' }}>
+                                                            📥 Download Excel Template
+                                                        </a>
+                                                    </div>
+                                                    <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                                                        Download the template, fill it in Excel, save it, and then upload it below.
+                                                    </p>
+
+                                                    <p style={{ color: '#00ff88', fontSize: '1rem', margin: '0 0 1rem 0', fontWeight: 'bold' }}>2. Upload your Sheet</p>
+                                                    <input
+                                                        type="file"
+                                                        accept=".csv"
+                                                        onChange={handleProductFileChange}
+                                                        style={{
+                                                            background: 'rgba(255,255,255,0.03)',
+                                                            padding: '1.5rem',
+                                                            borderRadius: '10px',
+                                                            border: '2px dashed rgba(0,255,136,0.3)',
+                                                            width: '100%',
+                                                            color: '#aaa',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div style={{ opacity: bulkProductData ? 1 : 0.5 }}>
+                                                    <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Preview / Manual Data (Optional)</label>
+                                                    <textarea
+                                                        className="input-field"
+                                                        placeholder="Data from your file will appear here automatically..."
+                                                        value={bulkProductData}
+                                                        onChange={e => setBulkProductData(e.target.value)}
+                                                        style={{ width: '100%', height: '150px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                                                    />
+                                                </div>
+
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                    <button type="button" onClick={() => { setShowAddProduct(false); setBulkProductData(''); }} className="btn btn-outline">Cancel</button>
+                                                    <button type="submit" className="btn btn-primary" disabled={!bulkProductData} style={{ padding: '0.8rem 2rem' }}>
+                                                        ✅ Start Upload Process
+                                                    </button>
                                                 </div>
                                             </form>
-                                        </div>
-                                    ) : importMode === 'z2u' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.05) 100%)', padding: '2rem', borderRadius: '16px', border: '1px solid #00ff88', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🪄</div>
-                                                <h4 style={{ marginBottom: '1rem' }}>Express Z2U Sync</h4>
-                                                <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
-                                                    Z2U prevents automated tools from reading prices. To bypass this, simply:
-                                                    <br /><br />
-                                                    1. Go to your <a href="https://www.z2u.com/reddit/accounts-5-15132?seller=265820" target="_blank" style={{ color: '#00ff88' }}>Z2U Seller Page</a>
-                                                    <br />
-                                                    2. Press <b>Ctrl + A</b> (Select All) then <b>Ctrl + C</b> (Copy)
-                                                    <br />
-                                                    3. Paste everything in the box below
-                                                </p>
-
-                                                <textarea
-                                                    className="input-field"
-                                                    placeholder="Paste everything from Z2U page here..."
-                                                    style={{ width: '100%', height: '150px', background: 'rgba(0,0,0,0.5)', marginBottom: '1.5rem' }}
-                                                    onChange={(e) => handleZ2UMagicSync(e.target.value)}
-                                                />
-
-                                                <div style={{ color: '#888', fontSize: '0.8rem' }}>
-                                                    I will automatically extract all Product Titles and Prices for you.
-                                                </div>
-                                            </div>
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                                <button type="button" onClick={() => setImportMode('manual')} className="btn btn-outline">Cancel</button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <form onSubmit={handleBulkProductImport} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                    <p style={{ color: '#00ff88', fontSize: '1rem', margin: 0, fontWeight: 'bold' }}>1. Get Template File</p>
-                                                    <a href="/catalog_template.csv" download className="btn btn-outline" style={{ color: '#00ff88', borderColor: '#00ff88', padding: '0.4rem 1rem', fontSize: '0.8rem' }}>
-                                                        📥 Download Excel Template
-                                                    </a>
-                                                </div>
-                                                <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                                                    Download the template, fill it in Excel, save it, and then upload it below.
-                                                </p>
-
-                                                <p style={{ color: '#00ff88', fontSize: '1rem', margin: '0 0 1rem 0', fontWeight: 'bold' }}>2. Upload your Sheet</p>
-                                                <input
-                                                    type="file"
-                                                    accept=".csv"
-                                                    onChange={handleProductFileChange}
-                                                    style={{
-                                                        background: 'rgba(255,255,255,0.03)',
-                                                        padding: '1.5rem',
-                                                        borderRadius: '10px',
-                                                        border: '2px dashed rgba(0,255,136,0.3)',
-                                                        width: '100%',
-                                                        color: '#aaa',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                />
-                                            </div>
-
-                                            <div style={{ opacity: bulkProductData ? 1 : 0.5 }}>
-                                                <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Preview / Manual Data (Optional)</label>
-                                                <textarea
-                                                    className="input-field"
-                                                    placeholder="Data from your file will appear here automatically..."
-                                                    value={bulkProductData}
-                                                    onChange={e => setBulkProductData(e.target.value)}
-                                                    style={{ width: '100%', height: '150px', fontFamily: 'monospace', fontSize: '0.8rem' }}
-                                                />
-                                            </div>
-
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                <button type="button" onClick={() => { setShowAddProduct(false); setBulkProductData(''); }} className="btn btn-outline">Cancel</button>
-                                                <button type="submit" className="btn btn-primary" disabled={!bulkProductData} style={{ padding: '0.8rem 2rem' }}>
-                                                    ✅ Start Upload Process
-                                                </button>
-                                            </div>
-                                        </form>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
