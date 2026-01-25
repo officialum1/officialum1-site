@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-// We can assume Navbar/Footer imports if needed, but for a "Delivery Page" often clean is better.
-// But let's keep branding.
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -66,172 +64,135 @@ export default function DeliveryPage() {
     );
 
     return (
-        <main style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
+        <main style={{ minHeight: '100vh', background: '#050505', color: '#fff', fontFamily: "'Segoe UI', Roboto, sans-serif" }}>
             <Navbar />
-            <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px', display: 'flex', justifyContent: 'center' }}>
-                <div className="glass" style={{ padding: '3rem', borderRadius: '24px', maxWidth: '600px', width: '100%', border: '1px solid #00ff88' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-                        <h1 className="text-gradient" style={{ fontSize: '2rem' }}>Your Order Details</h1>
-                        <p style={{ color: '#aaa' }}>{order.itemName}</p>
-                    </div>
+            <div className="container" style={{ paddingTop: '100px', paddingBottom: '100px', display: 'flex', justifyContent: 'center' }}>
+                <div className="glass" style={{
+                    padding: '0',
+                    borderRadius: '12px',
+                    maxWidth: '480px',
+                    width: '100%',
+                    border: '1px solid #222',
+                    background: '#0a0a0a',
+                    overflow: 'hidden'
+                }}>
+                    {/* Blue Top Border */}
+                    <div style={{ height: '4px', width: '100%', background: '#3b82f6' }}></div>
 
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '16px' }}>
-                        {(order.details.extraInfo && order.details.extraInfo.includes('\n')) ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                {order.details.extraInfo.split('\n').filter((l: string) => l.trim()).map((line: string, i: number) => {
-                                    // Case 1: Value Line (starts with :)
-                                    if (line.trim().startsWith(':')) {
-                                        return (
-                                            <div key={i} style={{
-                                                padding: '1rem', background: '#000', color: '#00ff88', borderRadius: '8px',
-                                                fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'all', marginTop: '-0.2rem'
-                                            }}>
-                                                {line.replace(/^:\s*/, '')}
-                                            </div>
-                                        );
-                                    }
-                                    // Case 2: Label: Value (Inline)
-                                    else if (line.includes(':')) {
-                                        const [label, ...valParts] = line.split(':');
-                                        const val = valParts.join(':').trim();
-                                        // If value is empty, treat as Label
-                                        if (!val) {
-                                            return <div key={i} style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>{line}</div>;
-                                        }
-                                        return (
-                                            <div key={i} style={{ marginTop: '0.5rem' }}>
-                                                <div style={{ color: '#888', fontSize: '0.9rem', marginBottom: '0.2rem' }}>{label}</div>
-                                                <div style={{
-                                                    padding: '1rem', background: '#000', color: '#00ff88', borderRadius: '8px',
-                                                    fontWeight: 'bold', fontSize: '1.1rem', userSelect: 'all'
-                                                }}>
-                                                    {val}
-                                                </div>
-                                            </div>
-                                        );
-                                    }
-                                    // Case 3: Label Only
-                                    return (
-                                        <div key={i} style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                                            {line}
-                                        </div>
-                                    );
-                                })}
+                    <div style={{ padding: '2.5rem 2rem' }}>
+
+                        {/* Header */}
+                        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                            <div style={{
+                                width: '64px', height: '64px', background: '#fff', borderRadius: '50%',
+                                margin: '0 auto 1rem auto', display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                overflow: 'hidden'
+                            }}>
+                                <img src="/logo.png" alt="UM1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=UM1&background=random'; }} />
                             </div>
-                        ) : (
-                            <>
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Login / Username</label>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
-                                        {order.details.username}
-                                    </div>
-                                </div>
+                            <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '0.2rem', color: '#fff' }}>officialum1</h1>
+                            <p style={{ color: '#666', fontSize: '0.9rem' }}>Secure Account Delivery</p>
+                        </div>
 
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Password</label>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px', color: '#00ff88' }}>
-                                        {order.details.password}
-                                    </div>
-                                </div>
+                        {/* Item Details Card */}
+                        <div style={{ background: '#111', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem' }}>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.3rem' }}>Item</div>
+                                <div style={{ fontSize: '1.2rem', fontWeight: 'bold', lineHeight: '1.3' }}>{order.itemName}</div>
+                            </div>
 
-                                {order.details.email && (
-                                    <div style={{ marginBottom: '1.5rem' }}>
-                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Email Access</label>
-                                        <div style={{ fontSize: '1rem', userSelect: 'all', background: '#000', padding: '1rem', borderRadius: '8px' }}>
-                                            {order.details.email}
-                                        </div>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.3rem' }}>Platform</div>
+                                <div style={{ fontSize: '1rem', color: '#fff' }}>{order.details.platform || 'Direct'}</div>
+                            </div>
+
+                            <div>
+                                <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.3rem' }}>Delivered</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                    <span style={{ fontSize: '0.95rem' }}>{new Date(order.date || Date.now()).toLocaleDateString()}</span>
+                                    <span style={{ background: '#222', color: '#ccc', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', border: '1px solid #333' }}>
+                                        {Math.floor((Date.now() - new Date(order.date || Date.now()).getTime()) / (1000 * 60 * 60 * 24))} DAYS AGO
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Credentials Section */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>Credentials</h3>
+
+                            <div style={{
+                                border: '1px dashed #333',
+                                background: '#050505',
+                                borderRadius: '8px',
+                                padding: '1.5rem',
+                                color: '#e5e5e5',
+                                fontFamily: 'monospace',
+                                fontSize: '0.95rem',
+                                lineHeight: '1.8'
+                            }}>
+                                {(order.details.extraInfo && order.details.extraInfo.includes('\n')) ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        {/* Simple Monospace List Renderer */}
+                                        {order.details.extraInfo.split('\n').filter((l: string) => l.trim()).map((line: string, i: number) => (
+                                            <div key={i} style={{ wordBreak: 'break-all' }}>{line}</div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {order.details.username && <div>Login Account: {order.details.username}</div>}
+                                        {order.details.password && <div>Login Password: {order.details.password}</div>}
+                                        {order.details.extraInfo && <div>{order.details.extraInfo}</div>}
                                     </div>
                                 )}
-                            </>
-                        )}
-
-                        {order.details.extraInfo && !order.details.extraInfo.includes('\n') && (
-                            <div>
-                                <label style={{ display: 'block', color: '#888', marginBottom: '0.5rem' }}>Additional Notes</label>
-                                <div style={{ fontSize: '1rem', fontStyle: 'italic', color: '#ccc', background: '#000', padding: '1rem', borderRadius: '8px' }}>
-                                    {order.details.extraInfo}
-                                </div>
                             </div>
-                        )}
+                        </div>
 
-                        {order.proofImage && (
-                            <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1.5rem' }}>
-                                <label style={{ display: 'block', color: '#00ff88', marginBottom: '0.8rem', fontWeight: 'bold' }}>📸 Proof of Delivery</label>
-                                <img
-                                    src={order.proofImage}
-                                    alt="Delivery Proof"
-                                    style={{ width: '100%', borderRadius: '8px', border: '1px solid #333' }}
-                                />
-                            </div>
-                        )}
-                    </div>
+                        <p style={{ color: '#444', fontSize: '0.8rem', textAlign: 'center' }}>
+                            Please change the password immediately after logging in.
+                        </p>
 
-                    <p style={{ textAlign: 'center', marginTop: '2rem', color: '#666', fontSize: '0.8rem' }}>
-                        Ensure you save these details. This link is secure.
-                        <br />
-                        <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>Link Viewed: {order.views || 0} times</span>
-                    </p>
-
-                    {/* Review Section */}
-                    <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', textAlign: 'center' }}>
-                        {!reviewSubmitted ? (
-                            <>
-                                <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Rate Your Experience</h3>
+                        {/* Review Section */}
+                        {!reviewSubmitted && (
+                            <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #222', textAlign: 'center' }}>
+                                <p style={{ color: '#666', marginBottom: '1rem', fontSize: '0.9rem' }}>How was your experience?</p>
                                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
                                     {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            onClick={() => setRating(star)}
-                                            style={{
-                                                fontSize: '2rem',
-                                                background: 'none',
-                                                border: 'none',
-                                                cursor: 'pointer',
-                                                color: star <= rating ? '#ffd700' : '#333',
-                                                transition: 'color 0.2s'
-                                            }}
-                                        >
-                                            ★
-                                        </button>
+                                        <button key={star} onClick={() => setRating(star)} style={{ fontSize: '1.8rem', background: 'none', border: 'none', cursor: 'pointer', color: star <= rating ? '#fff' : '#333' }}>★</button>
                                     ))}
                                 </div>
-                                <textarea
-                                    placeholder="Leave a comment (optional)..."
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    style={{
-                                        width: '100%',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid #333',
-                                        borderRadius: '8px',
-                                        padding: '1rem',
-                                        color: '#fff',
-                                        marginBottom: '1rem',
-                                        minHeight: '80px',
-                                        resize: 'none'
-                                    }}
-                                />
-                                <button
-                                    onClick={handleSubmitReview}
-                                    disabled={rating === 0}
-                                    className="btn btn-primary"
-                                    style={{
-                                        width: '100%',
-                                        opacity: rating === 0 ? 0.5 : 1,
-                                        cursor: rating === 0 ? 'not-allowed' : 'pointer'
-                                    }}
-                                >
-                                    Submit Review
-                                </button>
-                            </>
-                        ) : (
-                            <div style={{ padding: '2rem', background: 'rgba(0,255,136,0.1)', borderRadius: '16px', border: '1px solid #00ff88' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✅</div>
-                                <h3 style={{ color: '#00ff88' }}>Thank You!</h3>
-                                <p style={{ color: '#ccc' }}>Your feedback helps us improve.</p>
+                                {rating > 0 && (
+                                    <>
+                                        <textarea
+                                            placeholder="Comment..."
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                background: '#111',
+                                                border: '1px solid #333',
+                                                borderRadius: '8px',
+                                                padding: '0.8rem',
+                                                color: '#fff',
+                                                marginBottom: '1rem',
+                                                minHeight: '60px',
+                                                resize: 'none',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        />
+                                        <button onClick={handleSubmitReview} className="btn" style={{ width: '100%', background: '#fff', color: '#000', padding: '0.8rem', borderRadius: '8px', fontSize: '0.9rem', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
+                                            Submit Review
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         )}
+                        {reviewSubmitted && (
+                            <div style={{ marginTop: '3rem', textAlign: 'center', color: '#00ff88' }}>
+                                ✓ Review Submitted
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </div>
