@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { getPlatformIcon } from '@/lib/icons';
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
@@ -58,7 +59,7 @@ export default function ShopPage() {
                             {filtered.map(item => (
                                 <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                        <img src={item.image} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                        <img src={getPlatformIcon(item.platform, item.image)} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
                                     </div>
                                     <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>

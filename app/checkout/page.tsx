@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
+import { getPlatformIcon } from '@/lib/icons';
 
 function CheckoutContent() {
     const searchParams = useSearchParams();
@@ -214,7 +216,7 @@ function CheckoutContent() {
                         <h3 style={{ fontFamily: 'var(--font-outfit)', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>Order Summary</h3>
 
                         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <img src={product.image} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover' }} />
+                            <img src={getPlatformIcon(product.platform, product.image)} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'contain' }} />
                             <div>
                                 <h4 style={{ fontSize: '1rem', lineHeight: '1.4', marginBottom: '0.2rem' }}>{product.name}</h4>
                                 <div style={{ fontSize: '0.8rem', color: '#888', background: 'rgba(255,255,255,0.1)', width: 'fit-content', padding: '2px 8px', borderRadius: '4px' }}>{product.platform}</div>
@@ -225,9 +227,9 @@ function CheckoutContent() {
                         <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px' }}>
                             <span style={{ fontSize: '0.9rem', color: '#ccc' }}>Quantity</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ background: '#333', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>-</button>
+                                <button onClick={() => setQuantity((q: number) => Math.max(1, q - 1))} style={{ background: '#333', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>-</button>
                                 <span style={{ fontWeight: 'bold' }}>{quantity}</span>
-                                <button onClick={() => setQuantity(q => q + 1)} style={{ background: '#4f46e5', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>+</button>
+                                <button onClick={() => setQuantity((q: number) => q + 1)} style={{ background: '#4f46e5', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>+</button>
                             </div>
                         </div>
 

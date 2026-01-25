@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { getPlatformIcon } from '@/lib/icons';
 
 export default function AdminDashboard() {
     const [inventory, setInventory] = useState<any[]>([]);
@@ -940,7 +941,7 @@ export default function AdminDashboard() {
                                     <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
                                             <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
-                                                {prod.image && prod.image.length > 10 ? <img src={prod.image} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : '📦'}
+                                                <img src={getPlatformIcon(prod.platform, prod.image)} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
                                             </div>
                                         </div>
                                         <div style={{ padding: '1.5rem' }}>
