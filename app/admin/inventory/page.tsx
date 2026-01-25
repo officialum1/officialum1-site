@@ -468,7 +468,18 @@ export default function AdminDashboard() {
 
             if (priceMatch && currentTitle) {
                 const price = priceMatch[1];
-                products.push(`${currentTitle},Reddit,${price},Imported from Z2U store,`);
+                let platform = 'Reddit';
+                const lower = currentTitle.toLowerCase();
+                if (lower.includes('discord')) platform = 'Discord';
+                else if (lower.includes('telegram')) platform = 'Telegram';
+                else if (lower.includes('snapchat')) platform = 'Snapchat';
+                else if (lower.includes('instagram')) platform = 'Instagram';
+                else if (lower.includes('tiktok')) platform = 'TikTok';
+                else if (lower.includes('youtube')) platform = 'YouTube';
+                else if (lower.includes('google') || lower.includes('gmail')) platform = 'Google';
+                else if (lower.includes('viber')) platform = 'Viber';
+
+                products.push(`${currentTitle},${platform},${price},Imported from Z2U store,`);
                 currentTitle = ''; // Reset
             } else if (line.length > 20 && !line.includes('http') && !line.includes('Login')) {
                 // Heuristic for title: long text, not a link, not a UI element
@@ -1039,17 +1050,25 @@ export default function AdminDashboard() {
                                     </div>
 
                                     {importMode === 'manual' ? (
-                                        <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                            <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
-                                            <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
-                                            <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' }); }} className="btn btn-outline">Cancel</button>
-                                                <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '16px', padding: '2rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <img src={getPlatformIcon(newProduct.platform, newProduct.image)} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+                                                </div>
+                                                <p style={{ fontSize: '0.8rem', color: '#888' }}>Icon Preview</p>
                                             </div>
-                                        </form>
+                                            <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                                <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
+                                                <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
+                                                <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                                <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
+                                                <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
+                                                <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                    <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' }); }} className="btn btn-outline">Cancel</button>
+                                                    <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     ) : importMode === 'z2u' ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                             <div style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.05) 100%)', padding: '2rem', borderRadius: '16px', border: '1px solid #00ff88', textAlign: 'center' }}>
