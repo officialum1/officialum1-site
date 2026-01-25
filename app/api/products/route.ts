@@ -16,7 +16,12 @@ export async function POST(req: Request) {
         const body = await req.json();
 
         if (body.action === 'delete') {
-            await query("DELETE FROM products WHERE id = ?", [body.id]);
+            if (Array.isArray(body.id)) {
+                const placeholders = body.id.map(() => '?').join(',');
+                await query(`DELETE FROM products WHERE id IN (${placeholders})`, body.id);
+            } else {
+                await query("DELETE FROM products WHERE id = ?", [body.id]);
+            }
         } else if (body.action === 'cleanup_descriptions') {
             await query(
                 "UPDATE products SET description = ? WHERE description LIKE ?",

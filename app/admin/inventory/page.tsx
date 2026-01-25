@@ -83,6 +83,7 @@ export default function AdminDashboard() {
     const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u'>('manual');
     const [bulkProductData, setBulkProductData] = useState('');
     const [editingProduct, setEditingProduct] = useState<any>(null);
+    const [selectedShopProducts, setSelectedShopProducts] = useState<number[]>([]);
 
     // Fulfillment
     const [showFulfill, setShowFulfill] = useState(false);
@@ -436,6 +437,21 @@ export default function AdminDashboard() {
             });
             fetchData();
         } catch { alert('Failed to delete product'); }
+    };
+
+    const handleBulkDeleteProducts = async () => {
+        if (selectedShopProducts.length === 0) return;
+        if (!confirm(`Are you sure you want to delete ${selectedShopProducts.length} selected products?`)) return;
+        try {
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete', id: selectedShopProducts })
+            });
+            setSelectedShopProducts([]);
+            fetchData();
+            alert('Selected Products Deleted!');
+        } catch { alert('Failed to delete selected products'); }
     };
 
     const handleAddProduct = async (e: React.FormEvent) => {
@@ -1006,7 +1022,26 @@ export default function AdminDashboard() {
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h2 style={{ margin: 0 }}>🛍️ Shop Product Catalog</h2>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    {catalog.length > 0 && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginRight: '1rem' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedShopProducts.length === catalog.length}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) setSelectedShopProducts(catalog.map(p => p.id));
+                                                    else setSelectedShopProducts([]);
+                                                }}
+                                                style={{ width: '18px', height: '18px', accentColor: '#00ff88', cursor: 'pointer' }}
+                                            />
+                                            <span style={{ fontSize: '0.9rem', color: '#888' }}>Select All</span>
+                                        </div>
+                                    )}
+                                    {selectedShopProducts.length > 0 && (
+                                        <button onClick={handleBulkDeleteProducts} className="btn btn-outline" style={{ color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', background: 'rgba(255,77,77,0.05)' }}>
+                                            🗑️ Delete ({selectedShopProducts.length})
+                                        </button>
+                                    )}
                                     <button onClick={handleCleanupDescriptions} className="btn btn-outline" style={{ borderStyle: 'dashed', opacity: 0.7 }}>🧹 Clean Descriptions</button>
                                     <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
                                 </div>
@@ -1014,7 +1049,20 @@ export default function AdminDashboard() {
 
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                                 {catalog.map((prod: any) => (
-                                    <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: `1px solid ${selectedShopProducts.includes(prod.id) ? '#00ff88' : 'rgba(255,255,255,0.05)'}`, position: 'relative' }}>
+                                        {/* Bulk Select Checkbox */}
+                                        <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 10 }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedShopProducts.includes(prod.id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) setSelectedShopProducts([...selectedShopProducts, prod.id]);
+                                                    else setSelectedShopProducts(selectedShopProducts.filter(id => id !== prod.id));
+                                                }}
+                                                style={{ width: '20px', height: '20px', accentColor: '#00ff88', cursor: 'pointer' }}
+                                            />
+                                        </div>
+
                                         <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
                                             <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
                                                 <img src={getPlatformIcon(prod.platform, prod.image)} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
