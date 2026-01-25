@@ -950,24 +950,36 @@ export default function AdminDashboard() {
                                                 <span>{prod.platform}</span>
                                                 <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
                                             </div>
-                                            <button
-                                                onClick={() => {
-                                                    setEditingProduct(prod);
-                                                    setNewProduct({
-                                                        name: prod.name,
-                                                        platform: prod.platform,
-                                                        price: prod.price,
-                                                        description: prod.description || '',
-                                                        image: prod.image || ''
-                                                    });
-                                                    setShowAddProduct(true);
-                                                    setIsBulkProduct(false);
-                                                }}
-                                                className="btn btn-outline"
-                                                style={{ width: '100%', fontSize: '0.8rem' }}
-                                            >
-                                                Edit Details
-                                            </button>
+                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingProduct(prod);
+                                                        setNewProduct({
+                                                            name: prod.name,
+                                                            platform: prod.platform,
+                                                            price: prod.price,
+                                                            description: prod.description || '',
+                                                            image: prod.image || ''
+                                                        });
+                                                        setShowAddProduct(true);
+                                                        setIsBulkProduct(false);
+                                                    }}
+                                                    className="btn btn-outline"
+                                                    style={{ flex: 1, fontSize: '0.8rem' }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(`${window.location.origin}/shop/${prod.id}`);
+                                                        alert('Link Copied to Clipboard!');
+                                                    }}
+                                                    className="btn btn-outline"
+                                                    style={{ flex: 1, fontSize: '0.8rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)' }}
+                                                >
+                                                    🔗 Link
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

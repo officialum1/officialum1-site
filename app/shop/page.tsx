@@ -10,6 +10,7 @@ export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [filter, setFilter] = useState('All');
     const [loading, setLoading] = useState(true);
+    const [shareId, setShareId] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/api/products')
@@ -57,15 +58,31 @@ export default function ShopPage() {
                     <>
                         <div className="grid-3">
                             {filtered.map(item => (
-                                <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                                    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                                <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                                    {/* Share Button Overlay */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            navigator.clipboard.writeText(`${window.location.origin}/shop/${item.id}`);
+                                            setShareId(item.id);
+                                            setTimeout(() => setShareId(null), 2000);
+                                        }}
+                                        style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: shareId === item.id ? '#00ff88' : '#fff', cursor: 'pointer', fontSize: '0.9rem' }}
+                                        title="Copy Product Link"
+                                    >
+                                        {shareId === item.id ? '✓' : '🔗'}
+                                    </button>
+
+                                    <Link href={`/shop/${item.id}`} style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>
                                         <img src={getPlatformIcon(item.platform, item.image)} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-                                    </div>
+                                    </Link>
                                     <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                         <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                                             {item.platform}
                                         </div>
-                                        <h3 style={{ marginBottom: '0.5rem' }}>{item.name}</h3>
+                                        <Link href={`/shop/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <h3 style={{ marginBottom: '0.5rem', cursor: 'pointer' }}>{item.name}</h3>
+                                        </Link>
                                         <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
 
                                         <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
