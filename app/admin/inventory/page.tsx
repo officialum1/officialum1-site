@@ -78,6 +78,8 @@ export default function AdminDashboard() {
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
     const [orders, setOrders] = useState<any[]>([]);
+    const [isBulkProduct, setIsBulkProduct] = useState(false);
+    const [bulkProductData, setBulkProductData] = useState('');
 
     // Fulfillment
     const [showFulfill, setShowFulfill] = useState(false);
@@ -418,6 +420,25 @@ export default function AdminDashboard() {
         setShowAddProduct(false);
         setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
         fetchData();
+    };
+
+    const handleBulkProductImport = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'bulk_import',
+                    bulkData: bulkProductData
+                })
+            });
+            setShowAddProduct(false);
+            setBulkProductData('');
+            setIsBulkProduct(false);
+            fetchData();
+            alert('Bulk Products Imported!');
+        } catch { alert('Failed to import products'); }
     };
 
     const handleAddInventory = async (e: React.FormEvent) => {
@@ -916,18 +937,49 @@ export default function AdminDashboard() {
 
                             {showAddProduct && (
                                 <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00ff88', marginTop: '2rem' }}>
-                                    <h3 style={{ marginBottom: '1rem' }}>Add New Product to Shop</h3>
-                                    <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                        <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
-                                        <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
-                                        <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
-                                        <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
-                                        <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
-                                        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                            <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
-                                            <button type="submit" className="btn btn-primary">Create Product</button>
-                                        </div>
-                                    </form>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ margin: 0 }}>{isBulkProduct ? 'Bulk Import Shop Products' : 'Add New Product to Shop'}</h3>
+                                        <button
+                                            onClick={() => setIsBulkProduct(!isBulkProduct)}
+                                            className="btn btn-outline"
+                                            style={{ color: '#00ff88', borderColor: '#00ff88' }}
+                                        >
+                                            {isBulkProduct ? 'Switch to Single Entry' : 'Switch to Bulk CSV'}
+                                        </button>
+                                    </div>
+
+                                    {!isBulkProduct ? (
+                                        <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#ccc' }}>Category / Platform</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
+                                            <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
+                                            <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary">Create Product</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <form onSubmit={handleBulkProductImport} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                                <p style={{ color: '#00ff88', fontSize: '0.9rem', marginBottom: '0.5rem' }}>ℹ️ CSV Format Standard:</p>
+                                                <code style={{ fontSize: '0.8rem', color: '#888' }}>Name, Category, Price, Description, ImageURL</code>
+                                            </div>
+                                            <textarea
+                                                className="input-field"
+                                                placeholder="Example:&#10;Discord Nitro, Social, 9.99, Full features discord nitro, https://...&#10;Snapchat Plus, Social, 3.99, Snap features, https://..."
+                                                value={bulkProductData}
+                                                onChange={e => setBulkProductData(e.target.value)}
+                                                style={{ width: '100%', height: '200px', fontFamily: 'monospace' }}
+                                                required
+                                            />
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                                <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary">Import All Products</button>
+                                            </div>
+                                        </form>
+                                    )}
                                 </div>
                             )}
                         </div>
