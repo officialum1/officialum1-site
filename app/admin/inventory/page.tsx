@@ -441,6 +441,21 @@ export default function AdminDashboard() {
         } catch { alert('Failed to import products'); }
     };
 
+    const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const content = event.target?.result as string;
+            // Skip the header line if it exists
+            const lines = content.split('\n');
+            const dataOnly = lines[0].toLowerCase().includes('name') ? lines.slice(1).join('\n') : content;
+            setBulkProductData(dataOnly);
+        };
+        reader.readAsText(file);
+    };
+
     const handleAddInventory = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -962,21 +977,50 @@ export default function AdminDashboard() {
                                         </form>
                                     ) : (
                                         <form onSubmit={handleBulkProductImport} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
-                                                <p style={{ color: '#00ff88', fontSize: '0.9rem', marginBottom: '0.5rem' }}>ℹ️ CSV Format Standard:</p>
-                                                <code style={{ fontSize: '0.8rem', color: '#888' }}>Name, Category, Price, Description, ImageURL</code>
+                                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                    <p style={{ color: '#00ff88', fontSize: '1rem', margin: 0, fontWeight: 'bold' }}>1. Get Template File</p>
+                                                    <a href="/catalog_template.csv" download className="btn btn-outline" style={{ color: '#00ff88', borderColor: '#00ff88', padding: '0.4rem 1rem', fontSize: '0.8rem' }}>
+                                                        📥 Download Excel Template
+                                                    </a>
+                                                </div>
+                                                <p style={{ color: '#888', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                                                    Download the template, fill it in Excel, save it, and then upload it below.
+                                                </p>
+
+                                                <p style={{ color: '#00ff88', fontSize: '1rem', margin: '0 0 1rem 0', fontWeight: 'bold' }}>2. Upload your Sheet</p>
+                                                <input
+                                                    type="file"
+                                                    accept=".csv"
+                                                    onChange={handleProductFileChange}
+                                                    style={{
+                                                        background: 'rgba(255,255,255,0.03)',
+                                                        padding: '1.5rem',
+                                                        borderRadius: '10px',
+                                                        border: '2px dashed rgba(0,255,136,0.3)',
+                                                        width: '100%',
+                                                        color: '#aaa',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                />
                                             </div>
-                                            <textarea
-                                                className="input-field"
-                                                placeholder="Example:&#10;Discord Nitro, Social, 9.99, Full features discord nitro, https://...&#10;Snapchat Plus, Social, 3.99, Snap features, https://..."
-                                                value={bulkProductData}
-                                                onChange={e => setBulkProductData(e.target.value)}
-                                                style={{ width: '100%', height: '200px', fontFamily: 'monospace' }}
-                                                required
-                                            />
+
+                                            <div style={{ opacity: bulkProductData ? 1 : 0.5 }}>
+                                                <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Preview / Manual Data (Optional)</label>
+                                                <textarea
+                                                    className="input-field"
+                                                    placeholder="Data from your file will appear here automatically..."
+                                                    value={bulkProductData}
+                                                    onChange={e => setBulkProductData(e.target.value)}
+                                                    style={{ width: '100%', height: '150px', fontFamily: 'monospace', fontSize: '0.8rem' }}
+                                                />
+                                            </div>
+
                                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                <button type="button" onClick={() => setShowAddProduct(false)} className="btn btn-outline">Cancel</button>
-                                                <button type="submit" className="btn btn-primary">Import All Products</button>
+                                                <button type="button" onClick={() => { setShowAddProduct(false); setBulkProductData(''); }} className="btn btn-outline">Cancel</button>
+                                                <button type="submit" className="btn btn-primary" disabled={!bulkProductData} style={{ padding: '0.8rem 2rem' }}>
+                                                    ✅ Start Upload Process
+                                                </button>
                                             </div>
                                         </form>
                                     )}
