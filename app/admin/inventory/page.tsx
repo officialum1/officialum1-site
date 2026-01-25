@@ -15,6 +15,7 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('inventory'); // 'inventory', 'leads', 'marketing'
     const [showAddInv, setShowAddInv] = useState(false);
     const [showRecordSale, setShowRecordSale] = useState(false);
+    const [showBulk, setShowBulk] = useState(false);
 
     // Filter Stats
     const [stats, setStats] = useState({
