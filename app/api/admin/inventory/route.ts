@@ -52,11 +52,20 @@ export async function GET(request: Request) {
         sql += " ORDER BY purchaseDate DESC";
         const inventory: any = await query(sql, params);
 
-        // Parse JSON fields
-        const parsed = inventory.map((i: any) => ({
-            ...i,
-            accountDetails: i.accountDetails ? JSON.parse(i.accountDetails) : {}
-        }));
+        // Parse JSON fields and strip sensitive data for staff
+        const parsed = inventory.map((i: any) => {
+            const item = {
+                ...i,
+                accountDetails: i.accountDetails ? JSON.parse(i.accountDetails) : {}
+            };
+
+            // SECURITY: Never show real purchase price to staff
+            if (role === 'staff') {
+                delete item.purchasePrice;
+            }
+
+            return item;
+        });
 
         return NextResponse.json(parsed);
     } catch (e) {

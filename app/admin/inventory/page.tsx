@@ -954,7 +954,7 @@ export default function AdminDashboard() {
                                                     <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                         <td style={{ padding: '1rem' }}>{item.name}</td>
                                                         <td style={{ padding: '1rem' }}>{item.platform}</td>
-                                                        <td style={{ padding: '1rem', color: '#ccc' }}>${item.purchasePrice}</td>
+                                                        <td style={{ padding: '1rem', color: '#ccc' }}>{item.purchasePrice ? `$${item.purchasePrice}` : '***'}</td>
                                                         <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
                                                     </tr>
                                                 ))}
@@ -1270,7 +1270,7 @@ export default function AdminDashboard() {
                                     >
                                         <option value="">-- Click to Choose Product --</option>
                                         {inventory.filter(i => i.status === 'In Stock').map(i => (
-                                            <option key={i.id} value={i.id}>{i.platform} | {i.name} (${i.purchasePrice})</option>
+                                            <option key={i.id} value={i.id}>{i.platform} | {i.name} {i.purchasePrice ? `($${i.purchasePrice})` : ''}</option>
                                         ))}
                                     </select>
 
