@@ -38,11 +38,27 @@ export default function StaffDashboard() {
         const parsedUser = JSON.parse(stored);
         setStaff(parsedUser);
 
-        // 2. Initial Fetch
+        // 2. Fetch Latest Profile (Permissions sync)
+        fetchProfile(parsedUser.email);
+
+        // 3. Initial Fetch Data
         fetchInventory(parsedUser);
         fetchLeads(parsedUser);
         fetchPosts();
     }, []);
+
+    const fetchProfile = async (email: string) => {
+        try {
+            const res = await fetch(`/api/staff/profile?email=${email}`);
+            const data = await res.json();
+            if (data.id) {
+                setStaff(data);
+                localStorage.setItem('staff_user', JSON.stringify(data));
+            }
+        } catch (e) {
+            console.error('Failed to sync profile');
+        }
+    };
 
     const fetchInventory = async (userObj: any) => {
         try {
@@ -180,21 +196,26 @@ export default function StaffDashboard() {
 
                 {/* Tab Navigation */}
                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
-                    {['Inventory', 'Leads', 'Marketing', 'Settings'].map(tab => (
+                    {[
+                        { id: 'inventory', label: 'Inventory', permission: 'inventory' },
+                        { id: 'leads', label: 'Leads', permission: 'leads' },
+                        { id: 'marketing', label: 'Marketing', permission: 'marketing' },
+                        { id: 'settings', label: 'Settings', permission: 'any' }
+                    ].filter(tab => tab.permission === 'any' || staff?.permissions?.includes(tab.permission)).map(tab => (
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab.toLowerCase())}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
                             style={{
                                 background: 'transparent',
                                 border: 'none',
-                                color: activeTab === tab.toLowerCase() ? '#00ff88' : '#888',
+                                color: activeTab === tab.id ? '#00ff88' : '#888',
                                 fontSize: '1.2rem',
                                 cursor: 'pointer',
                                 padding: '0.5rem 1rem',
-                                borderBottom: activeTab === tab.toLowerCase() ? '2px solid #00ff88' : 'none'
+                                borderBottom: activeTab === tab.id ? '2px solid #00ff88' : 'none'
                             }}
                         >
-                            {tab}
+                            {tab.label}
                         </button>
                     ))}
                 </div>
