@@ -372,7 +372,8 @@ function AdminDashboard() {
                 setNewEmp({ name: '', email: '', password: '', position: '', department: '', salary: '', commissionRate: '', compensationType: 'Fixed', allowedPlatforms: [], permissions: ['inventory', 'orders', 'support'] });
                 fetchData();
             } else {
-                alert('Failed to process request');
+                const err = await res.json();
+                alert(`Failed to process request: ${err.error || 'Unknown Error'}`);
             }
         } catch (error) {
             console.error(error);
