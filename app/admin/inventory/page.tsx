@@ -104,6 +104,8 @@ function AdminDashboard() {
     const [bulkProductData, setBulkProductData] = useState('');
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [selectedShopProducts, setSelectedShopProducts] = useState<number[]>([]);
+    const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
+    const [bulkUpdateText, setBulkUpdateText] = useState('');
 
     // Fulfillment
     const [showFulfill, setShowFulfill] = useState(false);
@@ -533,6 +535,49 @@ function AdminDashboard() {
             fetchData();
             alert('Selected Products Deleted!');
         } catch { alert('Failed to delete selected products'); }
+    };
+
+    const handleCommitBulkUpdate = async () => {
+        const lines = bulkUpdateText.trim().split('\n');
+        const payload = lines.map(l => {
+            const parts = l.split(',');
+            if (parts.length < 3) return null;
+            const id = parseInt(parts[0].trim());
+            const price = parts[1].trim();
+            const stock = parseInt(parts[2].trim());
+            const platform = parts[3]?.trim() || '';
+            return { id, price, stock, platform };
+        }).filter(p => p !== null && !isNaN(p.id) && !isNaN(p.stock));
+
+        if (payload.length === 0) {
+            alert("No valid updates found. Format: ID,Price,Stock,Platform");
+            return;
+        }
+
+        const res = await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'bulk_update', updates: payload })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('✅ Bulk Updated Successfully!');
+            setShowBulkUpdateModal(false);
+            fetchData();
+        } else {
+            alert('❌ Update Failed: ' + data.error);
+        }
+    };
+
+    const handleQuickSetStock = (value: string) => {
+        const lines = bulkUpdateText.split('\n');
+        const newLines = lines.map(l => {
+            const parts = l.split(',');
+            if (parts.length < 3) return l;
+            parts[2] = value;
+            return parts.join(',');
+        });
+        setBulkUpdateText(newLines.join('\n'));
     };
 
     const handleAddProduct = async (e: React.FormEvent) => {
@@ -1201,25 +1246,10 @@ function AdminDashboard() {
                                     )}
                                     <button onClick={handleCleanupDescriptions} className="btn btn-outline" style={{ borderStyle: 'dashed', opacity: 0.7 }}>🧹 Clean Descriptions</button>
                                     <button onClick={() => {
-                                        const results = catalog.filter(p => selectedShopProducts.includes(p.id) || selectedShopProducts.length === 0);
+                                        const results = catalog.filter(p => selectedShopProducts.includes(p.id) || (selectedShopProducts.length === 0));
                                         const bulkText = results.map(p => `${p.id},${p.price},${p.stock || 1},${p.platform}`).join('\n');
-                                        const updates = prompt("Bulk Update (ID,Price,Stock,Category):\nKeep format or it will fail.\n(ID is fixed, you change others)", bulkText);
-                                        if (updates) {
-                                            const lines = updates.split('\n');
-                                            const payload = lines.map(l => {
-                                                const [id, price, stock, platform] = l.split(',');
-                                                return { id: parseInt(id), price, stock: parseInt(stock), platform: platform?.trim() };
-                                            }).filter(p => !isNaN(p.id) && !isNaN(p.stock));
-
-                                            fetch('/api/products', {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ action: 'bulk_update', updates: payload })
-                                            }).then(r => r.json()).then(data => {
-                                                if (data.success) { alert('Bulk Updated Successfully!'); fetchData(); }
-                                                else { alert('Update Failed: ' + data.error); }
-                                            });
-                                        }
+                                        setBulkUpdateText(bulkText);
+                                        setShowBulkUpdateModal(true);
                                     }} className="btn btn-outline" style={{ color: '#00ff88', borderColor: '#00ff8833' }}>
                                         📝 Bulk Stock/Price
                                     </button>
@@ -3061,6 +3091,51 @@ function AdminDashboard() {
                     }
                 </div >
             </div >
+
+            {showBulkUpdateModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <button onClick={() => setShowBulkUpdateModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ margin: 0, color: '#00ff88' }}>📝 Bulk Editor</h3>
+                            <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>Update Price, Stock, and Category in bulk.</p>
+                        </div>
+
+                        <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>🚀 Quick Set Tools</label>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Set all stocks to:</span>
+                                <button onClick={() => handleQuickSetStock('100')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>100</button>
+                                <button onClick={() => handleQuickSetStock('50')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>50</button>
+                                <button onClick={() => handleQuickSetStock('10')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>10</button>
+                                <button onClick={() => {
+                                    const val = prompt("Enter stock value for all:");
+                                    if (val) handleQuickSetStock(val);
+                                }} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>Custom Value</button>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Update Data (Format: ID, PRICE, STOCK, CATEGORY)</label>
+                            <textarea
+                                className="input-field"
+                                value={bulkUpdateText}
+                                onChange={(e) => setBulkUpdateText(e.target.value)}
+                                style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.5)', fontSize: '0.9rem', lineHeight: '1.5' }}
+                                placeholder="Example:\n23,66,100,Reddit\n22,77,100,Reddit"
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                            <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
+                            <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
+                                ✅ Save All Updates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <Footer />
         </main >
     );
