@@ -2689,7 +2689,7 @@ function AdminDashboard() {
                                                                     commissionRate: emp.commissionRate,
                                                                     compensationType: emp.compensationType,
                                                                     allowedPlatforms: emp.allowedPlatforms || [],
-                                                                    permissions: emp.permissions ? JSON.parse(emp.permissions) : []
+                                                                    permissions: Array.isArray(emp.permissions) ? emp.permissions : (emp.permissions ? JSON.parse(emp.permissions) : [])
                                                                 });
                                                                 setShowAddStaff(true);
                                                             }}

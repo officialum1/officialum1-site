@@ -9,7 +9,8 @@ export async function GET() {
             const { password, ...rest } = e;
             return {
                 ...rest,
-                allowedPlatforms: e.allowedPlatforms ? JSON.parse(e.allowedPlatforms) : []
+                allowedPlatforms: e.allowedPlatforms ? JSON.parse(e.allowedPlatforms) : [],
+                permissions: e.permissions ? JSON.parse(e.permissions) : []
             };
         });
         return NextResponse.json(parsed);

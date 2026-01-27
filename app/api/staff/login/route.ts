@@ -41,8 +41,13 @@ export async function POST(request: Request) {
         }
 
         if (isValid) {
-            const { password: _, ...userWithoutPass } = employee;
-            return NextResponse.json({ success: true, user: userWithoutPass });
+            const { password: _, ...rest } = employee;
+            const userWithParsedFields = {
+                ...rest,
+                allowedPlatforms: rest.allowedPlatforms ? JSON.parse(rest.allowedPlatforms) : [],
+                permissions: rest.permissions ? JSON.parse(rest.permissions) : []
+            };
+            return NextResponse.json({ success: true, user: userWithParsedFields });
         }
 
         return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });

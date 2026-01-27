@@ -49,11 +49,16 @@ export default function StaffDashboard() {
 
     const fetchProfile = async (email: string) => {
         try {
-            const res = await fetch(`/api/staff/profile?email=${email}`);
+            const res = await fetch(`/api/staff/profile?email=${email}`, { cache: 'no-store' });
             const data = await res.json();
             if (data.id) {
-                setStaff(data);
-                localStorage.setItem('staff_user', JSON.stringify(data));
+                // Ensure permissions is an array
+                const updatedStaff = {
+                    ...data,
+                    permissions: Array.isArray(data.permissions) ? data.permissions : (data.permissions ? JSON.parse(data.permissions) : [])
+                };
+                setStaff(updatedStaff);
+                localStorage.setItem('staff_user', JSON.stringify(updatedStaff));
             }
         } catch (e) {
             console.error('Failed to sync profile');
@@ -62,7 +67,7 @@ export default function StaffDashboard() {
 
     const fetchInventory = async (userObj: any) => {
         try {
-            const res = await fetch(`/api/admin/inventory?type=inventory&role=staff&email=${userObj.email}`);
+            const res = await fetch(`/api/admin/inventory?type=inventory&role=staff&email=${userObj.email}`, { cache: 'no-store' });
             const data = await res.json();
             setInventory(data);
         } catch (error) {
@@ -74,14 +79,14 @@ export default function StaffDashboard() {
 
     const fetchLeads = async (userObj: any) => {
         try {
-            const res = await fetch(`/api/leads?role=staff&email=${userObj.email}`);
+            const res = await fetch(`/api/leads?role=staff&email=${userObj.email}`, { cache: 'no-store' });
             setLeads(await res.json());
         } catch (e) { console.error(e); }
     };
 
     const fetchPosts = async () => {
         try {
-            const res = await fetch('/api/social');
+            const res = await fetch('/api/social', { cache: 'no-store' });
             setPosts(await res.json());
         } catch (e) { console.error(e); }
     };
@@ -187,32 +192,43 @@ export default function StaffDashboard() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                     <div>
                         <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Staff Workspace</h1>
-                        <p style={{ color: '#888' }}>Welcome, {staff?.name} ({staff?.position})</p>
+                        <p style={{ color: '#888' }}>Welcome back, {staff?.name} • <span style={{ color: '#00ff88' }}>{staff?.position}</span></p>
                     </div>
-                    <button onClick={() => { localStorage.removeItem('staff_user'); window.location.href = '/staff/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444' }}>
-                        Logout
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button onClick={() => { fetchProfile(staff.email); fetchInventory(staff); fetchLeads(staff); fetchPosts(); }} className="btn btn-outline" style={{ borderColor: '#333' }}>
+                            🔄 Sync Data
+                        </button>
+                        <button onClick={() => { localStorage.removeItem('staff_user'); window.location.href = '/staff/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444' }}>
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 {/* Tab Navigation */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid #333', paddingBottom: '1rem', overflowX: 'auto', whiteSpace: 'nowrap' }}>
                     {[
-                        { id: 'inventory', label: 'Inventory', permission: 'inventory' },
-                        { id: 'leads', label: 'Leads', permission: 'leads' },
-                        { id: 'marketing', label: 'Marketing', permission: 'marketing' },
-                        { id: 'settings', label: 'Settings', permission: 'any' }
+                        { id: 'inventory', label: '📊 Inventory', permission: 'inventory' },
+                        { id: 'orders', label: '📦 Orders', permission: 'orders' },
+                        { id: 'leads', label: '👥 Leads', permission: 'leads' },
+                        { id: 'marketing', label: '📢 Marketing', permission: 'marketing' },
+                        { id: 'support', label: '🎫 Support', permission: 'support' },
+                        { id: 'website', label: '🌐 Website', permission: 'website' },
+                        { id: 'finance', label: '💰 Finance', permission: 'finance' },
+                        { id: 'settings', label: '⚙️ Settings', permission: 'any' }
                     ].filter(tab => tab.permission === 'any' || staff?.permissions?.includes(tab.permission)).map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             style={{
-                                background: 'transparent',
+                                background: activeTab === tab.id ? 'rgba(0,255,136,0.1)' : 'transparent',
                                 border: 'none',
                                 color: activeTab === tab.id ? '#00ff88' : '#888',
-                                fontSize: '1.2rem',
+                                fontSize: '1rem',
                                 cursor: 'pointer',
-                                padding: '0.5rem 1rem',
-                                borderBottom: activeTab === tab.id ? '2px solid #00ff88' : 'none'
+                                padding: '0.6rem 1.2rem',
+                                borderRadius: '8px',
+                                transition: 'all 0.2s',
+                                fontWeight: activeTab === tab.id ? 'bold' : 'normal'
                             }}
                         >
                             {tab.label}
@@ -427,6 +443,35 @@ export default function StaffDashboard() {
                                 </div>
                                 <button type="submit" className="btn btn-primary">Save Changes & Logout</button>
                             </form>
+                        </div>
+                    )}
+
+                    {/* NEW TAB PLACEHOLDERS */}
+                    {activeTab === 'orders' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>📦 Orders Management</h2>
+                            <p style={{ color: '#888' }}>You have access to view and process orders. Full interface coming soon.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'support' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🎫 Support Tickets</h2>
+                            <p style={{ color: '#888' }}>You have access to reply to customer support tickets.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'website' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🌐 Website Content</h2>
+                            <p style={{ color: '#888' }}>Manage blogs, services, and dynamic website elements.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'finance' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>💰 Finance & Revenue</h2>
+                            <p style={{ color: '#888' }}>Access to revenue logs and payout information.</p>
                         </div>
                     )}
 
