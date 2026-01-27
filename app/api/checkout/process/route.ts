@@ -59,9 +59,19 @@ export async function POST(req: Request) {
 
         if (!product || !user) return NextResponse.json({ error: "Invalid Request: User or Product not found" }, { status: 400 });
 
-        // Calculate Amount to Charge
+        // Calculate Amount to Charge (With Flash Sale Logic)
         const safeQuantity = parseInt(quantity as string, 10) || 1;
-        const amountToCharge = finalPrice ? finalPrice : (parseFloat(product.price) * safeQuantity).toFixed(2);
+        let unitPrice = parseFloat(product.price);
+
+        // Check Flash Sale
+        if (product.sale_price && product.sale_ends_at) {
+            const saleEnd = new Date(product.sale_ends_at);
+            if (saleEnd > new Date()) {
+                unitPrice = parseFloat(product.sale_price);
+            }
+        }
+
+        const amountToCharge = finalPrice ? finalPrice : (unitPrice * safeQuantity).toFixed(2);
 
         // 2. Process Payment
         let paymentUrl = null;
@@ -195,12 +205,73 @@ export async function POST(req: Request) {
             } catch (e: any) { throw new Error("Binance Error: " + e.message); }
         }
 
+        // D. INTERNAL WALLET
+        if (method === 'wallet') {
+            if (userId === 'guest') throw new Error("Wallet payment is only available for registered users.");
+            const userFullRows = await query("SELECT wallet_balance FROM users WHERE id = ?", [userId]) as any[];
+            const balance = parseFloat(userFullRows[0]?.wallet_balance || 0);
+
+            if (balance < parseFloat(amountToCharge)) {
+                throw new Error(`Insufficient wallet balance. You need $${amountToCharge} but have $${balance.toFixed(2)}.`);
+            }
+
+            // Deduct Balance
+            await query("UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?", [amountToCharge, userId]);
+
+            // Record Transaction
+            await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'purchase', ?, 'completed')",
+                [userId, amountToCharge, `Purchase of ${product.name}`]);
+
+            orderStatus = 'paid';
+        }
+
         // CRITICAL CHECK
-        if (parseFloat(amountToCharge) > 0 && !paymentUrl) {
+        if (parseFloat(amountToCharge) > 0 && !paymentUrl && method !== 'wallet') {
             throw new Error("Payment Gateway Initialization Failed. Please check Admin Settings.");
         }
         if (parseFloat(amountToCharge) === 0) {
             orderStatus = 'paid';
+        }
+
+        // --- AFFILIATE COMMISSION LOGIC ---
+        let commissionAmount = 0;
+        if (orderStatus === 'paid' && userId !== 'guest') {
+            const userRefRows: any = await query("SELECT referred_by FROM users WHERE id = ?", [userId]);
+            const referrerId = userRefRows[0]?.referred_by;
+
+            if (referrerId) {
+                const commissionRate = parseFloat(settings.referral_commission_rate || 10); // Default 10%
+                commissionAmount = (parseFloat(amountToCharge) * commissionRate) / 100;
+
+                if (commissionAmount > 0) {
+                    await query("UPDATE users SET affiliate_balance = affiliate_balance + ?, total_affiliate_earnings = total_affiliate_earnings + ? WHERE id = ?",
+                        [commissionAmount, commissionAmount, referrerId]);
+
+                    await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'affiliate_payout', ?, 'completed')",
+                        [referrerId, commissionAmount, `Commission from ${user.email} purchase`]);
+                }
+            }
+        }
+
+        // --- STOCK DEPLETION CHECK (Task 3) ---
+        if (orderStatus === 'paid') {
+            // Check current stock if platform is Direct
+            const invCountRows = await query("SELECT COUNT(*) as count FROM inventory WHERE name = ? AND status = 'In Stock'", [product.name]) as any[];
+            const inStock = invCountRows[0]?.count || 0;
+
+            if (inStock < safeQuantity) {
+                const alertMsg = `⚠️ <b>LOW STOCK ALERT!</b>\nProduct: ${product.name}\nAvailable: ${inStock}\nRequested: ${safeQuantity}\nPlease restock immediately.`;
+                await sendTelegramAdminAlert(alertMsg);
+
+                if (settings.admin_email || settings.smtpUser) {
+                    await sendAuditReport(settings.admin_email || settings.smtpUser, "CRITICAL: Low Stock Alert", {
+                        da: "STOCK ALERT",
+                        pa: product.name,
+                        links: inStock,
+                        details: `The product "${product.name}" is running low. Current stock is ${inStock}. This order requested ${safeQuantity}. Please restock immediately to avoid lost sales.`
+                    }, settings);
+                }
+            }
         }
 
         // 3. Create Order
@@ -259,14 +330,66 @@ export async function POST(req: Request) {
         // 4. DELIVERY AUTOMATION
         let emailBody = "";
         let telegramBody = "";
+        let deliveredItems: any[] = [];
 
-        if (product.type === 'service') {
+        if (product.bundle_items) {
+            // --- BUNDLE DELIVERY ---
+            const bundleIds = JSON.parse(product.bundle_items);
+            let bundleCreds = "📦 **BUNDLE CONTENTS:**\n\n";
+
+            for (const bundleId of bundleIds) {
+                // Get Product Name
+                const subRows: any = await query("SELECT name FROM products WHERE id = ?", [bundleId]);
+                if (subRows.length === 0) continue;
+                const subName = subRows[0].name;
+
+                // Fetch Stock
+                const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [subName, safeQuantity]);
+
+                if (stockRows.length < safeQuantity) {
+                    bundleCreds += `⚠️ ${subName}: Out of Stock (Contact Support)\n`;
+                } else {
+                    for (const stockItem of stockRows) {
+                        // Mark Sold
+                        await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
+
+                        // Parse Details
+                        const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
+                        const creds = details.extraInfo || `${details.email}:${details.password}`;
+                        bundleCreds += `✅ **${subName}**:\n${creds}\n\n`;
+                        deliveredItems.push({ name: subName, stockId: stockItem.id });
+                    }
+                }
+            }
+            emailBody = `Thank you for purchasing the ${product.name} Bundle!\n\n${bundleCreds}\n\nPlease save these details immediately.`;
+            telegramBody = `Bundle Order: ${product.name}\n\n${bundleCreds}`;
+
+        } else if (product.type === 'service') {
             emailBody = `Thank you for your purchase!\n\nWe have received your order for ${product.name} (x${safeQuantity}).\nOur team will begin processing your boost shortly.\nYou will receive updates via email or Telegram.`;
             telegramBody = `Order Confirmed: ${product.name} (x${safeQuantity})\n\nStatus: Processing\nWe will update you soon!`;
         } else {
-            const credentials = product.creds || "Contact Support for Access";
-            emailBody = `Your Credentials:\n\n${credentials}\n\nPlease change your passwords immediately.`;
-            telegramBody = `Thanks for buying ${product.name}!\n\nHere are your details:\n${credentials}`;
+            // --- SINGLE ITEM DYNAMIC DELIVERY ---
+            // Try to fetch from Inventory first
+            const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [product.name, safeQuantity]);
+
+            if (stockRows.length >= safeQuantity) {
+                let dynamicCreds = "";
+                for (const stockItem of stockRows) {
+                    await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
+                    const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
+                    const creds = details.extraInfo || (details.email ? `Email: ${details.email}\nPass: ${details.password}` : Object.values(details).join(':'));
+                    dynamicCreds += `${creds}\n---\n`;
+                    deliveredItems.push({ name: product.name, stockId: stockItem.id });
+                }
+
+                emailBody = `Your Order Details for ${product.name}:\n\n${dynamicCreds}\n\nThank you for choosing us!`;
+                telegramBody = `Order: ${product.name}\n\n${dynamicCreds}`;
+            } else {
+                // Fallback to Static Creds
+                const credentials = product.creds || "Contact Support for Access";
+                emailBody = `Your Credentials:\n\n${credentials}\n\nPlease change your passwords immediately.`;
+                telegramBody = `Thanks for buying ${product.name}!\n\nHere are your details:\n${credentials}`;
+            }
         }
 
         // A. Email Delivery to User

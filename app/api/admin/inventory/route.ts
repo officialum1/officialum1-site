@@ -80,6 +80,10 @@ export async function POST(request: Request) {
         const action = body.action;
 
         if (action === 'add_inventory') {
+            // Check if it was out of stock before adding
+            const currentStockRows: any = await query("SELECT COUNT(*) as count FROM inventory WHERE name = ? AND status = 'In Stock'", [body.name]);
+            const wasOutOfStock = (currentStockRows[0]?.count || 0) === 0;
+
             const newItem = {
                 id: `inv_${Date.now()}`,
                 name: body.name,
@@ -98,6 +102,21 @@ export async function POST(request: Request) {
                 "INSERT INTO inventory (id, name, platform, purchasePrice, status, accountDetails) VALUES (?, ?, ?, ?, ?, ?)",
                 [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails]
             );
+
+            // Restock Announcement
+            if (wasOutOfStock) {
+                const settingsRows: any = await query("SELECT setting_key, setting_value FROM settings");
+                const settings = settingsRows.reduce((acc: any, row: any) => ({ ...acc, [row.setting_key]: row.setting_value }), {});
+
+                if (settings.telegram_bot_token && settings.telegram_chat_id) {
+                    const { sendTelegramMessage } = require('@/lib/telegram');
+                    await sendTelegramMessage(
+                        settings.telegram_chat_id,
+                        `✨ <b>RESTOCK ALERT!</b>\n\n${newItem.name} is now back in stock!\n\n🚀 Grab yours now at OfficialUM1!`,
+                        settings.telegram_bot_token
+                    );
+                }
+            }
 
             // Log
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
@@ -168,6 +187,10 @@ export async function POST(request: Request) {
             const lines = bulkData.split('\n');
             const created = [];
 
+            // Check if it was out of stock before adding
+            const currentStockRows: any = await query("SELECT COUNT(*) as count FROM inventory WHERE name = ? AND status = 'In Stock'", [namePrefix || `${platform} Account`]);
+            const wasOutOfStock = (currentStockRows[0]?.count || 0) === 0;
+
             for (const line of lines) {
                 if (!line.trim()) continue;
 
@@ -198,6 +221,21 @@ export async function POST(request: Request) {
                     [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails]
                 );
                 created.push(newItem);
+            }
+
+            // Restock Announcement
+            if (wasOutOfStock && created.length > 0) {
+                const settingsRows: any = await query("SELECT setting_key, setting_value FROM settings");
+                const settings = settingsRows.reduce((acc: any, row: any) => ({ ...acc, [row.setting_key]: row.setting_value }), {});
+
+                if (settings.telegram_bot_token && settings.telegram_chat_id) {
+                    const { sendTelegramMessage } = require('@/lib/telegram');
+                    await sendTelegramMessage(
+                        settings.telegram_chat_id,
+                        `🚀 <b>MASSIVE RESTOCK!</b>\n\n${created[0].name} is back in stock with ${created.length} new accounts!\n\n🛒 Shop now at OfficialUM1!`,
+                        settings.telegram_bot_token
+                    );
+                }
             }
 
             // Log

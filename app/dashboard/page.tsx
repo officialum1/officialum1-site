@@ -90,10 +90,10 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
 
                     {/* 1. Wallet Card */}
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)' }}>
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(0,255,136,0.05) 0%, rgba(0,0,0,0.2) 100%)', border: '1px solid rgba(0,255,136,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                             <h3 style={{ color: '#ccc' }}>Wallet Balance</h3>
-                            <span style={{ fontSize: '1.5rem' }}>💰</span>
+                            <span style={{ fontSize: '1.5rem' }}>💳</span>
                         </div>
                         <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#00ff88', marginBottom: '1.5rem' }}>
                             ${Number(balance).toFixed(2)}
@@ -108,24 +108,39 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
                                 className="input-field"
                                 style={{ flex: 1 }}
                             />
-                            <button onClick={handleDeposit} disabled={isDepositing} className="btn btn-primary">
+                            <button onClick={handleDeposit} disabled={isDepositing} className="btn btn-primary" style={{ minWidth: '120px' }}>
                                 {isDepositing ? '...' : '+ Deposit'}
                             </button>
                         </div>
                     </div>
 
-                    {/* 2. Referrals Card */}
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                    {/* 2. Affiliate Card */}
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0.2) 100%)', border: '1px solid rgba(255,215,0,0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                            <h3 style={{ color: '#ccc' }}>Affiliate Program</h3>
-                            <span style={{ fontSize: '1.5rem' }}>🤝</span>
+                            <h3 style={{ color: '#ccc' }}>Affiliate Earnings</h3>
+                            <span style={{ fontSize: '1.5rem' }}>📈</span>
                         </div>
-                        <p style={{ color: '#888', marginBottom: '1rem' }}>Share your code and earn 5% on every order!</p>
+                        <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#ffd700', marginBottom: '0.5rem' }}>
+                            ${Number(user?.affiliate_balance || 0).toFixed(2)}
+                        </h2>
+                        <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Total Earned: ${Number(user?.total_affiliate_earnings || 0).toFixed(2)}</p>
 
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed #444' }}>
-                            <code style={{ fontSize: '1.5rem', color: '#fff', letterSpacing: '2px' }}>{referralCode || 'GENERATING...'}</code>
-                            <button onClick={() => navigator.clipboard.writeText(referralCode)} style={{ background: 'none', border: 'none', color: '#00ff88', cursor: 'pointer' }}>Copy</button>
+                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed rgba(255,215,0,0.3)' }}>
+                            <code style={{ fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '1rem' }}>
+                                {typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${referralCode}` : `ref=${referralCode}`}
+                            </code>
+                            <button
+                                onClick={() => {
+                                    const link = `${window.location.origin}/register?ref=${referralCode}`;
+                                    navigator.clipboard.writeText(link);
+                                    alert('Affiliate link copied!');
+                                }}
+                                style={{ background: 'none', border: 'none', color: '#ffd700', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                COPY
+                            </button>
                         </div>
+                        <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Share your link and earn 10% commission on every automated purchase!</p>
                     </div>
 
                 </div>

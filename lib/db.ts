@@ -236,14 +236,48 @@ export async function initDB() {
         )
     `);
 
-    // 7. Activity Logs
+    // --- MIGRATIONS & NEW COLUMNS ---
+    try { await query("ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN affiliate_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN total_affiliate_earnings DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN permissions TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN review_sent BOOLEAN DEFAULT FALSE"); } catch (e) { }
+    try { await query("ALTER TABLE testimonials ADD COLUMN order_id VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE testimonials ADD COLUMN product_id INT"); } catch (e) { }
+
+    // 8. Wallet Transactions
     await query(`
-        CREATE TABLE IF NOT EXISTS activity_logs (
-            id VARCHAR(50) PRIMARY KEY,
-            user VARCHAR(100),
-            action VARCHAR(100),
-            details TEXT,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        CREATE TABLE IF NOT EXISTS wallet_transactions (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50) NOT NULL,
+            type ENUM('deposit', 'purchase', 'refund', 'affiliate_payout') NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            description TEXT,
+            status VARCHAR(50) DEFAULT 'completed',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // 9. Knowledge Base
+    await query(`
+        CREATE TABLE IF NOT EXISTS knowledge_base (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) UNIQUE NOT NULL,
+            content LONGTEXT NOT NULL,
+            category VARCHAR(100) DEFAULT 'General',
+            views INT DEFAULT 0,
+            is_published BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 10. Promotional Codes (Expanded)
+    try { await query("ALTER TABLE settings ADD COLUMN referral_commission_rate DECIMAL(5,2) DEFAULT 5.00"); } catch (e) { }
+    try { await query("ALTER TABLE employees ADD COLUMN permissions TEXT"); } catch (e) { }
+
+    // 11. Flash Sales & Bundles
+    try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
+    try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { } // JSON array of product IDs
 }

@@ -22,18 +22,18 @@ export default function AdminLoginPage() {
             const data = await res.json();
 
             if (data.success) {
-                // 2. Strict Check for Admin Email
-                if (data.user.email === 'admin@officialum1.com') {
+                // 2. Check for Admin or staff role
+                if (data.user.role === 'admin' || data.user.role === 'seller') {
                     // Set Secure Cookie
                     document.cookie = "admin_session=true; path=/; max-age=86400; SameSite=Strict";
 
-                    // Set Local Storage for Navbar
+                    // Set Local Storage for Navbar and Dashboard
                     localStorage.setItem('buyer_user', JSON.stringify(data.user));
 
                     // Redirect
                     window.location.href = '/admin/inventory';
                 } else {
-                    alert('Access Denied. You are not an Admin.');
+                    alert('Access Denied. You do not have staff/admin permissions.');
                     setLoading(false);
                 }
             } else {

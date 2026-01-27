@@ -37,18 +37,90 @@ export async function POST(request: Request) {
             commissionRate: Number(body.commissionRate || 0),
             compensationType: body.compensationType,
             allowedPlatforms: JSON.stringify(body.allowedPlatforms || []),
+            permissions: JSON.stringify(body.permissions || []),
             status: 'Active'
         };
 
+        // 1. Insert into employees
         await query(
-            "INSERT INTO employees (id, name, email, password, position, department, salary, commissionRate, compensationType, allowedPlatforms, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [newEmp.id, newEmp.name, newEmp.email, newEmp.password, newEmp.position, newEmp.department, newEmp.salary, newEmp.commissionRate, newEmp.compensationType, newEmp.allowedPlatforms, newEmp.status]
+            "INSERT INTO employees (id, name, email, password, position, department, salary, commissionRate, compensationType, allowedPlatforms, status, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [newEmp.id, newEmp.name, newEmp.email, newEmp.password, newEmp.position, newEmp.department, newEmp.salary, newEmp.commissionRate, newEmp.compensationType, newEmp.allowedPlatforms, newEmp.status, newEmp.permissions]
         );
+
+        // 2. Synchronize with users table for login
+        // Check if exists
+        const existing: any = await query("SELECT id FROM users WHERE email = ?", [newEmp.email]);
+        if (existing.length === 0) {
+            await query(
+                "INSERT INTO users (id, email, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?)",
+                [newEmp.id, newEmp.email, plainPassword, 'seller', true, newEmp.permissions]
+            );
+        } else {
+            // Update existing user to staff
+            await query(
+                "UPDATE users SET role = 'seller', permissions = ?, password = ? WHERE email = ?",
+                [newEmp.permissions, plainPassword, newEmp.email]
+            );
+        }
 
         // Return without password
         const { password: _, ...responseEmp } = newEmp;
 
         return NextResponse.json(responseEmp);
+    } catch (e: any) {
+        console.error("Employee Creation Error:", e);
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+export async function PATCH(request: Request) {
+    try {
+        const body = await request.json();
+        const { id, status } = body;
+
+        await query("UPDATE employees SET status = ? WHERE id = ?", [status, id]);
+
+        // If suspended, revoke login access in users table?? 
+        // Logic: Login route should check employee status.
+        // But for safety, let's revoke role if suspended.
+        if (status !== 'Active') {
+            // Get email
+            const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
+            if (empRows.length > 0) {
+                await query("UPDATE users SET role = 'buyer' WHERE email = ?", [empRows[0].email]);
+            }
+        } else {
+            // Reactivate
+            const empRows: any = await query("SELECT email, permissions FROM employees WHERE id = ?", [id]);
+            if (empRows.length > 0) {
+                await query("UPDATE users SET role = 'seller', permissions = ? WHERE email = ?", [empRows[0].permissions, empRows[0].email]);
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
+
+        // Get email first to cleanup user table
+        const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
+
+        await query("DELETE FROM employees WHERE id = ?", [id]);
+
+        // Downgrade user to buyer
+        if (empRows.length > 0) {
+            await query("UPDATE users SET role = 'buyer', permissions = NULL WHERE email = ?", [empRows[0].email]);
+        }
+
+        return NextResponse.json({ success: true });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

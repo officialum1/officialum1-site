@@ -20,10 +20,19 @@ export async function POST(req: Request) {
         const newRefCode = Math.random().toString(36).substring(7).toUpperCase();
         const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
+        // Resolve Referral Code to User ID
+        let referrerId = null;
+        if (referralCode) {
+            const refUser: any = await query("SELECT id FROM users WHERE referral_code = ?", [referralCode]);
+            if (refUser.length > 0) {
+                referrerId = refUser[0].id;
+            }
+        }
+
         // 4. Create User (Including Verification Token and is_verified=False)
         await query(
             "INSERT INTO users (id, email, password, telegram, role, referral_code, referred_by, verification_token, is_verified) VALUES (?, ?, ?, ?, 'buyer', ?, ?, ?, FALSE)",
-            [userId, email, password, telegram || '', newRefCode, referralCode || null, verificationToken]
+            [userId, email, password, telegram || '', newRefCode, referrerId, verificationToken]
         );
 
         // 5. Send Verification Email

@@ -9,7 +9,17 @@ export async function POST(req: Request) {
 
         if (results.length > 0) {
             const user = results[0];
-            return NextResponse.json({ success: true, user: { id: user.id, email: user.email, telegram: user.telegram } });
+            // Allow login for admin, seller, or anyone if we want them to have a dashboard
+            return NextResponse.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    telegram: user.telegram,
+                    role: user.role,
+                    permissions: user.permissions
+                }
+            });
         } else {
             // BACKWARD COMPAT (Fallback to JSON if DB fails/empty but not likely needed if we start fresh)
             return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });

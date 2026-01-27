@@ -68,12 +68,12 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true, count: created.length });
         } else if (body.action === 'update') {
-            const { id, name, platform, price, description, image } = body;
+            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ? WHERE id = ?",
-                [name, platform, cleanPrice, description, image, id]
+                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ? WHERE id = ?",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, id]
             );
 
             // Log activity
@@ -82,12 +82,12 @@ export async function POST(req: Request) {
             );
         } else {
             // Create Product in Catalog
-            const { name, platform, price, description, image } = body;
+            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "INSERT INTO products (name, platform, price, description, image) VALUES (?, ?, ?, ?, ?)",
-                [name, platform, cleanPrice, description, image]
+                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null]
             );
         }
 
