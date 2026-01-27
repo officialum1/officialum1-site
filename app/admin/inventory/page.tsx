@@ -537,6 +537,56 @@ export default function AdminDashboard() {
         }
     };
 
+    const handlePlayerUpMagicSync = (data: string) => {
+        const products: string[] = [];
+        const lines = data.split('\n');
+        let currentTitle = '';
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const playerUpMatch = line.match(/Buy Now\s*-\s*(.*?)\s*-\s*\$([0-9.]+)/i);
+            const parenMatch = line.match(/(.*?)\s*\(\s*\$([0-9.]+)\s*\)/);
+
+            if (playerUpMatch) {
+                const title = playerUpMatch[1].trim();
+                const price = playerUpMatch[2];
+                let platform = 'Social';
+                if (title.toLowerCase().includes('discord')) platform = 'Discord';
+                else if (title.toLowerCase().includes('reddit')) platform = 'Reddit';
+                else if (title.toLowerCase().includes('google') || title.toLowerCase().includes('gmail')) platform = 'Google';
+
+                products.push(`${title},${platform},${price},Imported from PlayerUp listings.,`);
+            } else if (parenMatch) {
+                const title = parenMatch[1].trim();
+                const price = parenMatch[2];
+                if (title.length > 5) {
+                    products.push(`${title},PlayerUp,${price},Imported via Express Sync.,`);
+                }
+            } else if (line.includes('$') && currentTitle) {
+                const priceMatch = line.match(/\$([0-9.]+)/);
+                if (priceMatch) {
+                    products.push(`${currentTitle},PlayerUp,${priceMatch[1]},Imported via Pro Sync.,`);
+                    currentTitle = '';
+                }
+            } else if (line.length > 15 && !line.includes('http')) {
+                currentTitle = line;
+            }
+        }
+
+        if (products.length > 0) {
+            const unique = [...new Set(products)];
+            setBulkProductData(unique.join('\n'));
+            setImportMode('csv');
+            alert(`🛍️ PlayerUp Sync found ${unique.length} listings! Check the data below.`);
+        } else {
+            alert('❌ No listings found. Make sure to Select All (Ctrl+A) and Copy (Ctrl+C) the search results page.');
+        }
+    };
+
+    \n
+
     const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -1134,8 +1184,10 @@ export default function AdminDashboard() {
                                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                     <button onClick={() => setImportMode('manual')} className={`btn ${importMode === 'manual' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Single Entry</button>
                                                     <button onClick={() => setImportMode('csv')} className={`btn ${importMode === 'csv' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem' }}>Bulk CSV</button>
-                                                    <button onClick={() => setImportMode('z2u')} className={`btn ${importMode === 'z2u' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00ff88', borderColor: '#00ff88' }}>🪄 Z2U Magic Sync</button>
+                                                    <button onClick={() => setImportMode('z2u')} className={`btn ${importMode === 'z2u' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00ff88', borderColor: '#00ff88' }}>🪄 Z2U Sync</button>
+                                                    <button onClick={() => setImportMode('playerup')} className={`btn ${importMode === 'playerup' ? 'btn-primary' : 'btn-outline'}`} style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', color: '#00c3ff', borderColor: '#00c3ff' }}>🛒 PlayerUp Importer</button>
                                                 </div>
+
                                             )}
                                         </div>
 
@@ -1183,6 +1235,33 @@ export default function AdminDashboard() {
 
                                                     <div style={{ color: '#888', fontSize: '0.8rem' }}>
                                                         I will automatically extract all Product Titles and Prices for you.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : importMode === 'playerup' ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                                <div style={{ background: 'linear-gradient(135deg, rgba(0,195,255,0.1) 0%, rgba(0,195,255,0.05) 100%)', padding: '2rem', borderRadius: '16px', border: '1px solid #00c3ff', textAlign: 'center' }}>
+                                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛍️</div>
+                                                    <h4 style={{ marginBottom: '1rem' }}>PlayerUp Bulk Importer</h4>
+                                                    <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem', maxWidth: '550px', margin: '0 auto 2rem' }}>
+                                                        Import all your PlayerUp listings instantly.
+                                                        <br /><br />
+                                                        1. Open your <a href="https://www.playerup.com/search/28909027/?q=officialum1&o=date&c[node]=1075" target="_blank" style={{ color: '#00c3ff', fontWeight: 'bold' }}>PlayerUp Listing Page</a>
+                                                        <br />
+                                                        2. Select All (<b>Ctrl+A</b>) and Copy (<b>Ctrl+C</b>)
+                                                        <br />
+                                                        3. Paste everything in the box below
+                                                    </p>
+
+                                                    <textarea
+                                                        className="input-field"
+                                                        placeholder="Paste PlayerUp page content here..."
+                                                        style={{ width: '100%', height: '150px', background: 'rgba(0,0,0,0.5)', marginBottom: '1.5rem', border: '1px solid rgba(0,195,255,0.3)' }}
+                                                        onChange={(e) => handlePlayerUpMagicSync(e.target.value)}
+                                                    />
+
+                                                    <div style={{ color: '#888', fontSize: '0.8rem' }}>
+                                                        I will scan the text and find every listing title and price for your catalog.
                                                     </div>
                                                 </div>
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
