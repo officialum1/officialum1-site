@@ -546,31 +546,42 @@ export default function AdminDashboard() {
             const line = lines[i].trim();
             if (!line) continue;
 
-            const playerUpMatch = line.match(/Buy Now\s*-\s*(.*?)\s*-\s*\$([0-9.]+)/i);
-            const parenMatch = line.match(/(.*?)\s*\(\s*\$([0-9.]+)\s*\)/);
+            // Skip metadata/header lines that confuse the parser
+            if (line.toLowerCase().startsWith('post by') || line.includes('in forum:') || line.length < 3) continue;
+            if (line.includes('Threads:') || line.includes('Messages:') || line.includes('Joined:')) continue;
 
-            if (playerUpMatch) {
-                const title = playerUpMatch[1].trim();
-                const price = playerUpMatch[2];
-                let platform = 'Social';
-                if (title.toLowerCase().includes('discord')) platform = 'Discord';
-                else if (title.toLowerCase().includes('reddit')) platform = 'Reddit';
-                else if (title.toLowerCase().includes('google') || title.toLowerCase().includes('gmail')) platform = 'Google';
+            // Pattern 1: Title - Price on same line
+            const sameLineMatch = line.match(/(.*?)\s*-\s*\$([0-9.]+)/) || line.match(/(.*?)\s*\(\s*\$([0-9.]+)\s*\)/);
 
-                products.push(`${title},${platform},${price},Imported from PlayerUp listings.,`);
-            } else if (parenMatch) {
-                const title = parenMatch[1].trim();
-                const price = parenMatch[2];
-                if (title.length > 5) {
-                    products.push(`${title},PlayerUp,${price},Imported via Express Sync.,`);
-                }
-            } else if (line.includes('$') && currentTitle) {
-                const priceMatch = line.match(/\$([0-9.]+)/);
-                if (priceMatch) {
-                    products.push(`${currentTitle},PlayerUp,${priceMatch[1]},Imported via Pro Sync.,`);
+            if (sameLineMatch) {
+                const title = sameLineMatch[1].trim();
+                const price = sameLineMatch[2];
+                if (title.length > 5 && !title.includes('Post by')) {
+                    let platform = 'Social';
+                    if (title.toLowerCase().includes('discord')) platform = 'Discord';
+                    else if (title.toLowerCase().includes('reddit')) platform = 'Reddit';
+                    else if (title.toLowerCase().includes('snapchat')) platform = 'Snapchat';
+                    else if (title.toLowerCase().includes('google') || title.toLowerCase().includes('gmail')) platform = 'Google';
+
+                    products.push(`${title},${platform},${price},Premium account verified.,`);
                     currentTitle = '';
+                    continue;
                 }
-            } else if (line.length > 15 && !line.includes('http')) {
+            }
+
+            // Pattern 2: Title line followed by Price line
+            const priceOnlyMatch = line.match(/^\$([0-9.]+)$/);
+            if (priceOnlyMatch && currentTitle) {
+                const price = priceOnlyMatch[1];
+                let platform = 'Social';
+                if (currentTitle.toLowerCase().includes('discord')) platform = 'Discord';
+                else if (currentTitle.toLowerCase().includes('reddit')) platform = 'Reddit';
+                else if (currentTitle.toLowerCase().includes('snapchat')) platform = 'Snapchat';
+
+                products.push(`${currentTitle},${platform},${price},Direct sync from listings.,`);
+                currentTitle = '';
+            } else if (line.length > 10 && !line.includes('$')) {
+                // Potential title line
                 currentTitle = line;
             }
         }
