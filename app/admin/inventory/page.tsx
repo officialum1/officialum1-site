@@ -2166,6 +2166,7 @@ function AdminDashboard() {
                                         <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
                                             <th style={{ padding: '1.5rem' }}>Buyer Info</th>
                                             <th style={{ padding: '1.5rem' }}>Status</th>
+                                            <th style={{ padding: '1.5rem' }}>Referrals</th>
                                             <th style={{ padding: '1.5rem' }}>Wallet Balance</th>
                                             <th style={{ padding: '1.5rem' }}>Affiliate Earned</th>
                                             <th style={{ padding: '1.5rem' }}>Joined</th>
@@ -2192,6 +2193,10 @@ function AdminDashboard() {
                                                     }}>
                                                         {u.is_verified ? 'VERIFIED' : 'PENDING'}
                                                     </span>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ color: '#fff', fontWeight: 'bold' }}>{u.referral_count || 0} Users</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#888' }}>Code: {u.referral_code}</div>
                                                 </td>
                                                 <td style={{ padding: '1.5rem' }}>
                                                     <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.wallet_balance || 0).toFixed(2)}</div>

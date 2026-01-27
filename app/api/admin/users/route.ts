@@ -4,7 +4,13 @@ import { sendAuditReport } from '@/lib/email';
 
 export async function GET() {
     try {
-        const users = await query('SELECT id, email, role, telegram, is_verified, wallet_balance, affiliate_balance, created_at, referral_code FROM users ORDER BY created_at DESC');
+        const users = await query(`
+            SELECT 
+                id, email, role, telegram, is_verified, wallet_balance, affiliate_balance, created_at, referral_code,
+                (SELECT COUNT(*) FROM users as u2 WHERE u2.referred_by = users.referral_code) as referral_count
+            FROM users 
+            ORDER BY created_at DESC
+        `);
         return NextResponse.json(users);
     } catch (error) {
         console.error('Fetch Users Error:', error);
