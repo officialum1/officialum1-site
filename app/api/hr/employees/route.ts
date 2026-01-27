@@ -109,19 +109,28 @@ export async function PATCH(request: Request) {
                 [name, position, department, Number(salary || 0), Number(commissionRate || 0), compensationType, JSON.stringify(allowedPlatforms || []), JSON.stringify(permissions || []), id]
             );
 
-            // Update user permissions as well
+            // Update or Create user for login synchronization
             const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
             if (empRows.length > 0) {
-                const updateParams: any[] = [JSON.stringify(permissions || []), empRows[0].email];
-                let updateQuery = "UPDATE users SET permissions = ? WHERE email = ?";
+                const userEmail = empRows[0].email;
+                const existingUser: any = await query("SELECT id FROM users WHERE email = ?", [userEmail]);
 
-                if (password) {
-                    const hashedPassword = await bcrypt.hash(password, 10);
-                    updateQuery = "UPDATE users SET permissions = ?, password = ? WHERE email = ?";
-                    updateParams.splice(1, 0, hashedPassword);
+                if (existingUser.length > 0) {
+                    const updateParams: any[] = [JSON.stringify(permissions || []), userEmail];
+                    let updateQuery = "UPDATE users SET role = 'seller', permissions = ? WHERE email = ?";
+
+                    if (password) {
+                        updateQuery = "UPDATE users SET role = 'seller', permissions = ?, password = ? WHERE email = ?";
+                        updateParams.splice(1, 0, password); // Note: Project uses plaintext in users table for auth/login
+                    }
+                    await query(updateQuery, updateParams);
+                } else {
+                    // Create missing user entry
+                    await query(
+                        "INSERT INTO users (id, email, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?)",
+                        [id, userEmail, password || 'default123', 'seller', true, JSON.stringify(permissions || [])]
+                    );
                 }
-
-                await query(updateQuery, updateParams);
             }
         }
 
