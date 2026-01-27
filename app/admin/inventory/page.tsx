@@ -548,7 +548,7 @@ function AdminDashboard() {
 
         setShowAddProduct(false);
         setEditingProduct(null);
-        setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '' });
+        setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '1' });
         fetchData();
     };
 
@@ -1266,7 +1266,8 @@ function AdminDashboard() {
                                                             image: prod.image || '',
                                                             salePrice: prod.sale_price || '',
                                                             saleEndsAt: prod.sale_ends_at ? new Date(prod.sale_ends_at).toISOString().slice(0, 16) : '',
-                                                            bundleItems: prod.bundle_items || ''
+                                                            bundleItems: prod.bundle_items || '',
+                                                            stock: prod.stock || '1'
                                                         });
                                                         setShowAddProduct(true);
                                                         setImportMode('manual');
@@ -1391,7 +1392,7 @@ function AdminDashboard() {
                                                     </div>
 
                                                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '' }); }} className="btn btn-outline">Cancel</button>
+                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '1' }); }} className="btn btn-outline">Cancel</button>
                                                         <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                                     </div>
                                                 </form>

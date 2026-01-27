@@ -12,8 +12,8 @@ export async function GET() {
             ORDER BY id DESC
         `);
         return NextResponse.json(products);
-    } catch (e: any) {
-        console.error("Shop API Error:", e.message);
+    } catch (e: unknown) {
+        console.error("Shop API Error:", e instanceof Error ? e.message : String(e));
         return NextResponse.json([], { status: 500 });
     }
 }
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({ success: true });
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+    } catch (e: unknown) {
+        return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
     }
 }
