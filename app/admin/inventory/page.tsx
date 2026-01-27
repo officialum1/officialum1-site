@@ -547,21 +547,25 @@ export default function AdminDashboard() {
             if (!line) continue;
 
             // Skip metadata/header lines that confuse the parser
-            if (line.toLowerCase().startsWith('post by') || line.includes('in forum:') || line.length < 3) continue;
-            if (line.includes('Threads:') || line.includes('Messages:') || line.includes('Joined:')) continue;
+            const lower = line.toLowerCase();
+            if (lower.startsWith('post by') || lower.includes('in forum:') || lower.includes('joined:') || lower.includes('threads:') || lower.includes('messages:')) continue;
+            if (line.length < 3) continue;
 
             // Pattern 1: Title - Price on same line
             const sameLineMatch = line.match(/(.*?)\s*-\s*\$([0-9.]+)/) || line.match(/(.*?)\s*\(\s*\$([0-9.]+)\s*\)/);
 
             if (sameLineMatch) {
-                const title = sameLineMatch[1].trim();
+                let title = sameLineMatch[1].trim();
                 const price = sameLineMatch[2];
-                if (title.length > 5 && !title.includes('Post by')) {
+                title = title.replace(/^Buy Now\s*-\s*/i, '').trim();
+
+                if (title.length > 5 && !title.toLowerCase().includes('post by')) {
                     let platform = 'Social';
-                    if (title.toLowerCase().includes('discord')) platform = 'Discord';
-                    else if (title.toLowerCase().includes('reddit')) platform = 'Reddit';
-                    else if (title.toLowerCase().includes('snapchat')) platform = 'Snapchat';
-                    else if (title.toLowerCase().includes('google') || title.toLowerCase().includes('gmail')) platform = 'Google';
+                    const lt = title.toLowerCase();
+                    if (lt.includes('discord')) platform = 'Discord';
+                    else if (lt.includes('reddit')) platform = 'Reddit';
+                    else if (lt.includes('snapchat')) platform = 'Snapchat';
+                    else if (lt.includes('google') || lt.includes('gmail')) platform = 'Google';
 
                     products.push(`${title},${platform},${price},Premium account verified.,`);
                     currentTitle = '';
@@ -574,9 +578,11 @@ export default function AdminDashboard() {
             if (priceOnlyMatch && currentTitle) {
                 const price = priceOnlyMatch[1];
                 let platform = 'Social';
-                if (currentTitle.toLowerCase().includes('discord')) platform = 'Discord';
-                else if (currentTitle.toLowerCase().includes('reddit')) platform = 'Reddit';
-                else if (currentTitle.toLowerCase().includes('snapchat')) platform = 'Snapchat';
+                const ct = currentTitle.toLowerCase();
+                if (ct.includes('discord')) platform = 'Discord';
+                else if (ct.includes('reddit')) platform = 'Reddit';
+                else if (ct.includes('snapchat')) platform = 'Snapchat';
+                else if (ct.includes('google')) platform = 'Google';
 
                 products.push(`${currentTitle},${platform},${price},Direct sync from listings.,`);
                 currentTitle = '';
