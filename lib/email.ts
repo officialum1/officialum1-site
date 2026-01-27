@@ -49,23 +49,67 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
     }
 }
 
-// Wrapper for existing calls (Backward Compatibility)
 export async function sendAuditReport(to: string, subject: string, data: any, settings: any) {
     const html = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4;">
-            <div style="background: white; padding: 20px; border-radius: 8px;">
-                <h2 style="color: #333;">${subject}</h2>
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;" />
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0d1117; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #161b22; border-radius: 24px; overflow: hidden; border: 1px solid #30363d; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+                <!-- Banner -->
+                <div style="background: linear-gradient(135deg, #00ff88 0%, #00c3ff 100%); height: 6px;"></div>
                 
-                <h3 style="color: #0070f3;">${data.da || 'Notification'}</h3>
-                <p><strong>Ref:</strong> ${data.pa || 'N/A'}</p>
-                <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #0070f3; margin: 20px 0;">
-                    ${(data.details || '').replace(/\n/g, '<br/>')}
+                <!-- Header -->
+                <div style="padding: 40px 30px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">OFFICIAL<span style="color: #00ff88;">UM1</span></h1>
+                    <div style="display: inline-block; margin-top: 10px; padding: 4px 12px; background: rgba(0,255,136,0.1); border-radius: 20px; border: 1px solid rgba(0,255,136,0.2);">
+                        <span style="color: #00ff88; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Secure Delivery</span>
+                    </div>
                 </div>
                 
-                <p style="font-size: 12px; color: #888; margin-top: 30px;">
-                    Sent by OfficialUM1 Automated System
-                </p>
+                <!-- Content -->
+                <div style="padding: 0 40px 40px;">
+                    <div style="text-align: center; margin-bottom: 35px;">
+                        <h2 style="margin: 0; font-size: 22px; color: #ffffff;">Your Purchase is Ready!</h2>
+                        <p style="margin: 10px 0 0; color: #8b949e; line-height: 1.5;">Thank you for your order. Your digital assets have been processed and are ready for immediate use.</p>
+                    </div>
+
+                    <div style="background: #0d1117; padding: 25px; border-radius: 16px; border: 1px solid #30363d; margin-bottom: 30px;">
+                        <p style="margin: 0; color: #8b949e; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Item Delivered</p>
+                        <p style="margin: 8px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">${data.pa || 'Digital Item'}</p>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <span style="color: #00ff88; font-size: 18px;">🔑</span>
+                            <span style="color: #ffffff; font-size: 14px; font-weight: 600;">ACCESS CREDENTIALS</span>
+                        </div>
+                        <div style="background: #1c2128; padding: 30px; border-radius: 16px; border: 1px solid #30363d; color: #00ff88; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 16px; line-height: 1.6; word-break: break-all; position: relative;">
+                            ${(data.details || '').replace(/\n/g, '<br/>')}
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,160,0,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,160,0,0.2); margin-bottom: 35px;">
+                        <p style="margin: 0; color: #ffa000; font-size: 13px; line-height: 1.5;">
+                            <strong>Pro Tip:</strong> For maximum security, we recommend changing the password and linking your own recovery methods immediately after the first login.
+                        </p>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <a href="https://officialum1.com/support" style="display: inline-block; padding: 16px 40px; background: #00ff88; color: #0d1117; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 15px; box-shadow: 0 10px 20px rgba(0,255,136,0.2); transition: all 0.2s;">View Full Order Details</a>
+                        <p style="margin-top: 25px; color: #484f58; font-size: 13px;">Need help? Reply to this email or chat with us on Telegram.</p>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="padding: 30px 40px; text-align: center; background: #0d1117; border-top: 1px solid #30363d;">
+                    <div style="margin-bottom: 20px;">
+                        <a href="#" style="color: #8b949e; text-decoration: none; margin: 0 10px; font-size: 12px;">Privacy</a>
+                        <a href="#" style="color: #8b949e; text-decoration: none; margin: 0 10px; font-size: 12px;">Terms</a>
+                        <a href="#" style="color: #8b949e; text-decoration: none; margin: 0 10px; font-size: 12px;">About</a>
+                    </div>
+                    <p style="margin: 0; font-size: 12px; color: #484f58; line-height: 1.5;">
+                        &copy; 2026 OfficialUM1 Marketplace. All rights reserved.<br/>
+                        This is an automated delivery email. Please do not share your credentials with anyone.
+                    </p>
+                </div>
             </div>
         </div>
     `;

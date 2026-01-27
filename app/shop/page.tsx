@@ -85,12 +85,27 @@ export default function ShopPage() {
                                         </Link>
                                         <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
 
-                                        <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>{item.price}</div>
+                                        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
+                                                {item.stock > 0 ? (
+                                                    <div style={{ fontSize: '0.75rem', color: item.stock < 5 ? '#ff4d4d' : '#888', fontWeight: item.stock < 5 ? 'bold' : 'normal' }}>
+                                                        {item.stock < 10 && '🔥 '} {item.stock} in stock
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
+                                                )}
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>⚡ Instant</div>
+                                                <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
+                                            </div>
+
                                             <Link
                                                 href={`/checkout?id=${item.id}`}
                                                 className="btn btn-outline"
-                                                style={{ fontSize: '0.9rem' }}
+                                                style={{ fontSize: '0.9rem', width: '100%', textAlign: 'center' }}
                                             >
                                                 Buy Now
                                             </Link>

@@ -28,7 +28,9 @@ export default function AdminDashboard() {
         profit: 0,
         margin: 0,
         stockValue: 0,
-        deptBreakdown: {} as any
+        deptBreakdown: {} as any,
+        monthlyProfit: {} as any,
+        productProfit: {} as any
     });
     const [settings, setSettings] = useState<any>({}); // API Keys
     const [employees, setEmployees] = useState<any[]>([]);
@@ -203,7 +205,11 @@ export default function AdminDashboard() {
     };
 
     const calculateStats = (history: any[], staffList: any[], inventoryList: any[]) => {
-        const newStats = { z2u: 0, playerup: 0, direct: 0, g2g: 0, total: 0, profit: 0, margin: 0, stockValue: 0, deptBreakdown: {} as any };
+        const newStats = {
+            z2u: 0, playerup: 0, direct: 0, g2g: 0, total: 0, profit: 0, margin: 0,
+            stockValue: 0, deptBreakdown: {} as any,
+            monthlyProfit: {} as any, productProfit: {} as any
+        };
 
         // Calculate Stock Assets
         if (inventoryList) {
@@ -216,6 +222,8 @@ export default function AdminDashboard() {
 
         history.forEach(t => {
             const amount = Number(t.amount);
+            const date = t.date ? new Date(t.date) : new Date();
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
             // Platform Stats
             if (t.platform === 'Z2U') newStats.z2u += amount;
@@ -226,14 +234,26 @@ export default function AdminDashboard() {
 
             // Profit Calculation
             let cost = 0;
+            let productName = t.description || 'Adjustment';
             if (t.inventoryId) {
                 const item = inventoryList.find(i => i.id === t.inventoryId);
-                if (item) cost = Number(item.purchasePrice || 0);
+                if (item) {
+                    cost = Number(item.purchasePrice || 0);
+                    productName = item.name;
+                }
             }
-            newStats.profit += (amount - cost);
+            const profit = amount - cost;
+            newStats.profit += profit;
+
+            // Monthly breakdown
+            if (!newStats.monthlyProfit[monthKey]) newStats.monthlyProfit[monthKey] = 0;
+            newStats.monthlyProfit[monthKey] += profit;
+
+            // Product breakdown
+            if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
+            newStats.productProfit[productName] += profit;
 
             // Department Stats
-            // Find staff
             const staff = staffList.find(e => e.name === t.processedBy);
             const dept = staff ? staff.department : (t.processedBy === 'Admin' ? 'Admin' : 'Unknown');
 
@@ -1441,16 +1461,33 @@ export default function AdminDashboard() {
                     {activeTab === 'finance' && (
                         <>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                {/* ROI & Profitability */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,215,0,0.2)', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, transparent 100%)' }}>
+                                    <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>📈 ROI & Profitability</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Net Profit</span>
+                                        <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.2rem' }}>$ {stats.profit.toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Profit Margin</span>
+                                        <span style={{ fontWeight: 'bold' }}>{stats.margin.toFixed(1)}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #333', paddingTop: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Asset Value (In Stock)</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {stats.stockValue.toLocaleString()}</span>
+                                    </div>
+                                </div>
+
                                 {/* PKR Wallet */}
                                 <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
                                     <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
                                         <span style={{ color: '#ccc' }}>Meezan Bank</span>
-                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span style={{ color: '#ccc' }}>UBL / Other</span>
-                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toLocaleString()}</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
                                     </div>
                                 </div>
 
@@ -1459,15 +1496,41 @@ export default function AdminDashboard() {
                                     <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
                                         <span style={{ color: '#ccc' }}>Z2U</span>
-                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
-                                    </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                        <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
-                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <span style={{ color: '#ccc' }}>RedotPay</span>
-                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'RedotPay').reduce((sum: number, t: any) => sum + Number(t.amount), 0).toFixed(2)}</span>
+                                        <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                {/* Monthly Profit Breakdown */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📅 Monthly Net Profit</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {Object.entries(stats.monthlyProfit).sort((a, b) => b[0].localeCompare(a[0])).map(([month, val]: [string, any]) => (
+                                            <div key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                                <span style={{ color: '#aaa', fontWeight: 'bold' }}>{new Date(month + '-01').toLocaleDateString('default', { month: 'long', year: 'numeric' })}</span>
+                                                <span style={{ color: val >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                        {Object.keys(stats.monthlyProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
+                                    </div>
+                                </div>
+
+                                {/* Top Performing Accounts */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>💎 Profit per Product/Account</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {Object.entries(stats.productProfit).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5).map(([name, val]: [string, any]) => (
+                                            <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                                <span style={{ color: '#ddd', fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                                                <span style={{ color: '#00ff88', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                        {Object.keys(stats.productProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
                                     </div>
                                 </div>
                             </div>

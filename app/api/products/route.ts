@@ -3,7 +3,14 @@ import { query } from '@/lib/db';
 
 export async function GET() {
     try {
-        const products = await query("SELECT * FROM products ORDER BY id DESC");
+        // Fetch products with their live stock count from inventory
+        const products = await query(`
+            SELECT p.*, 
+            (SELECT COUNT(*) FROM inventory i 
+             WHERE i.platform = p.platform AND i.status = 'In Stock') as stock
+            FROM products p
+            ORDER BY id DESC
+        `);
         return NextResponse.json(products);
     } catch (e: any) {
         console.error("Shop API Error:", e.message);
