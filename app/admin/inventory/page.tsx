@@ -60,6 +60,7 @@ function AdminDashboard() {
         allowedPlatforms: [] as string[],
         permissions: ['inventory', 'orders', 'support'] // Defaults
     });
+    const [editingEmp, setEditingEmp] = useState<any>(null);
     const [tickets, setTickets] = useState<any[]>([]);
     const [activeTicketId, setActiveTicketId] = useState<number | null>(null);
     const [replyMsg, setReplyMsg] = useState('');
@@ -353,27 +354,29 @@ function AdminDashboard() {
         try {
             const payload = {
                 ...newEmp,
+                id: editingEmp?.id,
                 salary: newEmp.compensationType === 'Fixed' ? Number(newEmp.salary) : 0,
                 commissionRate: newEmp.compensationType === 'Commission' ? Number(newEmp.commissionRate) : 0
             };
 
             const res = await fetch('/api/hr/employees', {
-                method: 'POST',
+                method: editingEmp ? 'PATCH' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
             if (res.ok) {
-                alert('Staff Added Successfully');
+                alert(editingEmp ? 'Staff Updated Successfully' : 'Staff Added Successfully');
                 setShowAddStaff(false);
+                setEditingEmp(null);
                 setNewEmp({ name: '', email: '', password: '', position: '', department: '', salary: '', commissionRate: '', compensationType: 'Fixed', allowedPlatforms: [], permissions: ['inventory', 'orders', 'support'] });
                 fetchData();
             } else {
-                alert('Failed to add staff');
+                alert('Failed to process request');
             }
         } catch (error) {
             console.error(error);
-            alert('Error adding staff');
+            alert('Error processing staff');
         }
     };
 
@@ -2526,16 +2529,16 @@ function AdminDashboard() {
                         <>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                 <h2 style={{ color: '#00ff88' }}>Administrative Staff & Admins</h2>
-                                <button onClick={() => setShowAddStaff(!showAddStaff)} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
+                                <button onClick={() => { setShowAddStaff(!showAddStaff); if (!showAddStaff) setEditingEmp(null); }} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
                             </div>
 
                             {showAddStaff && (
                                 <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                    <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Add New Staff Member</h3>
+                                    <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>{editingEmp ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
                                     <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password</label><input type="text" required className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required disabled={!!editingEmp} className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%', opacity: editingEmp ? 0.6 : 1 }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password {editingEmp && '(Leave empty to keep current)'}</label><input type="text" required={!editingEmp} className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
                                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Department</label>
@@ -2620,7 +2623,7 @@ function AdminDashboard() {
                                         </div>
 
                                         <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                            <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>Create Staff Account</button>
+                                            <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>{editingEmp ? 'Save Changes' : 'Create Staff Account'}</button>
                                         </div>
                                     </form>
                                 </div>
@@ -2644,10 +2647,22 @@ function AdminDashboard() {
                                             <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,255,136,0.02)' }}>
                                                 <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>System Admin</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{u.email}</div></td>
                                                 <td style={{ padding: '1.5rem' }}>Management / Owner</td>
-                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>Core Admin</span></td>
-                                                <td style={{ padding: '1.5rem' }}>Access to All</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,180,100,0.1)', color: '#00ff88' }}>Core Admin</span></td>
+                                                <td style={{ padding: '1.5rem' }}>${Number(u.wallet_balance || 0).toFixed(2)}</td>
                                                 <td style={{ padding: '1.5rem' }}><span style={{ color: '#00ff88' }}>• ACTIVE</span></td>
-                                                <td style={{ padding: '1.5rem', textAlign: 'right', color: '#666', fontSize: '0.9rem' }}>Cannot Modify</td>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedUser(u);
+                                                            setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
+                                                            setShowUserEdit(true);
+                                                        }}
+                                                        className="btn btn-outline"
+                                                        style={{ fontSize: '0.8rem', borderColor: '#4dacff', color: '#4dacff' }}
+                                                    >
+                                                        Edit Admin
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))}
                                         {/* Staff from Employees Table */}
@@ -2660,6 +2675,28 @@ function AdminDashboard() {
                                                 <td style={{ padding: '1.5rem' }}><span style={{ color: emp.status === 'Active' ? '#00ff88' : '#ff4444' }}>• {emp.status}</span></td>
                                                 <td style={{ padding: '1.5rem', textAlign: 'right' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingEmp(emp);
+                                                                setNewEmp({
+                                                                    name: emp.name,
+                                                                    email: emp.email,
+                                                                    password: '', // Hidden
+                                                                    position: emp.position,
+                                                                    department: emp.department,
+                                                                    salary: emp.salary,
+                                                                    commissionRate: emp.commissionRate,
+                                                                    compensationType: emp.compensationType,
+                                                                    allowedPlatforms: emp.allowedPlatforms || [],
+                                                                    permissions: emp.permissions ? JSON.parse(emp.permissions) : []
+                                                                });
+                                                                setShowAddStaff(true);
+                                                            }}
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.8rem', borderColor: '#4dacff', color: '#4dacff' }}
+                                                        >
+                                                            Edit
+                                                        </button>
                                                         <button
                                                             onClick={async () => {
                                                                 const newStatus = emp.status === 'Active' ? 'Suspended' : 'Active';

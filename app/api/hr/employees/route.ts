@@ -76,29 +76,58 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
     try {
         const body = await request.json();
-        const { id, status } = body;
+        const { id, status, name, position, department, salary, commissionRate, compensationType, allowedPlatforms, permissions, password } = body;
 
-        await query("UPDATE employees SET status = ? WHERE id = ?", [status, id]);
+        if (status) {
+            await query("UPDATE employees SET status = ? WHERE id = ?", [status, id]);
 
-        // If suspended, revoke login access in users table?? 
-        // Logic: Login route should check employee status.
-        // But for safety, let's revoke role if suspended.
-        if (status !== 'Active') {
-            // Get email
-            const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
-            if (empRows.length > 0) {
-                await query("UPDATE users SET role = 'buyer' WHERE email = ?", [empRows[0].email]);
+            // If suspended, revoke login access in users table?? 
+            if (status !== 'Active') {
+                const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
+                if (empRows.length > 0) {
+                    await query("UPDATE users SET role = 'buyer' WHERE email = ?", [empRows[0].email]);
+                }
+            } else {
+                const empRows: any = await query("SELECT email, permissions FROM employees WHERE id = ?", [id]);
+                if (empRows.length > 0) {
+                    await query("UPDATE users SET role = 'seller', permissions = ? WHERE email = ?", [empRows[0].permissions, empRows[0].email]);
+                }
             }
         } else {
-            // Reactivate
-            const empRows: any = await query("SELECT email, permissions FROM employees WHERE id = ?", [id]);
+            // Full Update
+            await query(
+                `UPDATE employees SET 
+                    name = ?, 
+                    position = ?, 
+                    department = ?, 
+                    salary = ?, 
+                    commissionRate = ?, 
+                    compensationType = ?, 
+                    allowedPlatforms = ?, 
+                    permissions = ? 
+                WHERE id = ?`,
+                [name, position, department, Number(salary || 0), Number(commissionRate || 0), compensationType, JSON.stringify(allowedPlatforms || []), JSON.stringify(permissions || []), id]
+            );
+
+            // Update user permissions as well
+            const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
             if (empRows.length > 0) {
-                await query("UPDATE users SET role = 'seller', permissions = ? WHERE email = ?", [empRows[0].permissions, empRows[0].email]);
+                const updateParams: any[] = [JSON.stringify(permissions || []), empRows[0].email];
+                let updateQuery = "UPDATE users SET permissions = ? WHERE email = ?";
+
+                if (password) {
+                    const hashedPassword = await bcrypt.hash(password, 10);
+                    updateQuery = "UPDATE users SET permissions = ?, password = ? WHERE email = ?";
+                    updateParams.splice(1, 0, hashedPassword);
+                }
+
+                await query(updateQuery, updateParams);
             }
         }
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
+        console.error("Employee PATCH Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
