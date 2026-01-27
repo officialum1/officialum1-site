@@ -109,9 +109,9 @@ export default function ShopPage() {
                                                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
                                                     )}
 
-                                                    {item.stock > 0 ? (
-                                                        <div style={{ fontSize: '0.75rem', color: item.stock < 5 ? '#ff4d4d' : '#888', fontWeight: item.stock < 5 ? 'bold' : 'normal' }}>
-                                                            {item.stock < 10 && '🔥 '} {item.stock} in stock
+                                                    {(Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0)) > 0 ? (
+                                                        <div style={{ fontSize: '0.75rem', color: (Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 5 ? '#ff4d4d' : '#888', fontWeight: (Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 5 ? 'bold' : 'normal' }}>
+                                                            {(Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 10 && '🔥 '} {Number(item.stock || 0) + Number(item.inventoryStock || 0)} in stock
                                                         </div>
                                                     ) : (
                                                         <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>

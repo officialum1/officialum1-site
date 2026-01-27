@@ -200,16 +200,16 @@ export default function SingleProductPage() {
                                     </div>
                                 )}
                             </div>
-                            {product.stock > 0 ? (
+                            {(Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 ? (
                                 <div style={{
                                     padding: '0.5rem 1rem',
-                                    background: product.stock < 5 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(0,255,136,0.1)',
-                                    color: product.stock < 5 ? '#ff4d4d' : '#00ff88',
+                                    background: (Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 5 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(0,255,136,0.1)',
+                                    color: (Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 5 ? '#ff4d4d' : '#00ff88',
                                     borderRadius: '8px',
                                     fontSize: '0.9rem',
                                     fontWeight: 'bold'
                                 }}>
-                                    {product.stock < 10 && '🔥 '} {product.stock} in Stock
+                                    {(Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 10 && '🔥 '} {Number(product.stock || 0) + Number(product.inventoryStock || 0)} in Stock
                                 </div>
                             ) : (
                                 <div style={{ padding: '0.5rem 1rem', background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>

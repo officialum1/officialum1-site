@@ -3,11 +3,11 @@ import { query } from '@/lib/db';
 
 export async function GET() {
     try {
-        // Fetch products with their live stock count from inventory
+        // Fetch products with their manual stock AND live inventory count
         const products = await query(`
             SELECT p.*, 
             (SELECT COUNT(*) FROM inventory i 
-             WHERE i.platform = p.platform AND i.status = 'In Stock') as stock
+             WHERE (i.platform = p.platform OR i.name = p.name) AND i.status = 'In Stock') as inventoryStock
             FROM products p
             ORDER BY id DESC
         `);
@@ -34,6 +34,15 @@ export async function POST(req: Request) {
                 "UPDATE products SET description = ? WHERE description LIKE ?",
                 ['Premium quality account verified and ready for use.', '%Imported from Z2U store%']
             );
+        } else if (body.action === 'bulk_update') {
+            const { updates } = body;
+            for (const item of updates) {
+                await query(
+                    "UPDATE products SET price = ?, stock = ?, platform = ? WHERE id = ?",
+                    [item.price, item.stock, item.platform, item.id]
+                );
+            }
+            return NextResponse.json({ success: true });
         } else if (body.action === 'bulk_import') {
             const { bulkData } = body;
             const lines = bulkData.split('\n');
@@ -42,52 +51,49 @@ export async function POST(req: Request) {
             for (const line of lines) {
                 if (!line.trim()) continue;
 
-                // Expected format: Name,Category,Price,Description,ImageURL
                 const parts = line.split(',');
-                if (parts.length < 3) continue; // Basic validation: need name and price
+                if (parts.length < 3) continue;
 
                 const name = parts[0]?.trim();
                 const platform = parts[1]?.trim() || 'General';
                 const price = parts[2]?.trim().replace(/[^0-9.]/g, '') || '0';
                 const description = parts[3]?.trim() || '';
                 const image = parts[4]?.trim() || '';
+                const stock = parts[5]?.trim() || '1';
 
                 if (!name || isNaN(Number(price))) continue;
 
                 await query(
-                    "INSERT INTO products (name, platform, price, description, image) VALUES (?, ?, ?, ?, ?)",
-                    [name, platform, price, description, image]
+                    "INSERT INTO products (name, platform, price, description, image, stock) VALUES (?, ?, ?, ?, ?, ?)",
+                    [name, platform, price, description, image, stock]
                 );
                 created.push({ name, platform, price });
             }
 
-            // Log activity
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
                 [`log_${Date.now()}`, 'Admin', 'Bulk Product Import', `Imported ${created.length} products to catalog`]
             );
 
             return NextResponse.json({ success: true, count: created.length });
         } else if (body.action === 'update') {
-            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems } = body;
+            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ? WHERE id = ?",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, id]
+                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ?, stock = ? WHERE id = ?",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, id]
             );
 
-            // Log activity
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
                 [`log_${Date.now()}`, 'Admin', 'Update Product', `Updated settings for ${name}`]
             );
         } else {
-            // Create Product in Catalog
-            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems } = body;
+            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null]
+                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1]
             );
         }
 

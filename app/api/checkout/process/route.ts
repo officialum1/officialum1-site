@@ -369,8 +369,8 @@ export async function POST(req: Request) {
             telegramBody = `Order Confirmed: ${product.name} (x${safeQuantity})\n\nStatus: Processing\nWe will update you soon!`;
         } else {
             // --- SINGLE ITEM DYNAMIC DELIVERY ---
-            // Try to fetch from Inventory first
-            const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [product.name, safeQuantity]);
+            // 1. Try to fetch from Inventory FIRST (Priority)
+            const stockRows: any = await query("SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' LIMIT ?", [product.name, product.platform, safeQuantity]);
 
             if (stockRows.length >= safeQuantity) {
                 let dynamicCreds = "";
@@ -384,11 +384,18 @@ export async function POST(req: Request) {
 
                 emailBody = `Your Order Details for ${product.name}:\n\n${dynamicCreds}\n\nThank you for choosing us!`;
                 telegramBody = `Order: ${product.name}\n\n${dynamicCreds}`;
+            } else if (Number(product.stock || 0) >= safeQuantity) {
+                // 2. FALLBACK to Manual Stock (If configured in Catalog)
+                // Decrement the manual stock column
+                await query("UPDATE products SET stock = stock - ? WHERE id = ?", [safeQuantity, product.id]);
+
+                const credentials = product.creds || "Product purchased! Our team will provide your access via Telegram/Email shortly.";
+                emailBody = `Your Order for ${product.name} (x${safeQuantity}) is confirmed!\n\nDetails / Status:\n${credentials}\n\nPlease check your Telegram or wait for further email updates.`;
+                telegramBody = `Thanks for buying ${product.name} (x${safeQuantity})!\n\nStatus: Paid & Pending Fulfillment\nDetails:\n${credentials}`;
             } else {
-                // Fallback to Static Creds
-                const credentials = product.creds || "Contact Support for Access";
-                emailBody = `Your Credentials:\n\n${credentials}\n\nPlease change your passwords immediately.`;
-                telegramBody = `Thanks for buying ${product.name}!\n\nHere are your details:\n${credentials}`;
+                // 3. Last resort (should not happen if frontend stock check works)
+                emailBody = `Thank you for your order. We are currently processing your delivery for ${product.name}. Please contact support with Order ID #${newOrder.orderId}.`;
+                telegramBody = `New Order #${newOrder.orderId} for ${product.name}. Manual fulfillment required.`;
             }
         }
 

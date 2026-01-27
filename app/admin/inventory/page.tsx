@@ -97,7 +97,7 @@ function AdminDashboard() {
     const [viewMode, setViewMode] = useState<'summary' | 'list'>('summary');
     const [catalog, setCatalog] = useState<any[]>([]);
     const [showAddProduct, setShowAddProduct] = useState(false);
-    const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '' });
+    const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '1' });
     const [orders, setOrders] = useState<any[]>([]);
     const [isBulkProduct, setIsBulkProduct] = useState(false);
     const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u' | 'playerup'>('manual');
@@ -1200,6 +1200,29 @@ function AdminDashboard() {
                                         </button>
                                     )}
                                     <button onClick={handleCleanupDescriptions} className="btn btn-outline" style={{ borderStyle: 'dashed', opacity: 0.7 }}>🧹 Clean Descriptions</button>
+                                    <button onClick={() => {
+                                        const results = catalog.filter(p => selectedShopProducts.includes(p.id) || selectedShopProducts.length === 0);
+                                        const bulkText = results.map(p => `${p.id},${p.price},${p.stock || 1},${p.platform}`).join('\n');
+                                        const updates = prompt("Bulk Update (ID,Price,Stock,Category):\nKeep format or it will fail.\n(ID is fixed, you change others)", bulkText);
+                                        if (updates) {
+                                            const lines = updates.split('\n');
+                                            const payload = lines.map(l => {
+                                                const [id, price, stock, platform] = l.split(',');
+                                                return { id: parseInt(id), price, stock: parseInt(stock), platform: platform?.trim() };
+                                            }).filter(p => !isNaN(p.id) && !isNaN(p.stock));
+
+                                            fetch('/api/products', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ action: 'bulk_update', updates: payload })
+                                            }).then(r => r.json()).then(data => {
+                                                if (data.success) { alert('Bulk Updated Successfully!'); fetchData(); }
+                                                else { alert('Update Failed: ' + data.error); }
+                                            });
+                                        }
+                                    }} className="btn btn-outline" style={{ color: '#00ff88', borderColor: '#00ff8833' }}>
+                                        📝 Bulk Stock/Price
+                                    </button>
                                     <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">+ Add Shop Product</button>
                                 </div>
                             </div>
@@ -1322,6 +1345,11 @@ function AdminDashboard() {
                                                     <div>
                                                         <label style={{ color: '#ff4d4d', display: 'block', marginBottom: '0.5rem' }}>Sale Ends At</label>
                                                         <input type="datetime-local" className="input-field" value={newProduct.saleEndsAt || ''} onChange={e => setNewProduct({ ...newProduct, saleEndsAt: e.target.value })} style={{ width: '100%', borderColor: '#ff4d4d' }} />
+                                                    </div>
+                                                    <div>
+                                                        <label style={{ color: '#ccc' }}>Stock Level (Manual)</label>
+                                                        <input type="number" className="input-field" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} style={{ width: '100%' }} placeholder="Enter manual stock count" />
+                                                        <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>Overrides inventory system if set.</p>
                                                     </div>
                                                     <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
                                                     <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
