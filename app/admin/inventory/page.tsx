@@ -80,7 +80,7 @@ export default function AdminDashboard() {
     const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '' });
     const [orders, setOrders] = useState<any[]>([]);
     const [isBulkProduct, setIsBulkProduct] = useState(false);
-    const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u'>('manual');
+    const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u' | 'playerup'>('manual');
     const [bulkProductData, setBulkProductData] = useState('');
     const [editingProduct, setEditingProduct] = useState<any>(null);
     const [selectedShopProducts, setSelectedShopProducts] = useState<number[]>([]);
@@ -584,8 +584,6 @@ export default function AdminDashboard() {
             alert('❌ No listings found. Make sure to Select All (Ctrl+A) and Copy (Ctrl+C) the search results page.');
         }
     };
-
-
 
     const handleProductFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
