@@ -141,10 +141,10 @@ export default function AdminDashboard() {
             setCurrentUser(user);
             // Permissions are stored as a JSON string in the DB
             try {
-                const perms = user.permissions ? (typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions) : (user.role === 'admin' ? ['all'] : []);
+                const perms = user.permissions ? (typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions) : (user.role.toLowerCase() === 'admin' ? ['all'] : []);
                 setPermissions(perms);
             } catch (e) {
-                setPermissions(user.role === 'admin' ? ['all'] : []);
+                setPermissions(user.role.toLowerCase() === 'admin' ? ['all'] : []);
             }
         }
         fetchData();
