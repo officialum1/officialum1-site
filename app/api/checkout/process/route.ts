@@ -4,6 +4,7 @@ import path from 'path';
 import { sendAuditReport } from '@/lib/email';
 import { query } from '@/lib/db';
 import { sendTelegramMessage, sendTelegramAdminAlert } from '@/lib/telegram';
+import crypto from 'crypto';
 
 // Paths
 const PRODUCTS_PATH = path.join(process.cwd(), 'data', 'products.json');
@@ -25,9 +26,8 @@ async function getSettings() {
             }, {});
         }
         return {};
-    } catch (e) {
+    } catch (e: unknown) {
         console.error("Failed to load settings from DB:", e);
-        // THROW error so we know if DB is failing
         throw new Error("Database Configuration Error: " + (e instanceof Error ? e.message : String(e)));
     }
 }
@@ -111,7 +111,6 @@ export async function POST(req: Request) {
         if (method === 'cryptomus') {
             if (!cryptoKey || !cryptoId) throw new Error("Cryptomus is not configured by Admin.");
             try {
-                const crypto = require('crypto');
                 const payload = {
                     amount: amountToCharge.toString(),
                     currency: "USD",
@@ -162,7 +161,6 @@ export async function POST(req: Request) {
         if (method === 'binance') {
             if (!settings.binanceKey || !settings.binanceSecret) throw new Error("Binance Pay is not configured.");
             try {
-                const crypto = require('crypto');
                 const requestBody = JSON.stringify({
                     env: { terminalType: "WEB" },
                     merchantTradeNo: Date.now().toString(),
@@ -330,7 +328,7 @@ export async function POST(req: Request) {
         // 4. DELIVERY AUTOMATION
         let emailBody = "";
         let telegramBody = "";
-        let deliveredItems: any[] = [];
+        const deliveredItems: any[] = [];
 
         if (product.bundle_items) {
             // --- BUNDLE DELIVERY ---
