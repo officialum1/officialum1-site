@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getPlatformIcon } from '@/lib/icons';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
+    return (
+        <Suspense fallback={<div style={{ background: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff' }}>Loading...</div>}>
+            <AdminDashboard />
+        </Suspense>
+    );
+}
+
+function AdminDashboard() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
     const [inventory, setInventory] = useState<any[]>([]);
     const [balanceHistory, setBalanceHistory] = useState<any[]>([]);
     const [leads, setLeads] = useState<any[]>([]);
@@ -141,14 +154,30 @@ export default function AdminDashboard() {
             setCurrentUser(user);
             // Permissions are stored as a JSON string in the DB
             try {
-                const perms = user.permissions ? (typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions) : (user.role.toLowerCase() === 'admin' ? ['all'] : []);
+                const perms = user.permissions ? (typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions) : ((user.role || '').toLowerCase() === 'admin' ? ['all'] : []);
                 setPermissions(perms);
             } catch (e) {
-                setPermissions(user.role.toLowerCase() === 'admin' ? ['all'] : []);
+                setPermissions((user.role || '').toLowerCase() === 'admin' ? ['all'] : []);
             }
         }
+    }, []);
+
+    // Sync tab with URL
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && tab !== activeTab) setActiveTab(tab);
+    }, [searchParams]);
+
+    useEffect(() => {
         fetchData();
     }, []);
+
+    const handleTabChange = (tabId: string) => {
+        setActiveTab(tabId);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', tabId);
+        router.push(`${pathname}?${params.toString()}`);
+    };
 
     const hasPermission = (perm: string) => {
         return permissions.includes('all') || permissions.includes(perm);
@@ -878,7 +907,7 @@ export default function AdminDashboard() {
                         ].filter(tab => hasPermission(tab.perm)).map(tab => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
+                                onClick={() => handleTabChange(tab.id)}
                                 style={{
                                     background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                     border: 'none',
@@ -2640,7 +2669,7 @@ export default function AdminDashboard() {
                                                                         headers: { 'Content-Type': 'application/json' },
                                                                         body: JSON.stringify({ id: emp.id, status: newStatus })
                                                                     });
-                                                                    window.location.reload();
+                                                                    fetchData();
                                                                 }
                                                             }}
                                                             className="btn btn-outline"
@@ -2652,7 +2681,7 @@ export default function AdminDashboard() {
                                                             onClick={async () => {
                                                                 if (confirm(`Terminate and delete staff account for ${emp.name}? This cannot be undone.`)) {
                                                                     await fetch(`/api/hr/employees?id=${emp.id}`, { method: 'DELETE' });
-                                                                    window.location.reload();
+                                                                    fetchData();
                                                                 }
                                                             }}
                                                             style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1.2rem' }}

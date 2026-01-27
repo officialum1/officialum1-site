@@ -17,7 +17,7 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
 
     useEffect(() => {
         // 1. Get User from LocalStorage (Mock Session)
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem('buyer_user');
         if (!storedUser) {
             window.location.href = '/login';
             return;
@@ -83,7 +83,7 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
                         <h1 style={{ marginBottom: '0.5rem' }}>My Dashboard</h1>
                         <p style={{ color: '#888' }}>Welcome back, {user?.email}</p>
                     </div>
-                    <button onClick={() => { localStorage.removeItem('user'); window.location.href = '/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#ff4444' }}>Logout</button>
+                    <button onClick={() => { localStorage.removeItem('buyer_user'); window.location.href = '/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#ff4444' }}>Logout</button>
                 </div>
 
                 {/* GRID LAYOUT */}

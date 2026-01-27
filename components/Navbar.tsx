@@ -57,7 +57,7 @@ export default function Navbar() {
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Insights</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
                         {/* Admin/HR Links - Restricted */}
-                        {user && user.email === 'admin@officialum1.com' ? (
+                        {user && (user.role === 'admin' || user.role === 'seller') ? (
                             <>
                                 <li><Link href="/admin/inventory" className="nav-link" style={{ color: '#00ccff' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
                             </>
