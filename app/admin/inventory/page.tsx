@@ -935,7 +935,17 @@ function AdminDashboard() {
 
                 {/* MAIN CONTENT AREA */}
                 <div style={{ flex: 1, padding: '2rem 3rem', maxWidth: '1600px', overflowX: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '2rem' }}>
+                        <button
+                            onClick={() => {
+                                setLoading(true);
+                                fetchData();
+                            }}
+                            className="btn btn-outline"
+                            style={{ color: '#00ff88', borderColor: '#00ff8833', padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}
+                        >
+                            🔄 Sync System
+                        </button>
                         <button onClick={() => { localStorage.removeItem('admin_user'); window.location.href = '/admin/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
                             Logout
                         </button>
