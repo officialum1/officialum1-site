@@ -140,7 +140,33 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
                                 COPY
                             </button>
                         </div>
-                        <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Share your link and earn 10% commission on every automated purchase!</p>
+                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
+                            <button
+                                onClick={async () => {
+                                    const amount = prompt("Amount to convert to wallet balance:", Number(user?.affiliate_balance || 0).toFixed(2));
+                                    if (amount && parseFloat(amount) > 0) {
+                                        const res = await fetch('/api/user/wallet/convert', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ userId: user.id, amount: parseFloat(amount) })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            alert('Successfully converted!');
+                                            window.location.reload();
+                                        } else {
+                                            alert(data.error || 'Conversion failed');
+                                        }
+                                    }
+                                }}
+                                disabled={Number(user?.affiliate_balance || 0) <= 0}
+                                className="btn btn-outline"
+                                style={{ flex: 1, borderColor: '#ffd700', color: '#ffd700', fontSize: '0.85rem', opacity: Number(user?.affiliate_balance || 0) <= 0 ? 0.5 : 1 }}
+                            >
+                                🔄 Convert to Balance
+                            </button>
+                        </div>
+                        <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Share your link and earn commissions on every automated purchase!</p>
                     </div>
 
                 </div>

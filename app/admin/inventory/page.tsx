@@ -2217,6 +2217,27 @@ function AdminDashboard() {
                                                         </button>
                                                         <button
                                                             onClick={async () => {
+                                                                const amount = prompt(`Adjustment amount for ${u.email} (Positive to add, Negative to subtract):`);
+                                                                if (amount && !isNaN(parseFloat(amount))) {
+                                                                    const res = await fetch('/api/user/wallet', {
+                                                                        method: 'POST',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ userId: u.id, amount: parseFloat(amount), source: 'Admin Adjustment' })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        alert('Wallet Updated');
+                                                                        fetchData();
+                                                                    } else {
+                                                                        alert('Failed to update wallet');
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00ff88', borderColor: '#00ff8833' }}
+                                                        >
+                                                            Wallet
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
                                                                 if (confirm(`Delete buyer ${u.email}?`)) {
                                                                     await fetch(`/api/admin/users?id=${u.id}`, { method: 'DELETE' });
                                                                     fetchData();
@@ -2926,6 +2947,25 @@ function AdminDashboard() {
                                             <h4 style={{ color: '#f3ba2f', gridColumn: 'span 2', marginTop: '1rem' }}>Binance Pay</h4>
                                             <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>API Key</label><input value={settings.binanceKey || ''} onChange={e => setSettings({ ...settings, binanceKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
                                             <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.binanceSecret || ''} onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Referral System */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
+                                        <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>Referral & Affiliate System</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Global Commission Rate (%)</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="10"
+                                                    value={settings.referral_commission_rate || ''}
+                                                    onChange={e => setSettings({ ...settings, referral_commission_rate: e.target.value })}
+                                                    className="input-field"
+                                                    style={{ width: '100%' }}
+                                                />
+                                                <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>Percentage earch user gets from their referral's successful purchases.</p>
+                                            </div>
                                         </div>
                                     </div>
 
