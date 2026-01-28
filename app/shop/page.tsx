@@ -123,13 +123,19 @@ export default function ShopPage() {
                                                     <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
                                                 </div>
 
-                                                <Link
-                                                    href={`/checkout?id=${item.id}`}
-                                                    className="btn btn-outline"
-                                                    style={{ fontSize: '0.9rem', width: '100%', textAlign: 'center' }}
-                                                >
-                                                    {isBundle ? 'View Bundle Details' : 'Buy Now'}
-                                                </Link>
+                                                {(Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0)) > 0 ? (
+                                                    <Link
+                                                        href={`/checkout?id=${item.id}`}
+                                                        className="btn btn-outline"
+                                                        style={{ fontSize: '0.9rem', width: '100%', textAlign: 'center' }}
+                                                    >
+                                                        {isBundle ? 'View Bundle Details' : 'Buy Now'}
+                                                    </Link>
+                                                ) : (
+                                                    <button className="btn btn-outline" disabled style={{ fontSize: '0.9rem', width: '100%', opacity: 0.5, cursor: 'not-allowed' }}>
+                                                        Out of Stock
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

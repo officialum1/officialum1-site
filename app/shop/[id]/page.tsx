@@ -219,11 +219,17 @@ export default function SingleProductPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>
-                                {isSale ? '🔥 Buy Sale Price' : 'Buy Now Instantly'}
-                            </Link>
+                            {(Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 ? (
+                                <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>
+                                    {isSale ? '🔥 Buy Sale Price' : 'Buy Now Instantly'}
+                                </Link>
+                            ) : (
+                                <button className="btn btn-outline" disabled style={{ flex: 1, cursor: 'not-allowed', opacity: 0.5 }}>
+                                    Out of Stock
+                                </button>
+                            )}
 
-                            {user && walletBalance >= parseFloat(product.price) && product.stock > 0 && (
+                            {user && walletBalance >= parseFloat(product.price) && (Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 && (
                                 <button
                                     onClick={handleWalletPurchase}
                                     className="btn btn-outline"
