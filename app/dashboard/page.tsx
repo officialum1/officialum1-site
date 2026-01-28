@@ -3,20 +3,19 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import DailyBonus from '@/components/DailyBonus';
 
-export default function UserDashboard() { // Renamed from AdminDashboard to UserDashboard logic
+export default function UserDashboard() {
     const [user, setUser] = useState<any>(null);
     const [balance, setBalance] = useState(0);
     const [referralCode, setReferralCode] = useState('');
     const [transactions, setTransactions] = useState<any[]>([]);
-    const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [depositAmount, setDepositAmount] = useState('');
     const [isDepositing, setIsDepositing] = useState(false);
 
     useEffect(() => {
-        // 1. Get User from LocalStorage (Mock Session)
         const storedUser = localStorage.getItem('buyer_user');
         if (!storedUser) {
             window.location.href = '/login';
@@ -24,13 +23,7 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
         }
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
-
-        // 2. Fetch Wallet Data
         fetchWallet(parsedUser.id);
-
-        // 3. Fetch Orders history (Optional)
-        // fetchOrders(parsedUser.id);
-
         setLoading(false);
     }, []);
 
@@ -52,8 +45,6 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
         if (!depositAmount || parseFloat(depositAmount) <= 0) return;
         setIsDepositing(true);
         try {
-            // For MVP, we simulate a direct "Admin Deposit" or "Test Deposit"
-            // In production, this would redirect to Stripe/Crypto Checkout calling a deposit API
             await fetch('/api/user/wallet', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -114,59 +105,63 @@ export default function UserDashboard() { // Renamed from AdminDashboard to User
                         </div>
                     </div>
 
-                    {/* 2. Affiliate Card */}
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0.2) 100%)', border: '1px solid rgba(255,215,0,0.1)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                            <h3 style={{ color: '#ccc' }}>Affiliate Earnings</h3>
-                            <span style={{ fontSize: '1.5rem' }}>📈</span>
-                        </div>
-                        <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#ffd700', marginBottom: '0.5rem' }}>
-                            ${Number(user?.affiliate_balance || 0).toFixed(2)}
-                        </h2>
-                        <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Total Earned: ${Number(user?.total_affiliate_earnings || 0).toFixed(2)}</p>
+                    {/* 2. Affiliate & Bonus Column */}
+                    <div>
+                        <DailyBonus />
 
-                        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed rgba(255,215,0,0.3)' }}>
-                            <code style={{ fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '1rem' }}>
-                                {typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${referralCode}` : `ref=${referralCode}`}
-                            </code>
-                            <button
-                                onClick={() => {
-                                    const link = `${window.location.origin}/register?ref=${referralCode}`;
-                                    navigator.clipboard.writeText(link);
-                                    alert('Affiliate link copied!');
-                                }}
-                                style={{ background: 'none', border: 'none', color: '#ffd700', cursor: 'pointer', fontWeight: 'bold' }}
-                            >
-                                COPY
-                            </button>
-                        </div>
-                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
-                            <button
-                                onClick={async () => {
-                                    const amount = prompt("Amount to convert to wallet balance:", Number(user?.affiliate_balance || 0).toFixed(2));
-                                    if (amount && parseFloat(amount) > 0) {
-                                        const res = await fetch('/api/user/wallet/convert', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ userId: user.id, amount: parseFloat(amount) })
-                                        });
-                                        const data = await res.json();
-                                        if (data.success) {
-                                            alert('Successfully converted!');
-                                            window.location.reload();
-                                        } else {
-                                            alert(data.error || 'Conversion failed');
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0.2) 100%)', border: '1px solid rgba(255,215,0,0.1)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                                <h3 style={{ color: '#ccc' }}>Affiliate Earnings</h3>
+                                <span style={{ fontSize: '1.5rem' }}>📈</span>
+                            </div>
+                            <h2 style={{ fontSize: '3rem', fontWeight: 'bold', color: '#ffd700', marginBottom: '0.5rem' }}>
+                                ${Number(user?.affiliate_balance || 0).toFixed(2)}
+                            </h2>
+                            <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Total Earned: ${Number(user?.total_affiliate_earnings || 0).toFixed(2)}</p>
+
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed rgba(255,215,0,0.3)' }}>
+                                <code style={{ fontSize: '0.9rem', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginRight: '1rem' }}>
+                                    {typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${referralCode}` : `ref=${referralCode}`}
+                                </code>
+                                <button
+                                    onClick={() => {
+                                        const link = `${window.location.origin}/register?ref=${referralCode}`;
+                                        navigator.clipboard.writeText(link);
+                                        alert('Affiliate link copied!');
+                                    }}
+                                    style={{ background: 'none', border: 'none', color: '#ffd700', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    COPY
+                                </button>
+                            </div>
+                            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
+                                <button
+                                    onClick={async () => {
+                                        const amount = prompt("Amount to convert to wallet balance:", Number(user?.affiliate_balance || 0).toFixed(2));
+                                        if (amount && parseFloat(amount) > 0) {
+                                            const res = await fetch('/api/user/wallet/convert', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ userId: user.id, amount: parseFloat(amount) })
+                                            });
+                                            const data = await res.json();
+                                            if (data.success) {
+                                                alert('Successfully converted!');
+                                                window.location.reload();
+                                            } else {
+                                                alert(data.error || 'Conversion failed');
+                                            }
                                         }
-                                    }
-                                }}
-                                disabled={Number(user?.affiliate_balance || 0) <= 0}
-                                className="btn btn-outline"
-                                style={{ flex: 1, borderColor: '#ffd700', color: '#ffd700', fontSize: '0.85rem', opacity: Number(user?.affiliate_balance || 0) <= 0 ? 0.5 : 1 }}
-                            >
-                                🔄 Convert to Balance
-                            </button>
+                                    }}
+                                    disabled={Number(user?.affiliate_balance || 0) <= 0}
+                                    className="btn btn-outline"
+                                    style={{ flex: 1, borderColor: '#ffd700', color: '#ffd700', fontSize: '0.85rem', opacity: Number(user?.affiliate_balance || 0) <= 0 ? 0.5 : 1 }}
+                                >
+                                    🔄 Convert to Balance
+                                </button>
+                            </div>
+                            <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Share your link and earn commissions on every automated purchase!</p>
                         </div>
-                        <p style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#666' }}>Share your link and earn commissions on every automated purchase!</p>
                     </div>
 
                 </div>

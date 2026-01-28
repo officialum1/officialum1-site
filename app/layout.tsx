@@ -10,6 +10,7 @@ import { CartProvider } from "./context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import GlobalAnnouncement from "@/components/GlobalAnnouncement";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
+import SalesPopup from "@/components/SalesPopup";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -154,6 +155,7 @@ export default function RootLayout({
           <LoyaltyBanner />
           <ScrollProgress />
           <TrustPulse />
+          <SalesPopup />
           {/* <WhatsAppButton /> */}
           {children}
         </CartProvider>
