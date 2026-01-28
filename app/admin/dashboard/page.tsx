@@ -43,7 +43,13 @@ export default function AdminDashboard() {
             <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <h1 style={{ fontFamily: 'var(--font-outfit)', fontSize: '3rem' }}>Admin Dashboard</h1>
-                    <a href="/admin/inventory" className="btn btn-outline">Manage Inventory</a>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <a href="/admin/inventory" className="btn btn-outline">Inventory</a>
+                        <a href="/admin/users" className="btn btn-outline">Users</a>
+                        <a href="/admin/reviews" className="btn btn-outline">Reviews</a>
+                        <a href="/admin/blogs" className="btn btn-outline">Blogs</a>
+                        <a href="/admin/settings" className="btn btn-primary">⚙️ Settings</a>
+                    </div>
                 </div>
 
                 {/* Key Metrics Grid */}

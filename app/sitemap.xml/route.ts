@@ -5,9 +5,9 @@ const BASE_URL = 'https://officialum1.com';
 
 export async function GET() {
     try {
-        const products = await query('SELECT id, name, updated_at FROM products WHERE status = "In Stock"') as any[];
-        const blogs = await query('SELECT id, title, updated_at FROM blogs WHERE status = "published"') as any[];
-        const kb = await query('SELECT slug, updated_at FROM knowledge_base WHERE is_published = 1') as any[];
+        const products = await query('SELECT id, name, created_at FROM products WHERE stock > 0') as any[]; // Assuming stock > 0 means in stock
+        const blogs = await query('SELECT id, title, created_at FROM blogs') as any[];
+        const kb = await query('SELECT slug, created_at FROM knowledge_base WHERE is_published = 1') as any[]; // is_published exists in KB schema
 
         const staticPages = ['', 'shop', 'services', 'contact', 'blog', 'help'];
 
@@ -25,7 +25,7 @@ export async function GET() {
     ${products.map(p => `
     <url>
         <loc>${BASE_URL}/shop/${p.id}</loc>
-        <lastmod>${new Date(p.updated_at).toISOString().split('T')[0]}</lastmod>
+        <lastmod>${new Date(p.created_at).toISOString().split('T')[0]}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
@@ -34,7 +34,7 @@ export async function GET() {
     ${blogs.map(b => `
     <url>
         <loc>${BASE_URL}/blog/${b.id}</loc>
-        <lastmod>${new Date(b.updated_at).toISOString().split('T')[0]}</lastmod>
+        <lastmod>${new Date(b.created_at).toISOString().split('T')[0]}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
@@ -43,7 +43,7 @@ export async function GET() {
     ${kb.map(k => `
     <url>
         <loc>${BASE_URL}/help/${k.slug}</loc>
-        <lastmod>${new Date(k.updated_at).toISOString().split('T')[0]}</lastmod>
+        <lastmod>${new Date(k.created_at).toISOString().split('T')[0]}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>

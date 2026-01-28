@@ -22,7 +22,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const { userId } = await req.json();
-        const bonusAmount = 0.05;
+
+        // Fetch bonus amount from settings (default 0.05)
+        let bonusAmount = 0.05;
+        const settingsRes: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'daily_bonus_amount'");
+        if (settingsRes.length > 0 && settingsRes[0].setting_value) {
+            bonusAmount = parseFloat(settingsRes[0].setting_value);
+        }
 
         // Verify 24h
         const rows = await query("SELECT last_claim FROM daily_bonus WHERE user_id = ?", [userId]) as any[];
