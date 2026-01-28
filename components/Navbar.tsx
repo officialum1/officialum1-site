@@ -62,6 +62,7 @@ export default function Navbar() {
                         <li><Link href="/work" className="nav-link" onClick={() => setIsOpen(false)}>Work</Link></li>
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Insights</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
+                        <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Refer & Earn</Link></li>
                         {/* Admin/HR Links - Restricted */}
                         {user && (user.role === 'admin' || user.role === 'seller') ? (
                             <>
