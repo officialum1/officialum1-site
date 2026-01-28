@@ -20,9 +20,13 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         try {
             const res = await fetch(`/api/reviews?productId=${productId}&page=${p}`);
             const data = await res.json();
-            if (p === 1) setReviews(data);
-            else setReviews(prev => [...prev, ...data]);
-            if (data.length < 5) setHasMore(false);
+            if (Array.isArray(data)) {
+                if (p === 1) setReviews(data);
+                else setReviews(prev => [...prev, ...data]);
+                if (data.length < 5) setHasMore(false);
+            } else {
+                console.warn("Reviews API Error:", data);
+            }
         } catch (e) { console.error(e); }
     };
 

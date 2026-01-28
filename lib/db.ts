@@ -280,4 +280,17 @@ export async function initDB() {
     try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
     try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
     try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { } // JSON array of product IDs
+
+    // 12. Reviews Table (New)
+    await query(`
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            product_id INT NOT NULL,
+            user_id VARCHAR(50) NOT NULL,
+            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            comment TEXT,
+            status VARCHAR(20) DEFAULT 'approved',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }
