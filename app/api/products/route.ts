@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { sendRestockEmail } from '@/lib/email';
 
 export async function GET() {
     try {
@@ -87,6 +88,29 @@ export async function POST(req: Request) {
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
                 [`log_${Date.now()}`, 'Admin', 'Update Product', `Updated settings for ${name}`]
             );
+
+            // --- RESTOCK NOTIFICATION TRIGGER ---
+            if (Number(stock) > 0) {
+                // Get Settings for SMTP
+                const settingsRows = await query("SELECT setting_key, setting_value FROM settings") as any[];
+                let settings = {};
+                if (Array.isArray(settingsRows)) {
+                    settings = settingsRows.reduce((acc: any, row: any) => { acc[row.setting_key] = row.setting_value; return acc; }, {});
+                }
+
+                // Find pending notifications
+                const pending = await query("SELECT * FROM inventory_notifications WHERE product_id = ? AND status = 'pending'", [id]) as any[];
+                if (pending && pending.length > 0) {
+                    const productData = { id, name, price, image };
+                    const productUrl = `https://officialum1.com/shop/${id}`;
+
+                    for (const req of pending) {
+                        await sendRestockEmail(req.email, productData, productUrl, settings);
+                        await query("UPDATE inventory_notifications SET status = 'sent' WHERE id = ?", [req.id]);
+                        console.log(`Restock email sent to ${req.email} for product ${id}`);
+                    }
+                }
+            }
         } else {
             const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');

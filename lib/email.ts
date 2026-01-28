@@ -116,3 +116,44 @@ export async function sendAuditReport(to: string, subject: string, data: any, se
 
     return await sendEmail({ to, subject, html });
 }
+
+export async function sendRestockEmail(to: string, product: any, productUrl: string, settings: any) {
+    const html = `
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0d1117; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #161b22; border-radius: 24px; overflow: hidden; border: 1px solid #30363d; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
+                <div style="background: linear-gradient(135deg, #00ff88 0%, #00c3ff 100%); height: 6px;"></div>
+                
+                <div style="padding: 40px 30px; text-align: center;">
+                    <div style="font-size: 60px; margin-bottom: 20px;">🎉</div>
+                    <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">Back in Stock!</h1>
+                    <p style="margin: 15px 0 0; color: #8b949e; font-size: 16px; line-height: 1.5;">
+                        Good news! The item you were waiting for is now available.
+                    </p>
+                </div>
+                
+                <div style="padding: 0 40px 40px;">
+                    <div style="background: #0d1117; padding: 25px; border-radius: 16px; border: 1px solid #30363d; margin-bottom: 35px; text-align: center;">
+                        <img src="${product.image ? product.image : 'https://officialum1.com/logo.jpg'}" alt="${product.name}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%; border: 2px solid #30363d; background: #1c2128; padding: 5px; margin-bottom: 15px;">
+                        <h2 style="margin: 0; color: #ffffff; font-size: 20px;">${product.name}</h2>
+                        <div style="margin-top: 5px; color: #00ff88; font-weight: bold;">$${product.price}</div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <a href="${productUrl}" style="display: inline-block; padding: 18px 50px; background: #00c3ff; color: #000000; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 16px; box-shadow: 0 10px 30px rgba(0,195,255,0.3); transition: all 0.2s;">
+                            Buy Now
+                        </a>
+                        <p style="margin-top: 20px; color: #484f58; font-size: 13px;">Hurry! Stock is limited and sells out fast.</p>
+                    </div>
+                </div>
+
+                <div style="padding: 30px 40px; text-align: center; background: #0d1117; border-top: 1px solid #30363d;">
+                    <p style="margin: 0; font-size: 12px; color: #484f58; line-height: 1.5;">
+                        &copy; 2026 OfficialUM1 Marketplace. Stop receiving these emails? <a href="#" style="color: #8b949e;">Unsubscribe</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    return await sendEmail({ to, subject: `Back in Stock: ${product.name} is available now! 🚀`, html });
+}
