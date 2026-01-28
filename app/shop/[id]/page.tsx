@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
+import ReviewsSection from '@/components/ReviewsSection';
 
 export default function SingleProductPage() {
     const params = useParams();
@@ -309,6 +310,11 @@ export default function SingleProductPage() {
                     </div>
                 </div>
             )}
+
+            {/* REVIEWS SECTION */}
+            <div className="container" style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '50px' }}>
+                <ReviewsSection productId={product.id} />
+            </div>
 
             <Footer />
         </main>
