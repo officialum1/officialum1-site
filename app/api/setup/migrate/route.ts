@@ -157,6 +157,33 @@ export async function GET() {
         `);
         console.log('Transactions table ready');
 
+        // 8. Notifications Table
+        await query(`
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                userId VARCHAR(50) NOT NULL,
+                message TEXT NOT NULL,
+                type VARCHAR(50) DEFAULT 'info', -- info, success, warning, alert
+                is_read BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Notifications table ready');
+
+        // 9. Client Projects Table (Service Tracker)
+        await query(`
+            CREATE TABLE IF NOT EXISTS client_projects (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                userId VARCHAR(50) NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                status VARCHAR(50) DEFAULT 'Pending', -- Pending, In Progress, Review, Completed
+                progress INT DEFAULT 0,
+                updates TEXT, -- JSON array of updates: [{date, message}, ...]
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('Client Projects table ready');
+
         // 6. Seed Initial Reviews (If empty)
         try {
             const reviews: any = await query("SELECT COUNT(*) as count FROM testimonials");
