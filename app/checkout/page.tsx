@@ -6,10 +6,16 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
+import { useCart } from '@/app/context/CartContext';
 
 function CheckoutContent() {
     const searchParams = useSearchParams();
     const id = searchParams.get('id');
+    const { cart, clearCart, cartTotal } = useCart();
+
+    // Mode: Single Product vs Cart
+    const isCartMode = !id && cart.length > 0;
+
     const [product, setProduct] = useState<any>(null);
     const [user, setUser] = useState<any>(null);
     const [email, setEmail] = useState(''); // Guest Email
@@ -24,11 +30,13 @@ function CheckoutContent() {
     const [promoStatus, setPromoStatus] = useState<'none' | 'success' | 'invalid'>('none');
 
     useEffect(() => {
-        // 1. Get Product
-        fetch('/api/products').then(res => res.json()).then(data => {
-            const p = data.find((item: any) => item.id.toString() === id);
-            setProduct(p);
-        });
+        // 1. Get Product (Only if Single Mode)
+        if (id) {
+            fetch('/api/products').then(res => res.json()).then(data => {
+                const p = data.find((item: any) => item.id.toString() === id);
+                setProduct(p);
+            });
+        }
 
         // 2. Check Login (Access localStorage only on client)
         if (typeof window !== 'undefined') {
@@ -60,9 +68,15 @@ function CheckoutContent() {
     };
 
     const getFinalPrice = () => {
-        if (!product) return 0;
-        const original = parseFloat(product.price.replace('$', ''));
-        const baseTotal = original * quantity;
+        let baseTotal = 0;
+        if (isCartMode) {
+            baseTotal = cartTotal;
+        } else {
+            if (!product) return 0;
+            const original = parseFloat(product.price.replace('$', ''));
+            baseTotal = original * quantity;
+        }
+
         if (discount > 0) {
             const d = baseTotal * (discount / 100);
             return (baseTotal - d).toFixed(2);
@@ -73,31 +87,60 @@ function CheckoutContent() {
     const handlePayment = async () => {
         if (!paymentMethod) return alert('Select a payment method');
         if (!email) return alert('Please enter your email for delivery');
+
         setIsProcessing(true);
 
         try {
-            const res = await fetch('/api/checkout/process', {
-                method: 'POST',
-                body: JSON.stringify({
-                    userId: user ? user.id : 'guest',
-                    guestEmail: email,
-                    productId: product.id,
-                    quantity: quantity,
-                    method: paymentMethod,
-                    promoCode: discount > 0 ? promoCode : null,
-                    finalPrice: getFinalPrice()
-                })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                if (data.paymentUrl) {
-                    window.location.href = data.paymentUrl; // Redirect to Gateway
-                } else {
-                    window.location.href = `/order-success?orderId=${data.orderId}`; // Manual Success
+            if (isCartMode) {
+                // CART CHECKOUT (Wallet Only or Loop)
+                if (paymentMethod !== 'wallet') {
+                    alert("Currently, bulk checkout is only supported via Wallet. Please purchase items individually for other methods.");
+                    setIsProcessing(false);
+                    return;
                 }
+
+                // Process each item sequentially
+                for (const item of cart) {
+                    await fetch('/api/checkout/process', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            userId: user ? user.id : 'guest',
+                            guestEmail: email,
+                            productId: item.id,
+                            quantity: 1,
+                            method: paymentMethod,
+                            promoCode: discount > 0 ? promoCode : null,
+                            finalPrice: item.price // discount logic might be tricky per item, essentially applied to total? Simplifying for now.
+                        })
+                    });
+                }
+                clearCart();
+                window.location.href = `/order-success?orderId=BULK_ORDER`;
             } else {
-                alert('Checkout Error: ' + data.error);
+                // SINGLE PRODUCT CHECKOUT
+                const res = await fetch('/api/checkout/process', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userId: user ? user.id : 'guest',
+                        guestEmail: email,
+                        productId: product.id,
+                        quantity: quantity,
+                        method: paymentMethod,
+                        promoCode: discount > 0 ? promoCode : null,
+                        finalPrice: getFinalPrice()
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.paymentUrl) {
+                        window.location.href = data.paymentUrl; // Redirect to Gateway
+                    } else {
+                        window.location.href = `/order-success?orderId=${data.orderId}`; // Manual Success
+                    }
+                } else {
+                    alert('Checkout Error: ' + data.error);
+                }
             }
         } catch (e) {
             alert('Payment Failed');
@@ -106,7 +149,7 @@ function CheckoutContent() {
         }
     };
 
-    if (!product) return <div className="container text-center pt-20">Loading Checkout...</div>;
+    if (!product && !isCartMode) return <div className="container text-center pt-20">Loading Checkout...</div>;
 
     return (
         <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px', maxWidth: '1200px' }}>
@@ -163,22 +206,31 @@ function CheckoutContent() {
                             <span style={{ color: '#06b6d4' }}>2.</span> Payment Method
                         </h3>
 
+                        {isCartMode && (
+                            <div style={{ marginBottom: '1rem', color: '#ffaa00', fontSize: '0.9rem', background: 'rgba(255,170,0,0.1)', padding: '0.8rem', borderRadius: '8px' }}>
+                                ⚠️ Bulk Checkout is currently available via <b>Wallet Balance</b> only.
+                            </div>
+                        )}
+
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                             {[
-                                { id: 'stripe', name: 'Credit Card', icon: '💳' },
-                                { id: 'cryptomus', name: 'Crypto', icon: '₿' },
-                                { id: 'binance', name: 'Binance Pay', icon: '🔸' }
+                                { id: 'stripe', name: 'Credit Card', icon: '💳', disabled: isCartMode },
+                                { id: 'cryptomus', name: 'Crypto', icon: '₿', disabled: isCartMode },
+                                { id: 'binance', name: 'Binance Pay', icon: '🔸', disabled: isCartMode },
+                                { id: 'wallet', name: 'Wallet', icon: '💼', disabled: false }
                             ].map((method) => (
                                 <button
                                     key={method.id}
-                                    onClick={() => setPaymentMethod(method.id)}
+                                    onClick={() => !method.disabled && setPaymentMethod(method.id)}
+                                    disabled={method.disabled}
                                     style={{
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         border: paymentMethod === method.id ? '2px solid #06b6d4' : '1px solid rgba(255,255,255,0.1)',
                                         background: paymentMethod === method.id ? 'rgba(6, 182, 212, 0.1)' : 'rgba(0,0,0,0.2)',
                                         color: '#fff',
-                                        cursor: 'pointer',
+                                        cursor: method.disabled ? 'not-allowed' : 'pointer',
+                                        opacity: method.disabled ? 0.3 : 1,
                                         transition: 'all 0.2s',
                                         textAlign: 'center'
                                     }}
@@ -215,23 +267,42 @@ function CheckoutContent() {
                     <div className="glass" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
                         <h3 style={{ fontFamily: 'var(--font-outfit)', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>Order Summary</h3>
 
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                            <img src={getPlatformIcon(product.platform, product.image)} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'contain' }} />
-                            <div>
-                                <h4 style={{ fontSize: '1rem', lineHeight: '1.4', marginBottom: '0.2rem' }}>{product.name}</h4>
-                                <div style={{ fontSize: '0.8rem', color: '#888', background: 'rgba(255,255,255,0.1)', width: 'fit-content', padding: '2px 8px', borderRadius: '4px' }}>{product.platform}</div>
+                        {isCartMode ? (
+                            <div style={{ marginBottom: '1.5rem', maxHeight: '300px', overflowY: 'auto' }}>
+                                {cart.map((item, idx) => (
+                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <img src={getPlatformIcon(item.platform, item.image)} style={{ width: '30px', height: '30px', objectFit: 'contain' }} />
+                                            <div>
+                                                <div style={{ fontSize: '0.9rem' }}>{item.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>{item.platform}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ fontWeight: 'bold' }}>${item.price}</div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <img src={getPlatformIcon(product.platform, product.image)} style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'contain' }} />
+                                    <div>
+                                        <h4 style={{ fontSize: '1rem', lineHeight: '1.4', marginBottom: '0.2rem' }}>{product.name}</h4>
+                                        <div style={{ fontSize: '0.8rem', color: '#888', background: 'rgba(255,255,255,0.1)', width: 'fit-content', padding: '2px 8px', borderRadius: '4px' }}>{product.platform}</div>
+                                    </div>
+                                </div>
 
-                        {/* Quantity Selector */}
-                        <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px' }}>
-                            <span style={{ fontSize: '0.9rem', color: '#ccc' }}>Quantity</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <button onClick={() => setQuantity((q: number) => Math.max(1, q - 1))} style={{ background: '#333', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>-</button>
-                                <span style={{ fontWeight: 'bold' }}>{quantity}</span>
-                                <button onClick={() => setQuantity((q: number) => q + 1)} style={{ background: '#4f46e5', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>+</button>
-                            </div>
-                        </div>
+                                {/* Quantity Selector - Only for Single Product */}
+                                <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '12px' }}>
+                                    <span style={{ fontSize: '0.9rem', color: '#ccc' }}>Quantity</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <button onClick={() => setQuantity((q: number) => Math.max(1, q - 1))} style={{ background: '#333', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>-</button>
+                                        <span style={{ fontWeight: 'bold' }}>{quantity}</span>
+                                        <button onClick={() => setQuantity((q: number) => q + 1)} style={{ background: '#4f46e5', color: 'white', border: 'none', width: '30px', height: '30px', borderRadius: '8px', cursor: 'pointer' }}>+</button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                         {/* Promo Input */}
                         <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
@@ -254,7 +325,7 @@ function CheckoutContent() {
                         <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed rgba(255,255,255,0.2)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#aaa' }}>
                                 <span>Subtotal</span>
-                                <span>${product.price} {quantity > 1 ? `x ${quantity}` : ''}</span>
+                                <span>${isCartMode ? cartTotal.toFixed(2) : `${product.price} ${quantity > 1 ? `x ${quantity}` : ''}`}</span>
                             </div>
                             {discount > 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#00ff88' }}>

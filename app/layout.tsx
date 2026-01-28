@@ -6,6 +6,8 @@ import CookieBanner from "@/components/CookieBanner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ScrollProgress from "@/components/ScrollProgress";
 import TrustPulse from "@/components/TrustPulse";
+import { CartProvider } from "./context/CartContext";
+import CartSidebar from "@/components/CartSidebar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -143,11 +145,14 @@ export default function RootLayout({
             gtag('config', 'G-G5WV453K9J');
           `}
         </Script>
-        <CookieBanner />
-        <ScrollProgress />
-        <TrustPulse />
-        {/* <WhatsAppButton /> */}
-        {children}
+        <CartProvider>
+          <CartSidebar />
+          <CookieBanner />
+          <ScrollProgress />
+          <TrustPulse />
+          {/* <WhatsAppButton /> */}
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

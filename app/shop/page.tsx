@@ -5,12 +5,22 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
+import { useCart } from '@/app/context/CartContext';
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [filter, setFilter] = useState('All');
     const [loading, setLoading] = useState(true);
     const [shareId, setShareId] = useState<string | null>(null);
+
+    // New Features: Search, Sort, Notify
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('newest'); // 'newest', 'price-asc', 'price-desc'
+    const [showNotifyModal, setShowNotifyModal] = useState(false);
+    const [notifyEmail, setNotifyEmail] = useState('');
+    const [notifyProduct, setNotifyProduct] = useState<any>(null);
+
+    const { addToCart } = useCart();
 
     useEffect(() => {
         fetch('/api/products')
@@ -22,7 +32,43 @@ export default function ShopPage() {
             .catch(e => setLoading(false));
     }, []);
 
-    const filtered = filter === 'All' ? products : products.filter(p => p.platform === filter);
+    const handleNotifySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!notifyEmail || !notifyProduct) return;
+        try {
+            const res = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: notifyEmail, productId: notifyProduct.id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("✅ We'll notify you when this is back in stock!");
+                setShowNotifyModal(false);
+                setNotifyEmail('');
+            } else {
+                alert(data.message || "Failed to subscribe. Try again.");
+            }
+        } catch (error) { alert("Error subscribing."); }
+    };
+
+    // Filter & Sort Logic
+    let filtered = products.filter(p => {
+        const matchesPlatform = filter === 'All' || p.platform === filter;
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesPlatform && matchesSearch;
+    });
+
+    if (sortBy === 'price-asc') {
+        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+    } else if (sortBy === 'price-desc') {
+        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+    } else {
+        // Assume default order (ID desc) is 'newest'
+        filtered.sort((a, b) => b.id - a.id);
+    }
+
     const platforms = ['All', ...Array.from(new Set(products.map((p: any) => p.platform)))];
 
     return (
@@ -32,6 +78,28 @@ export default function ShopPage() {
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
                     <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
+                </div>
+
+                {/* Search & Sort Bar */}
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                    <input
+                        type="text"
+                        placeholder="🔍 Search accounts..."
+                        className="input-field"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ maxWidth: '400px', width: '100%', padding: '0.8rem 1.5rem', borderRadius: '30px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    />
+                    <select
+                        className="input-field"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        style={{ width: 'auto', padding: '0.8rem 1.5rem', borderRadius: '30px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                    >
+                        <option value="newest">🔥 Newest Arrivals</option>
+                        <option value="price-asc">💰 Price: Low to High</option>
+                        <option value="price-desc">💎 Price: High to Low</option>
+                    </select>
                 </div>
 
                 {/* Filter Tabs */}
@@ -61,6 +129,7 @@ export default function ShopPage() {
                                 const isSale = item.sale_price && new Date(item.sale_ends_at) > new Date();
                                 const finalPrice = isSale ? item.sale_price : item.price;
                                 const isBundle = !!item.bundle_items;
+                                const totalStock = Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0);
 
                                 return (
                                     <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
@@ -109,9 +178,9 @@ export default function ShopPage() {
                                                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
                                                     )}
 
-                                                    {(Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0)) > 0 ? (
-                                                        <div style={{ fontSize: '0.75rem', color: (Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 5 ? '#ff4d4d' : '#888', fontWeight: (Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 5 ? 'bold' : 'normal' }}>
-                                                            {(Number(item.stock || 0) + Number(item.inventoryStock || 0)) < 10 && '🔥 '} {Number(item.stock || 0) + Number(item.inventoryStock || 0)} in stock
+                                                    {totalStock > 0 ? (
+                                                        <div style={{ fontSize: '0.75rem', color: totalStock < 5 ? '#ff4d4d' : '#888', fontWeight: totalStock < 5 ? 'bold' : 'normal' }}>
+                                                            {totalStock < 10 && '🔥 '} {totalStock} in stock
                                                         </div>
                                                     ) : (
                                                         <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
@@ -123,19 +192,35 @@ export default function ShopPage() {
                                                     <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
                                                 </div>
 
-                                                {(Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0)) > 0 ? (
-                                                    <Link
-                                                        href={`/checkout?id=${item.id}`}
-                                                        className="btn btn-outline"
-                                                        style={{ fontSize: '0.9rem', width: '100%', textAlign: 'center' }}
-                                                    >
-                                                        {isBundle ? 'View Bundle Details' : 'Buy Now'}
-                                                    </Link>
-                                                ) : (
-                                                    <button className="btn btn-outline" disabled style={{ fontSize: '0.9rem', width: '100%', opacity: 0.5, cursor: 'not-allowed' }}>
-                                                        Out of Stock
-                                                    </button>
-                                                )}
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    {totalStock > 0 ? (
+                                                        <>
+                                                            <Link
+                                                                href={`/checkout?id=${item.id}`}
+                                                                className="btn btn-outline"
+                                                                style={{ fontSize: '0.8rem', flex: 1, textAlign: 'center', padding: '0.6rem' }}
+                                                            >
+                                                                Buy Now
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => addToCart(item)}
+                                                                className="btn btn-primary"
+                                                                style={{ fontSize: '0.8rem', width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                title="Add to Cart"
+                                                            >
+                                                                🛒
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => { setNotifyProduct(item); setShowNotifyModal(true); }}
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.8rem', width: '100%', borderColor: '#ff4d4d', color: '#ff4d4d' }}
+                                                        >
+                                                            🔔 Notify Me
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -145,12 +230,45 @@ export default function ShopPage() {
 
                         {filtered.length === 0 && (
                             <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-                                No accounts available in this category right now.
+                                No accounts match your search.
                             </div>
                         )}
                     </>
                 )}
             </div>
+
+            {/* Notify Modal */}
+            {showNotifyModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00c3ff' }}>
+                        <button onClick={() => setShowNotifyModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔔</div>
+                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>Get Notified!</h3>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                We'll send you an email as soon as <b>{notifyProduct?.name}</b> is back in stock.
+                            </p>
+
+                            <form onSubmit={handleNotifySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="Enter your email address"
+                                    className="input-field"
+                                    value={notifyEmail}
+                                    onChange={e => setNotifyEmail(e.target.value)}
+                                    style={{ width: '100%', padding: '1rem', textAlign: 'center' }}
+                                />
+                                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                                    Subscribe to Alert
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <Footer />
         </main>
     );

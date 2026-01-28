@@ -2,11 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useCart } from "@/app/context/CartContext";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
+
+    // Safety check for Cart Context (in case it's used outside provider during builds/tests)
+    let cartContext;
+    try { cartContext = useCart(); } catch (e) { }
+    const { toggleCart, cartCount } = cartContext || { toggleCart: () => { }, cartCount: 0 };
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -64,7 +70,17 @@ export default function Navbar() {
                         ) : null}
                     </ul>
 
-                    <div className="auth-buttons">
+                    <div className="auth-buttons" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {/* Cart Button */}
+                        <button onClick={toggleCart} style={{ position: 'relative', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', marginRight: '0.5rem' }}>
+                            🛒
+                            {cartCount > 0 && (
+                                <span style={{ position: 'absolute', top: '-5px', right: '-10px', background: '#ff4d4d', color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', padding: '2px 5px', borderRadius: '50%', minWidth: '18px', textAlign: 'center' }}>
+                                    {cartCount}
+                                </span>
+                            )}
+                        </button>
+
                         {user ? (
                             <div className="user-menu">
                                 <Link href="/my-orders" className="nav-link" onClick={() => setIsOpen(false)}>Orders</Link>

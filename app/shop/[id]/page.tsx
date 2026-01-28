@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
+import { useCart } from '@/app/context/CartContext';
 
 export default function SingleProductPage() {
     const params = useParams();
@@ -17,6 +18,11 @@ export default function SingleProductPage() {
     const [user, setUser] = useState<any>(null);
     const [walletBalance, setWalletBalance] = useState(0);
     const [isPurchasing, setIsPurchasing] = useState(false);
+
+    // Notify & Cart Logic
+    const { addToCart } = useCart();
+    const [showNotifyModal, setShowNotifyModal] = useState(false);
+    const [notifyEmail, setNotifyEmail] = useState('');
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -57,6 +63,26 @@ export default function SingleProductPage() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
+    };
+
+    const handleNotifySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!notifyEmail || !product) return;
+        try {
+            const res = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: notifyEmail, productId: product.id })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("✅ We'll notify you when this is back in stock!");
+                setShowNotifyModal(false);
+                setNotifyEmail('');
+            } else {
+                alert(data.message || "Failed to subscribe.");
+            }
+        } catch (error) { alert("Error subscribing."); }
     };
 
     const handleWalletPurchase = async () => {
@@ -116,31 +142,7 @@ export default function SingleProductPage() {
     // Flash Sale Logic
     const isSale = product.sale_price && new Date(product.sale_ends_at) > new Date();
     const finalPrice = isSale ? product.sale_price : product.price;
-
-    const calculateTimeLeft = () => {
-        if (!product.sale_ends_at) return null;
-        const difference = +new Date(product.sale_ends_at) - +new Date();
-        if (difference > 0) {
-            return {
-                hours: Math.floor((difference / (1000 * 60 * 60))),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
-        return null;
-    };
-
-    const [timeLeft, setTimeLeft] = useState<{ hours: number, minutes: number, seconds: number } | null>(null);
-
-    useEffect(() => {
-        if (isSale) {
-            setTimeLeft(calculateTimeLeft());
-            const timer = setInterval(() => {
-                setTimeLeft(calculateTimeLeft());
-            }, 1000);
-            return () => clearInterval(timer);
-        }
-    }, [product]);
+    const totalStock = Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0);
 
     return (
         <main>
@@ -149,9 +151,9 @@ export default function SingleProductPage() {
                 <div className="glass" style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem', borderRadius: '30px', display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
 
                     {/* SALE TIMER BANNER */}
-                    {isSale && timeLeft && (
+                    {isSale && (
                         <div style={{ width: '100%', background: 'linear-gradient(45deg, #ff4d4d, #ff0000)', color: 'white', padding: '1rem', borderRadius: '12px', textAlign: 'center', fontWeight: 'bold', marginBottom: '1rem', boxShadow: '0 5px 15px rgba(255,0,0,0.3)' }}>
-                            ⚡ FLASH SALE ENDS IN: {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+                            ⚡ FLASH SALE ACTIVE - LIMITED TIME!
                         </div>
                     )}
 
@@ -200,16 +202,16 @@ export default function SingleProductPage() {
                                     </div>
                                 )}
                             </div>
-                            {(Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 ? (
+                            {totalStock > 0 ? (
                                 <div style={{
                                     padding: '0.5rem 1rem',
-                                    background: (Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 5 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(0,255,136,0.1)',
-                                    color: (Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 5 ? '#ff4d4d' : '#00ff88',
+                                    background: totalStock < 5 ? 'rgba(255, 77, 77, 0.1)' : 'rgba(0,255,136,0.1)',
+                                    color: totalStock < 5 ? '#ff4d4d' : '#00ff88',
                                     borderRadius: '8px',
                                     fontSize: '0.9rem',
                                     fontWeight: 'bold'
                                 }}>
-                                    {(Number(product.stock || 0) + Number(product.inventoryStock || 0)) < 10 && '🔥 '} {Number(product.stock || 0) + Number(product.inventoryStock || 0)} in Stock
+                                    {totalStock < 10 && '🔥 '} {totalStock} in Stock
                                 </div>
                             ) : (
                                 <div style={{ padding: '0.5rem 1rem', background: 'rgba(255, 77, 77, 0.1)', color: '#ff4d4d', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>
@@ -219,29 +221,38 @@ export default function SingleProductPage() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            {(Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 ? (
-                                <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>
-                                    {isSale ? '🔥 Buy Sale Price' : 'Buy Now Instantly'}
-                                </Link>
+                            {totalStock > 0 ? (
+                                <>
+                                    <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>
+                                        {isSale ? '🔥 Buy Sale Price' : 'Buy Now Instantly'}
+                                    </Link>
+                                    <button
+                                        onClick={() => addToCart(product)}
+                                        className="btn btn-outline"
+                                        style={{ flex: 1, border: '1px solid #00c3ff', color: '#00c3ff', background: 'rgba(0,195,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                                    >
+                                        🛒 Add to Cart
+                                    </button>
+                                </>
                             ) : (
-                                <button className="btn btn-outline" disabled style={{ flex: 1, cursor: 'not-allowed', opacity: 0.5 }}>
-                                    Out of Stock
+                                <button onClick={() => setShowNotifyModal(true)} className="btn btn-outline" style={{ flex: 1, cursor: 'pointer', borderColor: '#ff4d4d', color: '#ff4d4d' }}>
+                                    🔔 Notify Me
                                 </button>
                             )}
 
-                            {user && walletBalance >= parseFloat(product.price) && (Math.max(0, Number(product.stock || 0)) + Number(product.inventoryStock || 0)) > 0 && (
+                            {user && walletBalance >= parseFloat(product.price) && totalStock > 0 && (
                                 <button
                                     onClick={handleWalletPurchase}
                                     className="btn btn-outline"
                                     disabled={isPurchasing}
                                     style={{ flex: 1, border: '1px solid #00ff88', color: '#00ff88', background: 'rgba(0,255,136,0.05)' }}
                                 >
-                                    {isPurchasing ? 'Processing...' : `⚡ Buy with Wallet ($${walletBalance})`}
+                                    {isPurchasing ? 'Processing...' : `⚡ Wallet ($${walletBalance})`}
                                 </button>
                             )}
 
                             <button onClick={handleCopyLink} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                {copied ? '✅ Link Copied!' : '🔗 Share Product'}
+                                {copied ? '✅' : '🔗'}
                             </button>
                         </div>
 
@@ -261,25 +272,44 @@ export default function SingleProductPage() {
                                         <div style={{ fontSize: '0.75rem', color: '#888' }}>Avg. delivery &lt; 2 mins</div>
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,215,0,0.05)', padding: '1.2rem', borderRadius: '16px', border: '1px solid rgba(255,215,0,0.1)' }}>
-                                    <div style={{ fontSize: '1.5rem' }}>📋</div>
-                                    <div>
-                                        <div style={{ fontWeight: 'bold', color: '#ffd700', fontSize: '0.9rem' }}>24h Warranty</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>Full replacement guarantee</div>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ fontSize: '1.5rem' }}>⭐</div>
-                                    <div>
-                                        <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.9rem' }}>Premium Support</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#888' }}>24/7 dedicated assistance</div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Notify Modal */}
+            {showNotifyModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00c3ff' }}>
+                        <button onClick={() => setShowNotifyModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔔</div>
+                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>Get Notified!</h3>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                We'll send you an email as soon as <b>{product.name}</b> is back in stock.
+                            </p>
+
+                            <form onSubmit={handleNotifySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="Enter your email address"
+                                    className="input-field"
+                                    value={notifyEmail}
+                                    onChange={e => setNotifyEmail(e.target.value)}
+                                    style={{ width: '100%', padding: '1rem', textAlign: 'center' }}
+                                />
+                                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                                    Subscribe to Alert
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <Footer />
         </main>
     );
