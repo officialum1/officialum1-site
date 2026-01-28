@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any) {
@@ -8,6 +8,21 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
     const [method, setMethod] = useState<'crypto' | 'card' | null>(null);
     const [step, setStep] = useState(1); // 1=Amount, 2=Method, 3=Processing, 4=Success
     const [loading, setLoading] = useState(false);
+    const [availableMethods, setAvailableMethods] = useState<any>({ stripe: true, crypto: true });
+
+    useEffect(() => {
+        if (isOpen) {
+            fetch('/api/admin/settings')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.payment_gateways) {
+                        try {
+                            setAvailableMethods(JSON.parse(data.payment_gateways));
+                        } catch { }
+                    }
+                });
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -116,35 +131,43 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                         <p style={{ color: '#888', textAlign: 'center', marginBottom: '2rem' }}>How would you like to pay?</p>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                            <button
-                                onClick={() => setMethod('card')}
-                                className={`glass ${method === 'card' ? 'active' : ''}`}
-                                style={{
-                                    padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
-                                    border: method === 'card' ? '1px solid #00ff88' : '1px solid #333', textAlign: 'left'
-                                }}
-                            >
-                                <span style={{ fontSize: '1.5rem' }}>💳</span>
-                                <div>
-                                    <div style={{ fontWeight: 'bold' }}>Credit/Debit Card</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#888' }}>Instant • 2.9% Fee</div>
-                                </div>
-                            </button>
+                            {availableMethods.stripe && (
+                                <button
+                                    onClick={() => setMethod('card')}
+                                    className={`glass ${method === 'card' ? 'active' : ''}`}
+                                    style={{
+                                        padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
+                                        border: method === 'card' ? '1px solid #00ff88' : '1px solid #333', textAlign: 'left'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>💳</span>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>Credit/Debit Card</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>Instant • 2.9% Fee</div>
+                                    </div>
+                                </button>
+                            )}
 
-                            <button
-                                onClick={() => setMethod('crypto')}
-                                className={`glass ${method === 'crypto' ? 'active' : ''}`}
-                                style={{
-                                    padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
-                                    border: method === 'crypto' ? '1px solid #ffd700' : '1px solid #333', textAlign: 'left'
-                                }}
-                            >
-                                <span style={{ fontSize: '1.5rem' }}>₿</span>
-                                <div>
-                                    <div style={{ fontWeight: 'bold' }}>Cryptocurrency</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#888' }}>BTC, ETH, LTC • No Fee</div>
-                                </div>
-                            </button>
+                            {availableMethods.crypto && (
+                                <button
+                                    onClick={() => setMethod('crypto')}
+                                    className={`glass ${method === 'crypto' ? 'active' : ''}`}
+                                    style={{
+                                        padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
+                                        border: method === 'crypto' ? '1px solid #ffd700' : '1px solid #333', textAlign: 'left'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>₿</span>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>Cryptocurrency</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>BTC, ETH, LTC • No Fee</div>
+                                    </div>
+                                </button>
+                            )}
+
+                            {!availableMethods.stripe && !availableMethods.crypto && (
+                                <p style={{ color: '#ff4444', textAlign: 'center' }}>No Payment Methods Enabled.</p>
+                            )}
                         </div>
 
                         <div style={{ display: 'flex', gap: '10px' }}>

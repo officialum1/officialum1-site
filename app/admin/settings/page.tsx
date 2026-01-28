@@ -13,6 +13,10 @@ export default function GlobalSettings() {
         link: ''
     });
     const [bonusAmount, setBonusAmount] = useState('0.05');
+    const [paymentMethods, setPaymentMethods] = useState({
+        stripe: true,
+        crypto: true
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,6 +32,11 @@ export default function GlobalSettings() {
                 if (data.daily_bonus_amount) {
                     setBonusAmount(data.daily_bonus_amount);
                 }
+                if (data.payment_gateways) {
+                    try {
+                        setPaymentMethods(JSON.parse(data.payment_gateways));
+                    } catch { }
+                }
                 setLoading(false);
             });
     }, []);
@@ -36,7 +45,8 @@ export default function GlobalSettings() {
         const payload = {
             ...settings,
             announcement_banner: JSON.stringify(banner),
-            daily_bonus_amount: bonusAmount
+            daily_bonus_amount: bonusAmount,
+            payment_gateways: JSON.stringify(paymentMethods)
         };
 
         try {
@@ -141,6 +151,40 @@ export default function GlobalSettings() {
                             onChange={e => setBonusAmount(e.target.value)}
                             style={{ maxWidth: '150px' }}
                         />
+                    </div>
+                </section>
+
+                {/* Payment Methods */}
+                <section className="glass" style={{ padding: '2rem', borderRadius: '24px', marginBottom: '2rem' }}>
+                    <h3>💳 Payment Methods</h3>
+                    <p style={{ color: '#888', marginBottom: '1rem', fontSize: '0.9rem' }}>Enable or disable deposit methods for users.</p>
+
+                    <div style={{ display: 'grid', gap: '1rem' }}>
+                        <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                            <input
+                                type="checkbox"
+                                checked={paymentMethods.stripe}
+                                onChange={e => setPaymentMethods({ ...paymentMethods, stripe: e.target.checked })}
+                                style={{ width: '20px', height: '20px' }}
+                            />
+                            <div>
+                                <div style={{ fontWeight: 'bold' }}>Credit/Debit Card (Stripe)</div>
+                                <div style={{ fontSize: '0.8rem', color: '#666' }}>Secure card payments.</div>
+                            </div>
+                        </label>
+
+                        <label className="checkbox-container" style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                            <input
+                                type="checkbox"
+                                checked={paymentMethods.crypto}
+                                onChange={e => setPaymentMethods({ ...paymentMethods, crypto: e.target.checked })}
+                                style={{ width: '20px', height: '20px' }}
+                            />
+                            <div>
+                                <div style={{ fontWeight: 'bold' }}>Cryptocurrency (Coinbase)</div>
+                                <div style={{ fontSize: '0.8rem', color: '#666' }}>BTC, ETH, LTC, and more.</div>
+                            </div>
+                        </label>
                     </div>
                 </section>
 
