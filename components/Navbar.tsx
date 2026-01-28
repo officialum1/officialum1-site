@@ -56,13 +56,12 @@ export default function Navbar() {
                 <div className={`nav-menu ${isOpen ? 'active' : ''}`}>
                     <ul className="nav-links">
                         <li><Link href="/services" className="nav-link" onClick={() => setIsOpen(false)}>Services</Link></li>
-                        <li><Link href="/shop" className="nav-link" style={{ color: '#00ff88' }} onClick={() => setIsOpen(false)}>Buy Accounts</Link></li>
+                        <li><Link href="/shop" className="nav-link" style={{ color: '#00ff88' }} onClick={() => setIsOpen(false)}>Shop</Link></li>
                         <li><Link href="/reviews" className="nav-link" onClick={() => setIsOpen(false)}>Reviews</Link></li>
-                        <li><Link href="/store" className="nav-link" onClick={() => setIsOpen(false)}>Rent Sites</Link></li>
-                        <li><Link href="/work" className="nav-link" onClick={() => setIsOpen(false)}>Work</Link></li>
-                        <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Insights</Link></li>
+                        <li><Link href="/store" className="nav-link" onClick={() => setIsOpen(false)}>Rentals</Link></li>
+                        <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Blog</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
-                        <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Refer & Earn</Link></li>
+                        <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Earn</Link></li>
                         {/* Admin/HR Links - Restricted */}
                         {user && (user.role === 'admin' || user.role === 'seller') ? (
                             <>

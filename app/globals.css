@@ -258,7 +258,7 @@ p {
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   list-style: none;
 }
 
@@ -268,6 +268,7 @@ p {
   color: rgba(255, 255, 255, 0.7);
   transition: color 0.2s;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
