@@ -942,6 +942,7 @@ function AdminDashboard() {
                             { id: 'website', label: '🌐 Website', perm: 'website' },
                             { id: 'sell', label: '💸 Sales', perm: 'sales' },
                             { id: 'finance', label: '💰 Finance', perm: 'finance' },
+                            { id: 'payments', label: '💳 Payments', perm: 'settings', href: '/admin/payments' },
                             { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
                             { id: 'leads', label: '👥 Leads', perm: 'leads' },
                             { id: 'users', label: '👤 Buyers', perm: 'users' },
@@ -953,10 +954,10 @@ function AdminDashboard() {
                             { id: 'logs', label: '📜 Logs', perm: 'all' },
                             { id: 'kb', label: '📚 KB/FAQ', perm: 'website' },
                             { id: 'settings', label: '⚙️ Settings', perm: 'settings' }
-                        ].filter(tab => hasPermission(tab.perm)).map(tab => (
+                        ].filter(tab => hasPermission(tab.perm)).map((tab: any) => (
                             <button
                                 key={tab.id}
-                                onClick={() => handleTabChange(tab.id)}
+                                onClick={() => tab.href ? router.push(tab.href) : handleTabChange(tab.id)}
                                 style={{
                                     background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                     border: 'none',
