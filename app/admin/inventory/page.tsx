@@ -3007,21 +3007,15 @@ function AdminDashboard() {
                                     </div>
 
                                     {/* RESTORED: Payment Gateways */}
-                                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                                        <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Payment Processors</h3>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            <h4 style={{ color: '#00ff88', gridColumn: 'span 2' }}>Stripe (Credit Card)</h4>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Public Key</label><input value={settings.stripePublic || ''} onChange={e => setSettings({ ...settings, stripePublic: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.stripeSecret || ''} onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-
-                                            <h4 style={{ color: '#ffaa00', gridColumn: 'span 2', marginTop: '1rem' }}>Cryptomus (Crypto)</h4>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Merchant ID</label><input value={settings.cryptomusId || ''} onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Payment Key</label><input type="password" value={settings.cryptomusKey || ''} onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-
-                                            <h4 style={{ color: '#f3ba2f', gridColumn: 'span 2', marginTop: '1rem' }}>Binance Pay</h4>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>API Key</label><input value={settings.binanceKey || ''} onChange={e => setSettings({ ...settings, binanceKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.binanceSecret || ''} onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                    {/* Payment Processors Link */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>Payment Processors</h3>
+                                            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Configure Stripe, Cryptomus, Binance Pay, and Manual Transfers.</p>
                                         </div>
+                                        <a href="/admin/payments" className="btn btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                                            Manage Payments ➔
+                                        </a>
                                     </div>
 
                                     {/* Referral System */}
