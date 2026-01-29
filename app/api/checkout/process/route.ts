@@ -165,8 +165,13 @@ export async function POST(req: Request) {
         }
 
         // C. BINANCE PAY
-        const binanceKey = (settings.binanceApiKey && settings.binanceApiKey !== '...') ? settings.binanceApiKey : settings.binanceKey;
-        const binanceSecret = (settings.binanceSecretKey && settings.binanceSecretKey !== '...') ? settings.binanceSecretKey : settings.binanceSecret;
+        const binanceKey = (settings.binanceApiKey && settings.binanceApiKey !== '...')
+            ? settings.binanceApiKey
+            : (settings.binanceKey || process.env.BINANCE_API_KEY);
+
+        const binanceSecret = (settings.binanceSecretKey && settings.binanceSecretKey !== '...')
+            ? settings.binanceSecretKey
+            : (settings.binanceSecret || process.env.BINANCE_SECRET_KEY);
 
         if (method === 'binance') {
             if (!binanceKey || !binanceSecret) throw new Error("Binance Pay is not configured.");
