@@ -2261,8 +2261,8 @@ function AdminDashboard() {
                                                     <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Publishable Key</label>
                                                     <input
                                                         className="input-field"
-                                                        value={settings.stripePublishableKey || ''}
-                                                        onChange={e => setSettings({ ...settings, stripePublishableKey: e.target.value })}
+                                                        value={settings.stripePublic || ''}
+                                                        onChange={e => setSettings({ ...settings, stripePublic: e.target.value })}
                                                         placeholder="pk_test_..."
                                                         style={{ width: '100%' }}
                                                     />
@@ -2272,8 +2272,8 @@ function AdminDashboard() {
                                                     <input
                                                         type="password"
                                                         className="input-field"
-                                                        value={settings.stripeSecretKey || ''}
-                                                        onChange={e => setSettings({ ...settings, stripeSecretKey: e.target.value })}
+                                                        value={settings.stripeSecret || ''}
+                                                        onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })}
                                                         placeholder="sk_test_..."
                                                         style={{ width: '100%' }}
                                                     />
@@ -2287,8 +2287,8 @@ function AdminDashboard() {
                                                     <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Cryptomus Merchant ID</label>
                                                     <input
                                                         className="input-field"
-                                                        value={settings.cryptomusMerchantId || ''}
-                                                        onChange={e => setSettings({ ...settings, cryptomusMerchantId: e.target.value })}
+                                                        value={settings.cryptomusId || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })}
                                                         style={{ width: '100%', borderColor: '#fdd835' }}
                                                     />
                                                 </div>
@@ -2297,8 +2297,8 @@ function AdminDashboard() {
                                                     <input
                                                         type="password"
                                                         className="input-field"
-                                                        value={settings.cryptomusPaymentKey || ''}
-                                                        onChange={e => setSettings({ ...settings, cryptomusPaymentKey: e.target.value })}
+                                                        value={settings.cryptomusKey || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })}
                                                         style={{ width: '100%', borderColor: '#fdd835' }}
                                                     />
                                                 </div>
@@ -2311,8 +2311,8 @@ function AdminDashboard() {
                                                     <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance API Key</label>
                                                     <input
                                                         className="input-field"
-                                                        value={settings.binanceApiKey || ''}
-                                                        onChange={e => setSettings({ ...settings, activePaymentTab: 'binance', binanceApiKey: e.target.value })}
+                                                        value={settings.binanceKey || ''}
+                                                        onChange={e => setSettings({ ...settings, binanceKey: e.target.value })}
                                                         style={{ width: '100%', borderColor: '#FCD535' }}
                                                     />
                                                 </div>
@@ -2321,8 +2321,8 @@ function AdminDashboard() {
                                                     <input
                                                         type="password"
                                                         className="input-field"
-                                                        value={settings.binanceSecretKey || ''}
-                                                        onChange={e => setSettings({ ...settings, activePaymentTab: 'binance', binanceSecretKey: e.target.value })}
+                                                        value={settings.binanceSecret || ''}
+                                                        onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })}
                                                         style={{ width: '100%', borderColor: '#FCD535' }}
                                                     />
                                                 </div>

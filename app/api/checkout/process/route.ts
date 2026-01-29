@@ -78,9 +78,9 @@ export async function POST(req: Request) {
         let orderStatus = 'pending'; // Default to pending, NOT paid
 
         // A. STRIPE
-        const stripeSecret = (settings.stripeSecretKey && settings.stripeSecretKey !== '...')
-            ? settings.stripeSecretKey
-            : (settings.stripeSecret || process.env.STRIPE_SECRET_KEY); // Fallback to old keys just in case
+        const stripeSecret = (settings.stripeSecret && settings.stripeSecret !== '...')
+            ? settings.stripeSecret
+            : (settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY);
 
         if (method === 'stripe') {
             if (!stripeSecret) throw new Error("Stripe is not configured by Admin (Missing Secret Key).");
@@ -107,13 +107,13 @@ export async function POST(req: Request) {
         }
 
         // B. CRYPTOMUS
-        const cryptoKey = (settings.cryptomusPaymentKey && settings.cryptomusPaymentKey !== '...')
-            ? settings.cryptomusPaymentKey
-            : (settings.cryptomusKey || process.env.CRYPTOMUS_API_KEY);
+        const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...')
+            ? settings.cryptomusKey
+            : (settings.cryptomusPaymentKey || process.env.CRYPTOMUS_API_KEY);
 
-        const cryptoId = (settings.cryptomusMerchantId && settings.cryptomusMerchantId !== '...')
-            ? settings.cryptomusMerchantId
-            : (settings.cryptomusId || process.env.CRYPTOMUS_MERCHANT_ID);
+        const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...')
+            ? settings.cryptomusId
+            : (settings.cryptomusMerchantId || process.env.CRYPTOMUS_MERCHANT_ID);
 
         if (method === 'cryptomus') {
             if (!cryptoKey || !cryptoId) throw new Error("Cryptomus is not configured by Admin.");
@@ -165,13 +165,13 @@ export async function POST(req: Request) {
         }
 
         // C. BINANCE PAY
-        const binanceKey = (settings.binanceApiKey && settings.binanceApiKey !== '...')
-            ? settings.binanceApiKey
-            : (settings.binanceKey || process.env.BINANCE_API_KEY);
+        const binanceKey = (settings.binanceKey && settings.binanceKey !== '...')
+            ? settings.binanceKey
+            : (settings.binanceApiKey || process.env.BINANCE_API_KEY);
 
-        const binanceSecret = (settings.binanceSecretKey && settings.binanceSecretKey !== '...')
-            ? settings.binanceSecretKey
-            : (settings.binanceSecret || process.env.BINANCE_SECRET_KEY);
+        const binanceSecret = (settings.binanceSecret && settings.binanceSecret !== '...')
+            ? settings.binanceSecret
+            : (settings.binanceSecretKey || process.env.BINANCE_SECRET_KEY);
 
         if (method === 'binance') {
             if (!binanceKey || !binanceSecret) throw new Error("Binance Pay is not configured.");
