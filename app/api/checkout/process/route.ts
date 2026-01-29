@@ -78,7 +78,9 @@ export async function POST(req: Request) {
         let orderStatus = 'pending'; // Default to pending, NOT paid
 
         // A. STRIPE
-        const stripeSecret = (settings.stripeSecret && settings.stripeSecret !== '...') ? settings.stripeSecret : process.env.STRIPE_SECRET_KEY;
+        const stripeSecret = (settings.stripeSecretKey && settings.stripeSecretKey !== '...')
+            ? settings.stripeSecretKey
+            : (settings.stripeSecret || process.env.STRIPE_SECRET_KEY); // Fallback to old keys just in case
 
         if (method === 'stripe') {
             if (!stripeSecret) throw new Error("Stripe is not configured by Admin (Missing Secret Key).");
@@ -105,8 +107,13 @@ export async function POST(req: Request) {
         }
 
         // B. CRYPTOMUS
-        const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...') ? settings.cryptomusKey : (process.env.CRYPTOMUS_API_KEY || settings.cryptomusKey);
-        const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...') ? settings.cryptomusId : (process.env.CRYPTOMUS_MERCHANT_ID || settings.cryptomusId);
+        const cryptoKey = (settings.cryptomusPaymentKey && settings.cryptomusPaymentKey !== '...')
+            ? settings.cryptomusPaymentKey
+            : (settings.cryptomusKey || process.env.CRYPTOMUS_API_KEY);
+
+        const cryptoId = (settings.cryptomusMerchantId && settings.cryptomusMerchantId !== '...')
+            ? settings.cryptomusMerchantId
+            : (settings.cryptomusId || process.env.CRYPTOMUS_MERCHANT_ID);
 
         if (method === 'cryptomus') {
             if (!cryptoKey || !cryptoId) throw new Error("Cryptomus is not configured by Admin.");
@@ -158,8 +165,11 @@ export async function POST(req: Request) {
         }
 
         // C. BINANCE PAY
+        const binanceKey = (settings.binanceApiKey && settings.binanceApiKey !== '...') ? settings.binanceApiKey : settings.binanceKey;
+        const binanceSecret = (settings.binanceSecretKey && settings.binanceSecretKey !== '...') ? settings.binanceSecretKey : settings.binanceSecret;
+
         if (method === 'binance') {
-            if (!settings.binanceKey || !settings.binanceSecret) throw new Error("Binance Pay is not configured.");
+            if (!binanceKey || !binanceSecret) throw new Error("Binance Pay is not configured.");
             try {
                 const requestBody = JSON.stringify({
                     env: { terminalType: "WEB" },
@@ -180,7 +190,7 @@ export async function POST(req: Request) {
                 const timestamp = Date.now();
                 const nonce = crypto.randomBytes(16).toString('hex');
                 const payload = `${timestamp}\n${nonce}\n${requestBody}\n`;
-                const signature = crypto.createHmac('sha512', settings.binanceSecret).update(payload).digest('hex').toUpperCase();
+                const signature = crypto.createHmac('sha512', binanceSecret).update(payload).digest('hex').toUpperCase();
 
                 const binanceRes = await fetch('https://bpay.binanceapi.com/binancepay/openapi/v2/order', {
                     method: 'POST',
@@ -188,7 +198,7 @@ export async function POST(req: Request) {
                         'Content-Type': 'application/json',
                         'BinancePay-Timestamp': timestamp.toString(),
                         'BinancePay-Nonce': nonce,
-                        'BinancePay-Certificate-SN': settings.binanceKey,
+                        'BinancePay-Certificate-SN': binanceKey,
                         'BinancePay-Signature': signature
                     },
                     body: requestBody
