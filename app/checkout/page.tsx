@@ -12,9 +12,10 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const id = searchParams.get('id');
     const { cart, clearCart, cartTotal } = useCart();
-
-    // Mode: Single Product vs Cart
-    const isCartMode = !id && cart.length > 0;
+    // Mode: Single Product vs Cart vs Membership
+    const membership = searchParams.get('membership');
+    const isCartMode = !id && !membership && cart.length > 0;
+    const isMembershipMode = !!membership;
 
     const [product, setProduct] = useState<any>(null);
     const [user, setUser] = useState<any>(null);
@@ -47,7 +48,16 @@ function CheckoutContent() {
                 setEmail(u.email);
             }
         }
-    }, [id]);
+        // 3. Handle Membership Mode
+        if (membership) {
+            const PLANS: any = {
+                silver: { name: 'Silver VIP Membership', price: '9.99', platform: 'VIP', id: 'm1' },
+                gold: { name: 'Gold VIP Membership', price: '24.99', platform: 'VIP', id: 'm2' },
+                diamond: { name: 'Diamond VIP Membership', price: '49.99', platform: 'VIP', id: 'm3' }
+            };
+            setProduct(PLANS[membership] || null);
+        }
+    }, [id, membership]);
 
     const handleApplyPromo = async () => {
         if (!promoCode) return;
@@ -71,9 +81,11 @@ function CheckoutContent() {
         let baseTotal = 0;
         if (isCartMode) {
             baseTotal = cartTotal;
+        } else if (isMembershipMode) {
+            baseTotal = parseFloat(product?.price || '0');
         } else {
             if (!product) return 0;
-            const original = parseFloat(product.price.replace('$', ''));
+            const original = parseFloat(product.price.toString().replace('$', ''));
             baseTotal = original * quantity;
         }
 
@@ -92,30 +104,32 @@ function CheckoutContent() {
 
         try {
             if (isCartMode) {
-                // CART CHECKOUT (Wallet Only or Loop)
-                if (paymentMethod !== 'wallet') {
-                    alert("Currently, bulk checkout is only supported via Wallet. Please purchase items individually for other methods.");
-                    setIsProcessing(false);
-                    return;
-                }
+                // CART CHECKOUT (New Universal Bulk Support)
+                const res = await fetch('/api/checkout/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user ? user.id : 'guest',
+                        guestEmail: email,
+                        cartItems: isCartMode ? cart : null,
+                        membershipPlan: membership,
+                        method: paymentMethod,
+                        promoCode: discount > 0 ? promoCode : null,
+                        finalPrice: getFinalPrice() // Total amount
+                    })
+                });
+                const data = await res.json();
 
-                // Process each item sequentially
-                for (const item of cart) {
-                    await fetch('/api/checkout/process', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            userId: user ? user.id : 'guest',
-                            guestEmail: email,
-                            productId: item.id,
-                            quantity: 1,
-                            method: paymentMethod,
-                            promoCode: discount > 0 ? promoCode : null,
-                            finalPrice: item.price // discount logic might be tricky per item, essentially applied to total? Simplifying for now.
-                        })
-                    });
+                if (data.success) {
+                    clearCart();
+                    if (data.paymentUrl) {
+                        window.location.href = data.paymentUrl;
+                    } else {
+                        window.location.href = `/order-success?orderId=${data.orderId}`;
+                    }
+                } else {
+                    alert('Checkout Error: ' + data.error);
                 }
-                clearCart();
-                window.location.href = `/order-success?orderId=BULK_ORDER`;
             } else {
                 // SINGLE PRODUCT CHECKOUT
                 const res = await fetch('/api/checkout/process', {

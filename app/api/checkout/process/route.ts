@@ -35,43 +35,60 @@ async function getSettings() {
 
 export async function POST(req: Request) {
     try {
-        const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1 } = await req.json();
+        const body = await req.json();
+        const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1, cartItems, membershipPlan } = body;
 
         // 1. Load Settings
         const settings = await getSettings();
 
-        // 2. Fetch Product from DB
-        const productRows = await query("SELECT * FROM products WHERE id = ?", [productId]) as any[];
-        const product = productRows[0];
+        // Check if Bulk or Single
+        const isBulk = !!cartItems && Array.isArray(cartItems) && cartItems.length > 0;
+        let product: any = null;
+        let amountToCharge = "0";
+        let safeQuantity = quantity;
+
+        if (membershipPlan) {
+            const PLANS: any = {
+                silver: { name: 'Silver VIP Membership', price: '9.99', platform: 'VIP', id: 'm1' },
+                gold: { name: 'Gold VIP Membership', price: '24.99', platform: 'VIP', id: 'm2' },
+                diamond: { name: 'Diamond VIP Membership', price: '49.99', platform: 'VIP', id: 'm3' }
+            };
+            product = PLANS[membershipPlan];
+            if (!product) throw new Error("Invalid membership plan selected.");
+            amountToCharge = product.price;
+            safeQuantity = 1;
+        } else if (!isBulk) {
+            // 2. Fetch Single Product from DB/Memory
+            const productRows = await query("SELECT * FROM products WHERE id = ?", [productId]) as any[];
+            product = productRows[0];
+            if (!product) return NextResponse.json({ error: "Product not found" }, { status: 400 });
+
+            const q = parseInt(quantity as string, 10) || 1;
+            safeQuantity = q;
+            let unitPrice = parseFloat(product.price);
+            if (product.sale_price && product.sale_ends_at) {
+                const saleEnd = new Date(product.sale_ends_at);
+                if (saleEnd > new Date()) unitPrice = parseFloat(product.sale_price);
+            }
+            amountToCharge = finalPrice ? finalPrice : (unitPrice * q).toFixed(2);
+        } else {
+            // Bulk Cart
+            amountToCharge = finalPrice ? finalPrice : cartItems.reduce((acc: number, item: any) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0).toFixed(2);
+            product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple" };
+        }
 
         // Create/Get User Object
         let user: any = null;
-
         if (userId === 'guest') {
             user = { id: 'guest', email: guestEmail, telegram: null };
         } else {
-            // Fetch from DB
             const userRows = await query("SELECT id, email, telegram FROM users WHERE id = ?", [userId]) as any[];
-            if (userRows.length > 0) {
-                user = userRows[0];
-            }
+            if (userRows.length > 0) user = userRows[0];
         }
 
-        if (!product || !user) return NextResponse.json({ error: "Invalid Request: User or Product not found" }, { status: 400 });
+        if (!user) return NextResponse.json({ error: "User not found" }, { status: 400 });
 
-        // Calculate Amount to Charge (With Flash Sale Logic)
-        const safeQuantity = parseInt(quantity as string, 10) || 1;
-        let unitPrice = parseFloat(product.price);
-
-        // Check Flash Sale
-        if (product.sale_price && product.sale_ends_at) {
-            const saleEnd = new Date(product.sale_ends_at);
-            if (saleEnd > new Date()) {
-                unitPrice = parseFloat(product.sale_price);
-            }
-        }
-
-        const amountToCharge = finalPrice ? finalPrice : (unitPrice * safeQuantity).toFixed(2);
+        // amountToCharge is already calculated above for both single and bulk
 
         // 2. Process Payment
         let paymentUrl = null;
@@ -88,9 +105,9 @@ export async function POST(req: Request) {
                 const params = new URLSearchParams();
                 params.append('payment_method_types[]', 'card');
                 params.append('line_items[0][price_data][currency]', 'usd');
-                params.append('line_items[0][price_data][product_data][name]', `${product.name} (x${safeQuantity})` + (promoCode ? ` [${promoCode}]` : ''));
+                params.append('line_items[0][price_data][product_data][name]', isBulk ? `Cart Purchase (${cartItems.length} items)` : `${product.name} (x${safeQuantity})` + (promoCode ? ` [${promoCode}]` : ''));
                 params.append('line_items[0][price_data][unit_amount]', (parseFloat(amountToCharge) * 100).toFixed(0)); // Total Amount
-                params.append('line_items[0][quantity]', '1'); // We are charging the TOTAL as one line item
+                params.append('line_items[0][quantity]', '1'); // Total session
                 params.append('mode', 'payment');
                 params.append('success_url', `${req.headers.get('origin')}/order-success?session_id={CHECKOUT_SESSION_ID}&orderId=${Date.now()}`);
                 params.append('cancel_url', `${req.headers.get('origin')}/checkout?id=${productId}`);
@@ -233,7 +250,12 @@ export async function POST(req: Request) {
 
             // Record Transaction
             await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'purchase', ?, 'completed')",
-                [userId, amountToCharge, `Purchase of ${product.name}`]);
+                [userId, amountToCharge, membershipPlan ? `VIP Membership Upgrade: ${membershipPlan}` : (isBulk ? `Bulk Cart Purchase (${cartItems.length} items)` : `Purchase of ${product.name}`)]);
+
+            // UPDATE MEMBERSHIP IF APPLICABLE
+            if (membershipPlan) {
+                await query("UPDATE users SET membership = ?, membership_expires = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?", [membershipPlan, userId]);
+            }
 
             orderStatus = 'paid';
         }
@@ -289,16 +311,16 @@ export async function POST(req: Request) {
 
         // 3. Create Order
         const newOrder = {
-            orderId: Date.now().toString(),
+            orderId: (isBulk ? 'BULK-' : 'ORD-') + Date.now().toString(),
             userId: user.id,
-            guestEmail: userId === 'guest' ? guestEmail : null,
-            productId: product.id,
+            guestEmail: user.email || (userId === 'guest' ? guestEmail : null),
+            productId: isBulk ? 0 : product.id,
             amount: amountToCharge,
-            originalPrice: product.price,
+            originalPrice: isBulk ? amountToCharge : product.price,
             promoCode: promoCode || null,
             method,
             status: orderStatus,
-            quantity: safeQuantity, // ADDED
+            quantity: isBulk ? cartItems.length : safeQuantity,
             date: new Date()
         };
 
@@ -341,101 +363,73 @@ export async function POST(req: Request) {
         }
 
         // 4. DELIVERY AUTOMATION
-        let emailBody = "";
-        let telegramBody = "";
-        const deliveredItems: any[] = [];
+        let combinedEmailBody = "Thank you for your purchase! Here are your order details:\n\n";
+        let combinedTelegramBody = "💰 **New Order Confirmed!**\n\n";
+        const itemsToProcess = isBulk ? cartItems : [{ id: productId, quantity: safeQuantity }];
 
-        if (product.bundle_items) {
-            // --- BUNDLE DELIVERY ---
-            const bundleIds = JSON.parse(product.bundle_items);
-            let bundleCreds = "📦 **BUNDLE CONTENTS:**\n\n";
+        for (const item of itemsToProcess) {
+            const currentProductId = item.id;
+            const currentQuantity = item.quantity || 1;
 
-            for (const bundleId of bundleIds) {
-                // Get Product Name
-                const subRows: any = await query("SELECT name FROM products WHERE id = ?", [bundleId]);
-                if (subRows.length === 0) continue;
-                const subName = subRows[0].name;
+            // Fetch Product Data
+            const pRows: any = await query("SELECT * FROM products WHERE id = ?", [currentProductId]);
+            const p = pRows[0];
+            if (!p) continue;
 
-                // Fetch Stock
-                const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [subName, safeQuantity]);
+            let itemCreds = "";
 
-                if (stockRows.length < safeQuantity) {
-                    bundleCreds += `⚠️ ${subName}: Out of Stock (Contact Support)\n`;
-                } else {
-                    for (const stockItem of stockRows) {
-                        // Mark Sold
-                        await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
-
-                        // Parse Details
-                        const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
-                        const creds = details.extraInfo || `${details.email}:${details.password}`;
-                        bundleCreds += `✅ **${subName}**:\n${creds}\n\n`;
-                        deliveredItems.push({ name: subName, stockId: stockItem.id });
+            if (p.bundle_items) {
+                const bundleIds = JSON.parse(p.bundle_items);
+                itemCreds += `📦 **${p.name} Bundle:**\n`;
+                for (const bundleId of bundleIds) {
+                    const subRows: any = await query("SELECT name FROM products WHERE id = ?", [bundleId]);
+                    if (subRows.length === 0) continue;
+                    const subName = subRows[0].name;
+                    const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [subName, currentQuantity]);
+                    if (stockRows.length < currentQuantity) {
+                        itemCreds += `  ⚠️ ${subName}: Out of Stock (Contact Support)\n`;
+                    } else {
+                        for (const stockItem of stockRows) {
+                            await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
+                            const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
+                            itemCreds += `  ✅ ${subName}: ${details.extraInfo || (details.email + ":" + details.password)}\n`;
+                        }
                     }
                 }
-            }
-            emailBody = `Thank you for purchasing the ${product.name} Bundle!\n\n${bundleCreds}\n\nPlease save these details immediately.`;
-            telegramBody = `Bundle Order: ${product.name}\n\n${bundleCreds}`;
-
-        } else if (product.type === 'service') {
-            emailBody = `Thank you for your purchase!\n\nWe have received your order for ${product.name} (x${safeQuantity}).\nOur team will begin processing your boost shortly.\nYou will receive updates via email or Telegram.`;
-            telegramBody = `Order Confirmed: ${product.name} (x${safeQuantity})\n\nStatus: Processing\nWe will update you soon!`;
-        } else {
-            // --- SINGLE ITEM DYNAMIC DELIVERY ---
-            // 1. Try to fetch from Inventory FIRST (Priority)
-            const stockRows: any = await query("SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' LIMIT ?", [product.name, product.platform, safeQuantity]);
-
-            if (stockRows.length >= safeQuantity) {
-                let dynamicCreds = "";
-                for (const stockItem of stockRows) {
-                    await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
-                    const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
-                    const creds = details.extraInfo || (details.email ? `Email: ${details.email}\nPass: ${details.password}` : Object.values(details).join(':'));
-                    dynamicCreds += `${creds}\n---\n`;
-                    deliveredItems.push({ name: product.name, stockId: stockItem.id });
-                }
-
-                emailBody = `Your Order Details for ${product.name}:\n\n${dynamicCreds}\n\nThank you for choosing us!`;
-                telegramBody = `Order: ${product.name}\n\n${dynamicCreds}`;
-            } else if (Number(product.stock || 0) >= safeQuantity) {
-                // 2. FALLBACK to Manual Stock (If configured in Catalog)
-                // Decrement the manual stock column
-                await query("UPDATE products SET stock = stock - ? WHERE id = ?", [safeQuantity, product.id]);
-
-                const credentials = product.creds || "Product purchased! Our team will provide your access via Telegram/Email shortly.";
-                emailBody = `Your Order for ${product.name} (x${safeQuantity}) is confirmed!\n\nDetails / Status:\n${credentials}\n\nPlease check your Telegram or wait for further email updates.`;
-                telegramBody = `Thanks for buying ${product.name} (x${safeQuantity})!\n\nStatus: Paid & Pending Fulfillment\nDetails:\n${credentials}`;
+            } else if (p.type === 'service') {
+                itemCreds += `⚡ **${p.name}:** Processing shortly.\n`;
             } else {
-                // 3. Last resort (should not happen if frontend stock check works)
-                emailBody = `Thank you for your order. We are currently processing your delivery for ${product.name}. Please contact support with Order ID #${newOrder.orderId}.`;
-                telegramBody = `New Order #${newOrder.orderId} for ${product.name}. Manual fulfillment required.`;
+                const stockRows: any = await query("SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' LIMIT ?", [p.name, p.platform, currentQuantity]);
+                if (stockRows.length >= currentQuantity) {
+                    itemCreds += `✅ **${p.name}:**\n`;
+                    for (const stockItem of stockRows) {
+                        await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stockItem.id]);
+                        const details = stockItem.accountDetails ? JSON.parse(stockItem.accountDetails) : {};
+                        const creds = details.extraInfo || (details.email ? `Email: ${details.email}\nPass: ${details.password}` : Object.values(details).join(':'));
+                        itemCreds += `${creds}\n`;
+                    }
+                } else {
+                    await query("UPDATE products SET stock = GREATEST(0, stock - ?) WHERE id = ?", [currentQuantity, p.id]);
+                    itemCreds += `⏳ **${p.name}:** Pending manual fulfillment.\n`;
+                }
             }
+            combinedEmailBody += itemCreds + "\n---\n";
+            combinedTelegramBody += itemCreds + "\n";
         }
 
         // A. Email Delivery to User
         if (user.email) {
             await sendAuditReport(user.email, "Order #" + newOrder.orderId, {
                 da: "ORDER CONFIRMED",
-                pa: product.name,
+                pa: isBulk ? "Multiple Items" : product.name,
                 links: Number(amountToCharge || 0),
-                details: emailBody
+                details: combinedEmailBody
             }, settings);
         }
 
-        // B. Email Alert to Admin
-        const adminEmail = process.env.ADMIN_EMAIL || settings.smtpUser;
-        if (adminEmail) {
-            await sendAuditReport(adminEmail, "New FREE Order #" + newOrder.orderId, {
-                da: "FREE ORDER CLAIMED",
-                pa: product.name,
-                links: 0,
-                details: `Customer: ${user.email} received ${product.name} (x${safeQuantity}) for free.`
-            }, settings);
-        }
-
-        // C. Telegram Delivery
+        // B. Telegram Delivery
         if (user.telegram && settings.telegramToken) {
-            await sendTelegramMessage(user.telegram, telegramBody, settings.telegramToken);
+            await sendTelegramMessage(user.telegram, combinedTelegramBody, settings.telegramToken);
         }
 
         return NextResponse.json({ success: true, orderId: newOrder.orderId });
