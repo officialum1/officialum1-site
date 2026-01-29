@@ -942,7 +942,7 @@ function AdminDashboard() {
                             { id: 'website', label: '🌐 Website', perm: 'website' },
                             { id: 'sell', label: '💸 Sales', perm: 'sales' },
                             { id: 'finance', label: '💰 Finance', perm: 'finance' },
-                            { id: 'payments', label: '💳 Payments', perm: 'settings', href: '/admin/payments' },
+                            { id: 'payments', label: '💳 Payments', perm: 'settings' }, // Removed href to keep in-app
                             { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
                             { id: 'leads', label: '👥 Leads', perm: 'leads' },
                             { id: 'users', label: '👤 Buyers', perm: 'users' },
@@ -2208,6 +2208,146 @@ function AdminDashboard() {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+
+                    {/* PAYMENTS TAB (New Modern Layout) */}
+                    {activeTab === 'payments' && (
+                        <div className="FadeIn" style={{ display: 'flex', gap: '2rem', minHeight: '600px' }}>
+                            {/* Inner Sidebar for Payments */}
+                            <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <h3 style={{ color: '#fff', marginBottom: '1rem', paddingLeft: '0.5rem' }}>Payment Methods</h3>
+                                {['general', 'stripe', 'cryptomus', 'binance', 'manual'].map(sub => (
+                                    <button
+                                        key={sub}
+                                        onClick={() => setSettings({ ...settings, activePaymentTab: sub })}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '1rem',
+                                            borderRadius: '8px',
+                                            background: settings.activePaymentTab === sub ? 'rgba(0,255,136,0.1)' : 'transparent',
+                                            color: settings.activePaymentTab === sub ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: settings.activePaymentTab === sub ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
+                                        {sub === 'general' && '⚙️ General'}
+                                        {sub === 'stripe' && '💳 Stripe'}
+                                        {sub === 'cryptomus' && '🟠 Cryptomus'}
+                                        {sub === 'binance' && '🟡 Binance Pay'}
+                                        {sub === 'manual' && '🏦 Manual / Bank'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Content Area */}
+                            <div style={{ flex: 1 }}>
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '0.5rem', textTransform: 'capitalize' }}>
+                                        {settings.activePaymentTab || 'General'} Configuration
+                                    </h2>
+                                    <p style={{ color: '#666', marginBottom: '2rem' }}>Update your payment gateway credentials securely.</p>
+
+                                    <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                                        {(!settings.activePaymentTab || settings.activePaymentTab === 'stripe') && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Publishable Key</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.stripePublishableKey || ''}
+                                                        onChange={e => setSettings({ ...settings, stripePublishableKey: e.target.value })}
+                                                        placeholder="pk_test_..."
+                                                        style={{ width: '100%' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Secret Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.stripeSecretKey || ''}
+                                                        onChange={e => setSettings({ ...settings, stripeSecretKey: e.target.value })}
+                                                        placeholder="sk_test_..."
+                                                        style={{ width: '100%' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'cryptomus' && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Cryptomus Merchant ID</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.cryptomusMerchantId || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusMerchantId: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#fdd835' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Payment API Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.cryptomusPaymentKey || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusPaymentKey: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#fdd835' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'binance' && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance API Key</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.binanceApiKey || ''}
+                                                        onChange={e => setSettings({ ...settings, activePaymentTab: 'binance', binanceApiKey: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#FCD535' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance Secret Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.binanceSecretKey || ''}
+                                                        onChange={e => setSettings({ ...settings, activePaymentTab: 'binance', binanceSecretKey: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#FCD535' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'manual' && (
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Bank / Manual Transfer Instructions</label>
+                                                <textarea
+                                                    className="input-field h-32"
+                                                    value={settings.manualPaymentInstructions || ''}
+                                                    onChange={e => setSettings({ ...settings, manualPaymentInstructions: e.target.value })}
+                                                    placeholder="Bank Name: ... IBAN: ..."
+                                                    style={{ width: '100%', minHeight: '150px' }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Calculate & Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     )}
 
