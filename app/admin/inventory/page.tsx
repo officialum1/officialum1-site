@@ -330,7 +330,11 @@ function AdminDashboard() {
         try {
             const res = await fetch('/api/admin/users', {
                 method: 'PATCH',
-                body: JSON.stringify({ id: selectedUser.id, ...userForm })
+                body: JSON.stringify({
+                    id: selectedUser.id,
+                    ...userForm,
+                    membership: selectedUser.membership // Include membership
+                })
             });
             if (res.ok) {
                 alert('User updated successfully');
@@ -2365,8 +2369,8 @@ function AdminDashboard() {
                                     <thead>
                                         <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
                                             <th style={{ padding: '1.5rem' }}>Buyer Info</th>
-                                            <th style={{ padding: '1.5rem' }}>Status</th>
-                                            <th style={{ padding: '1.5rem' }}>Referrals</th>
+                                            <th style={{ padding: '1.5rem' }}>Status / Tier</th>
+                                            <th style={{ padding: '1.5rem' }}>Spent / Points</th>
                                             <th style={{ padding: '1.5rem' }}>Wallet Balance</th>
                                             <th style={{ padding: '1.5rem' }}>Affiliate Earned</th>
                                             <th style={{ padding: '1.5rem' }}>Joined</th>
@@ -2383,20 +2387,35 @@ function AdminDashboard() {
                                                     <div style={{ fontSize: '0.8rem', color: '#666', fontFamily: 'monospace' }}>ID: {u.id}</div>
                                                 </td>
                                                 <td style={{ padding: '1.5rem' }}>
-                                                    <span style={{
-                                                        padding: '4px 10px',
-                                                        borderRadius: '20px',
-                                                        fontSize: '0.75rem',
-                                                        background: u.is_verified ? 'rgba(0,180,100,0.1)' : 'rgba(255,100,0,0.1)',
-                                                        color: u.is_verified ? '#00ff88' : '#ff9900',
-                                                        border: u.is_verified ? '1px solid #00ff8833' : '1px solid #ff990033'
-                                                    }}>
-                                                        {u.is_verified ? 'VERIFIED' : 'PENDING'}
-                                                    </span>
+                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                                        <span style={{
+                                                            padding: '4px 10px',
+                                                            borderRadius: '20px',
+                                                            fontSize: '0.75rem',
+                                                            background: u.is_verified ? 'rgba(0,180,100,0.1)' : 'rgba(255,100,0,0.1)',
+                                                            color: u.is_verified ? '#00ff88' : '#ff9900',
+                                                            border: u.is_verified ? '1px solid #00ff8833' : '1px solid #ff990033'
+                                                        }}>
+                                                            {u.is_verified ? 'VERIFIED' : 'PENDING'}
+                                                        </span>
+                                                        {u.membership && u.membership !== 'none' && (
+                                                            <span style={{
+                                                                padding: '4px 10px',
+                                                                borderRadius: '20px',
+                                                                fontSize: '0.75rem',
+                                                                background: 'rgba(255,215,0,0.15)',
+                                                                color: '#ffd700',
+                                                                border: '1px solid #ffd70055',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                ★ {u.membership.toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td style={{ padding: '1.5rem' }}>
-                                                    <div style={{ color: '#fff', fontWeight: 'bold' }}>{u.referral_count || 0} Users</div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#888' }}>Code: {u.referral_code}</div>
+                                                    <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.total_spent || 0).toFixed(2)}</div>
+                                                    <div style={{ fontSize: '0.82rem', color: '#888' }}>{u.points || 0} pts</div>
                                                 </td>
                                                 <td style={{ padding: '1.5rem' }}>
                                                     <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.wallet_balance || 0).toFixed(2)}</div>
@@ -2497,6 +2516,15 @@ function AdminDashboard() {
                                                     <option value="buyer">Buyer / Customer</option>
                                                     <option value="seller">Seller / Partner</option>
                                                     <option value="admin">System Admin</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Membership Tier</label>
+                                                <select className="input-field" value={selectedUser.membership || 'none'} onChange={e => setSelectedUser({ ...selectedUser, membership: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                                    <option value="none">None (Standard)</option>
+                                                    <option value="silver">Silver VIP</option>
+                                                    <option value="gold">Gold VIP</option>
+                                                    <option value="diamond">Diamond VIP</option>
                                                 </select>
                                             </div>
                                             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>

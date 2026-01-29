@@ -257,6 +257,10 @@ export async function POST(req: Request) {
                 await query("UPDATE users SET membership = ?, membership_expires = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?", [membershipPlan, userId]);
             }
 
+            // UPDATE TOTAL SPENT & POINTS
+            await query("UPDATE users SET total_spent = total_spent + ?, points = points + ? WHERE id = ?",
+                [parseFloat(amountToCharge), Math.floor(parseFloat(amountToCharge)), userId]);
+
             orderStatus = 'paid';
         }
 

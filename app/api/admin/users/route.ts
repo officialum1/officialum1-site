@@ -23,6 +23,9 @@ export async function GET(req: Request) {
                 u.created_at, 
                 u.is_banned, 
                 u.is_verified,
+                u.membership,
+                u.membership_expires,
+                u.total_spent,
                 (SELECT COUNT(*) FROM users ref WHERE ref.referred_by = u.referral_code) as referral_count
             FROM users u 
             ORDER BY u.created_at DESC
@@ -70,6 +73,7 @@ export async function PATCH(req: Request) {
         if (password) { updates.push("password = ?"); values.push(password); } // Ideally hash this
         if (telegram) { updates.push("telegram = ?"); values.push(telegram); }
         if (role) { updates.push("role = ?"); values.push(role); }
+        if (body.membership) { updates.push("membership = ?"); values.push(body.membership); }
 
         if (updates.length > 0) {
             values.push(id);
