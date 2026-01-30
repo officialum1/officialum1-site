@@ -2253,13 +2253,61 @@ function AdminDashboard() {
                             <div style={{ flex: 1 }}>
                                 <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <h2 style={{ color: '#00ff88', marginBottom: '0.5rem', textTransform: 'capitalize' }}>
-                                        {settings.activePaymentTab || 'General'} Configuration
+                                        {(settings.activePaymentTab && settings.activePaymentTab !== 'general') ? settings.activePaymentTab : 'General'} Configuration
                                     </h2>
                                     <p style={{ color: '#666', marginBottom: '2rem' }}>Update your payment gateway credentials securely.</p>
 
                                     <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                                        {(!settings.activePaymentTab || settings.activePaymentTab === 'stripe') && (
+                                        {(!settings.activePaymentTab || settings.activePaymentTab === 'general') && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                                {/* Global Settings */}
+                                                <div style={{ gridColumn: 'span 2' }}>
+                                                    <h4 style={{ color: '#fff', borderBottom: '1px solid #333', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Global Shopping Rules</h4>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Primary Site Currency</label>
+                                                    <select className="input-field" value={settings.site_currency || 'USD'} onChange={e => setSettings({ ...settings, site_currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                        <option value="USD">USD ($) - International</option>
+                                                        <option value="PKR">PKR (₨) - Pakistan</option>
+                                                        <option value="EUR">EUR (€) - Europe</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Admin Notification Email</label>
+                                                    <input className="input-field" value={settings.admin_email || ''} onChange={e => setSettings({ ...settings, admin_email: e.target.value })} placeholder="alerts@officialum1.com" style={{ width: '100%' }} />
+                                                </div>
+                                                <div style={{ gridColumn: 'span 2', display: 'flex', gap: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid #333' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
+                                                        <input type="checkbox" checked={settings.allow_guest_checkout === 'true'} onChange={e => setSettings({ ...settings, allow_guest_checkout: e.target.checked ? 'true' : 'false' })} />
+                                                        Allow Guest Checkout
+                                                    </label>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
+                                                        <input type="checkbox" checked={settings.allow_wallet_payment === 'true'} onChange={e => setSettings({ ...settings, allow_wallet_payment: e.target.checked ? 'true' : 'false' })} />
+                                                        Allow Wallet Payments
+                                                    </label>
+                                                </div>
+
+                                                {/* VIP SaaS Configuration */}
+                                                <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                                                    <h4 style={{ color: '#ffd700', borderBottom: '1px solid #222', paddingBottom: '0.5rem', marginBottom: '1rem' }}>SaaS Membership Discounts (%)</h4>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Silver VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_silver || '5'} onChange={e => setSettings({ ...settings, discount_silver: e.target.value })} style={{ width: '100%', borderColor: '#C0C0C033' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Gold VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_gold || '10'} onChange={e => setSettings({ ...settings, discount_gold: e.target.value })} style={{ width: '100%', borderColor: '#FFD70033' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Diamond VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_diamond || '15'} onChange={e => setSettings({ ...settings, discount_diamond: e.target.value })} style={{ width: '100%', borderColor: '#B9F2FF33' }} />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {settings.activePaymentTab === 'stripe' && (
                                             <>
                                                 <div>
                                                     <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Publishable Key</label>
