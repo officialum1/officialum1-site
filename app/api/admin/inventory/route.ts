@@ -168,7 +168,8 @@ export async function POST(request: Request) {
                     const token = Math.random().toString(36).substring(2, 10);
                     const deliveryDetails = {
                         note: `Bulk Order of ${qty} x ${productName}`,
-                        accounts: combinedDetailsText
+                        accounts: combinedDetailsText,
+                        inventoryIds: soldInventoryIds
                     };
 
                     deliveryData = {
@@ -328,6 +329,42 @@ export async function POST(request: Request) {
             );
 
             return NextResponse.json({ success: true, count: created.length });
+        }
+
+        if (action === 'delete_sale') {
+            const { transactionId } = body;
+
+            // 1. Find delivery to get inventory items
+            const deliveryRes: any = await query("SELECT details FROM deliveries WHERE orderId = ?", [transactionId]);
+            if (deliveryRes.length > 0) {
+                const details = JSON.parse(deliveryRes[0].details || '{}');
+                let ids = details.inventoryIds || [];
+
+                // Fallback for single sales or old sales
+                if (!ids || ids.length === 0) {
+                    const transRes: any = await query("SELECT inventoryId FROM transactions WHERE id = ?", [transactionId]);
+                    if (transRes.length > 0 && transRes[0].inventoryId && transRes[0].inventoryId !== 'bulk') {
+                        ids = [transRes[0].inventoryId];
+                    }
+                }
+
+                // 2. Mark items as In Stock
+                if (ids && ids.length > 0) {
+                    const placeholders = ids.map(() => '?').join(',');
+                    await query(`UPDATE inventory SET status = 'In Stock' WHERE id IN (${placeholders})`, ids);
+                }
+            }
+
+            // 3. Delete Delivery & Transaction
+            await query("DELETE FROM deliveries WHERE orderId = ?", [transactionId]);
+            await query("DELETE FROM transactions WHERE id = ?", [transactionId]);
+
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Delete Sale', `Deleted transaction ${transactionId} and restored stock`]
+            );
+
+            return NextResponse.json({ success: true });
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

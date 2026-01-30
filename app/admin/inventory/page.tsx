@@ -576,6 +576,24 @@ function AdminDashboard() {
         }
     };
 
+    const handleDeleteSale = async (transactionId: string) => {
+        if (!confirm('Are you sure you want to delete this sale? This will remove the transaction record and mark the inventory items as "In Stock" again.')) return;
+        try {
+            const res = await fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete_sale', transactionId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Sale deleted and stock restored! ✅');
+                fetchData();
+            } else {
+                alert('Failed to delete sale');
+            }
+        } catch (e) { alert('Network error'); }
+    };
+
     const handleCreateBundle = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -1742,6 +1760,23 @@ function AdminDashboard() {
                                                             {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
                                                         </button>
                                                         <span style={{ fontSize: '0.8rem', color: '#666' }}>Views: {sale.deliveryViews || 0}</span>
+                                                        {(currentUser?.role === 'admin' || currentUser?.role === 'owner') && (
+                                                            <button
+                                                                onClick={() => handleDeleteSale(sale.id)}
+                                                                style={{
+                                                                    background: 'rgba(255,68,68,0.1)',
+                                                                    border: '1px solid #ff4444',
+                                                                    color: '#ff4444',
+                                                                    borderRadius: '4px',
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    marginLeft: 'auto'
+                                                                }}
+                                                            >
+                                                                🗑️ Delete
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
