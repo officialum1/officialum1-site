@@ -82,18 +82,79 @@ export default function DeliveryPage() {
     // Parsing Bulk Accounts if they exist
     let bulkAccounts: any[] = [];
     if (order.details?.accounts) {
-        bulkAccounts = order.details.accounts.split('\n').filter((l: string) => l.trim()).map((line: string) => {
-            // Try to parse User:Pass format
-            if (line.includes(':')) {
-                const parts = line.split(':');
-                return { user: parts[0], pass: parts[1], extra: parts.slice(2).join(':') };
+        const lines = order.details.accounts.split('\n').filter((l: string) => l.trim());
+        bulkAccounts = lines.map((line: string) => {
+            let user = '', pass = '', email = '', extra = '';
+
+            // SMART PARSING
+            const separators = ['\t', ':', '|', ','];
+            let parts: string[] = [line];
+            for (const sep of separators) {
+                if (line.includes(sep)) {
+                    parts = line.split(sep);
+                    break;
+                }
             }
-            return { raw: line };
-        });
+
+            if (parts.length >= 2) {
+                // Heuristic: If one looks like an email, it's email.
+                const emailIdx = parts.findIndex(p => p.includes('@'));
+                if (emailIdx !== -1) {
+                    email = parts[emailIdx].trim();
+                    const others = parts.filter((_, idx) => idx !== emailIdx);
+                    user = others[0]?.trim() || '';
+                    pass = others[1]?.trim() || '';
+                    extra = others.slice(2).join(' ').trim();
+                } else {
+                    user = parts[0].trim();
+                    pass = parts[1].trim();
+                    extra = parts.slice(2).join(' ').trim();
+                }
+            } else {
+                return { raw: line.replace('(Bulk Imported)', '').trim() };
+            }
+
+            // Clean up: remove "Bulk Imported" tag from data
+            user = user.replace('(Bulk Imported)', '').trim();
+            pass = pass.replace('(Bulk Imported)', '').trim();
+            extra = extra.replace('(Bulk Imported)', '').trim();
+            email = email.replace('(Bulk Imported)', '').trim();
+
+            // Filter out header rows
+            const lowLine = line.toLowerCase();
+            if ((lowLine.includes('user') && lowLine.includes('pass')) ||
+                (lowLine.includes('login') && lowLine.includes('password')) ||
+                (lowLine.includes('mail') && lowLine.includes('username'))) {
+                return null;
+            }
+
+            return { user, pass, email, extra };
+        }).filter(Boolean);
     }
 
     // Determine type: Single or Bulk
     const isBulk = bulkAccounts.length > 0;
+
+    const downloadTxt = () => {
+        const blob = new Blob([order.details.accounts], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `order_${order.orderId || 'delivery'}.txt`;
+        a.click();
+    };
+
+    const downloadCsv = () => {
+        const headers = ["Email", "Username", "Password", "Extra"];
+        const rows = bulkAccounts.map(a => [a.email || '', a.user || '', a.pass || '', a.extra || '']);
+        const content = [headers, ...rows].map(e => e.join(",")).join("\n");
+        const blob = new Blob([content], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `order_${order.orderId || 'delivery'}.csv`;
+        a.click();
+    };
 
     return (
         <main style={{ minHeight: '100vh', background: '#050505', color: '#fff', fontFamily: "'Outfit', sans-serif" }}>
@@ -129,124 +190,119 @@ export default function DeliveryPage() {
                     <div style={{ padding: '3rem 2rem' }}>
 
                         {/* Product Info */}
-                        <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem' }}>
-                            <h2 style={{ fontSize: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '1px', marginBottom: '0.5rem' }}>Purchased Item</h2>
-                            <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff' }}>{order.itemName}</h3>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <span className="badge">✅ Verified Purchase</span>
-                                <span className="badge">⚡ Instant Delivery</span>
+                        <div style={{ marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+                            <div>
+                                <h2 style={{ fontSize: '0.9rem', textTransform: 'uppercase', color: '#666', letterSpacing: '2px', marginBottom: '0.5rem' }}>Purchased Item</h2>
+                                <h3 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{order.itemName}</h3>
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <span className="badge">✅ Verified Purchase</span>
+                                    <span className="badge">⚡ Instant Delivery</span>
+                                </div>
                             </div>
+
+                            {revealed && isBulk && (
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button onClick={downloadTxt} className="btn-secondary" style={{ fontSize: '0.8rem' }}>💾 .TXT</button>
+                                    <button onClick={downloadCsv} className="btn-secondary" style={{ fontSize: '0.8rem' }}>📊 .CSV</button>
+                                    <button onClick={handleCopyAll} className="btn-primary-small">📋 Copy All</button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Credentials Reveal Section */}
                         <div style={{ position: 'relative' }}>
-                            <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>Credentials</span>
-                                {revealed && isBulk && (
-                                    <button onClick={handleCopyAll} style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer' }}>
-                                        📋 Copy All
-                                    </button>
-                                )}
-                            </h2>
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#fff' }}>
+                                Account Details
+                            </h4>
 
                             {!revealed ? (
                                 <div style={{
-                                    background: 'rgba(255,255,255,0.03)',
+                                    background: 'rgba(255,255,255,0.02)',
                                     borderRadius: '16px',
-                                    padding: '4rem 2rem',
+                                    padding: '5rem 2rem',
                                     textAlign: 'center',
                                     border: '1px dashed #333',
-                                    backdropFilter: 'blur(10px)'
+                                    backdropFilter: 'blur(15px)'
                                 }}>
-                                    <h3 style={{ marginBottom: '1rem', color: '#ccc' }}>Hidden for Security</h3>
-                                    <p style={{ color: '#666', marginBottom: '2rem', fontSize: '0.9rem' }}>Click below to reveal your purchase details securely.</p>
+                                    <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>👁️</div>
+                                    <h3 style={{ marginBottom: '1rem', color: '#fff', fontSize: '1.5rem' }}>Encrypted Content</h3>
+                                    <p style={{ color: '#666', marginBottom: '2.5rem', fontSize: '0.95rem', maxWidth: '400px', margin: '0 auto 2.5rem auto' }}>
+                                        To maintain privacy, details are hidden by default. Click reveal to view your credentials.
+                                    </p>
                                     <button
                                         onClick={() => setRevealed(true)}
-                                        className="btn-primary-glow"
-                                        style={{
-                                            padding: '1rem 3rem',
-                                            fontSize: '1.1rem',
-                                            borderRadius: '50px',
-                                            border: 'none',
-                                            background: '#fff',
-                                            color: '#000',
-                                            fontWeight: 'bold',
-                                            cursor: 'pointer',
-                                            boxShadow: '0 0 20px rgba(255,255,255,0.3)'
-                                        }}
+                                        className="btn-reveal"
                                     >
-                                        Reveal Data
+                                        Reveal Credentials
                                     </button>
                                 </div>
                             ) : (
                                 <div className="fade-in-up">
                                     {isBulk ? (
-                                        // BULK VIEW
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                            {bulkAccounts.map((acc: any, i: number) => (
-                                                <div key={i} style={{
-                                                    background: 'rgba(0,0,0,0.5)',
-                                                    border: '1px solid rgba(255,255,255,0.1)',
-                                                    padding: '1rem',
-                                                    borderRadius: '12px',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <div style={{ fontFamily: 'monospace', fontSize: '1rem', color: '#00ff88', overflowX: 'auto' }}>
-                                                        {acc.user ? (
-                                                            <span>
-                                                                <span style={{ color: '#fff' }}>{acc.user}</span>
-                                                                <span style={{ color: '#666' }}>:</span>
-                                                                <span style={{ color: '#ccc' }}>{acc.pass}</span>
-                                                                {acc.extra && <span style={{ color: '#888' }}> | {acc.extra}</span>}
-                                                            </span>
-                                                        ) : (
-                                                            <span>{acc.raw}</span>
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        onClick={() => handleCopy(acc.user ? `${acc.user}:${acc.pass}` : acc.raw, i)}
-                                                        style={{
-                                                            background: copiedIndex === i ? '#00ff88' : 'rgba(255,255,255,0.1)',
-                                                            color: copiedIndex === i ? '#000' : '#fff',
-                                                            border: 'none',
-                                                            borderRadius: '6px',
-                                                            padding: '0.5rem 0.8rem',
-                                                            cursor: 'pointer',
-                                                            transition: 'all 0.2s'
-                                                        }}
-                                                    >
-                                                        {copiedIndex === i ? 'Copied!' : 'Copy'}
-                                                    </button>
-                                                </div>
-                                            ))}
+                                        // PROFESSIONAL TABLE VIEW
+                                        <div className="table-container" style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.95rem' }}>
+                                                <thead>
+                                                    <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>#</th>
+                                                        {(bulkAccounts[0]?.email || bulkAccounts[1]?.email) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Login / Email</th>}
+                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Username</th>
+                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Password</th>
+                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {bulkAccounts.map((acc: any, i: number) => (
+                                                        <tr key={i} className="table-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                                            <td style={{ padding: '1rem 1.2rem', color: '#444' }}>{i + 1}</td>
+                                                            {(acc.email || bulkAccounts[0]?.email || bulkAccounts[1]?.email) && (
+                                                                <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#00ff88' }}>{acc.email || ''}</td>
+                                                            )}
+                                                            <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace' }}>{acc.user || acc.raw}</td>
+                                                            <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#ccc' }}>{acc.pass || '---'}</td>
+                                                            <td style={{ padding: '1rem 1.2rem' }}>
+                                                                <button
+                                                                    onClick={() => handleCopy(`${acc.user || acc.raw}:${acc.pass || ''}${acc.email ? `:${acc.email}` : ''}`, i)}
+                                                                    className="btn-row-copy"
+                                                                    style={{
+                                                                        background: copiedIndex === i ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                                                        color: copiedIndex === i ? '#000' : '#fff'
+                                                                    }}
+                                                                >
+                                                                    {copiedIndex === i ? 'Copied' : 'Copy'}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
                                     ) : (
                                         // SINGLE ITEM VIEW
-                                        <div style={{ background: '#111', borderRadius: '16px', padding: '2rem', border: '1px solid #333' }}>
+                                        <div style={{ background: '#0c0c0c', borderRadius: '16px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
                                             {order.details.username && (
-                                                <div style={{ marginBottom: '1.5rem' }}>
-                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>USERNAME / EMAIL</label>
+                                                <div style={{ marginBottom: '2rem' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#555', marginBottom: '0.8rem', letterSpacing: '1px', fontWeight: '600' }}>LOGIN IDENTIFIER</label>
                                                     <div style={{ display: 'flex', gap: '1rem' }}>
-                                                        <input readOnly value={order.details.username} style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '1rem', borderRadius: '8px', fontSize: '1.1rem', fontFamily: 'monospace' }} />
+                                                        <input readOnly value={order.details.username} style={{ flex: 1, background: '#030303', border: '1px solid #1a1a1a', color: '#00ff88', padding: '1.2rem', borderRadius: '12px', fontSize: '1.2rem', fontFamily: 'monospace' }} />
                                                         <button onClick={() => handleCopy(order.details.username, 99)} className="btn-copy">Copy</button>
                                                     </div>
                                                 </div>
                                             )}
 
                                             {order.details.password && (
-                                                <div style={{ marginBottom: '1.5rem' }}>
-                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>PASSWORD</label>
+                                                <div style={{ marginBottom: '2rem' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#555', marginBottom: '0.8rem', letterSpacing: '1px', fontWeight: '600' }}>SYSTEM PASSWORD</label>
                                                     <div style={{ display: 'flex', gap: '1rem' }}>
-                                                        <input readOnly value={order.details.password} style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '1rem', borderRadius: '8px', fontSize: '1.1rem', fontFamily: 'monospace' }} />
+                                                        <input readOnly value={order.details.password} style={{ flex: 1, background: '#030303', border: '1px solid #1a1a1a', color: '#fff', padding: '1.2rem', borderRadius: '12px', fontSize: '1.2rem', fontFamily: 'monospace' }} />
                                                         <button onClick={() => handleCopy(order.details.password, 100)} className="btn-copy">Copy</button>
                                                     </div>
                                                 </div>
                                             )}
 
                                             {order.details.extraInfo && (
-                                                <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.9rem', color: '#ccc', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                <div style={{ marginTop: '2.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', fontSize: '0.95rem', color: '#888', border: '1px solid rgba(255,255,255,0.03)', fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                                                    <div style={{ color: '#555', marginBottom: '0.5rem', fontSize: '0.7rem', fontWeight: 'bold' }}>ADDITIONAL NOTES</div>
                                                     {order.details.extraInfo}
                                                 </div>
                                             )}
@@ -261,7 +317,7 @@ export default function DeliveryPage() {
                             <div>
                                 <h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Need Help?</h4>
                                 <p style={{ fontSize: '0.9rem', color: '#666' }}>Contact our support team if you have issues logging in.</p>
-                                <a href="/contact" style={{ color: '#00ff88', fontSize: '0.9rem', textDecoration: 'none', display: 'inline-block', marginTop: '0.5rem' }}>Contact Support →</a>
+                                <a href="/support" style={{ color: '#00ff88', fontSize: '0.9rem', textDecoration: 'none', display: 'inline-block', marginTop: '0.5rem' }}>Contact Support →</a>
                             </div>
                             <div style={{ textAlign: 'right' }}>
                                 <h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Date</h4>
@@ -320,9 +376,17 @@ export default function DeliveryPage() {
 
             <style jsx>{`
                 .glass { background: #0a0a0a; backdrop-filter: blur(10px); }
-                .badge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.4rem 0.8rem; borderRadius: 20px; fontSize: 0.8rem; color: #ccc; }
-                .btn-copy { background: #222; color: #fff; border: 1px solid #333; padding: 0 1.5rem; borderRadius: 8px; cursor: pointer; transition: all 0.2s; }
-                .btn-copy:hover { background: #333; border-color: #444; }
+                .badge { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.4rem 0.8rem; borderRadius: 20px; fontSize: 0.75rem; color: #888; font-weight: 600; letter-spacing: 1px; }
+                .btn-copy { background: #111; color: #fff; border: 1px solid #222; padding: 0 1.5rem; borderRadius: 12px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+                .btn-copy:hover { background: #222; border-color: #333; }
+                .btn-reveal { padding: 1.2rem 3rem; font-size: 1.1rem; border-radius: 50px; border: none; background: #fff; color: #000; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+                .btn-reveal:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255,255,255,0.4); }
+                .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 0.6rem 1rem; borderRadius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+                .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+                .btn-primary-small { background: #fff; color: #000; border: none; padding: 0.6rem 1.2rem; borderRadius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+                .btn-primary-small:hover { background: #00ff88; transform: translateY(-2px); }
+                .btn-row-copy { border: none; borderRadius: 8px; padding: 0.4rem 0.8rem; cursor: pointer; transition: all 0.2s; font-size: 0.8rem; font-weight: 600; }
+                .table-row:hover { background: rgba(255,255,255,0.01); }
                 .fade-in-up { animation: fadeInUp 0.5s ease-out; }
                 @keyframes fadeInUp {
                     from { opacity: 0; transform: translateY(20px); }
