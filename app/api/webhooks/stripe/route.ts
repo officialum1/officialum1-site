@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const sig = req.headers.get('stripe-signature');
 
     // Get Secret from DB
-    const settingsRows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'stripeSecretKey'");
+    const settingsRows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'stripeSecret'");
     const stripeSecret = settingsRows[0]?.setting_value;
 
     // Get Webhook Secret from DB

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         // 1. STRIPE
         if (method === 'stripe') {
-            const stripeSecret = settings.stripeSecretKey || process.env.STRIPE_SECRET_KEY;
+            const stripeSecret = (settings.stripeSecret && settings.stripeSecret !== '...') ? settings.stripeSecret : process.env.STRIPE_SECRET_KEY;
             if (!stripeSecret) throw new Error("Stripe is not configured.");
 
             const params = new URLSearchParams();
@@ -57,8 +57,8 @@ export async function POST(req: Request) {
 
         // 2. CRYPTOMUS
         if (method === 'cryptomus') {
-            const cryptoKey = settings.cryptomusPaymentKey || process.env.CRYPTOMUS_API_KEY;
-            const cryptoId = settings.cryptomusMerchantId || process.env.CRYPTOMUS_MERCHANT_ID;
+            const cryptoKey = (settings.cryptomusKey && settings.cryptomusKey !== '...') ? settings.cryptomusKey : process.env.CRYPTOMUS_API_KEY;
+            const cryptoId = (settings.cryptomusId && settings.cryptomusId !== '...') ? settings.cryptomusId : process.env.CRYPTOMUS_MERCHANT_ID;
             if (!cryptoKey || !cryptoId) throw new Error("Cryptomus is not configured.");
 
             const payload = {

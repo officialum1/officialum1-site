@@ -9,9 +9,7 @@ export async function POST(req: Request) {
         const { sign, ...data } = body;
 
         if (!sign) return NextResponse.json({ error: "No signature" }, { status: 400 });
-
-        // Get Key from DB
-        const settingsRows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'cryptomusPaymentKey'");
+        const settingsRows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'cryptomusKey'");
         const cryptoKey = settingsRows[0]?.setting_value;
 
         if (!cryptoKey) return NextResponse.json({ error: "Cryptomus not configured" }, { status: 500 });
