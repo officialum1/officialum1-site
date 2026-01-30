@@ -5,12 +5,11 @@ import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ScrollProgress from "@/components/ScrollProgress";
-import TrustPulse from "@/components/TrustPulse";
+import DynamicSalesPulse from '@/components/DynamicSalesPulse';
 import { CartProvider } from "./context/CartContext";
 import CartSidebar from "@/components/CartSidebar";
 import GlobalAnnouncement from "@/components/GlobalAnnouncement";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
-import RecentSalesPopup from '@/components/RecentSalesPopup';
 
 const inter = Inter({
   variable: "--font-inter",
@@ -154,8 +153,7 @@ export default function RootLayout({
           <CookieBanner />
           <LoyaltyBanner />
           <ScrollProgress />
-          <TrustPulse />
-          <RecentSalesPopup />
+          <DynamicSalesPulse />
           {/* <WhatsAppButton /> */}
           {children}
         </CartProvider>

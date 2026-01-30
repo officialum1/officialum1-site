@@ -19,6 +19,7 @@ export default function SingleProductPage() {
     const [copied, setCopied] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [walletBalance, setWalletBalance] = useState(0);
+    const [gateways, setGateways] = useState<any>({ stripe: true, crypto: true, binance: true, wallet: true });
     const [isPurchasing, setIsPurchasing] = useState(false);
 
     // Notify & Cart Logic
@@ -57,6 +58,14 @@ export default function SingleProductPage() {
                 }
             })
             .catch(() => setLoading(false));
+
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.payment_gateways) {
+                    try { setGateways(JSON.parse(data.payment_gateways)); } catch { }
+                }
+            });
     }, [id]);
 
     const handleCopyLink = () => {
@@ -242,7 +251,7 @@ export default function SingleProductPage() {
                                 </button>
                             )}
 
-                            {user && walletBalance >= parseFloat(product.price) && totalStock > 0 && (
+                            {user && gateways.wallet !== false && walletBalance >= parseFloat(product.price) && totalStock > 0 && (
                                 <button
                                     onClick={handleWalletPurchase}
                                     className="btn btn-outline"

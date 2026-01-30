@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any) {
     const [amount, setAmount] = useState<string>('');
-    const [method, setMethod] = useState<'crypto' | 'card' | null>(null);
+    const [method, setMethod] = useState<'crypto' | 'card' | 'binance' | null>(null);
     const [step, setStep] = useState(1); // 1=Amount, 2=Method, 3=Processing, 4=Success
     const [loading, setLoading] = useState(false);
     const [availableMethods, setAvailableMethods] = useState<any>({ stripe: true, crypto: true });
@@ -40,7 +40,7 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                 body: JSON.stringify({
                     userId,
                     amount: Number(amount),
-                    method: method === 'card' ? 'stripe' : 'cryptomus'
+                    method: method === 'card' ? 'stripe' : method
                 })
             });
 
@@ -149,7 +149,7 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                                 </button>
                             )}
 
-                            {availableMethods.crypto && (
+                            {availableMethods.crypto !== false && (
                                 <button
                                     onClick={() => setMethod('crypto')}
                                     className={`glass ${method === 'crypto' ? 'active' : ''}`}
@@ -166,7 +166,24 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                                 </button>
                             )}
 
-                            {!availableMethods.stripe && !availableMethods.crypto && (
+                            {availableMethods.binance !== false && (
+                                <button
+                                    onClick={() => setMethod('binance')}
+                                    className={`glass ${method === 'binance' ? 'active' : ''}`}
+                                    style={{
+                                        padding: '1rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
+                                        border: method === 'binance' ? '1px solid #f3ba2f' : '1px solid #333', textAlign: 'left'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem' }}>🔸</span>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold' }}>Binance Pay</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>Instant • USDT Supported</div>
+                                    </div>
+                                </button>
+                            )}
+
+                            {Object.values(availableMethods).every(v => v === false) && (
                                 <p style={{ color: '#ff4444', textAlign: 'center' }}>No Payment Methods Enabled.</p>
                             )}
                         </div>

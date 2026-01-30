@@ -31,6 +31,8 @@ function CheckoutContent() {
     const [quantity, setQuantity] = useState<number>(1);
     const [promoStatus, setPromoStatus] = useState<'none' | 'success' | 'invalid'>('none');
 
+    const [gateways, setGateways] = useState<any>({ stripe: true, crypto: true, binance: true, wallet: true });
+
     useEffect(() => {
         // 1. Get Product (Only if Single Mode)
         if (id) {
@@ -58,6 +60,15 @@ function CheckoutContent() {
             };
             setProduct(PLANS[membership] || null);
         }
+
+        // 4. Get Payment Settings
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data => {
+                if (data.payment_gateways) {
+                    try { setGateways(JSON.parse(data.payment_gateways)); } catch { }
+                }
+            });
     }, [id, membership]);
 
     const handleApplyPromo = async () => {
@@ -236,7 +247,7 @@ function CheckoutContent() {
                                 { id: 'cryptomus', name: 'Crypto', icon: '₿', disabled: isCartMode },
                                 { id: 'binance', name: 'Binance Pay', icon: '🔸', disabled: isCartMode },
                                 { id: 'wallet', name: 'Wallet', icon: '💼', disabled: false }
-                            ].map((method) => (
+                            ].filter(m => gateways[m.id === 'cryptomus' ? 'crypto' : m.id] !== false).map((method) => (
                                 <button
                                     key={method.id}
                                     onClick={() => !method.disabled && setPaymentMethod(method.id)}
@@ -257,6 +268,9 @@ function CheckoutContent() {
                                     <div style={{ fontWeight: 500, fontSize: '0.9rem' }}>{method.name}</div>
                                 </button>
                             ))}
+                            {Object.values(gateways).every(v => v === false) && (
+                                <p style={{ color: '#ff4444', textAlign: 'center', gridColumn: 'span 2' }}>No payment methods are currently available.</p>
+                            )}
                         </div>
                     </div>
 

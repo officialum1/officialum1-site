@@ -101,6 +101,53 @@ export async function POST(req: Request) {
             }
         }
 
+        // 3. BINANCE PAY
+        if (method === 'binance') {
+            const binanceKey = (settings.binanceKey && settings.binanceKey !== '...') ? settings.binanceKey : process.env.BINANCE_API_KEY;
+            const binanceSecret = (settings.binanceSecret && settings.binanceSecret !== '...') ? settings.binanceSecret : process.env.BINANCE_SECRET_KEY;
+
+            if (!binanceKey || !binanceSecret) throw new Error("Binance Pay is not configured.");
+
+            const requestBody = JSON.stringify({
+                env: { terminalType: "WEB" },
+                merchantTradeNo: orderId,
+                orderAmount: parseFloat(amount).toFixed(2),
+                currency: "USDT",
+                goods: {
+                    goodsType: "01",
+                    goodsCategory: "Z000",
+                    referenceGoodsId: "deposit",
+                    goodsName: "Wallet Top-up",
+                    goodsDetail: `Deposit for User ${userId}`
+                },
+                returnUrl: `${req.headers.get('origin')}/dashboard?success=true&orderId=${orderId}`,
+                cancelUrl: `${req.headers.get('origin')}/dashboard`
+            });
+
+            const timestamp = Date.now();
+            const nonce = crypto.randomBytes(16).toString('hex');
+            const payload = `${timestamp}\n${nonce}\n${requestBody}\n`;
+            const signature = crypto.createHmac('sha512', binanceSecret).update(payload).digest('hex').toUpperCase();
+
+            const binanceRes = await fetch('https://bpay.binanceapi.com/binancepay/openapi/v2/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'BinancePay-Timestamp': timestamp.toString(),
+                    'BinancePay-Nonce': nonce,
+                    'BinancePay-Signature': signature,
+                    'BinancePay-Certificate-SN': binanceKey
+                },
+                body: requestBody
+            });
+            const binanceData = await binanceRes.json();
+            if (binanceData.status === 'SUCCESS' && binanceData.data && binanceData.data.checkoutUrl) {
+                paymentUrl = binanceData.data.checkoutUrl;
+            } else {
+                throw new Error("Binance Error: " + JSON.stringify(binanceData));
+            }
+        }
+
         if (!paymentUrl) throw new Error("Payment Gateway failed to initialize.");
 
         // We create a "pending" transaction or order for the deposit if we want to track it
