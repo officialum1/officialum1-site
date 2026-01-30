@@ -148,11 +148,19 @@ export async function POST(request: Request) {
                 }
 
                 // 2. Mark all as Sold & Collect Details
+                let accountsList: any[] = [];
                 for (const item of availableItems) {
                     await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [item.id]);
                     soldInventoryIds.push(item.id);
 
                     const details = item.accountDetails ? JSON.parse(item.accountDetails) : {};
+                    accountsList.push({
+                        email: details.email || '',
+                        user: details.username || '',
+                        pass: details.password || '',
+                        extra: details.extraInfo || ''
+                    });
+
                     // Format: "email:username:password" (Only include email/username if they exist and are different)
                     let loginPart = details.email || details.username;
                     if (details.email && details.username && details.email !== details.username) {
@@ -169,6 +177,7 @@ export async function POST(request: Request) {
                     const deliveryDetails = {
                         note: `Bulk Order of ${qty} x ${productName}`,
                         accounts: combinedDetailsText,
+                        items: accountsList,
                         inventoryIds: soldInventoryIds
                     };
 

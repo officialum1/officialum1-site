@@ -81,7 +81,12 @@ export default function DeliveryPage() {
 
     // Parsing Bulk Accounts if they exist
     let bulkAccounts: any[] = [];
-    if (order.details?.accounts) {
+    if (order.details?.items && Array.isArray(order.details.items)) {
+        bulkAccounts = order.details.items.map((it: any) => ({
+            ...it,
+            raw: `${it.email ? it.email + ':' : ''}${it.user}:${it.pass}${it.extra ? ':' + it.extra : ''}`
+        }));
+    } else if (order.details?.accounts) {
         const rawAccounts = order.details.accounts.replace(/\(Bulk Imported\)/g, '').trim();
         const lines = rawAccounts.split('\n').filter((l: string) => l.trim());
         bulkAccounts = lines.map((line: string) => {
@@ -247,10 +252,10 @@ export default function DeliveryPage() {
                                                 <thead>
                                                     <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>#</th>
-                                                        {bulkAccounts.some(a => a.email) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Email</th>}
+                                                        {bulkAccounts.some(a => a.email !== undefined || a.email !== '') && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Email</th>}
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Username</th>
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Password</th>
-                                                        {bulkAccounts.some(a => a.extra) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Extra</th>}
+                                                        {bulkAccounts.some(a => a.extra !== undefined || a.extra !== '') && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Extra</th>}
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500', textAlign: 'right' }}>Action</th>
                                                     </tr>
                                                 </thead>
@@ -258,12 +263,12 @@ export default function DeliveryPage() {
                                                     {bulkAccounts.map((acc: any, i: number) => (
                                                         <tr key={i} className="table-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                                             <td style={{ padding: '1rem 1.2rem', color: '#444' }}>{i + 1}</td>
-                                                            {bulkAccounts.some(a => a.email) && (
+                                                            {bulkAccounts.some(a => a.email !== undefined || a.email !== '') && (
                                                                 <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#00ff88' }}>{acc.email || '---'}</td>
                                                             )}
                                                             <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace' }}>{acc.user || acc.raw}</td>
                                                             <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#ccc' }}>{acc.pass || '---'}</td>
-                                                            {bulkAccounts.some(a => a.extra) && (
+                                                            {bulkAccounts.some(a => a.extra !== undefined || a.extra !== '') && (
                                                                 <td style={{ padding: '1rem 1.2rem', fontSize: '0.85rem', color: '#666' }}>{acc.extra || ''}</td>
                                                             )}
                                                             <td style={{ padding: '1rem 1.2rem', textAlign: 'right' }}>
