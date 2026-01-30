@@ -366,4 +366,21 @@ export async function initDB() {
     // Add SEO Columns
     try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
     try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }
+
+    // 17. Categories Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            slug VARCHAR(100) NOT NULL UNIQUE,
+            icon VARCHAR(50),
+            discount_percent DECIMAL(5,2) DEFAULT 0.00,
+            sale_ends_at TIMESTAMP NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Migration: Add category_id to products
+    try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
+    try { await query("ALTER TABLE products ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL"); } catch (e) { }
 }

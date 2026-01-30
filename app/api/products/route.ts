@@ -7,10 +7,12 @@ export async function GET() {
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
             SELECT p.*, 
+            c.name as categoryName, c.icon as categoryIcon, c.discount_percent as categoryDiscount,
             (SELECT COUNT(*) FROM inventory i 
              WHERE (i.platform = p.platform OR i.name = p.name) AND i.status = 'In Stock') as inventoryStock
             FROM products p
-            ORDER BY id DESC
+            LEFT JOIN categories c ON p.category_id = c.id
+            ORDER BY p.id DESC
         `);
         return NextResponse.json(products);
     } catch (e: unknown) {
@@ -77,12 +79,12 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true, count: created.length });
         } else if (body.action === 'update') {
-            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock } = body;
+            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ?, stock = ? WHERE id = ?",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, id]
+                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ?, stock = ?, category_id = ? WHERE id = ?",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null, id]
             );
 
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
@@ -112,12 +114,12 @@ export async function POST(req: Request) {
                 }
             }
         } else {
-            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock } = body;
+            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1]
+                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items, stock, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null]
             );
         }
 
