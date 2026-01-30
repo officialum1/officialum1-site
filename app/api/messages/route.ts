@@ -6,7 +6,9 @@ import { isAuthenticated } from '@/lib/auth';
 const dataFilePath = path.join(process.cwd(), 'data', 'messages.json');
 
 export async function GET() {
-    if (!(await isAuthenticated())) {
+    // Basic check for authenticated session
+    const isAuth = await isAuthenticated();
+    if (!isAuth) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     try {

@@ -376,6 +376,82 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true });
         }
 
+        if (action === 'replace_sale') {
+            const { transactionId } = body;
+
+            // 1. Get current delivery to identify old items
+            const deliveryRes: any = await query("SELECT * FROM deliveries WHERE orderId = ?", [transactionId]);
+            if (deliveryRes.length === 0) return NextResponse.json({ error: "No delivery found" }, { status: 404 });
+
+            const delivery = deliveryRes[0];
+            const oldDetails = JSON.parse(delivery.details || '{}');
+            const oldIds = oldDetails.inventoryIds || [];
+
+            if (!oldIds.length) return NextResponse.json({ error: "No original items found to replace. This feature requires orders made after the recent update." }, { status: 400 });
+
+            // 2. Mark old items as Defective
+            const placeholdersOld = oldIds.map(() => '?').join(',');
+            await query(`UPDATE inventory SET status = 'Defective' WHERE id IN (${placeholdersOld})`, oldIds);
+
+            // 3. Find replacement items of SAME product type
+            const itemInfo: any = await query("SELECT name FROM inventory WHERE id = ?", [oldIds[0]]);
+            if (!itemInfo.length) return NextResponse.json({ error: "Original item info lost" }, { status: 500 });
+            const productName = itemInfo[0].name;
+            const qty = oldIds.length;
+
+            const newItems: any = await query(
+                "SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?",
+                [productName, qty]
+            );
+
+            if (newItems.length < qty) {
+                // REVERT: If we can't replace, don't mark as defective yet? No, keep it defective but fail the replacement.
+                return NextResponse.json({ error: `Not enough stock to replace. Needed: ${qty}, Available: ${newItems.length}` }, { status: 400 });
+            }
+
+            // 4. Assign new items
+            let newIds = [];
+            let newAccountsText = "";
+            let newItemsList = [];
+
+            for (const item of newItems) {
+                await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [item.id]);
+                newIds.push(item.id);
+
+                const details = JSON.parse(item.accountDetails || '{}');
+                newItemsList.push({
+                    email: details.email || '',
+                    user: details.username || '',
+                    pass: details.password || '',
+                    extra: details.extraInfo || ''
+                });
+
+                let loginPart = details.email || details.username;
+                if (details.email && details.username && details.email !== details.username) {
+                    loginPart = `${details.email}:${details.username}`;
+                }
+                newAccountsText += `${loginPart}:${details.password}${details.extraInfo ? `:${details.extraInfo}` : ''}\n`;
+            }
+
+            // 5. Update Delivery Record
+            const newDetails = {
+                ...oldDetails,
+                note: (oldDetails.note || '') + ` (Replaced on ${new Date().toLocaleDateString()})`,
+                accounts: newAccountsText,
+                items: newItemsList,
+                inventoryIds: newIds
+            };
+
+            await query("UPDATE deliveries SET details = ? WHERE orderId = ?", [JSON.stringify(newDetails), transactionId]);
+
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Replace Sale', `Replaced ${qty} items for transaction ${transactionId}`]
+            );
+
+            return NextResponse.json({ success: true });
+        }
+
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (e: any) {

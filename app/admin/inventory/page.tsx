@@ -148,6 +148,15 @@ function AdminDashboard() {
     // User Editing State
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [showUserEdit, setShowUserEdit] = useState(false);
+
+    // Modern Delete & Replace States
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteId, setDeleteId] = useState('');
+    const [confirmPin, setConfirmPin] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+
+    const [isReplacing, setIsReplacing] = useState(false);
     const [userForm, setUserForm] = useState({ email: '', password: '', telegram: '', role: 'buyer' });
 
     const [currentUser, setCurrentUser] = useState<any>(null);
@@ -576,22 +585,58 @@ function AdminDashboard() {
         }
     };
 
-    const handleDeleteSale = async (transactionId: string) => {
-        if (!confirm('Are you sure you want to delete this sale? This will remove the transaction record and mark the inventory items as "In Stock" again.')) return;
+    const handleDeleteSale = async () => {
+        if (confirmPin !== '5753') {
+            setDeleteError('❌ Incorrect Administrative PIN');
+            return;
+        }
+
+        setIsDeleting(true);
+        setDeleteError('');
         try {
             const res = await fetch('/api/admin/inventory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'delete_sale', transactionId })
+                body: JSON.stringify({ action: 'delete_sale', transactionId: deleteId })
             });
             const data = await res.json();
             if (data.success) {
-                alert('Sale deleted and stock restored! ✅');
+                setShowDeleteModal(false);
+                setDeleteId('');
+                setConfirmPin('');
                 fetchData();
             } else {
-                alert('Failed to delete sale');
+                setDeleteError('❌ ' + (data.error || 'Deletion failed'));
             }
-        } catch (e) { alert('Network error'); }
+        } catch (e) {
+            setDeleteError('❌ Network error connectivity issue');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleReplaceSale = async (transactionId: string) => {
+        if (!confirm('Are you sure you want to REPLACE this sale with fresh stock? The old items will be marked as DEFECTIVE.')) return;
+
+        setIsReplacing(true);
+        try {
+            const res = await fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'replace_sale', transactionId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Replacement successful! Customer delivery link has been updated.');
+                fetchData();
+            } else {
+                alert('❌ Replacement failed: ' + (data.error || 'No stock available?'));
+            }
+        } catch (e) {
+            alert('❌ Network error');
+        } finally {
+            setIsReplacing(false);
+        }
     };
 
     const handleCreateBundle = async (e: React.FormEvent) => {
@@ -1761,21 +1806,41 @@ function AdminDashboard() {
                                                         </button>
                                                         <span style={{ fontSize: '0.8rem', color: '#666' }}>Views: {sale.deliveryViews || 0}</span>
                                                         {(currentUser?.role === 'admin' || currentUser?.role === 'owner') && (
-                                                            <button
-                                                                onClick={() => handleDeleteSale(sale.id)}
-                                                                style={{
-                                                                    background: 'rgba(255,68,68,0.1)',
-                                                                    border: '1px solid #ff4444',
-                                                                    color: '#ff4444',
-                                                                    borderRadius: '4px',
-                                                                    padding: '0.4rem 0.8rem',
-                                                                    cursor: 'pointer',
-                                                                    fontSize: '0.8rem',
-                                                                    marginLeft: 'auto'
-                                                                }}
-                                                            >
-                                                                🗑️ Delete
-                                                            </button>
+                                                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+                                                                <button
+                                                                    onClick={() => handleReplaceSale(sale.id)}
+                                                                    disabled={isReplacing}
+                                                                    title="Replace with fresh stock"
+                                                                    style={{
+                                                                        background: 'rgba(255,170,0,0.1)',
+                                                                        border: '1px solid #ffaa00',
+                                                                        color: '#ffaa00',
+                                                                        borderRadius: '4px',
+                                                                        padding: '0.4rem 0.8rem',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.8rem',
+                                                                    }}
+                                                                >
+                                                                    🔄 Replace
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setDeleteId(sale.id);
+                                                                        setShowDeleteModal(true);
+                                                                    }}
+                                                                    style={{
+                                                                        background: 'rgba(255,68,68,0.1)',
+                                                                        border: '1px solid #ff4444',
+                                                                        color: '#ff4444',
+                                                                        borderRadius: '4px',
+                                                                        padding: '0.4rem 0.8rem',
+                                                                        cursor: 'pointer',
+                                                                        fontSize: '0.8rem',
+                                                                    }}
+                                                                >
+                                                                    🗑️ Delete
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </td>
@@ -3523,6 +3588,52 @@ function AdminDashboard() {
                             <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
                             <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
                                 ✅ Save All Updates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDeleteModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #ff4444', textAlign: 'center' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+                        <h2 style={{ margin: '0 0 1rem 0', color: '#ff4444' }}>Admin Verification</h2>
+                        <p style={{ color: '#aaa', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                            You are about to delete a transaction and restore stock. Please enter your 4-digit security PIN to confirm.
+                        </p>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <input
+                                type="password"
+                                placeholder="Enter Security PIN"
+                                value={confirmPin}
+                                onChange={(e) => setConfirmPin(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '1.2rem',
+                                    borderRadius: '12px',
+                                    border: '2px solid rgba(255, 68, 68, 0.2)',
+                                    background: 'rgba(0,0,0,0.3)',
+                                    color: '#fff',
+                                    fontSize: '1.5rem',
+                                    textAlign: 'center',
+                                    letterSpacing: '1rem'
+                                }}
+                                maxLength={4}
+                            />
+                            {deleteError && <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '1rem' }}>{deleteError}</p>}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <button onClick={() => { setShowDeleteModal(false); setConfirmPin(''); setDeleteError(''); }} className="btn btn-outline" style={{ borderRadius: '12px' }}>Cancel</button>
+                            <button
+                                onClick={handleDeleteSale}
+                                disabled={isDeleting}
+                                className="btn"
+                                style={{ background: '#ff4444', color: '#fff', borderRadius: '12px', fontWeight: 'bold' }}
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete Sale'}
                             </button>
                         </div>
                     </div>

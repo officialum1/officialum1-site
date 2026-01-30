@@ -7,7 +7,7 @@ export async function GET() {
         // Fetch last 5 orders
         const orders: any = await query(`
             SELECT 
-                o.id, 
+                o.orderId as id, 
                 p.name as productName, 
                 o.date,
                 o.guestEmail,
