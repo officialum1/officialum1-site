@@ -3175,18 +3175,6 @@ function AdminDashboard() {
                                         </div>
                                     </div>
 
-                                    {/* RESTORED: Payment Gateways */}
-                                    {/* Payment Processors Link */}
-                                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div>
-                                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>Payment Processors</h3>
-                                            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Configure Stripe, Cryptomus, Binance Pay, and Manual Transfers.</p>
-                                        </div>
-                                        <a href="/admin/payments" className="btn btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                                            Manage Payments ➔
-                                        </a>
-                                    </div>
-
                                     {/* Referral System */}
                                     <div style={{ padding: '1.5rem', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
                                         <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>Referral & Affiliate System</h3>
