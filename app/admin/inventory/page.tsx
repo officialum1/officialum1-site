@@ -2410,7 +2410,7 @@ function AdminDashboard() {
                                 <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
                                         <h2 style={{ color: '#00ff88' }}>Website Buyers</h2>
-                                        <p style={{ color: '#666' }}>Manage your site customers ({users.filter((u: any) => u.role === 'buyer').length} Total)</p>
+                                        <p style={{ color: '#666' }}>Manage your site customers ({users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length} Total)</p>
                                     </div>
                                 </div>
                                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -2426,9 +2426,9 @@ function AdminDashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {users.filter((u: any) => u.role === 'buyer').length === 0 ? (
+                                        {users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length === 0 ? (
                                             <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No buyers found.</td></tr>
-                                        ) : users.filter((u: any) => u.role === 'buyer').map((u: any) => (
+                                        ) : users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).map((u: any) => (
                                             <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <td style={{ padding: '1.5rem' }}>
                                                     <div style={{ fontWeight: 'bold' }}>{u.email}</div>

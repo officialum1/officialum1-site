@@ -144,6 +144,11 @@ export async function GET() {
             await query("ALTER TABLE users ADD COLUMN is_verified BOOLEAN DEFAULT FALSE");
             console.log('Added is_verified to users');
         } catch (e) { }
+        try { await query("ALTER TABLE users ADD COLUMN is_banned BOOLEAN DEFAULT FALSE"); } catch (e) { }
+        try { await query("ALTER TABLE users ADD COLUMN membership VARCHAR(50) DEFAULT 'none'"); } catch (e) { }
+        try { await query("ALTER TABLE users ADD COLUMN membership_expires TIMESTAMP NULL"); } catch (e) { }
+        try { await query("ALTER TABLE users ADD COLUMN total_spent DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+        try { await query("ALTER TABLE users ADD COLUMN points INT DEFAULT 0"); } catch (e) { }
 
         await query(`
             CREATE TABLE IF NOT EXISTS transactions (

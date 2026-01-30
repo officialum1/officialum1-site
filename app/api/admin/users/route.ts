@@ -26,6 +26,7 @@ export async function GET(req: Request) {
                 u.membership,
                 u.membership_expires,
                 u.total_spent,
+                u.points,
                 (SELECT COUNT(*) FROM users ref WHERE ref.referred_by = u.referral_code) as referral_count
             FROM users u 
             ORDER BY u.created_at DESC

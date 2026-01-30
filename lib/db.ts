@@ -38,6 +38,11 @@ export async function initDB() {
             referred_by VARCHAR(50),
             verification_token VARCHAR(255),
             is_verified BOOLEAN DEFAULT FALSE,
+            is_banned BOOLEAN DEFAULT FALSE,
+            membership VARCHAR(50) DEFAULT 'none',
+            membership_expires TIMESTAMP NULL,
+            total_spent DECIMAL(10,2) DEFAULT 0.00,
+            points INT DEFAULT 0,
             reset_token VARCHAR(100),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -244,6 +249,11 @@ export async function initDB() {
     try { await query("ALTER TABLE orders ADD COLUMN review_sent BOOLEAN DEFAULT FALSE"); } catch (e) { }
     try { await query("ALTER TABLE testimonials ADD COLUMN order_id VARCHAR(50)"); } catch (e) { }
     try { await query("ALTER TABLE testimonials ADD COLUMN product_id INT"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN is_banned BOOLEAN DEFAULT FALSE"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN membership VARCHAR(50) DEFAULT 'none'"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN membership_expires TIMESTAMP NULL"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN total_spent DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN points INT DEFAULT 0"); } catch (e) { }
 
     // 8. Wallet Transactions
     await query(`
