@@ -260,9 +260,6 @@ function AdminDashboard() {
                 if (tRes.ok) ticketData = await tRes.json();
             } catch (e) { console.warn("Tickets fetch failed"); }
 
-            const catData = await catRes.json();
-            const ordersData = await ordersRes.json();
-
             // Categories Fetch
             let categoryData = [];
             try {
@@ -1560,7 +1557,8 @@ function AdminDashboard() {
                                                             salePrice: prod.sale_price || '',
                                                             saleEndsAt: prod.sale_ends_at ? new Date(prod.sale_ends_at).toISOString().slice(0, 16) : '',
                                                             bundleItems: prod.bundle_items || '',
-                                                            stock: prod.stock || '1'
+                                                            stock: prod.stock || '1',
+                                                            category_id: prod.category_id || ''
                                                         });
                                                         setShowAddProduct(true);
                                                         setImportMode('manual');
@@ -1692,7 +1690,7 @@ function AdminDashboard() {
                                                     </div>
 
                                                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100' }); }} className="btn btn-outline">Cancel</button>
+                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '' }); }} className="btn btn-outline">Cancel</button>
                                                         <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                                     </div>
                                                 </form>
