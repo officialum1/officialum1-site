@@ -153,8 +153,13 @@ export async function POST(request: Request) {
                     soldInventoryIds.push(item.id);
 
                     const details = item.accountDetails ? JSON.parse(item.accountDetails) : {};
-                    // Format: "User: ... | Pass: ..."
-                    const line = `${details.email || details.username}:${details.password} ${details.extraInfo ? `(${details.extraInfo})` : ''}`;
+                    // Format: "email:username:password" (Only include email/username if they exist and are different)
+                    let loginPart = details.email || details.username;
+                    if (details.email && details.username && details.email !== details.username) {
+                        loginPart = `${details.email}:${details.username}`;
+                    }
+
+                    const line = `${loginPart}:${details.password}${details.extraInfo ? `:${details.extraInfo}` : ''}`;
                     combinedDetailsText += line + "\n";
                 }
 
@@ -291,7 +296,7 @@ export async function POST(request: Request) {
                         username,
                         password,
                         email,
-                        extraInfo: extra || (namePrefix ? 'Bulk Imported' : '')
+                        extraInfo: extra
                     })
                 };
 

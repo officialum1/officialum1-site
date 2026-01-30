@@ -82,7 +82,8 @@ export default function DeliveryPage() {
     // Parsing Bulk Accounts if they exist
     let bulkAccounts: any[] = [];
     if (order.details?.accounts) {
-        const lines = order.details.accounts.split('\n').filter((l: string) => l.trim());
+        const rawAccounts = order.details.accounts.replace(/\(Bulk Imported\)/g, '').trim();
+        const lines = rawAccounts.split('\n').filter((l: string) => l.trim());
         bulkAccounts = lines.map((line: string) => {
             let user = '', pass = '', email = '', extra = '';
 
@@ -111,14 +112,14 @@ export default function DeliveryPage() {
                     extra = parts.slice(2).join(' ').trim();
                 }
             } else {
-                return { raw: line.replace('(Bulk Imported)', '').trim() };
+                return { raw: line.trim() };
             }
 
-            // Clean up: remove "Bulk Imported" tag from data
-            user = user.replace('(Bulk Imported)', '').trim();
-            pass = pass.replace('(Bulk Imported)', '').trim();
-            extra = extra.replace('(Bulk Imported)', '').trim();
-            email = email.replace('(Bulk Imported)', '').trim();
+            // Clean up: ensure no whitespace
+            user = user.trim();
+            pass = pass.trim();
+            extra = extra.trim();
+            email = email.trim();
 
             // Filter out header rows
             const lowLine = line.toLowerCase();
@@ -128,7 +129,7 @@ export default function DeliveryPage() {
                 return null;
             }
 
-            return { user, pass, email, extra };
+            return { user, pass, email, extra, raw: line.trim() };
         }).filter(Boolean);
     }
 
@@ -136,7 +137,8 @@ export default function DeliveryPage() {
     const isBulk = bulkAccounts.length > 0;
 
     const downloadTxt = () => {
-        const blob = new Blob([order.details.accounts], { type: 'text/plain' });
+        const cleaned = order.details.accounts.replace(/\(Bulk Imported\)/g, '').trim();
+        const blob = new Blob([cleaned], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -245,24 +247,28 @@ export default function DeliveryPage() {
                                                 <thead>
                                                     <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>#</th>
-                                                        {(bulkAccounts[0]?.email || bulkAccounts[1]?.email) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Login / Email</th>}
+                                                        {bulkAccounts.some(a => a.email) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Email</th>}
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Username</th>
                                                         <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Password</th>
-                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Action</th>
+                                                        {bulkAccounts.some(a => a.extra) && <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500' }}>Extra</th>}
+                                                        <th style={{ padding: '1.2rem', color: '#888', fontWeight: '500', textAlign: 'right' }}>Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {bulkAccounts.map((acc: any, i: number) => (
                                                         <tr key={i} className="table-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                                                             <td style={{ padding: '1rem 1.2rem', color: '#444' }}>{i + 1}</td>
-                                                            {(acc.email || bulkAccounts[0]?.email || bulkAccounts[1]?.email) && (
-                                                                <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#00ff88' }}>{acc.email || ''}</td>
+                                                            {bulkAccounts.some(a => a.email) && (
+                                                                <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#00ff88' }}>{acc.email || '---'}</td>
                                                             )}
                                                             <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace' }}>{acc.user || acc.raw}</td>
                                                             <td style={{ padding: '1rem 1.2rem', fontFamily: 'monospace', color: '#ccc' }}>{acc.pass || '---'}</td>
-                                                            <td style={{ padding: '1rem 1.2rem' }}>
+                                                            {bulkAccounts.some(a => a.extra) && (
+                                                                <td style={{ padding: '1rem 1.2rem', fontSize: '0.85rem', color: '#666' }}>{acc.extra || ''}</td>
+                                                            )}
+                                                            <td style={{ padding: '1rem 1.2rem', textAlign: 'right' }}>
                                                                 <button
-                                                                    onClick={() => handleCopy(`${acc.user || acc.raw}:${acc.pass || ''}${acc.email ? `:${acc.email}` : ''}`, i)}
+                                                                    onClick={() => handleCopy(acc.raw || `${acc.user}:${acc.pass}${acc.email ? `:${acc.email}` : ''}`, i)}
                                                                     className="btn-row-copy"
                                                                     style={{
                                                                         background: copiedIndex === i ? '#00ff88' : 'rgba(255,255,255,0.05)',
