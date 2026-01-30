@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         const users: any = await query("SELECT email FROM users WHERE role = 'buyer'"); // Also send to registered users? Maybe redundant if they are in newsletter table. Let's just stick to newsletter table for now.
 
         // Merge lists (optional, for now just newsletter table)
-        const emails = [...new Set(subscribers.map((s: any) => s.email))];
+        const emails = [...new Set(subscribers.map((s: any) => s.email))] as string[];
 
         if (emails.length === 0) return NextResponse.json({ error: "No subscribers found." }, { status: 400 });
 

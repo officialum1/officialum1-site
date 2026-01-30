@@ -6,12 +6,13 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
 interface Props {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }
 
 // SEO Metadata
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const rows: any = await query("SELECT title, content, meta_description, keywords FROM knowledge_base WHERE slug = ? AND is_published = 1", [params.slug]);
+    const { slug } = await params;
+    const rows: any = await query("SELECT title, content, meta_description, keywords FROM knowledge_base WHERE slug = ? AND is_published = 1", [slug]);
     if (rows.length === 0) return { title: 'Article Not Found' };
 
     const article = rows[0];
@@ -30,7 +31,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ArticlePage({ params }: Props) {
-    const rows: any = await query("SELECT * FROM knowledge_base WHERE slug = ? AND is_published = 1", [params.slug]);
+    const { slug } = await params;
+    const rows: any = await query("SELECT * FROM knowledge_base WHERE slug = ? AND is_published = 1", [slug]);
 
     if (rows.length === 0) {
         return notFound();

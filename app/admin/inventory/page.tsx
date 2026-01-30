@@ -911,7 +911,7 @@ function AdminDashboard() {
             })
         });
         setShowRecordSale(false);
-        setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '' });
+        setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
         fetchData();
     };
 
