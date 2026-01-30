@@ -5,13 +5,20 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
+        const email = searchParams.get('email');
 
         if (id) {
             const user = await query("SELECT * FROM users WHERE id = ?", [id]) as any[];
             return NextResponse.json(user[0] || {});
         }
 
-        const users = await query(`
+        if (email) {
+            const user = await query("SELECT id, email, role FROM users WHERE email = ?", [email]) as any[];
+            return NextResponse.json(user);
+        }
+
+        // Fetch Registered Users
+        const registeredUsers = await query(`
             SELECT 
                 u.id, 
                 u.email, 
@@ -27,11 +34,39 @@ export async function GET(req: Request) {
                 u.membership_expires,
                 u.total_spent,
                 u.points,
-                (SELECT COUNT(*) FROM users ref WHERE ref.referred_by = u.referral_code) as referral_count
+                (SELECT COUNT(*) FROM users ref WHERE ref.referred_by = u.referral_code) as referral_count,
+                FALSE as is_guest
             FROM users u 
             ORDER BY u.created_at DESC
-        `);
-        return NextResponse.json(users);
+        `) as any[];
+
+        // Fetch Unique Guest Emails from Orders
+        const guestBuyers = await query(`
+            SELECT 
+                DISTINCT guestEmail as email,
+                'guest' as id,
+                'buyer' as role,
+                0.00 as wallet_balance,
+                0.00 as affiliate_balance,
+                MAX(date) as created_at,
+                FALSE as is_banned,
+                TRUE as is_verified,
+                'none' as membership,
+                SUM(amount) as total_spent,
+                0 as points,
+                0 as referral_count,
+                TRUE as is_guest
+            FROM orders 
+            WHERE guestEmail IS NOT NULL AND guestEmail != ''
+            GROUP BY guestEmail
+        `) as any[];
+
+        // Combine and Sort
+        const allUsers = [...registeredUsers, ...guestBuyers].sort((a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        return NextResponse.json(allUsers);
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

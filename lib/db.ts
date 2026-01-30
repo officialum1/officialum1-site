@@ -254,6 +254,12 @@ export async function initDB() {
     try { await query("ALTER TABLE users ADD COLUMN membership_expires TIMESTAMP NULL"); } catch (e) { }
     try { await query("ALTER TABLE users ADD COLUMN total_spent DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
     try { await query("ALTER TABLE users ADD COLUMN points INT DEFAULT 0"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN DEFAULT FALSE"); } catch (e) { }
+    try { await query("ALTER TABLE users ADD COLUMN tier VARCHAR(50) DEFAULT 'Bronze'"); } catch (e) { }
+
+    try { await query("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+
 
     // 8. Wallet Transactions
     await query(`
@@ -303,4 +309,61 @@ export async function initDB() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // 13. Notifications Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS notifications(
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id VARCHAR(50) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        type VARCHAR(50) DEFAULT 'info', -- 'deposit', 'order', 'support', 'system'
+            is_read BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+        `);
+
+    // 14. Coupons Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS coupons(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            code VARCHAR(50) UNIQUE NOT NULL,
+            type ENUM('percent', 'flat') NOT NULL,
+            value DECIMAL(10, 2) NOT NULL,
+            min_amount DECIMAL(10, 2) DEFAULT 0.00,
+            expiry TIMESTAMP NULL,
+            status ENUM('active', 'inactive') DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        `);
+
+    // 15. Payouts Table (Affiliate Withdrawals)
+    await query(`
+        CREATE TABLE IF NOT EXISTS payouts(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50) NOT NULL,
+            amount DECIMAL(10, 2) NOT NULL,
+            method VARCHAR(50) NOT NULL, -- 'paypal', 'crypto', 'bank'
+            details TEXT NOT NULL, -- address, email, etc.
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    // 16. Knowledge Base Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS knowledge_base(
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL,
+            content LONGTEXT NOT NULL,
+            category VARCHAR(100) DEFAULT 'General',
+            views INT DEFAULT 0,
+            is_published BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Add SEO Columns
+    try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }
 }

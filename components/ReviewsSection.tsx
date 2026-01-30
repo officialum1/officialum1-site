@@ -87,7 +87,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                     {reviews.map(r => (
                         <div key={r.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                <div style={{ fontWeight: 'bold' }}>{r.user_email?.split('@')[0]}***</div>
+                                <div style={{ fontWeight: 'bold' }}>{r.email?.split('@')[0]}***</div>
                                 <div style={{ color: '#ffd700' }}>{"★".repeat(r.rating)}</div>
                             </div>
                             <p style={{ color: '#ccc', lineHeight: '1.5' }}>{r.comment}</p>

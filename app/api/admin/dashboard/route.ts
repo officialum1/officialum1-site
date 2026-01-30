@@ -53,12 +53,42 @@ export async function GET() {
             LIMIT 5
         `);
 
+        // 5. Chart Data (Last 30 Days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const chartRows = await query(`
+            SELECT DATE(date) as day, SUM(amount) as total
+            FROM orders
+            WHERE status IN ('paid', 'completed') AND date >= ?
+            GROUP BY DATE(date)
+            ORDER BY DATE(date) ASC
+        `, [thirtyDaysAgo]) as any[];
+
+        const salesChartData = chartRows.map(row => ({
+            date: new Date(row.day).toLocaleDateString(),
+            total: row.total
+        }));
+
+        // 6. Top Products
+        const topProdRows = await query(`
+            SELECT p.name, COUNT(*) as sales
+            FROM orders o
+            JOIN products p ON o.productId = p.id
+            WHERE o.status IN ('paid', 'completed')
+            GROUP BY p.id
+            ORDER BY sales DESC
+            LIMIT 5
+        `);
+
         return NextResponse.json({
             revenueMonth,
             ordersMonth,
             totalUsers,
             topPlatform,
-            recentOrders
+            recentOrders,
+            salesChartData,
+            topProducts: topProdRows
         });
 
     } catch (e: unknown) {

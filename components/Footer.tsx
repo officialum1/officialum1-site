@@ -133,6 +133,7 @@ export default function Footer() {
                     <div>
                         <h4 style={{ marginBottom: '1.2rem', color: 'white', fontSize: '1.1rem' }}>Resources</h4>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                            <li><a href="/help" className="footer-link">Help Center (FAQ)</a></li>
                             <li><a href="/blog" className="footer-link">Insights & Blog</a></li>
                             <li><a href="/backlink-checker" className="footer-link">Backlink Checker</a></li>
                             <li><a href="/terms" className="footer-link">Terms & Conditions</a></li>

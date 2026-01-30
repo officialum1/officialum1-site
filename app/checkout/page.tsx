@@ -26,7 +26,8 @@ function CheckoutContent() {
     // Promo Code State
     const [promoCode, setPromoCode] = useState('');
     const [rating, setRating] = useState<number>(0);
-    const [discount, setDiscount] = useState<number>(0); // Percentage
+    const [discount, setDiscount] = useState<number>(0);
+    const [discountType, setDiscountType] = useState<'percent' | 'flat'>('percent');
     const [quantity, setQuantity] = useState<number>(1);
     const [promoStatus, setPromoStatus] = useState<'none' | 'success' | 'invalid'>('none');
 
@@ -63,14 +64,17 @@ function CheckoutContent() {
         if (!promoCode) return;
         setPromoStatus('none');
         try {
-            const res = await fetch(`/api/promocodes?code=${promoCode}`);
+            const baseAmount = isCartMode ? cartTotal : (isMembershipMode ? parseFloat(product?.price || '0') : parseFloat(product?.price?.toString().replace('$', '') || '0') * quantity);
+            const res = await fetch(`/api/coupons?code=${promoCode}&amount=${baseAmount}`);
             const data = await res.json();
             if (data.success) {
-                setDiscount(data.discount);
+                setDiscount(data.value);
+                setDiscountType(data.type);
                 setPromoStatus('success');
             } else {
                 setDiscount(0);
                 setPromoStatus('invalid');
+                alert(data.error || "Invalid code");
             }
         } catch (e) {
             setPromoStatus('invalid');
@@ -90,8 +94,8 @@ function CheckoutContent() {
         }
 
         if (discount > 0) {
-            const d = baseTotal * (discount / 100);
-            return (baseTotal - d).toFixed(2);
+            const d = discountType === 'percent' ? (baseTotal * (discount / 100)) : discount;
+            return Math.max(0, baseTotal - d).toFixed(2);
         }
         return baseTotal.toFixed(2);
     };
@@ -344,7 +348,7 @@ function CheckoutContent() {
                             {discount > 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#00ff88' }}>
                                     <span>Discount</span>
-                                    <span>-{discount}%</span>
+                                    <span>-{discountType === 'percent' ? `${discount}%` : `$${discount}`}</span>
                                 </div>
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '1.5rem', fontWeight: 'bold' }}>

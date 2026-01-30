@@ -8,6 +8,9 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<any[]>([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const unreadCount = notifications.filter(n => !n.is_read).length;
 
     // Safety check for Cart Context (in case it's used outside provider during builds/tests)
     let cartContext;
@@ -21,16 +24,48 @@ export default function Navbar() {
         // Check Auth
         const stored = localStorage.getItem('buyer_user');
         if (stored) {
-            setUser(JSON.parse(stored));
+            const u = JSON.parse(stored);
+            setUser(u);
+            fetchNotifications(u.id);
         }
 
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    const fetchNotifications = async (userId: string) => {
+        try {
+            const res = await fetch(`/api/notifications?userId=${userId}`);
+            const data = await res.json();
+            if (Array.isArray(data)) setNotifications(data);
+        } catch { }
+    };
+
+    const markAllRead = async () => {
+        if (unreadCount === 0) return;
+        try {
+            await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, action: 'markAllRead' })
+            });
+            setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
+        } catch { }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem('buyer_user');
         setUser(null);
         window.location.href = '/';
+    };
+
+    const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const term = (e.target as HTMLInputElement).value;
+            if (term.trim()) {
+                window.location.href = `/shop?search=${encodeURIComponent(term)}`;
+                setIsOpen(false);
+            }
+        }
     };
 
     return (
@@ -52,6 +87,28 @@ export default function Navbar() {
                     <span className={`bar ${isOpen ? 'open' : ''}`}></span>
                 </button>
 
+                {/* Global Search Bar (Desktop) */}
+                <div className="hidden md:block" style={{ flex: 1, maxWidth: '300px', margin: '0 2rem' }}>
+                    <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            onKeyDown={handleSearch}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                padding: '8px 12px 8px 35px',
+                                borderRadius: '20px',
+                                color: 'white',
+                                fontSize: '0.9rem',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+                </div>
+
                 {/* Navigation Links & Auth */}
                 <div className={`nav-menu ${isOpen ? 'active' : ''}`}>
                     <ul className="nav-links">
@@ -71,6 +128,50 @@ export default function Navbar() {
                     </ul>
 
                     <div className="auth-buttons" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        {/* Notification Bell */}
+                        {user && (
+                            <div style={{ position: 'relative' }}>
+                                <button
+                                    onClick={() => { setShowNotifications(!showNotifications); if (!showNotifications) markAllRead(); }}
+                                    style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}
+                                >
+                                    🔔
+                                    {unreadCount > 0 && (
+                                        <span style={{ position: 'absolute', top: '0', right: '0', background: '#00ff88', color: '#000', fontSize: '0.6rem', fontWeight: 'bold', width: '15px', height: '15px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Dropdown */}
+                                {showNotifications && (
+                                    <div className="glass" style={{
+                                        position: 'absolute', top: '40px', right: '0', width: '280px', maxHeight: '400px',
+                                        overflowY: 'auto', borderRadius: '12px', zIndex: 1002, padding: '10px',
+                                        border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(10, 10, 10, 0.95)',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                                    }}>
+                                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span>Notifications</span>
+                                            <span style={{ color: '#00ff88', cursor: 'pointer' }} onClick={() => setShowNotifications(false)}>Close</span>
+                                        </div>
+                                        {notifications.length === 0 && <div style={{ textAlign: 'center', color: '#555', padding: '20px 0', fontSize: '0.85rem' }}>No notifications yet.</div>}
+                                        {notifications.map(n => (
+                                            <div key={n.id} style={{
+                                                padding: '10px', borderRadius: '8px', marginBottom: '5px',
+                                                background: n.is_read ? 'transparent' : 'rgba(0,255,136,0.05)',
+                                                border: '1px solid rgba(255,255,255,0.02)'
+                                            }}>
+                                                <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: n.is_read ? '#ccc' : '#fff' }}>{n.title}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>{n.message}</div>
+                                                <div style={{ fontSize: '0.6rem', color: '#444', marginTop: '5px' }}>{new Date(n.created_at).toLocaleString()}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Cart Button */}
                         <button onClick={toggleCart} style={{ position: 'relative', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', marginRight: '0.5rem' }}>
                             🛒
@@ -83,6 +184,7 @@ export default function Navbar() {
 
                         {user ? (
                             <div className="user-menu">
+                                <Link href="/dashboard" className="nav-link" onClick={() => setIsOpen(false)} style={{ color: '#00ff88', fontWeight: 'bold' }}>Dashboard</Link>
                                 <Link href="/my-orders" className="nav-link" onClick={() => setIsOpen(false)}>Orders</Link>
                                 <Link href="/support" className="nav-link" onClick={() => setIsOpen(false)}>Support</Link>
                                 <button onClick={handleLogout} className="logout-btn">Logout</button>
@@ -96,6 +198,6 @@ export default function Navbar() {
                     </div>
                 </div>
             </div>
-        </nav>
+        </nav >
     );
 }

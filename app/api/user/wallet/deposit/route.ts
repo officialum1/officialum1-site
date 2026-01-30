@@ -18,9 +18,9 @@ export async function POST(req: Request) {
         const { userId, amount, method } = await req.json();
         const settings = await getSettings();
 
-        if (!userId || !amount || !method) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-        }
+        if (!userId) return NextResponse.json({ error: "Missing required field: userId" }, { status: 400 });
+        if (!amount) return NextResponse.json({ error: "Missing required field: amount" }, { status: 400 });
+        if (!method) return NextResponse.json({ error: "Missing required field: method" }, { status: 400 });
 
         const orderId = `DEP-${Date.now()}`;
         let paymentUrl = null;
@@ -30,17 +30,23 @@ export async function POST(req: Request) {
             const stripeSecret = (settings.stripeSecret && settings.stripeSecret !== '...') ? settings.stripeSecret : process.env.STRIPE_SECRET_KEY;
             if (!stripeSecret) throw new Error("Stripe is not configured.");
 
+            // Add 2.9% Fee for Stripe
+            const originalAmount = parseFloat(amount);
+            const fee = originalAmount * 0.029;
+            const finalAmount = originalAmount + fee;
+
             const params = new URLSearchParams();
             params.append('payment_method_types[]', 'card');
             params.append('line_items[0][price_data][currency]', 'usd');
-            params.append('line_items[0][price_data][product_data][name]', 'Wallet Top-up');
-            params.append('line_items[0][price_data][unit_amount]', (parseFloat(amount) * 100).toFixed(0));
+            params.append('line_items[0][price_data][product_data][name]', 'Wallet Top-up (Inc. 2.9% Fee)');
+            // unit_amount is in cents
+            params.append('line_items[0][price_data][unit_amount]', (finalAmount * 100).toFixed(0));
             params.append('line_items[0][quantity]', '1');
             params.append('mode', 'payment');
             // We'll use metadata to identify the deposit on checkout.session.completed
             params.append('metadata[userId]', userId);
             params.append('metadata[type]', 'deposit');
-            params.append('metadata[amount]', amount.toString());
+            params.append('metadata[amount]', amount.toString()); // Credited amount (original)
 
             params.append('success_url', `${req.headers.get('origin')}/dashboard?success=true&orderId=${orderId}`);
             params.append('cancel_url', `${req.headers.get('origin')}/dashboard`);

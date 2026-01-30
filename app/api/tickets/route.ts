@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendTelegramAdminAlert } from '@/lib/telegram';
+import { sendTicketReplyEmail } from '@/lib/email';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -43,6 +44,20 @@ export async function POST(req: Request) {
             // Notification for Admin if User Replies
             if (body.sender === 'user') {
                 await sendTelegramAdminAlert(`💬 <b>New Ticket Reply!</b>\nTicket ID: #${body.ticketId}\nMessage: ${body.message}`);
+            } else {
+                // If staff replied, notify the user
+                const ticketRows: any = await query("SELECT user_id, subject FROM tickets WHERE id = ?", [body.ticketId]);
+                if (ticketRows.length > 0) {
+                    const { user_id, subject } = ticketRows[0];
+                    await query("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+                        [user_id, "Support Team Replied! 🎫", `You have a new reply for your ticket: ${subject}`, 'support']);
+
+                    // Send Email if we have their address
+                    const uRows: any = await query("SELECT email FROM users WHERE id = ?", [user_id]);
+                    if (uRows[0]?.email) {
+                        await sendTicketReplyEmail(uRows[0].email, subject, body.message);
+                    }
+                }
             }
 
             return NextResponse.json({ success: true });

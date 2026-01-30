@@ -9,20 +9,20 @@ export async function GET() {
             SELECT 
                 o.id, 
                 p.name as productName, 
-                o.created_at,
+                o.date,
                 o.guestEmail,
                 u.email as userEmail
             FROM orders o
             LEFT JOIN products p ON o.productId = p.id
             LEFT JOIN users u ON o.userId = u.id
             WHERE o.status = 'paid' OR o.status = 'completed'
-            ORDER BY o.created_at DESC 
+            ORDER BY o.date DESC 
             LIMIT 5
         `);
 
         // Format data for popup
         const formatted = orders.map((o: any) => {
-            const timeDiff = Date.now() - new Date(o.created_at).getTime();
+            const timeDiff = Date.now() - new Date(o.date).getTime();
             const minsAgo = Math.floor(timeDiff / 60000);
 
             // Generate a random country for "social proof" effect (since we don't store IP geo yet)

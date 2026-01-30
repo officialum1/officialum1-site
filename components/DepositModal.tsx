@@ -58,8 +58,8 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                     setLoading(false);
                 }, 2000);
             } else {
-                alert(data.error || "Transaction Failed");
-                setStep(2);
+                alert(`Error: ${data.error || "Transaction Failed"}`);
+                setStep(method === 'card' ? 2 : 2); // Stay on method selection
                 setLoading(false);
             }
         } catch (err) {
@@ -179,7 +179,7 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
                                 style={{ flex: 2, background: '#00ff88', color: 'black' }}
                                 disabled={!method}
                             >
-                                Pay ${amount}
+                                Pay ${method === 'card' && amount ? (Number(amount) * 1.029).toFixed(2) : amount}
                             </button>
                         </div>
                     </>

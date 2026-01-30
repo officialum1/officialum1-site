@@ -128,12 +128,62 @@ export async function POST(request: Request) {
 
         if (action === 'record_sale') {
             const transactionId = `trans_${Date.now()}`;
-
-            // Update Inventory (if sold from inventory)
             let deliveryData = null;
+            let soldInventoryIds: string[] = [];
+            let combinedDetailsText = "";
 
-            if (body.inventoryId) {
+            // --- BULK SALE LOGIC ---
+            if (body.mode === 'bulk') {
+                const { productName, quantity } = body;
+                const qty = parseInt(quantity);
+
+                // 1. Find available stock
+                const availableItems: any = await query(
+                    "SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?",
+                    [productName, qty]
+                );
+
+                if (availableItems.length < qty) {
+                    return NextResponse.json({ error: `Not enough stock. Requested: ${qty}, Available: ${availableItems.length}` }, { status: 400 });
+                }
+
+                // 2. Mark all as Sold & Collect Details
+                for (const item of availableItems) {
+                    await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [item.id]);
+                    soldInventoryIds.push(item.id);
+
+                    const details = item.accountDetails ? JSON.parse(item.accountDetails) : {};
+                    // Format: "User: ... | Pass: ..."
+                    const line = `${details.email || details.username}:${details.password} ${details.extraInfo ? `(${details.extraInfo})` : ''}`;
+                    combinedDetailsText += line + "\n";
+                }
+
+                // 3. Create Delivery
+                if (soldInventoryIds.length > 0) {
+                    const token = Math.random().toString(36).substring(2, 10);
+                    const deliveryDetails = {
+                        note: `Bulk Order of ${qty} x ${productName}`,
+                        accounts: combinedDetailsText
+                    };
+
+                    deliveryData = {
+                        token,
+                        details: deliveryDetails,
+                        itemName: `${qty}x ${productName}`,
+                        proofImage: body.proofImage || null
+                    };
+
+                    await query(
+                        "INSERT INTO deliveries (token, orderId, itemName, details, proofImage) VALUES (?, ?, ?, ?, ?)",
+                        [token, transactionId, deliveryData.itemName, JSON.stringify(deliveryDetails), deliveryData.proofImage]
+                    );
+                }
+
+            }
+            // --- SINGLE ITEM LOGIC (Legacy) ---
+            else if (body.inventoryId) {
                 await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [body.inventoryId]);
+                soldInventoryIds.push(body.inventoryId);
 
                 // Get Inventory details for delivery
                 const items: any = await query("SELECT * FROM inventory WHERE id = ?", [body.inventoryId]);
@@ -164,9 +214,9 @@ export async function POST(request: Request) {
                 type: 'sale',
                 platform: body.platform,
                 amount: Number(body.salePrice),
-                description: body.description || 'Direct Sale',
+                description: body.description || (body.mode === 'bulk' ? `Bulk Sale: ${body.quantity}x ${body.productName}` : 'Direct Sale'),
                 processedBy: body.staffName || 'Admin',
-                inventoryId: body.inventoryId || null
+                inventoryId: soldInventoryIds.length === 1 ? soldInventoryIds[0] : 'bulk' // Store 'bulk' or single ID
             };
 
             await query(
@@ -176,7 +226,7 @@ export async function POST(request: Request) {
 
             // Log
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
-                [`log_${Date.now()}`, newTransaction.processedBy, 'Record Sale', `Sold item for $${newTransaction.amount} (${newTransaction.platform})`]
+                [`log_${Date.now()}`, newTransaction.processedBy, 'Record Sale', `Sold items for $${newTransaction.amount} (${newTransaction.platform})`]
             );
 
             return NextResponse.json({ success: true, transaction: newTransaction, delivery: deliveryData });
@@ -194,11 +244,40 @@ export async function POST(request: Request) {
             for (const line of lines) {
                 if (!line.trim()) continue;
 
-                // Simple parsing: user:pass or user:pass:email
-                const parts = line.trim().split(':');
-                const username = parts[0]?.trim();
-                const password = parts[1]?.trim();
-                const email = parts[2]?.trim() || '';
+                let username = '';
+                let password = '';
+                let email = '';
+                let extra = '';
+
+                // SMART PARSING
+                // 1. Check for basic Excel Paste (Tab Separated)
+                if (line.includes('\t')) {
+                    const parts = line.split('\t');
+                    username = parts[0]?.trim();
+                    password = parts[1]?.trim();
+                    email = parts[2]?.trim() || '';
+                    extra = parts.length > 3 ? parts.slice(3).join(' | ').trim() : '';
+                }
+                // 2. Check for Standard Combolist (User:Pass:Email or User:Pass)
+                else if (line.includes(':')) {
+                    const parts = line.trim().split(':');
+                    username = parts[0]?.trim();
+                    password = parts[1]?.trim();
+                    // If 3 parts, 3rd is email. If more, join defaults to extra.
+                    if (parts.length === 3) {
+                        email = parts[2]?.trim();
+                    } else if (parts.length > 3) {
+                        email = parts[2]?.trim();
+                        extra = parts.slice(3).join(':').trim();
+                    }
+                }
+                // 3. Last Resort (Comma separated)
+                else if (line.includes(',')) {
+                    const parts = line.split(',');
+                    username = parts[0]?.trim();
+                    password = parts[1]?.trim();
+                    email = parts[2]?.trim() || '';
+                }
 
                 if (!username || !password) continue;
 
@@ -212,7 +291,7 @@ export async function POST(request: Request) {
                         username,
                         password,
                         email,
-                        extraInfo: 'Bulk Imported'
+                        extraInfo: extra || (namePrefix ? 'Bulk Imported' : '')
                     })
                 };
 

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
 import ReviewsSection from '@/components/ReviewsSection';
+import RelatedProducts from '@/components/RelatedProducts';
 
 export default function SingleProductPage() {
     const params = useParams();
@@ -26,7 +27,7 @@ export default function SingleProductPage() {
     const [notifyEmail, setNotifyEmail] = useState('');
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem('buyer_user');
         if (storedUser) {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
@@ -314,6 +315,7 @@ export default function SingleProductPage() {
             {/* REVIEWS SECTION */}
             <div className="container" style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '50px' }}>
                 <ReviewsSection productId={product.id} />
+                <RelatedProducts currentProductId={product.id} platform={product.platform} />
             </div>
 
             <Footer />

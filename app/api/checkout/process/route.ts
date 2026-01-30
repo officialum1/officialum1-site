@@ -71,11 +71,44 @@ export async function POST(req: Request) {
                 const saleEnd = new Date(product.sale_ends_at);
                 if (saleEnd > new Date()) unitPrice = parseFloat(product.sale_price);
             }
-            amountToCharge = finalPrice ? finalPrice : (unitPrice * q).toFixed(2);
+            amountToCharge = (unitPrice * q).toFixed(2);
         } else {
             // Bulk Cart
-            amountToCharge = finalPrice ? finalPrice : cartItems.reduce((acc: number, item: any) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0).toFixed(2);
+            amountToCharge = cartItems.reduce((acc: number, item: any) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0).toFixed(2);
             product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple" };
+        }
+
+        // --- SERVER-SIDE COUPON VALIDATION ---
+        let discountAmount = 0;
+        if (promoCode) {
+            const couponRows: any = await query("SELECT * FROM coupons WHERE code = ? AND status = 'active'", [promoCode]);
+            if (couponRows.length > 0) {
+                const coupon = couponRows[0];
+                const baseAmount = parseFloat(amountToCharge);
+
+                // Check Expiry
+                const isExpired = coupon.expiry && new Date(coupon.expiry) < new Date();
+                const isMinMet = baseAmount >= parseFloat(coupon.min_amount);
+
+                if (!isExpired && isMinMet) {
+                    if (coupon.type === 'percent') {
+                        discountAmount = baseAmount * (parseFloat(coupon.value) / 100);
+                    } else {
+                        discountAmount = parseFloat(coupon.value);
+                    }
+                    amountToCharge = Math.max(0, baseAmount - discountAmount).toFixed(2);
+                }
+            }
+        }
+
+        // Security Check: If client provided a finalPrice, it shouldn't be lower than our calculated price
+        if (finalPrice && parseFloat(finalPrice) < parseFloat(amountToCharge)) {
+            // Log discrepancy but maybe allow if it's within a cent due to rounding
+            if (Math.abs(parseFloat(finalPrice) - parseFloat(amountToCharge)) > 0.05) {
+                console.warn(`[Security] Price mismatch for Order! Client: ${finalPrice}, Server: ${amountToCharge}`);
+                return NextResponse.json({ error: "Price discrepancy detected. Please try again." }, { status: 400 });
+            }
+            amountToCharge = finalPrice; // Accept client price if it's higher or equal (within rounding)
         }
 
         // Create/Get User Object

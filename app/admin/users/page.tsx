@@ -74,7 +74,7 @@ export default function UserManager() {
                             <tbody>
                                 {users.map(u => (
                                     <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem' }}>{u.id.substring(0, 8)}...</td>
+                                        <td style={{ padding: '1rem', fontFamily: 'monospace', fontSize: '0.8rem' }}>{(u.id || '').toString().substring(0, 8)}...</td>
                                         <td style={{ padding: '1rem' }}>{u.email}</td>
                                         <td style={{ padding: '1rem', color: '#00ff88' }}>${Number(u.wallet_balance || 0).toFixed(2)}</td>
                                         <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#888' }}>{new Date(u.created_at).toLocaleDateString()}</td>

@@ -157,3 +157,44 @@ export async function sendRestockEmail(to: string, product: any, productUrl: str
 
     return await sendEmail({ to, subject: `Back in Stock: ${product.name} is available now! 🚀`, html });
 }
+
+export async function sendDepositEmail(to: string, amount: number, method: string) {
+    const html = `
+        <div style="font-family: 'Inter', sans-serif; background-color: #0d1117; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #161b22; border-radius: 20px; overflow: hidden; border: 1px solid #30363d;">
+                <div style="background: #00ff88; height: 5px;"></div>
+                <div style="padding: 40px; text-align: center;">
+                    <div style="font-size: 50px; margin-bottom: 20px;">💸</div>
+                    <h1 style="margin: 0; color: #fff;">Deposit Successful!</h1>
+                    <p style="color: #8b949e; margin-top: 10px;">Your wallet has been credited with $${amount.toFixed(2)} via ${method}.</p>
+                    <div style="margin-top: 30px; padding: 20px; background: #0d1117; border-radius: 12px; border: 1px dashed #30363d;">
+                        <span style="display: block; color: #8b949e; font-size: 12px; text-transform: uppercase;">Current Balance</span>
+                        <span style="font-size: 24px; font-weight: bold; color: #00ff88;">Check Dashboard</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    return await sendEmail({ to, subject: `Deposit Confirmed: $${amount.toFixed(2)} added to your wallet`, html });
+}
+
+export async function sendTicketReplyEmail(to: string, ticketSubject: string, message: string) {
+    const html = `
+        <div style="font-family: 'Inter', sans-serif; background-color: #0d1117; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #161b22; border-radius: 20px; overflow: hidden; border: 1px solid #30363d;">
+                <div style="background: #4f46e5; height: 5px;"></div>
+                <div style="padding: 40px;">
+                    <h2 style="margin: 0; color: #fff;">New Reply to your Ticket</h2>
+                    <p style="color: #8b949e; margin-top: 5px;">Subject: ${ticketSubject}</p>
+                    <div style="margin-top: 30px; padding: 25px; background: #0d1117; border-radius: 12px; border: 1px solid #30363d; line-height: 1.6;">
+                        ${message.replace(/\n/g, '<br/>')}
+                    </div>
+                    <div style="text-align: center; margin-top: 40px;">
+                        <a href="https://officialum1.com/dashboard" style="background: #4f46e5; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">View Ticket & Reply</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    return await sendEmail({ to, subject: `New Support Reply: ${ticketSubject}`, html });
+}

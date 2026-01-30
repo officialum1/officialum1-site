@@ -1,5 +1,5 @@
 import { query } from './db';
-import { sendAuditReport } from './email';
+import { sendAuditReport, sendDepositEmail } from './email';
 import { sendTelegramMessage, sendTelegramAdminAlert } from './telegram';
 
 export async function fulfillOrder(orderId: string) {
@@ -29,6 +29,17 @@ export async function fulfillOrder(orderId: string) {
             await query("UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?", [order.amount, order.userId]);
             await query("INSERT INTO wallet_transactions (user_id, type, amount, description, status) VALUES (?, 'deposit', ?, ?, 'completed')",
                 [order.userId, order.amount, `Deposit via ${order.method}`, 'completed']);
+
+            // Notification
+            await query("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+                [order.userId, "Deposit Successful! 💸", `Your wallet has been credited with $${order.amount} via ${order.method}.`, 'deposit']);
+
+            // Email
+            const uRows: any = await query("SELECT email FROM users WHERE id = ?", [order.userId]);
+            if (uRows[0]?.email) {
+                await sendDepositEmail(uRows[0].email, parseFloat(order.amount), order.method);
+            }
+
             console.log(`[Fulfillment] Wallet credited for User ${order.userId}`);
             return;
         }
@@ -113,6 +124,12 @@ export async function fulfillOrder(orderId: string) {
                 links: Number(order.amount),
                 details: combinedEmailBody
             }, settings);
+
+            // Notification
+            if (order.userId !== 'guest') {
+                await query("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+                    [order.userId, "Order Delivered! 📦", `Your order #${orderId} for ${product?.name} has been delivered. Check your emails or My Orders.`, 'order']);
+            }
         }
 
         // UPDATE TOTAL SPENT & POINTS

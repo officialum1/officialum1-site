@@ -7,9 +7,10 @@ export async function GET() {
     try {
         // Fetch Orders + Product Names
         const orders = await query(`
-            SELECT o.*, p.name as product_name, p.platform 
+            SELECT o.*, p.name as product_name, p.platform, u.email as user_email
             FROM orders o 
             LEFT JOIN products p ON o.productId = p.id 
+            LEFT JOIN users u ON o.userId = u.id
             ORDER BY o.date DESC
         `);
         return NextResponse.json(orders);

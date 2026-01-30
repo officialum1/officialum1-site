@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SalesChart from '@/components/SalesChart';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>(null);
@@ -47,7 +48,11 @@ export default function AdminDashboard() {
                         <a href="/admin/inventory" className="btn btn-outline">Inventory</a>
                         <a href="/admin/users" className="btn btn-outline">Users</a>
                         <a href="/admin/reviews" className="btn btn-outline">Reviews</a>
+                        <a href="/admin/coupons" className="btn btn-outline">Coupons</a>
+                        <a href="/admin/newsletter" className="btn btn-outline">Newsletter</a>
+                        <a href="/admin/payouts" className="btn btn-outline">Payouts</a>
                         <a href="/admin/blogs" className="btn btn-outline">Blogs</a>
+                        <a href="/admin/kb" className="btn btn-outline">FAQ / KB</a>
                         <a href="/admin/settings" className="btn btn-primary">⚙️ Settings</a>
                     </div>
                 </div>
@@ -66,6 +71,24 @@ export default function AdminDashboard() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+
+
+                {/* Charts & Analytics Row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '3rem' }}>
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                        <SalesChart data={stats?.salesChartData || []} />
+                    </div>
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                        <h3 style={{ marginBottom: '1.5rem' }}>🔥 Top Products</h3>
+                        {stats?.topProducts?.map((p: any, i: number) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                <span>{i + 1}. {p.name}</span>
+                                <span style={{ color: '#aaa' }}>{p.sales} Sold</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Recent Orders Table */}
@@ -102,6 +125,6 @@ export default function AdminDashboard() {
                 </div>
             </div>
             <Footer />
-        </main>
+        </main >
     );
 }
