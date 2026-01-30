@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const { userId, productId, method, guestEmail, promoCode, finalPrice, quantity = 1, cartItems, membershipPlan } = body;
+        const orderId = (cartItems && Array.isArray(cartItems)) ? 'BULK-' + Date.now() : 'ORD-' + Date.now();
 
         // 1. Load Settings
         const settings = await getSettings();
@@ -109,8 +110,10 @@ export async function POST(req: Request) {
                 params.append('line_items[0][price_data][unit_amount]', (parseFloat(amountToCharge) * 100).toFixed(0)); // Total Amount
                 params.append('line_items[0][quantity]', '1'); // Total session
                 params.append('mode', 'payment');
-                params.append('success_url', `${req.headers.get('origin')}/order-success?session_id={CHECKOUT_SESSION_ID}&orderId=${Date.now()}`);
+                params.append('success_url', `${req.headers.get('origin')}/order-success?session_id={CHECKOUT_SESSION_ID}&orderId=${orderId}`);
                 params.append('cancel_url', `${req.headers.get('origin')}/checkout?id=${productId}`);
+                params.append('metadata[orderId]', orderId);
+                params.append('metadata[userId]', userId);
 
                 const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
                     method: 'POST',
@@ -138,7 +141,8 @@ export async function POST(req: Request) {
                 const payload = {
                     amount: amountToCharge.toString(),
                     currency: "USD",
-                    order_id: Date.now().toString(),
+                    order_id: orderId,
+                    url_callback: `${req.headers.get('origin')}/api/webhooks/cryptomus`,
                     url_return: `${req.headers.get('origin')}/order-success`,
                     url_success: `${req.headers.get('origin')}/order-success`,
                     is_payment_multiple: true,
@@ -315,7 +319,7 @@ export async function POST(req: Request) {
 
         // 3. Create Order
         const newOrder = {
-            orderId: (isBulk ? 'BULK-' : 'ORD-') + Date.now().toString(),
+            orderId: orderId, // Use the same orderId used in gateways
             userId: user.id,
             guestEmail: user.email || (userId === 'guest' ? guestEmail : null),
             productId: isBulk ? 0 : product.id,

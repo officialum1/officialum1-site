@@ -29,43 +29,44 @@ export default function DepositModal({ isOpen, onClose, userId, onSuccess }: any
     const quickAmounts = [10, 25, 50, 100];
 
     const handleDeposit = async () => {
+        if (!amount || !method) return;
         setLoading(true);
         setStep(3); // Processing UI
 
-        // Process Payment
-        setTimeout(async () => {
-            try {
-                const res = await fetch('/api/user/wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId,
-                        amount: Number(amount),
-                        source: method === 'crypto' ? 'Coinbase' : 'Stripe Card'
-                    })
-                });
+        try {
+            const res = await fetch('/api/user/wallet/deposit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    amount: Number(amount),
+                    method: method === 'card' ? 'stripe' : 'cryptomus'
+                })
+            });
 
-                if (res.ok) {
-                    setStep(4); // Success UI
-                    setTimeout(() => {
-                        onSuccess();
-                        onClose();
-                        setStep(1);
-                        setAmount('');
-                        setMethod(null);
-                        setLoading(false);
-                    }, 2000);
-                } else {
-                    alert("Transaction Failed");
-                    setStep(2);
+            const data = await res.json();
+            if (data.paymentUrl) {
+                window.location.href = data.paymentUrl;
+            } else if (data.success) {
+                setStep(4);
+                setTimeout(() => {
+                    onSuccess();
+                    onClose();
+                    setStep(1);
+                    setAmount('');
+                    setMethod(null);
                     setLoading(false);
-                }
-            } catch {
-                alert("Error connecting to gateway");
+                }, 2000);
+            } else {
+                alert(data.error || "Transaction Failed");
                 setStep(2);
                 setLoading(false);
             }
-        }, 2000); // 2s Fake Processing
+        } catch (err) {
+            alert("Error connecting to gateway");
+            setStep(2);
+            setLoading(false);
+        }
     };
 
     return (
