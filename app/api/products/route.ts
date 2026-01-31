@@ -37,6 +37,12 @@ export async function GET() {
             )
         `);
 
+        // Migration: Add missing columns if table already existed (Safe Alter)
+        try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
+        try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
+        try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
+        try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { }
+
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
             SELECT p.*, 
