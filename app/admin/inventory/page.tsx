@@ -125,9 +125,17 @@ function AdminDashboard() {
     const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
     const [bulkUpdateText, setBulkUpdateText] = useState('');
 
-    // Fulfillment
     const [showFulfill, setShowFulfill] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+    // G2G Center State
+    const [g2gOrderId, setG2GOrderId] = useState('');
+    const [g2gOrderData, setG2GOrderData] = useState<any>(null);
+    const [g2gLoading, setG2GLoading] = useState(false);
+    const [g2gDelivery, setG2GDelivery] = useState({
+        account_details: '',
+        status: 'completed'
+    });
     const [fulfillDetails, setFulfillDetails] = useState('');
 
     // Tools State
@@ -1194,6 +1202,7 @@ function AdminDashboard() {
                                     { id: 'inventory', label: '📦 Orders', perm: 'orders' },
                                     { id: 'stock', label: '📊 Stock', perm: 'inventory' },
                                     { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
+                                    { id: 'g2g_center', label: '🎮 G2G Center', perm: 'orders' },
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
                                     <button
@@ -2124,6 +2133,154 @@ function AdminDashboard() {
                                         )}
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* G2G CENTER TAB */}
+                    {activeTab === 'g2g_center' && (
+                        <div className="FadeIn">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                <h2 style={{ margin: 0, fontFamily: 'var(--font-outfit)' }}>🎮 G2G Fulfillment Hub</h2>
+                                <div style={{ background: 'rgba(0,188,255,0.1)', color: '#00ccff', padding: '6px 15px', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(0,204,255,0.2)' }}>
+                                    API CONNECTED ✅
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
+                                {/* Left: Search & Action */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '20px', height: 'fit-content' }}>
+                                    <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>🔍 Fetch G2G Order</h3>
+                                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                                        <input
+                                            className="input-field"
+                                            placeholder="Enter G2G Order #"
+                                            value={g2gOrderId}
+                                            onChange={(e) => setG2GOrderId(e.target.value)}
+                                            style={{ flex: 1, height: '52px' }}
+                                        />
+                                        <button
+                                            onClick={async () => {
+                                                if (!g2gOrderId) return;
+                                                setG2GLoading(true);
+                                                try {
+                                                    const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
+                                                    const data = await res.json();
+                                                    if (res.ok) setG2GOrderData(data);
+                                                    else alert(data.error || 'Order not found on G2G');
+                                                } catch { alert('Network error'); }
+                                                finally { setG2GLoading(false); }
+                                            }}
+                                            disabled={g2gLoading}
+                                            className="btn btn-primary"
+                                            style={{ padding: '0 1.5rem', background: '#00ccff' }}
+                                        >
+                                            {g2gLoading ? '...' : 'Fetch'}
+                                        </button>
+                                    </div>
+
+                                    {g2gOrderData && (
+                                        <div style={{ borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
+                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>📦 Deliver to G2G</h3>
+                                            <form onSubmit={async (e) => {
+                                                e.preventDefault();
+                                                if (!confirm('Confirm G2G Delivery? This action is permanent on G2G.')) return;
+                                                setG2GLoading(true);
+                                                try {
+                                                    const res = await fetch('/api/admin/g2g', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            action: 'deliver_order',
+                                                            orderId: g2gOrderId,
+                                                            delivery_details: {
+                                                                status: g2gDelivery.status,
+                                                                content: g2gDelivery.account_details
+                                                            }
+                                                        })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (res.ok) alert('✅ Delivered on G2G!');
+                                                    else alert('❌ Error: ' + (data.error || 'Failed'));
+                                                } catch { alert('Network error'); }
+                                                finally { setG2GLoading(false); }
+                                            }}>
+                                                <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Account Details (Shared with Buyer)</label>
+                                                <textarea
+                                                    className="input-field"
+                                                    value={g2gDelivery.account_details}
+                                                    onChange={(e) => setG2GDelivery({ ...g2gDelivery, account_details: e.target.value })}
+                                                    placeholder="Login:Password:Token etc."
+                                                    style={{ width: '100%', height: '120px', marginBottom: '1rem', fontFamily: 'monospace' }}
+                                                    required
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={g2gLoading}
+                                                    className="btn btn-primary"
+                                                    style={{ width: '100%', background: 'linear-gradient(45deg, #00ccff, #0088ff)', padding: '1rem' }}
+                                                >
+                                                    {g2gLoading ? 'Processing...' : '🚀 Submit Delivery to G2G'}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Right: Order Info Display */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '20px' }}>
+                                    {!g2gOrderData ? (
+                                        <div style={{ height: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#444', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮</div>
+                                            <p>Enter an Order ID from G2G to see details and perform delivery.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="FadeIn">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                                <div>
+                                                    <h3 style={{ margin: 0, color: '#00ccff' }}>Order #{g2gOrderData.order_number || g2gOrderId}</h3>
+                                                    <div style={{ fontSize: '0.9rem', color: '#888' }}>Platform: G2G Marketplace</div>
+                                                </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div style={{
+                                                        padding: '4px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                        background: g2gOrderData.order_status?.toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                        color: g2gOrderData.order_status?.toLowerCase().includes('paid') ? '#00ff88' : '#ccc'
+                                                    }}>
+                                                        {g2gOrderData.order_status?.toUpperCase() || 'UNKNOWN'}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+                                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Buyer</label>
+                                                    <div style={{ fontWeight: 'bold' }}>{g2gOrderData.display_name || 'Anonymous G2G Buyer'}</div>
+                                                </div>
+                                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Amount</label>
+                                                    <div style={{ fontWeight: 'bold', color: '#00ff88' }}>{g2gOrderData.total_price} {g2gOrderData.currency}</div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ marginBottom: '2rem' }}>
+                                                <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Product Title</label>
+                                                <div style={{ fontSize: '1rem', color: '#fff', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
+                                                    {g2gOrderData.product_name || 'N/A'}
+                                                </div>
+                                            </div>
+
+                                            {g2gOrderData.delivery_details && (
+                                                <div style={{ border: '1px solid rgba(0,255,136,0.2)', padding: '1.5rem', borderRadius: '12px', background: 'rgba(0,255,136,0.02)' }}>
+                                                    <h4 style={{ color: '#00ff88', margin: '0 0 1rem 0' }}>✅ Already Delivered</h4>
+                                                    <div style={{ fontSize: '0.85rem', color: '#ccc', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                                                        {g2gOrderData.delivery_details.content}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
