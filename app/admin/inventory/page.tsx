@@ -212,6 +212,23 @@ function AdminDashboard() {
         fetchData();
     }, []);
 
+    // Real-time G2G Polling
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (activeTab === 'g2g_center') {
+            interval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/admin/g2g?action=get_tracked_orders');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setTrackedG2GOrders(Array.isArray(data) ? data : []);
+                    }
+                } catch (e) { console.error("G2G Polling Error", e); }
+            }, 5000); // Poll every 5 seconds
+        }
+        return () => { if (interval) clearInterval(interval); };
+    }, [activeTab]);
+
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
         const params = new URLSearchParams(searchParams.toString());
@@ -2240,7 +2257,13 @@ function AdminDashboard() {
 
                                     {/* Recent Tracked Orders List */}
                                     <div style={{ marginTop: '2.5rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
-                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#888' }}>📜 Recent Webhook Events</h3>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                            <h3 style={{ fontSize: '1rem', margin: 0, color: '#888' }}>📜 Recent Webhook Events</h3>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,255,136,0.05)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                                <div className="pulse" style={{ width: '6px', height: '6px', background: '#00ff88', borderRadius: '50%' }}></div>
+                                                <span style={{ fontSize: '0.65rem', color: '#00ff88', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Live</span>
+                                            </div>
+                                        </div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                                             {trackedG2GOrders.length > 0 ? trackedG2GOrders.map((o: any) => (
                                                 <div
