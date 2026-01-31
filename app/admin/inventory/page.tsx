@@ -806,15 +806,15 @@ function AdminDashboard() {
             });
         }
 
-        // Bulk insert via magic sync logic or dedicated endpoint
-        // For simplicity, we'll use the bulk_import endpoint logic (CSV style)
-        const csvData = created.map(p => `${p.name},${p.platform},${p.price},${p.description},,${p.stock}`).join('\n');
-
         try {
             await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'bulk_import', bulkData: csvData, category_id: genConfig.category_id })
+                body: JSON.stringify({
+                    action: 'bulk_import',
+                    products: created,
+                    category_id: genConfig.category_id
+                })
             });
             setShowGenerator(false);
             fetchData();
@@ -824,13 +824,19 @@ function AdminDashboard() {
 
     const handleBulkProductImport = async (e: React.FormEvent) => {
         e.preventDefault();
+        const lines = bulkProductData.split('\n');
+        const products = lines.map(line => {
+            const [name, platform, price, description, image, stock] = line.split(',');
+            return { name, platform, price, description, image, stock };
+        }).filter(p => p.name && p.price);
+
         try {
             await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'bulk_import',
-                    bulkData: bulkProductData
+                    products
                 })
             });
             setShowAddProduct(false);
@@ -1539,10 +1545,27 @@ function AdminDashboard() {
                                             </div>
                                         </div>
                                         <div style={{ padding: '1.5rem' }}>
-                                            <h3 style={{ marginBottom: '0.5rem', color: '#fff' }}>{prod.name}</h3>
+                                            <h3 style={{ marginBottom: '0.2rem', color: '#fff' }}>{prod.name}</h3>
+                                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                {prod.categoryIcon} {prod.categoryName || 'Uncategorized'}
+                                            </div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '1rem', fontSize: '0.9rem' }}>
                                                 <span>{prod.platform}</span>
-                                                <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    {(prod.categoryDiscount > 0 || prod.sale_price) ? (
+                                                        <>
+                                                            <span style={{ textDecoration: 'line-through', color: '#666', fontSize: '0.8rem', marginRight: '0.5rem' }}>${prod.price}</span>
+                                                            <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>
+                                                                ${Math.min(
+                                                                    prod.sale_price || 999999,
+                                                                    prod.categoryDiscount > 0 ? (prod.price * (1 - prod.categoryDiscount / 100)) : 999999
+                                                                ).toFixed(2)}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${prod.price}</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div style={{ display: 'flex', gap: '0.4rem' }}>
                                                 <button
@@ -3990,7 +4013,7 @@ function AdminDashboard() {
 
                         <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
                             <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
-                            <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value })} placeholder="Category Name" required />
+                            <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
                             <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
                             <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
                         </form>

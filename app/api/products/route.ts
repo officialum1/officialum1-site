@@ -47,28 +47,26 @@ export async function POST(req: Request) {
             }
             return NextResponse.json({ success: true });
         } else if (body.action === 'bulk_import') {
-            const { bulkData } = body;
-            const lines = bulkData.split('\n');
+            const { products, category_id } = body;
             const created = [];
 
-            for (const line of lines) {
-                if (!line.trim()) continue;
+            if (!Array.isArray(products)) {
+                return NextResponse.json({ error: 'Invalid products array' }, { status: 400 });
+            }
 
-                const parts = line.split(',');
-                if (parts.length < 3) continue;
+            for (const p of products) {
+                const name = p.name?.trim();
+                const platform = p.platform?.trim() || 'General';
+                const price = p.price?.toString().replace(/[^0-9.]/g, '') || '0';
+                const description = p.description?.trim() || '';
+                const image = p.image?.trim() || '';
+                const stock = p.stock || '1';
 
-                const name = parts[0]?.trim();
-                const platform = parts[1]?.trim() || 'General';
-                const price = parts[2]?.trim().replace(/[^0-9.]/g, '') || '0';
-                const description = parts[3]?.trim() || '';
-                const image = parts[4]?.trim() || '';
-                const stock = parts[5]?.trim() || '1';
-
-                if (!name || isNaN(Number(price))) continue;
+                if (!name) continue;
 
                 await query(
-                    "INSERT INTO products (name, platform, price, description, image, stock) VALUES (?, ?, ?, ?, ?, ?)",
-                    [name, platform, price, description, image, stock]
+                    "INSERT INTO products (name, platform, price, description, image, stock, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    [name, platform, price, description, image, stock, category_id || null]
                 );
                 created.push({ name, platform, price });
             }
