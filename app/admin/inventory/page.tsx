@@ -219,6 +219,9 @@ function AdminDashboard() {
     };
 
     const hasPermission = (perm: string) => {
+        if (!currentUser) return false;
+        const role = (currentUser.role || '').toLowerCase();
+        if (role === 'admin') return true;
         return permissions.includes('all') || permissions.includes(perm);
     };
 
