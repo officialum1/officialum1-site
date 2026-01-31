@@ -244,11 +244,8 @@ function AdminDashboard() {
                         }
 
                         // Auto-select latest if none chosen
-                        if (newOrders.length > 0 && !g2gOrderData) {
-                            const o = newOrders[0];
-                            const raw = typeof o.raw_payload === 'string' ? JSON.parse(o.raw_payload) : o.raw_payload;
-                            setG2GOrderId(o.order_id);
-                            setG2GOrderData({ ...raw, ...o });
+                        if (newOrders.length > 0 && !g2gOrderId) {
+                            setG2GOrderId(newOrders[0].order_id);
                         }
 
                         setTrackedG2GOrders(newOrders);
@@ -257,7 +254,25 @@ function AdminDashboard() {
             }, 5000); // Poll every 5 seconds
         }
         return () => { if (interval) clearInterval(interval); };
-    }, [activeTab, trackedG2GOrders.length, g2gOrderData]);
+    }, [activeTab, trackedG2GOrders.length, g2gOrderId]);
+
+    // Real-time Order Detail Fetcher
+    useEffect(() => {
+        const fetchOrderDetail = async () => {
+            if (!g2gOrderId || activeTab !== 'g2g_center') return;
+            setG2GLoading(true);
+            try {
+                const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
+                const data = await res.json();
+                if (res.ok) {
+                    setG2GOrderData(data);
+                }
+            } catch (e) { console.error("G2G Detail Fetch Error", e); }
+            finally { setG2GLoading(false); }
+        };
+
+        fetchOrderDetail();
+    }, [g2gOrderId, activeTab]);
 
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
@@ -2298,24 +2313,7 @@ function AdminDashboard() {
                                             {trackedG2GOrders.length > 0 ? trackedG2GOrders.map((o: any) => (
                                                 <div
                                                     key={o.id}
-                                                    onClick={() => {
-                                                        setG2GOrderId(o.order_id);
-                                                        try {
-                                                            const raw = typeof o.raw_payload === 'string' ? JSON.parse(o.raw_payload) : o.raw_payload;
-                                                            // Merge DB fields with raw payload for maximum compatibility
-                                                            setG2GOrderData({
-                                                                ...raw,
-                                                                order_id: o.order_id,
-                                                                product_name: o.product_name,
-                                                                buyer_name: o.buyer_name,
-                                                                amount: o.amount,
-                                                                currency: o.currency,
-                                                                status: o.status
-                                                            });
-                                                        } catch {
-                                                            setG2GOrderData(o);
-                                                        }
-                                                    }}
+                                                    onClick={() => setG2GOrderId(o.order_id)}
                                                     className="FadeIn"
                                                     style={{
                                                         padding: '1.2rem',
