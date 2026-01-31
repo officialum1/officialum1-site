@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import { query } from '@/lib/db';
 
 // Webhook Secrets (Should match what user puts in G2G Dashboard)
-const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET || "t0kQkpU6lKhz9P";
-const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET || "s4CheGaCDqiso";
+const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET || "nKkGeGGv5Gzx";
+const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET || "5xaz6MvvSBV661I";
 
 export async function POST(request: Request) {
     const rawBody = await request.text();
