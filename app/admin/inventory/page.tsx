@@ -213,6 +213,21 @@ function AdminDashboard() {
     }, []);
 
     // Real-time G2G Polling
+    const playBeep = () => {
+        try {
+            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, context.currentTime); // High A
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            osc.start();
+            osc.stop(context.currentTime + 0.1);
+        } catch (e) { }
+    };
+
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (activeTab === 'g2g_center') {
@@ -221,13 +236,28 @@ function AdminDashboard() {
                     const res = await fetch('/api/admin/g2g?action=get_tracked_orders');
                     if (res.ok) {
                         const data = await res.json();
-                        setTrackedG2GOrders(Array.isArray(data) ? data : []);
+                        const newOrders = Array.isArray(data) ? data : [];
+
+                        // If count increased, play sound
+                        if (newOrders.length > trackedG2GOrders.length && trackedG2GOrders.length > 0) {
+                            playBeep();
+                        }
+
+                        // Auto-select latest if none chosen
+                        if (newOrders.length > 0 && !g2gOrderData) {
+                            const o = newOrders[0];
+                            const raw = typeof o.raw_payload === 'string' ? JSON.parse(o.raw_payload) : o.raw_payload;
+                            setG2GOrderId(o.order_id);
+                            setG2GOrderData({ ...raw, ...o });
+                        }
+
+                        setTrackedG2GOrders(newOrders);
                     }
                 } catch (e) { console.error("G2G Polling Error", e); }
             }, 5000); // Poll every 5 seconds
         }
         return () => { if (interval) clearInterval(interval); };
-    }, [activeTab]);
+    }, [activeTab, trackedG2GOrders.length, g2gOrderData]);
 
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
@@ -2261,87 +2291,111 @@ function AdminDashboard() {
                                             <h3 style={{ fontSize: '1rem', margin: 0, color: '#888' }}>📜 Recent Webhook Events</h3>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,255,136,0.05)', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
                                                 <div className="pulse" style={{ width: '6px', height: '6px', background: '#00ff88', borderRadius: '50%' }}></div>
-                                                <span style={{ fontSize: '0.65rem', color: '#00ff88', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Live</span>
+                                                <span style={{ fontSize: '0.65rem', color: '#00ff88', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>Live Feed</span>
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '430px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                                             {trackedG2GOrders.length > 0 ? trackedG2GOrders.map((o: any) => (
                                                 <div
                                                     key={o.id}
                                                     onClick={() => {
                                                         setG2GOrderId(o.order_id);
-                                                        setG2GOrderData(o.raw_payload ? JSON.parse(o.raw_payload) : null);
+                                                        try {
+                                                            const raw = typeof o.raw_payload === 'string' ? JSON.parse(o.raw_payload) : o.raw_payload;
+                                                            // Merge DB fields with raw payload for maximum compatibility
+                                                            setG2GOrderData({
+                                                                ...raw,
+                                                                order_id: o.order_id,
+                                                                product_name: o.product_name,
+                                                                buyer_name: o.buyer_name,
+                                                                amount: o.amount,
+                                                                currency: o.currency,
+                                                                status: o.status
+                                                            });
+                                                        } catch {
+                                                            setG2GOrderData(o);
+                                                        }
                                                     }}
+                                                    className="FadeIn"
                                                     style={{
-                                                        padding: '1rem',
+                                                        padding: '1.2rem',
                                                         background: 'rgba(255,255,255,0.02)',
-                                                        borderRadius: '12px',
-                                                        border: g2gOrderId === o.order_id ? '1px solid #00ccff' : '1px solid transparent',
+                                                        borderRadius: '15px',
+                                                        border: g2gOrderId === o.order_id ? '1px solid #00ccff' : '1px solid rgba(255,255,255,0.05)',
                                                         cursor: 'pointer',
-                                                        transition: 'all 0.2s'
+                                                        transition: 'all 0.2s',
+                                                        position: 'relative',
+                                                        overflow: 'hidden'
                                                     }}
                                                 >
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                                                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>#{o.order_id}</span>
+                                                    {g2gOrderId === o.order_id && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: '#00ccff' }}></div>}
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                                        <span style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff' }}>#{o.order_id}</span>
                                                         <span style={{ fontSize: '0.7rem', color: '#666' }}>{new Date(o.updated_at).toLocaleTimeString()}</span>
                                                     </div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#aaa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.product_name}</div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', alignItems: 'center' }}>
-                                                        <span style={{ fontSize: '0.75rem', color: '#00ccff' }}>{o.buyer_name}</span>
+                                                    <div style={{ fontSize: '0.8rem', color: '#aaa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '0.8rem' }}>{o.product_name || 'G2G Product'}</div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#00ccff', fontWeight: '500' }}>👤 {o.buyer_name || 'Buyer'}</span>
                                                         <span style={{
-                                                            fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px',
-                                                            background: o.status?.toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                                            color: o.status?.toLowerCase().includes('paid') ? '#00ff88' : '#888'
-                                                        }}>{o.status}</span>
+                                                            fontSize: '0.65rem', padding: '3px 8px', borderRadius: '6px',
+                                                            background: (o.status || '').toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                            color: (o.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#888',
+                                                            fontWeight: 'bold'
+                                                        }}>{(o.status || 'NEW').toUpperCase()}</span>
                                                     </div>
                                                 </div>
                                             )) : (
-                                                <div style={{ textAlign: 'center', color: '#444', fontSize: '0.85rem', padding: '1rem' }}>No webhooks received yet.</div>
+                                                <div style={{ textAlign: 'center', color: '#444', fontSize: '0.85rem', padding: '3rem', border: '1px dashed #222', borderRadius: '15px' }}>
+                                                    <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>📡</div>
+                                                    Waiting for real-time G2G orders...
+                                                </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Right: Order Info Display */}
-                                <div className="glass" style={{ padding: '2rem', borderRadius: '20px' }}>
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '20px', minHeight: '600px' }}>
                                     {!g2gOrderData ? (
-                                        <div style={{ height: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#444', textAlign: 'center' }}>
-                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎮</div>
-                                            <p>Enter an Order ID from G2G to see details and perform delivery.</p>
+                                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#444', textAlign: 'center' }}>
+                                            <div className="pulse" style={{ fontSize: '4rem', marginBottom: '1.5rem', opacity: 0.3 }}>🎮</div>
+                                            <h3 style={{ color: '#333' }}>Ready for Fulfillment</h3>
+                                            <p>Select an order from the Live Feed or enter an ID manually to begin delivery.</p>
                                         </div>
                                     ) : (
                                         <div className="FadeIn">
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
                                                 <div>
-                                                    <h3 style={{ margin: 0, color: '#00ccff' }}>Order #{g2gOrderData.order_number || g2gOrderId}</h3>
-                                                    <div style={{ fontSize: '0.9rem', color: '#888' }}>Platform: G2G Marketplace</div>
+                                                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '1.8rem' }}>Order #{g2gOrderData.order_number || g2gOrderData.order_id || g2gOrderId}</h3>
+                                                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.4rem' }}>Source: G2G Marketplace API v2</div>
                                                 </div>
-                                                <div style={{ textAlign: 'right' }}>
-                                                    <div style={{
-                                                        padding: '4px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold',
-                                                        background: g2gOrderData.order_status?.toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                                        color: g2gOrderData.order_status?.toLowerCase().includes('paid') ? '#00ff88' : '#ccc'
-                                                    }}>
-                                                        {g2gOrderData.order_status?.toUpperCase() || 'UNKNOWN'}
-                                                    </div>
+                                                <div style={{
+                                                    padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold',
+                                                    background: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                    color: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#888',
+                                                    border: '1px solid rgba(255,255,255,0.05)'
+                                                }}>
+                                                    {(g2gOrderData.order_status || g2gOrderData.status || 'NEW').toUpperCase()}
                                                 </div>
                                             </div>
 
                                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
-                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Buyer</label>
-                                                    <div style={{ fontWeight: 'bold' }}>{g2gOrderData.display_name || 'Anonymous G2G Buyer'}</div>
+                                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Customer</label>
+                                                    <div style={{ fontWeight: '600', fontSize: '1.1rem', color: '#fff' }}>{g2gOrderData.display_name || g2gOrderData.buyer_name || g2gOrderData.buyer_display_name || 'G2G Customer'}</div>
                                                 </div>
-                                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
-                                                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Amount</label>
-                                                    <div style={{ fontWeight: 'bold', color: '#00ff88' }}>{g2gOrderData.total_price} {g2gOrderData.currency}</div>
+                                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                    <label style={{ display: 'block', fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Payment</label>
+                                                    <div style={{ fontWeight: '600', fontSize: '1.1rem', color: '#00ff88' }}>
+                                                        {g2gOrderData.total_price || g2gOrderData.amount || '0.00'} {g2gOrderData.currency || 'USD'}
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div style={{ marginBottom: '2rem' }}>
-                                                <label style={{ display: 'block', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Product Title</label>
-                                                <div style={{ fontSize: '1rem', color: '#fff', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
-                                                    {g2gOrderData.product_name || 'N/A'}
+                                            <div style={{ marginBottom: '2.5rem' }}>
+                                                <label style={{ display: 'block', fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.8rem' }}>Product Information</label>
+                                                <div style={{ fontSize: '1.1rem', color: '#fff', background: 'linear-gradient(90deg, rgba(255,255,255,0.04), transparent)', padding: '1.5rem', borderRadius: '15px', borderLeft: '4px solid #00ccff' }}>
+                                                    {g2gOrderData.product_name || g2gOrderData.title || g2gOrderData.product_title || 'G2G Game Account / Service'}
                                                 </div>
                                             </div>
 
