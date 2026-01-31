@@ -28,7 +28,6 @@ function AdminDashboard() {
     // UI State
     const [activeTab, setActiveTab] = useState('inventory'); // 'inventory', 'leads', 'marketing', 'bundle'
     const [showAddInv, setShowAddInv] = useState(false);
-    const [showRecordSale, setShowRecordSale] = useState(false);
     const [showBulk, setShowBulk] = useState(false);
 
     // Filter Stats
@@ -87,7 +86,6 @@ function AdminDashboard() {
     const [fundForm, setFundForm] = useState({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
 
     // Bulk Import State
-    const [isBulk, setIsBulk] = useState(false);
     const [bulkData, setBulkData] = useState('');
     const [logs, setLogs] = useState<any[]>([]);
     const [kbArticles, setKbArticles] = useState<any[]>([]);
@@ -120,7 +118,6 @@ function AdminDashboard() {
     });
 
     const [orders, setOrders] = useState<any[]>([]);
-    const [isBulkProduct, setIsBulkProduct] = useState(false);
     const [importMode, setImportMode] = useState<'manual' | 'csv' | 'z2u' | 'playerup'>('manual');
     const [bulkProductData, setBulkProductData] = useState('');
     const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -220,7 +217,8 @@ function AdminDashboard() {
     const fetchData = async () => {
         try {
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
-                blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes
+                blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
+                categRes, tRes, kbRes
             ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
@@ -240,7 +238,10 @@ function AdminDashboard() {
                 fetch('/api/rentals'),
                 fetch('/api/messages'),
                 fetch('/api/promocodes'),
-                fetch('/api/admin/users')
+                fetch('/api/admin/users'),
+                fetch('/api/admin/categories'),
+                fetch('/api/tickets'),
+                fetch('/api/kb?admin=true')
             ]);
 
             const invData = await invRes.json();
@@ -253,27 +254,6 @@ function AdminDashboard() {
             const catData = await catRes.json();
             const ordersData = await ordersRes.json();
 
-            // Fail-safe Ticket Fetch (Don't crash if DB is down)
-            let ticketData = [];
-            try {
-                const tRes = await fetch('/api/tickets');
-                if (tRes.ok) ticketData = await tRes.json();
-            } catch (e) { console.warn("Tickets fetch failed"); }
-
-            // Categories Fetch
-            let categoryData = [];
-            try {
-                const categRes = await fetch('/api/admin/categories');
-                const catJson = await categRes.json();
-                if (categRes.ok) {
-                    categoryData = Array.isArray(catJson) ? catJson : [];
-                } else {
-                    console.error("Categories fetch failed:", catJson.error);
-                }
-            } catch (e) {
-                console.warn("Categories fetch failed", e);
-            }
-
             setInventory(invData);
             setBalanceHistory(balData);
             setLeads(leadsData);
@@ -282,9 +262,23 @@ function AdminDashboard() {
             setEmployees(empData);
             setLogs(logsData);
             setCatalog(catData);
-            setCategories(categoryData);
             setOrders(ordersData);
-            setTickets(ticketData);
+
+            // Handle Sub-fetches
+            try {
+                const catJson = await categRes.json();
+                setCategories(Array.isArray(catJson) ? catJson : []);
+            } catch { setCategories([]); }
+
+            try {
+                const ticketData = await tRes.json();
+                setTickets(Array.isArray(ticketData) ? ticketData : []);
+            } catch { setTickets([]); }
+
+            try {
+                const kbData = await kbRes.json();
+                setKbArticles(Array.isArray(kbData) ? kbData : []);
+            } catch { setKbArticles([]); }
 
             // Set Restored Data with Array Validation
             try { const b = await blogsRes.json(); setManualBlogs(Array.isArray(b) ? b : []); } catch { setManualBlogs([]); }
@@ -296,11 +290,6 @@ function AdminDashboard() {
             try { const m = await msgRes.json(); setMessages(Array.isArray(m) ? m : []); } catch { setMessages([]); }
             try { const pc = await promoRes.json(); setPromoCodes(Array.isArray(pc) ? pc : []); } catch { setPromoCodes([]); }
             try { const u = await usersRes.json(); setUsers(Array.isArray(u) ? u : []); } catch { setUsers([]); }
-            try {
-                const kbRes = await fetch('/api/kb?admin=true');
-                const kbData = await kbRes.json();
-                setKbArticles(Array.isArray(kbData) ? kbData : []);
-            } catch { setKbArticles([]); }
 
             calculateStats(balData, empData, invData);
         } catch (e) {
@@ -826,7 +815,7 @@ function AdminDashboard() {
         }
 
         try {
-            await fetch('/api/products', {
+            const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -835,9 +824,14 @@ function AdminDashboard() {
                     category_id: genConfig.category_id
                 })
             });
-            setShowGenerator(false);
-            fetchData();
-            alert(`✅ Successfully Generated ${productsCount} Products!`);
+            if (res.ok) {
+                setShowGenerator(false);
+                await fetchData();
+                alert(`✅ Successfully Generated ${productsCount} Products!`);
+            } else {
+                const err = await res.json();
+                alert(`Error: ${err.error || 'Failed to import products'}`);
+            }
         } catch { alert('Generation failed'); }
     };
 
@@ -1130,7 +1124,7 @@ function AdminDashboard() {
                 productName: newSale.productName // For bulk
             })
         });
-        setShowRecordSale(false);
+        alert("Sale recorded successfully!");
         setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
         fetchData();
     };
@@ -1191,47 +1185,143 @@ function AdminDashboard() {
                 }}>
                     <h1 className="text-gradient" style={{ fontSize: '1.8rem', marginBottom: '2rem', paddingLeft: '1rem' }}>Admin Workspace</h1>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {[
-                            { id: 'inventory', label: '📦 Orders', perm: 'orders' },
-                            { id: 'stock', label: '📊 Stock', perm: 'inventory' },
-                            { id: 'website', label: '🌐 Website', perm: 'website' },
-                            { id: 'sell', label: '💸 Sales', perm: 'sales' },
-                            { id: 'finance', label: '💰 Finance', perm: 'finance' },
-                            { id: 'payments', label: '💳 Payments', perm: 'settings' }, // Removed href to keep in-app
-                            { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
-                            { id: 'leads', label: '👥 Leads', perm: 'leads' },
-                            { id: 'users', label: '👤 Buyers', perm: 'users' },
-                            { id: 'support', label: '🎫 Support', perm: 'support' },
-                            { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
-                            { id: 'marketing', label: '📢 Marketing', perm: 'marketing' },
-                            { id: 'tools', label: '🛠️ Tools', perm: 'tools' },
-                            { id: 'hr', label: '👔 Staff & Admins', perm: 'hr' },
-                            { id: 'logs', label: '📜 Logs', perm: 'all' },
-                            { id: 'kb', label: '📚 KB/FAQ', perm: 'website' },
-                            { id: 'settings', label: '⚙️ Settings', perm: 'settings' }
-                        ].filter(tab => hasPermission(tab.perm)).map((tab: any) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => tab.href ? router.push(tab.href) : handleTabChange(tab.id)}
-                                style={{
-                                    background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
-                                    border: 'none',
-                                    borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
-                                    color: activeTab === tab.id ? '#00ff88' : '#888',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer',
-                                    padding: '0.8rem 1rem',
-                                    textAlign: 'left',
-                                    borderRadius: '0 8px 8px 0',
-                                    transition: 'all 0.2s',
-                                    fontWeight: activeTab === tab.id ? 'bold' : 'normal',
-                                    width: '100%'
-                                }}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* Group 1: Store Operations */}
+                        <div>
+                            <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>Store Operations</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                {[
+                                    { id: 'inventory', label: '📦 Orders', perm: 'orders' },
+                                    { id: 'stock', label: '📊 Stock', perm: 'inventory' },
+                                    { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
+                                    { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
+                                ].filter(tab => hasPermission(tab.perm)).map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabChange(tab.id)}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '0.8rem 1rem',
+                                            borderRadius: '8px',
+                                            background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
+                                            borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
+                                            color: activeTab === tab.id ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            transition: 'all 0.2s',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Group 2: Sales & Relationship */}
+                        <div>
+                            <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>Sales & CRM</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                {[
+                                    { id: 'sell', label: '💸 Sales', perm: 'sales' },
+                                    { id: 'leads', label: '👥 Leads', perm: 'leads' },
+                                    { id: 'users', label: '👤 Buyers', perm: 'users' },
+                                    { id: 'support', label: '🎫 Support', perm: 'support' },
+                                ].filter(tab => hasPermission(tab.perm)).map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabChange(tab.id)}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '0.8rem 1rem',
+                                            borderRadius: '8px',
+                                            background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
+                                            borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
+                                            color: activeTab === tab.id ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            transition: 'all 0.2s',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Group 3: Content & Tools */}
+                        <div>
+                            <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>Content & Tools</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                {[
+                                    { id: 'website', label: '🌐 Website', perm: 'website' },
+                                    { id: 'marketing', label: '📢 Marketing', perm: 'marketing' },
+                                    { id: 'tools', label: '🛠️ Tools', perm: 'tools' },
+                                    { id: 'kb', label: '📚 KB/FAQ', perm: 'website' },
+                                ].filter(tab => hasPermission(tab.perm)).map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabChange(tab.id)}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '0.8rem 1rem',
+                                            borderRadius: '8px',
+                                            background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
+                                            borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
+                                            color: activeTab === tab.id ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            transition: 'all 0.2s',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Group 4: Administration */}
+                        <div>
+                            <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>Administration</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                {[
+                                    { id: 'finance', label: '💰 Finance', perm: 'finance' },
+                                    { id: 'payments', label: '💳 Payments', perm: 'settings' },
+                                    { id: 'hr', label: '👔 Staff', perm: 'hr' },
+                                    { id: 'logs', label: '📜 Logs', perm: 'all' },
+                                    { id: 'settings', label: '⚙️ Settings', perm: 'settings' }
+                                ].filter(tab => hasPermission(tab.perm)).map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => handleTabChange(tab.id)}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '0.8rem 1rem',
+                                            borderRadius: '8px',
+                                            background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
+                                            borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
+                                            color: activeTab === tab.id ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: activeTab === tab.id ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            fontSize: '0.95rem',
+                                            transition: 'all 0.2s',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 

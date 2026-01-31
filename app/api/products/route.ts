@@ -4,6 +4,39 @@ import { sendRestockEmail } from '@/lib/email';
 
 export async function GET() {
     try {
+        // Ensure products table exists (Self-healing)
+        await query(`
+            CREATE TABLE IF NOT EXISTS products (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                price VARCHAR(50) NOT NULL,
+                image TEXT,
+                platform VARCHAR(100),
+                description TEXT,
+                type VARCHAR(50),
+                creds TEXT,
+                stock INT DEFAULT 1,
+                category_id INT,
+                sale_price VARCHAR(50),
+                sale_ends_at TIMESTAMP NULL,
+                bundle_items TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Ensure inventory table exists
+        await query(`
+            CREATE TABLE IF NOT EXISTS inventory (
+                id VARCHAR(50) PRIMARY KEY,
+                name VARCHAR(255),
+                platform VARCHAR(50),
+                purchasePrice DECIMAL(10,2),
+                status VARCHAR(50) DEFAULT 'In Stock',
+                purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                accountDetails LONGTEXT
+            )
+        `);
+
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
             SELECT p.*, 
