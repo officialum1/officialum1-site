@@ -18,6 +18,8 @@
   RewriteRule ^api/get_offers/?$ php-api/api/get_offers.php [L,QSA]
   RewriteRule ^api/get_orders/?$ php-api/api/get_orders.php [L,QSA]
   RewriteRule ^api/auth/login/?$ php-api/api/auth_login.php [L,QSA]
+  RewriteRule ^api/webhook/order/?$ php-api/api/webhook_order.php [L,QSA]
+  RewriteRule ^api/webhook/offer/?$ php-api/api/webhook_offer.php [L,QSA]
   
   # Handle Next.js static files (_next folder)
   RewriteCond %{REQUEST_URI} ^/_next/

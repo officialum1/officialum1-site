@@ -23,6 +23,8 @@ $routes = [
     'api/get_products' => 'get_products.php',
     'api/create_offer' => 'create_offer.php',
     'api/deliver' => 'deliver.php',
+    'api/webhook/order' => 'webhook_order.php',
+    'api/webhook/offer' => 'webhook_offer.php',
 ];
 
 // Handle dynamic routes

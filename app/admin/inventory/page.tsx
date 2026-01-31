@@ -136,7 +136,7 @@ function AdminDashboard() {
         account_details: '',
         status: 'completed'
     });
-    const [fulfillDetails, setFulfillDetails] = useState('');
+    const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
 
     // Tools State
     const [toolUrl, setToolUrl] = useState('');
@@ -229,7 +229,7 @@ function AdminDashboard() {
         try {
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
                 blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
-                categRes, tRes, kbRes
+                categRes, tRes, kbRes, g2Res
             ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
@@ -252,7 +252,8 @@ function AdminDashboard() {
                 fetch('/api/admin/users'),
                 fetch('/api/admin/categories'),
                 fetch('/api/tickets'),
-                fetch('/api/kb?admin=true')
+                fetch('/api/kb?admin=true'),
+                fetch('/api/admin/g2g?action=get_tracked_orders')
             ]);
 
             const invData = await invRes.json();
@@ -290,6 +291,11 @@ function AdminDashboard() {
                 const kbData = await kbRes.json();
                 setKbArticles(Array.isArray(kbData) ? kbData : []);
             } catch { setKbArticles([]); }
+
+            try {
+                const g2Data = await g2Res.json();
+                setTrackedG2GOrders(Array.isArray(g2Data) ? g2Data : []);
+            } catch { setTrackedG2GOrders([]); }
 
             // Set Restored Data with Array Validation
             try { const b = await blogsRes.json(); setManualBlogs(Array.isArray(b) ? b : []); } catch { setManualBlogs([]); }
@@ -2203,8 +2209,10 @@ function AdminDashboard() {
                                                         })
                                                     });
                                                     const data = await res.json();
-                                                    if (res.ok) alert('✅ Delivered on G2G!');
-                                                    else alert('❌ Error: ' + (data.error || 'Failed'));
+                                                    if (res.ok) {
+                                                        alert('✅ Delivered on G2G!');
+                                                        fetchData(); // Refresh list
+                                                    } else alert('❌ Error: ' + (data.error || 'Failed'));
                                                 } catch { alert('Network error'); }
                                                 finally { setG2GLoading(false); }
                                             }}>
@@ -2228,6 +2236,46 @@ function AdminDashboard() {
                                             </form>
                                         </div>
                                     )}
+
+                                    {/* Recent Tracked Orders List */}
+                                    <div style={{ marginTop: '2.5rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
+                                        <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: '#888' }}>📜 Recent Webhook Events</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                                            {trackedG2GOrders.length > 0 ? trackedG2GOrders.map((o: any) => (
+                                                <div
+                                                    key={o.id}
+                                                    onClick={() => {
+                                                        setG2GOrderId(o.order_id);
+                                                        setG2GOrderData(o.raw_payload ? JSON.parse(o.raw_payload) : null);
+                                                    }}
+                                                    style={{
+                                                        padding: '1rem',
+                                                        background: 'rgba(255,255,255,0.02)',
+                                                        borderRadius: '12px',
+                                                        border: g2gOrderId === o.order_id ? '1px solid #00ccff' : '1px solid transparent',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                                                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>#{o.order_id}</span>
+                                                        <span style={{ fontSize: '0.7rem', color: '#666' }}>{new Date(o.updated_at).toLocaleTimeString()}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#aaa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.product_name}</div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', alignItems: 'center' }}>
+                                                        <span style={{ fontSize: '0.75rem', color: '#00ccff' }}>{o.buyer_name}</span>
+                                                        <span style={{
+                                                            fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px',
+                                                            background: o.status?.toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                            color: o.status?.toLowerCase().includes('paid') ? '#00ff88' : '#888'
+                                                        }}>{o.status}</span>
+                                                    </div>
+                                                </div>
+                                            )) : (
+                                                <div style={{ textAlign: 'center', color: '#444', fontSize: '0.85rem', padding: '1rem' }}>No webhooks received yet.</div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Right: Order Info Display */}

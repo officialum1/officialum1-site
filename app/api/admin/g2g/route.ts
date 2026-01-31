@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { query } from '@/lib/db';
 
 // Configuration (Should ideally be in env but using user's hardcoded values as fallback)
 const G2G_API_KEY = process.env.G2G_API_KEY || "AZES6HAPUIXTNK6ATCLIGHOMNF2TRLH6";
@@ -53,6 +54,11 @@ export async function GET(request: Request) {
             if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
             const result = await makeG2GRequest('GET', `/orders/${orderId}`);
             return NextResponse.json(result.data, { status: result.status });
+        }
+
+        if (action === 'get_tracked_orders') {
+            const rows = await query("SELECT * FROM g2g_orders ORDER BY updated_at DESC LIMIT 50");
+            return NextResponse.json(rows);
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
