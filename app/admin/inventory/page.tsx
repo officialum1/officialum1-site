@@ -264,8 +264,15 @@ function AdminDashboard() {
             let categoryData = [];
             try {
                 const categRes = await fetch('/api/admin/categories');
-                if (categRes.ok) categoryData = await categRes.json();
-            } catch (e) { console.warn("Categories fetch failed"); }
+                const catJson = await categRes.json();
+                if (categRes.ok) {
+                    categoryData = Array.isArray(catJson) ? catJson : [];
+                } else {
+                    console.error("Categories fetch failed:", catJson.error);
+                }
+            } catch (e) {
+                console.warn("Categories fetch failed", e);
+            }
 
             setInventory(invData);
             setBalanceHistory(balData);
@@ -730,20 +737,31 @@ function AdminDashboard() {
 
     const handleAddCategory = async (e: React.FormEvent) => {
         e.preventDefault();
-        const action = 'create';
-        await fetch('/api/admin/categories', {
-            method: 'POST',
-            body: JSON.stringify({ action, ...newCategory })
-        });
-        setShowAddCategory(false);
-        setNewCategory({ name: '', slug: '', icon: '📁' });
-        fetchData();
+        try {
+            const res = await fetch('/api/admin/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'create', ...newCategory })
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                alert("Failed to create category: " + (data.error || 'Unknown error'));
+                return;
+            }
+            setShowAddCategory(false);
+            setNewCategory({ name: '', slug: '', icon: '📁' });
+            fetchData();
+            alert("Category Created Successfully!");
+        } catch (err) {
+            alert("Network error creating category");
+        }
     };
 
     const handleDeleteCategory = async (id: number) => {
         if (!confirm('Are you sure? Products in this category will be uncategorized.')) return;
         await fetch('/api/admin/categories', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete', id })
         });
         fetchData();
@@ -753,6 +771,7 @@ function AdminDashboard() {
         if (!showCategorySale) return;
         await fetch('/api/admin/categories', {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'set_discount',
                 id: showCategorySale.id,

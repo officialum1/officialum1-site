@@ -3,9 +3,22 @@ import { query } from '@/lib/db';
 
 export async function GET() {
     try {
+        // Ensure table exists
+        await query(`
+            CREATE TABLE IF NOT EXISTS categories (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                slug VARCHAR(100) NOT NULL UNIQUE,
+                icon VARCHAR(50),
+                discount_percent DECIMAL(5,2) DEFAULT 0.00,
+                sale_ends_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
         const categories = await query("SELECT * FROM categories ORDER BY name ASC");
         return NextResponse.json(categories);
     } catch (e: any) {
+        console.error("Categories GET Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
