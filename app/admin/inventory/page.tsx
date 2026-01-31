@@ -137,6 +137,7 @@ function AdminDashboard() {
         status: 'completed'
     });
     const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
+    const [fulfillDetails, setFulfillDetails] = useState('');
 
     // Tools State
     const [toolUrl, setToolUrl] = useState('');
