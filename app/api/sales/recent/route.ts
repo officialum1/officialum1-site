@@ -13,7 +13,7 @@ export async function GET() {
                 o.guestEmail,
                 u.email as userEmail
             FROM orders o
-            LEFT JOIN products p ON o.productId = p.id
+            INNER JOIN products p ON o.productId = p.id
             LEFT JOIN users u ON o.userId = u.id
             WHERE o.status = 'paid' OR o.status = 'completed'
             ORDER BY o.date DESC 

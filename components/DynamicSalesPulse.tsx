@@ -38,25 +38,34 @@ export default function DynamicSalesPulse() {
             let selected: any = null;
 
             // Decision Logic: Use real sales if they happened recently, else simulate
-            if (realSales.length > 0 && Math.random() > 0.4) {
-                // Use a real sale
+            // ONLY for items in the Shop Catalog (stock > 0 and exists in shopItems)
+            const activeCatalogItems = shopItems.filter(item => (Number(item.stock) > 0 || Number(item.inventoryStock) > 0));
+
+            if (realSales.length > 0 && Math.random() > 0.5) {
+                // Use a real sale - but only if product is in current active catalog
                 const sale = realSales[Math.floor(Math.random() * realSales.length)];
-                selected = {
-                    title: `Verified Purchase`,
-                    message: `Someone from ${sale.location} bought ${sale.product}`,
-                    time: sale.timeAgo,
-                    type: 'real',
-                    icon: '✅'
-                };
-            } else if (shopItems.length > 0) {
-                // Simulate a purchase from real shop items
-                const item = shopItems[Math.floor(Math.random() * shopItems.length)];
-                const locations = ["London", "New York", "Dubai", "Sydney", "Singapore", "Berlin", "Paris", "Toronto"];
+                const isInCatalog = shopItems.some(item => item.name === sale.product);
+
+                if (isInCatalog) {
+                    selected = {
+                        title: `🛍️ Catalog Sale`,
+                        message: `Someone from ${sale.location} bought ${sale.product}`,
+                        time: sale.timeAgo,
+                        type: 'real',
+                        icon: '✅'
+                    };
+                }
+            }
+
+            if (!selected && activeCatalogItems.length > 0) {
+                // Simulate a purchase from real shop items (Catalog)
+                const item = activeCatalogItems[Math.floor(Math.random() * activeCatalogItems.length)];
+                const locations = ["London", "New York", "Dubai", "Sydney", "Singapore", "Berlin", "Paris", "Toronto", "Riyadh", "Tokyo"];
                 const loc = locations[Math.floor(Math.random() * locations.length)];
                 const times = ["Just now", "2 mins ago", "5 mins ago", "12 mins ago", "24 mins ago"];
 
                 selected = {
-                    title: `New Sale`,
+                    title: `🛍️ New Sale`,
                     message: `Someone from ${loc} purchased ${item.name}`,
                     time: times[Math.floor(Math.random() * times.length)],
                     type: 'simulated',
