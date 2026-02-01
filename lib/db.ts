@@ -408,4 +408,31 @@ export async function initDB() {
             last_checked TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // --- PERFORMANCE OPTIMIZATIONS: ADD INDEXES ---
+    console.log("Adding performance indexes...");
+
+    // Orders table indexes
+    try { await query("CREATE INDEX idx_orders_userId ON orders(userId)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_orders_guestEmail ON orders(guestEmail)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_orders_status ON orders(status)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_orders_date ON orders(date)"); } catch (e) { }
+
+    // Products table indexes
+    try { await query("CREATE INDEX idx_products_platform ON products(platform)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_products_type ON products(type)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_products_stock ON products(stock)"); } catch (e) { }
+
+    // Leads table indexes
+    try { await query("CREATE INDEX idx_leads_status ON leads(status)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_leads_platform ON leads(platform)"); } catch (e) { }
+
+    // Market Intel indexes
+    try { await query("CREATE INDEX idx_market_platform ON market_intel(platform)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_market_status ON market_intel(status)"); } catch (e) { }
+
+    // Users table indexes
+    try { await query("CREATE INDEX idx_users_email ON users(email)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_users_role ON users(role)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_users_referral_code ON users(referral_code)"); } catch (e) { }
 }

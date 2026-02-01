@@ -2,12 +2,19 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { query } from '@/lib/db';
 
-const WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET || 's4CheGaCDqiso';
+const WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET;
 
-export async function POST(request: Request) {
+if (!WEBHOOK_SECRET) {
+    console.error("FATAL: OFFER_WEBHOOK_SECRET not configured");
+}
+
+export async function POST(req: Request) {
     try {
-        const rawBody = await request.text();
-        const signature = request.headers.get('g2g-signature') || request.headers.get('x-g2g-signature') || '';
+        if (!WEBHOOK_SECRET) {
+            return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+        }
+        const rawBody = await req.text();
+        const signature = req.headers.get('g2g-signature') || req.headers.get('x-g2g-signature') || '';
 
         // Verify Signature
         if (WEBHOOK_SECRET && signature) {

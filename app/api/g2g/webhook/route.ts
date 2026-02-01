@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { query } from '@/lib/db';
+import crypto from 'crypto';
+import { sendTelegramMessage } from '@/lib/telegram';
 import { makeG2GRequest, sendG2GMessage } from '@/lib/g2g';
 import { sendDiscordNotification } from '@/lib/discord';
 
-const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET || "nKkGeGGv5Gzx";
-const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET || "5xaz6MvvSBV661I";
+const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET;
+const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET;
+
+if (!ORDER_WEBHOOK_SECRET || !OFFER_WEBHOOK_SECRET) {
+    console.error("FATAL: G2G webhook secrets not configured");
+}
 
 export async function POST(request: Request) {
     const rawBody = await request.text();
@@ -22,6 +27,10 @@ export async function POST(request: Request) {
     const secret = eventType.startsWith('order.') ? ORDER_WEBHOOK_SECRET : OFFER_WEBHOOK_SECRET;
 
     if (signature) {
+        if (!secret) {
+            console.error("G2G Webhook: Secret not configured");
+            return NextResponse.json({ error: 'Webhook configuration error' }, { status: 500 });
+        }
         const expectedSignature = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
         if (expectedSignature !== signature) {
             console.error("G2G Webhook: Invalid Signature");

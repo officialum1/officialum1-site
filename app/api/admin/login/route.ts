@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
-const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "famemake_secure_2024";
+const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!DEFAULT_ADMIN_PASSWORD) {
+    console.error("FATAL: ADMIN_PASSWORD not configured");
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -28,17 +32,19 @@ export async function POST(request: NextRequest) {
 
         if (isDefault) {
             // Default is always plain text
-            if (password === storedPass) isValid = true;
+            if (storedPass && password === storedPass) isValid = true;
         } else {
             // Check if it matches hash
-            const isMatch = await bcrypt.compare(password, storedPass).catch(() => false);
-            if (isMatch) {
-                isValid = true;
-            } else if (password === storedPass) {
-                // Fallback: It was stored as plain text, match and migrate
-                isValid = true;
-                const newHash = await bcrypt.hash(password, 10);
-                await query("UPDATE settings SET setting_value = ? WHERE setting_key = 'admin_password'", [newHash]);
+            if (storedPass) {
+                const isMatch = await bcrypt.compare(password, storedPass).catch(() => false);
+                if (isMatch) {
+                    isValid = true;
+                } else if (password === storedPass) {
+                    // Fallback: It was stored as plain text, match and migrate
+                    isValid = true;
+                    const newHash = await bcrypt.hash(password, 10);
+                    await query("UPDATE settings SET setting_value = ? WHERE setting_key = 'admin_password'", [newHash]);
+                }
             }
         }
 

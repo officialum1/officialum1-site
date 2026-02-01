@@ -1,17 +1,35 @@
 import crypto from 'crypto';
 import { query } from './db';
 
-const G2G_API_KEY = process.env.G2G_API_KEY || "AZES6HAPUIXTNK6ATCLIGHOMNF2TRLH6";
-const G2G_SECRET_KEY = process.env.G2G_SECRET_KEY || "asWMg3K5xwxHiAMr0LxGHkEDx0Z7XnXzJsJ1V3feRV2";
-const G2G_USER_ID = process.env.G2G_USER_ID || "7788063";
-const G2G_BASE_URL = "https://open-api.g2g.com/v2";
+// Security: Require environment variables (no fallbacks)
+const G2G_API_KEY = process.env.G2G_API_KEY;
+const G2G_SECRET_KEY = process.env.G2G_SECRET_KEY;
+const G2G_USER_ID = process.env.G2G_USER_ID;
+const BASE_URL = "https://api.g2g.com/v1";
+
+// Validate required credentials
+if (!G2G_API_KEY || !G2G_SECRET_KEY || !G2G_USER_ID) {
+    console.error("FATAL: G2G credentials not configured. Set G2G_API_KEY, G2G_SECRET_KEY, and G2G_USER_ID in environment variables.");
+}
+
+interface G2GProduct { } // This line was incomplete in the instruction, assuming it's an empty interface for now.
 
 function generateSignature(path: string, timestamp: string) {
+    // Ensure credentials are not undefined before using them
+    if (!G2G_API_KEY || !G2G_USER_ID || !G2G_SECRET_KEY) {
+        throw new Error("G2G credentials are not set. Cannot generate signature.");
+    }
     const stringToSign = path + G2G_API_KEY + G2G_USER_ID + timestamp;
     return crypto.createHmac('sha256', G2G_SECRET_KEY).update(stringToSign).digest('hex');
 }
 
 export async function makeG2GRequest(method: string, path: string, body: any = null) {
+    // Ensure credentials are not undefined before making a request
+    if (!G2G_API_KEY || !G2G_USER_ID || !G2G_SECRET_KEY) {
+        console.error("G2G credentials are not set. Cannot make G2G request.");
+        return { status: 500, data: { error: "G2G credentials not configured" } };
+    }
+
     const timestamp = Date.now().toString();
     const signaturePath = `/v2${path}`;
     const signature = generateSignature(signaturePath, timestamp);
@@ -24,7 +42,7 @@ export async function makeG2GRequest(method: string, path: string, body: any = n
         'Content-Type': 'application/json'
     };
 
-    const url = `${G2G_BASE_URL}${path}`;
+    const url = `${BASE_URL}${path}`;
     const options: RequestInit = {
         method,
         headers,
