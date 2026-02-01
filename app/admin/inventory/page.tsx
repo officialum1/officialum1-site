@@ -2388,54 +2388,7 @@ function AdminDashboard() {
                                         </button>
                                     </div>
 
-                                    {g2gOrderData && (
-                                        <div style={{ borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
-                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>📦 Deliver to G2G</h3>
-                                            <form onSubmit={async (e) => {
-                                                e.preventDefault();
-                                                if (!confirm('Confirm G2G Delivery? This action is permanent on G2G.')) return;
-                                                setG2GLoading(true);
-                                                try {
-                                                    const res = await fetch('/api/admin/g2g', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({
-                                                            action: 'deliver_order',
-                                                            orderId: g2gOrderId,
-                                                            delivery_details: {
-                                                                status: g2gDelivery.status,
-                                                                content: g2gDelivery.account_details
-                                                            }
-                                                        })
-                                                    });
-                                                    const data = await res.json();
-                                                    if (res.ok) {
-                                                        alert('✅ Delivered on G2G!');
-                                                        fetchData(); // Refresh list
-                                                    } else alert('❌ Error: ' + (data.error || 'Failed'));
-                                                } catch { alert('Network error'); }
-                                                finally { setG2GLoading(false); }
-                                            }}>
-                                                <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Account Details (Shared with Buyer)</label>
-                                                <textarea
-                                                    className="input-field"
-                                                    value={g2gDelivery.account_details}
-                                                    onChange={(e) => setG2GDelivery({ ...g2gDelivery, account_details: e.target.value })}
-                                                    placeholder="Login:Password:Token etc."
-                                                    style={{ width: '100%', height: '120px', marginBottom: '1rem', fontFamily: 'monospace' }}
-                                                    required
-                                                />
-                                                <button
-                                                    type="submit"
-                                                    disabled={g2gLoading}
-                                                    className="btn btn-primary"
-                                                    style={{ width: '100%', background: 'linear-gradient(45deg, #00ccff, #0088ff)', padding: '1rem' }}
-                                                >
-                                                    {g2gLoading ? 'Processing...' : '🚀 Submit Delivery to G2G'}
-                                                </button>
-                                            </form>
-                                        </div>
-                                    )}
+
 
                                     {/* Recent Tracked Orders List */}
                                     <div style={{ marginTop: '2.5rem', borderTop: '1px solid #222', paddingTop: '1.5rem' }}>
@@ -2450,7 +2403,16 @@ function AdminDashboard() {
                                             {trackedG2GOrders.length > 0 ? trackedG2GOrders.map((o: any) => (
                                                 <div
                                                     key={o.id}
-                                                    onClick={() => setG2GOrderId(o.order_id)}
+                                                    onClick={async () => {
+                                                        setG2GOrderId(o.order_id);
+                                                        setG2GLoading(true);
+                                                        try {
+                                                            const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${o.order_id}`);
+                                                            const data = await res.json();
+                                                            if (res.ok) setG2GOrderData(data);
+                                                        } catch { }
+                                                        finally { setG2GLoading(false); }
+                                                    }}
                                                     className="FadeIn"
                                                     style={{
                                                         padding: '1.2rem',
@@ -2551,13 +2513,63 @@ function AdminDashboard() {
                                             </div>
 
                                             {g2gOrderData.delivery_details && (
-                                                <div style={{ border: '1px solid rgba(0,255,136,0.2)', padding: '1.5rem', borderRadius: '12px', background: 'rgba(0,255,136,0.02)' }}>
+                                                <div style={{ border: '1px solid rgba(0,255,136,0.2)', padding: '1.5rem', borderRadius: '12px', background: 'rgba(0,255,136,0.02)', marginBottom: '2rem' }}>
                                                     <h4 style={{ color: '#00ff88', margin: '0 0 1rem 0' }}>✅ Already Delivered</h4>
                                                     <div style={{ fontSize: '0.85rem', color: '#ccc', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
                                                         {g2gOrderData.delivery_details.content}
                                                     </div>
                                                 </div>
                                             )}
+
+                                            <div style={{ borderTop: '1px solid #222', paddingTop: '2rem', marginTop: '2rem' }}>
+                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>📦 New Delivery / Update</h3>
+                                                <form onSubmit={async (e) => {
+                                                    e.preventDefault();
+                                                    if (!confirm('Confirm G2G Delivery? This action is permanent on G2G.')) return;
+                                                    setG2GLoading(true);
+                                                    try {
+                                                        const res = await fetch('/api/admin/g2g', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({
+                                                                action: 'deliver_order',
+                                                                orderId: g2gOrderId || g2gOrderData.order_id,
+                                                                delivery_details: {
+                                                                    status: g2gDelivery.status,
+                                                                    content: g2gDelivery.account_details
+                                                                }
+                                                            })
+                                                        });
+                                                        const data = await res.json();
+                                                        if (res.ok) {
+                                                            alert('✅ Delivered on G2G!');
+                                                            // Refresh data
+                                                            const refreshRes = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId || g2gOrderData.order_id}`);
+                                                            if (refreshRes.ok) setG2GOrderData(await refreshRes.json());
+                                                            fetchData();
+                                                        } else alert('❌ Error: ' + (data.error || 'Failed'));
+                                                    } catch { alert('Network error'); }
+                                                    finally { setG2GLoading(false); }
+                                                }}>
+                                                    <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Account Details (Shared with Buyer)</label>
+                                                    <textarea
+                                                        className="input-field"
+                                                        value={g2gDelivery.account_details}
+                                                        onChange={(e) => setG2GDelivery({ ...g2gDelivery, account_details: e.target.value })}
+                                                        placeholder="Login:Password:Token etc."
+                                                        style={{ width: '100%', height: '120px', marginBottom: '1rem', fontFamily: 'monospace', background: '#0a0a0a' }}
+                                                        required
+                                                    />
+                                                    <button
+                                                        type="submit"
+                                                        disabled={g2gLoading}
+                                                        className="btn btn-primary"
+                                                        style={{ width: '100%', background: 'linear-gradient(45deg, #00ccff, #0088ff)', padding: '1rem' }}
+                                                    >
+                                                        {g2gLoading ? 'Processing...' : '🚀 Submit Delivery'}
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
