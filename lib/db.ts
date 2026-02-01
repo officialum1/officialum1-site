@@ -384,4 +384,28 @@ export async function initDB() {
     // Migration: Add category_id to products
     try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
     try { await query("ALTER TABLE products ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL"); } catch (e) { }
+
+    // --- NEW REVENUE ENGINE MIGRATIONS ---
+
+    // 1. Leads Enhancements (Pitch & SEO Audit)
+    try { await query("ALTER TABLE leads ADD COLUMN lighthouse_score VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE leads ADD COLUMN personalized_pitch TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE leads ADD COLUMN website_url VARCHAR(255)"); } catch (e) { }
+
+    // 2. Orders Enhancements (Progress Tracking)
+    try { await query("ALTER TABLE orders ADD COLUMN progress_percent INT DEFAULT 0"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN report_link TEXT"); } catch (e) { }
+
+    // 3. Market Intelligence Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS market_intel (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            item_name VARCHAR(255) NOT NULL,
+            platform VARCHAR(50), -- 'Z2U', 'G2G', etc.
+            competitor_price DECIMAL(10,2),
+            my_price DECIMAL(10,2),
+            status VARCHAR(50), -- 'Competitive', 'Underpriced', 'Overpriced'
+            last_checked TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 }

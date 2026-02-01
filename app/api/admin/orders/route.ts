@@ -22,8 +22,14 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { orderId, credentials } = body;
 
+        if (body.action === 'update_progress') {
+            const { orderId, progress, report_link } = body;
+            await query("UPDATE orders SET progress_percent = ?, report_link = ? WHERE orderId = ?", [progress, report_link, orderId]);
+            return NextResponse.json({ success: true });
+        }
+
+        const { orderId, credentials } = body;
         // 1. Get Order Details
         const orderRows = await query("SELECT * FROM orders WHERE orderId = ?", [orderId]) as any[];
         if (!orderRows.length) return NextResponse.json({ error: "Order not found" }, { status: 404 });

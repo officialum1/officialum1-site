@@ -22,6 +22,7 @@ function AdminDashboard() {
     const [inventory, setInventory] = useState<any[]>([]);
     const [balanceHistory, setBalanceHistory] = useState<any[]>([]);
     const [leads, setLeads] = useState<any[]>([]);
+    const [marketIntel, setMarketIntel] = useState<any[]>([]);
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -143,6 +144,7 @@ function AdminDashboard() {
     const [g2gTab, setG2GTab] = useState<'orders' | 'create_offer' | 'my_offers' | 'my_orders'>('orders');
     const [offerForm, setOfferForm] = useState({ product_id: '', unit_price: '', min_qty: 1, api_qty: 10, description: '', currency: 'USD' });
     const [fulfillDetails, setFulfillDetails] = useState('');
+    const [intelForm, setIntelForm] = useState({ item_name: '', platform: 'Z2U', competitor_price: '', my_price: '' });
 
     // Tools State
     const [toolUrl, setToolUrl] = useState('');
@@ -297,7 +299,7 @@ function AdminDashboard() {
         try {
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
                 blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
-                categRes, tRes, kbRes, g2Res, g2StatsRes, g2OffersRes
+                categRes, tRes, kbRes, g2Res, g2StatsRes, g2OffersRes, intelRes
             ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
@@ -323,7 +325,8 @@ function AdminDashboard() {
                 fetch('/api/kb?admin=true'),
                 fetch('/api/admin/g2g?action=get_tracked_orders'),
                 fetch('/api/admin/g2g?action=get_stats'),
-                fetch('/api/admin/g2g?action=get_tracked_offers')
+                fetch('/api/admin/g2g?action=get_tracked_offers'),
+                fetch('/api/market')
             ]);
 
             const invData = await invRes.json();
@@ -393,6 +396,7 @@ function AdminDashboard() {
         } catch (e) {
             console.error("Failed to load admin data", e);
         } finally {
+            setMarketIntel(await intelRes.json());
             setLoading(false);
         }
     };
@@ -1361,6 +1365,7 @@ function AdminDashboard() {
                                 {[
                                     { id: 'website', label: '🌐 Website', perm: 'website' },
                                     { id: 'marketing', label: '📢 Marketing', perm: 'marketing' },
+                                    { id: 'intel', label: '📊 Intelligence', perm: 'marketing' },
                                     { id: 'tools', label: '🛠️ Tools', perm: 'tools' },
                                     { id: 'kb', label: '📚 KB/FAQ', perm: 'website' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
@@ -1483,19 +1488,44 @@ function AdminDashboard() {
                                                     </span>
                                                 </td>
                                                 <td style={{ padding: '1rem' }}>
-                                                    {order.status !== 'completed' && (
+                                                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                                        {order.status !== 'completed' && (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedOrder(order);
+                                                                    setShowFulfill(true);
+                                                                }}
+                                                                className="btn btn-primary"
+                                                                style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
+                                                            >
+                                                                Fulfill
+                                                            </button>
+                                                        )}
                                                         <button
-                                                            onClick={() => {
-                                                                setSelectedOrder(order);
-                                                                setShowFulfill(true);
+                                                            onClick={async () => {
+                                                                const prog = prompt(`Update progress % (0-100) for ${order.orderId}:`, order.progress_percent || '0');
+                                                                if (prog === null) return;
+                                                                const link = prompt(`Delivery Report / Progress Link (Optional):`, order.report_link || '');
+                                                                if (link === null) return;
+
+                                                                await fetch('/api/admin/orders', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({
+                                                                        action: 'update_progress',
+                                                                        orderId: order.orderId,
+                                                                        progress: parseInt(prog),
+                                                                        report_link: link
+                                                                    })
+                                                                });
+                                                                fetchData();
                                                             }}
-                                                            className="btn btn-primary"
+                                                            className="btn btn-outline"
                                                             style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
                                                         >
-                                                            Fulfill
+                                                            Progress
                                                         </button>
-                                                    )}
-                                                    {order.status === 'completed' && <span style={{ color: '#666', fontSize: '0.8rem' }}>Delivered</span>}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -3475,35 +3505,269 @@ function AdminDashboard() {
                         </div>
                     )}
 
-                    {/* LEADS TAB */}
+                    {/* LEADS (CRM) TAB */}
                     {activeTab === 'leads' && (
-                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                            <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h2 style={{ color: '#00ff88' }}>All Company Leads</h2>
-                                <p style={{ color: '#666' }}>Full CRM Database</p>
-                            </div>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1.5rem' }}>Lead Name</th>
-                                        <th style={{ padding: '1.5rem' }}>Contact</th>
-                                        <th style={{ padding: '1.5rem' }}>Value</th>
-                                        <th style={{ padding: '1.5rem' }}>Status</th>
-                                        <th style={{ padding: '1.5rem' }}>Owner</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {leads.map((lead: any) => (
-                                        <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{lead.name}</td>
-                                            <td style={{ padding: '1.5rem', color: '#888' }}>{lead.contact}</td>
-                                            <td style={{ padding: '1.5rem' }}>${lead.value}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,100,255,0.2)' }}>{lead.status}</span></td>
-                                            <td style={{ padding: '1.5rem', color: '#aaa' }}>{lead.createdBy}</td>
-                                        </tr>
+                        <div className="FadeIn">
+                            {/* Discovery Header */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '24px', marginBottom: '2.5rem', border: '1px solid rgba(0, 255, 136, 0.2)', position: 'relative', overflow: 'hidden' }}>
+                                <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'rgba(0, 255, 136, 0.05)', borderRadius: '50%', filter: 'blur(40px)' }}></div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                                    <div>
+                                        <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                            <span style={{ fontSize: '2.5rem' }}>🎯</span> Business Lead Discovery
+                                        </h2>
+                                        <p style={{ color: '#888', fontSize: '1rem' }}>Manage your CRM and discover high-value corporate clients automatically.</p>
+                                    </div>
+                                    <button
+                                        className="btn btn-primary"
+                                        style={{ background: 'linear-gradient(45deg, #00ff88, #00ccff)', padding: '1rem 2rem', fontWeight: 'bold', border: 'none', boxShadow: '0 10px 30px rgba(0,255,136,0.3)' }}
+                                        onClick={() => alert("AI Lead Search Engine is scanning the web for new targets...")}
+                                    >
+                                        🔍 DISCOVER NEW LEADS
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2.5rem' }}>
+                                    {[
+                                        { label: 'Total Leads', val: leads.length, color: '#fff' },
+                                        { label: 'New Targets', val: leads.filter((l: any) => l.status === 'New').length, color: '#00ccff' },
+                                        { label: 'In Pipeline', val: leads.filter((l: any) => l.status === 'In Progress').length, color: '#ffd700' },
+                                        { label: 'Potential Revenue', val: `$${leads.reduce((sum: number, l: any) => sum + Number(l.budget || 0), 0).toLocaleString()}`, color: '#00ff88' }
+                                    ].map((s, i) => (
+                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>{s.label}</div>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: s.color }}>{s.val}</div>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                                {/* Leads Table */}
+                                <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                                    <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #222', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h3 style={{ margin: 0 }}>Active Lead Database</h3>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>📥 Export</button>
+                                            <button className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>📤 Import CSV</button>
+                                        </div>
+                                    </div>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', borderBottom: '1px solid #222', background: 'rgba(255,255,255,0.02)' }}>
+                                                    <th style={{ padding: '1.2rem', color: '#666', fontSize: '0.85rem' }}>CLIENT / COMPANY</th>
+                                                    <th style={{ padding: '1.2rem', color: '#666', fontSize: '0.85rem' }}>PLATFORM / NICHE</th>
+                                                    <th style={{ padding: '1.2rem', color: '#666', fontSize: '0.85rem' }}>BUDGET</th>
+                                                    <th style={{ padding: '1.2rem', color: '#666', fontSize: '0.85rem' }}>STATUS</th>
+                                                    <th style={{ padding: '1.2rem', color: '#666', fontSize: '0.85rem' }}>ACTION</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {leads.map((lead: any) => (
+                                                    <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}>
+                                                        <td style={{ padding: '1.2rem' }}>
+                                                            <div style={{ fontWeight: 'bold', color: '#fff' }}>{lead.clientName}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#555', marginTop: '4px' }}>
+                                                                {lead.lighthouse_score ? (
+                                                                    <span style={{ color: Number(lead.lighthouse_score) > 80 ? '#00ff88' : '#ff4444' }}>
+                                                                        Lighthouse: {lead.lighthouse_score}%
+                                                                    </span>
+                                                                ) : 'No Audit'}
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '1.2rem' }}>
+                                                            <span style={{ fontSize: '0.9rem', color: '#aaa' }}>{lead.platform}</span>
+                                                        </td>
+                                                        <td style={{ padding: '1.2rem' }}>
+                                                            <span style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(lead.budget).toLocaleString()}</span>
+                                                        </td>
+                                                        <td style={{ padding: '1.2rem' }}>
+                                                            <span style={{
+                                                                padding: '4px 10px',
+                                                                borderRadius: '20px',
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 'bold',
+                                                                background: lead.status === 'New' ? 'rgba(0,255,136,0.1)' : 'rgba(255,215,0,0.1)',
+                                                                color: lead.status === 'New' ? '#00ff88' : '#ffd700',
+                                                                border: `1px solid ${lead.status === 'New' ? 'rgba(0,255,136,0.2)' : 'rgba(255,215,0,0.2)'}`
+                                                            }}>
+                                                                {lead.status.toUpperCase()}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '1.2rem' }}>
+                                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                                <button
+                                                                    title="Audit Website"
+                                                                    onClick={async () => {
+                                                                        const res = await fetch('/api/leads', { method: 'POST', body: JSON.stringify({ action: 'run_audit', id: lead.id }) });
+                                                                        if (res.ok) fetchData();
+                                                                    }}
+                                                                    style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#fff', cursor: 'pointer', padding: '5px', borderRadius: '5px' }}
+                                                                >🔍</button>
+                                                                <button
+                                                                    title="Generate AI Pitch"
+                                                                    onClick={async () => {
+                                                                        const res = await fetch('/api/leads', { method: 'POST', body: JSON.stringify({ action: 'generate_pitch', id: lead.id }) });
+                                                                        if (res.ok) {
+                                                                            const data = await res.json();
+                                                                            alert(`PERSONALIZED PITCH:\n\n${data.pitch}`);
+                                                                            fetchData();
+                                                                        }
+                                                                    }}
+                                                                    style={{ background: 'rgba(0,255,136,0.1)', border: 'none', color: '#00ff88', cursor: 'pointer', padding: '5px', borderRadius: '5px' }}
+                                                                >🤖</button>
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        const n = prompt("Edit notes for this lead:", lead.notes);
+                                                                        if (n !== null) {
+                                                                            await fetch('/api/leads', {
+                                                                                method: 'POST',
+                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                body: JSON.stringify({ action: 'update_status', id: lead.id, status: lead.status, notes: n })
+                                                                            });
+                                                                            fetchData();
+                                                                        }
+                                                                    }}
+                                                                    style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '1.1rem' }}
+                                                                >⚙️</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {leads.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', color: '#444' }}>
+                                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+                                                            No leads in the database. Use Discovery to find some!
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* Discovery Sidebar */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <h4 style={{ marginBottom: '1rem', color: '#00ff88' }}>⚡ Fast Add Lead</h4>
+                                        <form onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            const f = new FormData(e.target as HTMLFormElement);
+                                            const res = await fetch('/api/leads', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    action: 'add',
+                                                    clientName: f.get('name'),
+                                                    platform: f.get('niche'),
+                                                    budget: f.get('budget'),
+                                                    notes: f.get('notes')
+                                                })
+                                            });
+                                            if (res.ok) { (e.target as HTMLFormElement).reset(); fetchData(); }
+                                        }} style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                            <input name="name" placeholder="Contact/Company Name" className="input-field" required style={{ width: '100%' }} />
+                                            <input name="niche" placeholder="Niche (e.g. Crypto/SaaS)" className="input-field" style={{ width: '100%' }} />
+                                            <input name="budget" type="number" placeholder="Estimated Budget ($)" className="input-field" style={{ width: '100%' }} />
+                                            <textarea name="notes" placeholder="Notes..." className="input-field" style={{ width: '100%', height: '80px' }} />
+                                            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>ADD LEAD</button>
+                                        </form>
+                                    </div>
+
+                                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '20px', background: 'linear-gradient(180deg, rgba(0,255,136,0.05), transparent)' }}>
+                                        <h4 style={{ marginBottom: '1rem' }}>📈 Lead Generation Tips</h4>
+                                        <div style={{ fontSize: '0.85rem', color: '#888', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                <span style={{ color: '#00ff88' }}>💡</span>
+                                                <span>Target <b>Monad Early Projects</b> for Next.js dev services. High budget and early stage.</span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                <span style={{ color: '#00ff88' }}>💡</span>
+                                                <span>Audit <b>Shopify stores</b> with &gt; 2s LCP and offer Speed Optimization.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MARKET INTELLIGENCE TAB */}
+                    {activeTab === 'intel' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '2.5rem', borderRadius: '24px', marginBottom: '2.5rem' }}>
+                                <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>📉 Market Intelligence</h2>
+                                <p style={{ color: '#888' }}>Monitor competitor pricing on Z2U, G2G, and PlayerUp to stay competitive.</p>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2rem' }}>
+                                    {[
+                                        { label: 'Tracked Items', val: marketIntel.length },
+                                        { label: 'Competitive', val: marketIntel.filter(i => i.status === 'Competitive').length },
+                                        { label: 'Overpriced', val: marketIntel.filter(i => i.status === 'Overpriced').length },
+                                        { label: 'Underpriced', val: marketIntel.filter(i => i.status === 'Underpriced').length }
+                                    ].map((s, i) => (
+                                        <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '16px' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.5rem' }}>{s.label}</div>
+                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{s.val}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2.5rem' }}>
+                                <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ textAlign: 'left', borderBottom: '1px solid #222', background: 'rgba(255,255,255,0.02)' }}>
+                                                <th style={{ padding: '1.2rem' }}>ITEM NAME</th>
+                                                <th style={{ padding: '1.2rem' }}>PLATFORM</th>
+                                                <th style={{ padding: '1.2rem' }}>COMP. PRICE</th>
+                                                <th style={{ padding: '1.2rem' }}>MY PRICE</th>
+                                                <th style={{ padding: '1.2rem' }}>STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {marketIntel.map((item: any) => (
+                                                <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                    <td style={{ padding: '1.2rem' }}>{item.item_name}</td>
+                                                    <td style={{ padding: '1.2rem' }}>{item.platform}</td>
+                                                    <td style={{ padding: '1.2rem' }}>${item.competitor_price}</td>
+                                                    <td style={{ padding: '1.2rem' }}>${item.my_price}</td>
+                                                    <td style={{ padding: '1.2rem' }}>
+                                                        <span style={{ color: item.status === 'Competitive' ? '#00ff88' : '#ff4444' }}>{item.status}</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                                    <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>➕ Add Item to Track</h3>
+                                    <form onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        await fetch('/api/market', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ action: 'track', ...intelForm })
+                                        });
+                                        setIntelForm({ item_name: '', platform: 'Z2U', competitor_price: '', my_price: '' });
+                                        fetchData();
+                                    }} style={{ display: 'grid', gap: '1rem' }}>
+                                        <input placeholder="Item Name" value={intelForm.item_name} onChange={e => setIntelForm({ ...intelForm, item_name: e.target.value })} className="input-field" required />
+                                        <select value={intelForm.platform} onChange={e => setIntelForm({ ...intelForm, platform: e.target.value })} className="input-field">
+                                            <option value="Z2U">Z2U</option>
+                                            <option value="G2G">G2G</option>
+                                            <option value="PlayerUp">PlayerUp</option>
+                                        </select>
+                                        <input placeholder="Competitor Price ($)" type="number" step="0.01" value={intelForm.competitor_price} onChange={e => setIntelForm({ ...intelForm, competitor_price: e.target.value })} className="input-field" required />
+                                        <input placeholder="My Price ($)" type="number" step="0.01" value={intelForm.my_price} onChange={e => setIntelForm({ ...intelForm, my_price: e.target.value })} className="input-field" required />
+                                        <button type="submit" className="btn btn-primary">START TRACKING</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     )}
 

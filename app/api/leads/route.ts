@@ -32,7 +32,27 @@ export async function POST(request: Request) {
         }
 
         if (body.action === 'update_status') {
-            await query("UPDATE leads SET status = ? WHERE id = ?", [body.status, body.id]);
+            await query("UPDATE leads SET status = ?, notes = ? WHERE id = ?", [body.status, body.notes, body.id]);
+            return NextResponse.json({ success: true });
+        }
+
+        if (body.action === 'generate_pitch') {
+            const results = await query("SELECT * FROM leads WHERE id = ?", [body.id]) as any[];
+            const lead = results[0];
+            const pitch = `Hello ${lead.clientName || 'Team'},\n\nI noticed your work on ${lead.platform} and I believe OfficialUM1 can help scale your presence. Given your current stage, our custom development and SEO optimization would provide a significant edge. Would you be open to a quick chat about our specialized ${lead.platform} packages?\n\nBest,\nOfficialUM1 Team`;
+
+            await query("UPDATE leads SET personalized_pitch = ? WHERE id = ?", [pitch, body.id]);
+            return NextResponse.json({ pitch });
+        }
+
+        if (body.action === 'run_audit') {
+            const score = Math.floor(Math.random() * 40) + 50; // Mock Lighthouse Score
+            await query("UPDATE leads SET lighthouse_score = ? WHERE id = ?", [score.toString(), body.id]);
+            return NextResponse.json({ score });
+        }
+
+        if (body.action === 'delete') {
+            await query("DELETE FROM leads WHERE id = ?", [body.id]);
             return NextResponse.json({ success: true });
         }
 
