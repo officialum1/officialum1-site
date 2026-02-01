@@ -808,7 +808,7 @@ function AdminDashboard() {
 
         setShowAddProduct(false);
         setEditingProduct(null);
-        setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '' });
+        setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '' });
         fetchData();
     };
 
@@ -1913,7 +1913,7 @@ function AdminDashboard() {
                                                     </div>
 
                                                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '' }); }} className="btn btn-outline">Cancel</button>
+                                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '' }); }} className="btn btn-outline">Cancel</button>
                                                         <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                                     </div>
                                                 </form>
