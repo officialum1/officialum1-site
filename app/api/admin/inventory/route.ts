@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { syncG2GStock } from '@/lib/g2g';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -123,6 +124,9 @@ export async function POST(request: Request) {
                 [`log_${Date.now()}`, 'Admin', 'Add Inventory', `Added ${newItem.name} (${newItem.platform})`]
             );
 
+            // Sync G2G
+            await syncG2GStock(newItem.name);
+
             return NextResponse.json(newItem);
         }
 
@@ -244,6 +248,9 @@ export async function POST(request: Request) {
                 [`log_${Date.now()}`, newTransaction.processedBy, 'Record Sale', `Sold items for $${newTransaction.amount} (${newTransaction.platform})`]
             );
 
+            // Sync G2G
+            await syncG2GStock(body.mode === 'bulk' ? body.productName : body.itemName);
+
             return NextResponse.json({ success: true, transaction: newTransaction, delivery: deliveryData });
         }
 
@@ -337,6 +344,9 @@ export async function POST(request: Request) {
                 [`log_${Date.now()}`, 'Admin', 'Bulk Import', `Imported ${created.length} accounts for ${platform}`]
             );
 
+            // Sync G2G
+            if (created.length > 0) await syncG2GStock(created[0].name);
+
             return NextResponse.json({ success: true, count: created.length });
         }
 
@@ -361,6 +371,10 @@ export async function POST(request: Request) {
                 if (ids && ids.length > 0) {
                     const placeholders = ids.map(() => '?').join(',');
                     await query(`UPDATE inventory SET status = 'In Stock' WHERE id IN (${placeholders})`, ids);
+
+                    // Sync G2G
+                    const nameRes: any = await query("SELECT name FROM inventory WHERE id = ?", [ids[0]]);
+                    if (nameRes.length > 0) await syncG2GStock(nameRes[0].name);
                 }
             }
 
@@ -448,6 +462,9 @@ export async function POST(request: Request) {
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
                 [`log_${Date.now()}`, 'Admin', 'Replace Sale', `Replaced ${qty} items for transaction ${transactionId}`]
             );
+
+            // Sync G2G
+            await syncG2GStock(productName);
 
             return NextResponse.json({ success: true });
         }

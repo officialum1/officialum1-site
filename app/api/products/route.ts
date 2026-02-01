@@ -20,6 +20,7 @@ export async function GET() {
                 sale_price VARCHAR(50),
                 sale_ends_at TIMESTAMP NULL,
                 bundle_items TEXT,
+                g2g_listing_id VARCHAR(100),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -42,6 +43,7 @@ export async function GET() {
         try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { }
+        try { await query("ALTER TABLE products ADD COLUMN g2g_listing_id VARCHAR(100)"); } catch (e) { }
 
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
@@ -116,12 +118,12 @@ export async function POST(req: Request) {
 
             return NextResponse.json({ success: true, count: created.length });
         } else if (body.action === 'update') {
-            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id } = body;
+            const { id, name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id, g2g_listing_id } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ?, stock = ?, category_id = ? WHERE id = ?",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null, id]
+                "UPDATE products SET name = ?, platform = ?, price = ?, description = ?, image = ?, sale_price = ?, sale_ends_at = ?, bundle_items = ?, stock = ?, category_id = ?, g2g_listing_id = ? WHERE id = ?",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null, g2g_listing_id || null, id]
             );
 
             await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
@@ -151,12 +153,12 @@ export async function POST(req: Request) {
                 }
             }
         } else {
-            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id } = body;
+            const { name, platform, price, description, image, salePrice, saleEndsAt, bundleItems, stock, category_id, g2g_listing_id } = body;
             const cleanPrice = price.toString().replace(/[^0-9.]/g, '');
 
             await query(
-                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items, stock, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null]
+                "INSERT INTO products (name, platform, price, description, image, sale_price, sale_ends_at, bundle_items, stock, category_id, g2g_listing_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [name, platform, cleanPrice, description, image, salePrice || null, saleEndsAt || null, bundleItems || null, stock || 1, category_id || null, g2g_listing_id || null]
             );
         }
 

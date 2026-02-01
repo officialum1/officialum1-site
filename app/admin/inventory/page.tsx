@@ -99,7 +99,7 @@ function AdminDashboard() {
     const [categories, setCategories] = useState<any[]>([]);
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
-    const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '' });
+    const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '' });
     const [newCategory, setNewCategory] = useState({ name: '', slug: '', icon: '📁' });
     const [showCategorySale, setShowCategorySale] = useState<any>(null); // Category object for sale modal
     const [categorySaleForm, setCategorySaleForm] = useState({ discount: '', expiry: '' });
@@ -1779,7 +1779,8 @@ function AdminDashboard() {
                                                             saleEndsAt: prod.sale_ends_at ? new Date(prod.sale_ends_at).toISOString().slice(0, 16) : '',
                                                             bundleItems: prod.bundle_items || '',
                                                             stock: prod.stock || '1',
-                                                            category_id: prod.category_id || ''
+                                                            category_id: prod.category_id || '',
+                                                            g2g_listing_id: prod.g2g_listing_id || ''
                                                         });
                                                         setShowAddProduct(true);
                                                         setImportMode('manual');
@@ -1856,6 +1857,7 @@ function AdminDashboard() {
                                                     </div>
                                                     <div><label style={{ color: '#ccc' }}>Platform / Brand</label><input className="input-field" value={newProduct.platform} onChange={e => setNewProduct({ ...newProduct, platform: e.target.value })} placeholder="e.g. Discord, Snapchat" required style={{ width: '100%' }} /></div>
                                                     <div><label style={{ color: '#ccc' }}>Price ($)</label><input type="number" className="input-field" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required style={{ width: '100%' }} /></div>
+                                                    <div><label style={{ color: '#00ccff' }}>🔗 G2G Listing ID</label><input className="input-field" value={newProduct.g2g_listing_id} onChange={e => setNewProduct({ ...newProduct, g2g_listing_id: e.target.value })} placeholder="e.g. 1234567" style={{ width: '100%', borderColor: '#00ccff33' }} /></div>
 
                                                     {/* Flash Sale Fields */}
                                                     <div>
@@ -4295,6 +4297,36 @@ function AdminDashboard() {
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                             <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label><input type="password" value={settings.telegram_bot_token || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
                                             <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Chat ID (e.g. @channelname)</label><input type="text" value={settings.telegram_chat_id || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Discord */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(114, 137, 218, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#7289da', marginBottom: '1rem' }}>Discord Command Center</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Webhook URL (Sales Pings)</label><input type="password" value={settings.discord_webhook_url || ''} onChange={e => setSettings({ ...settings, discord_webhook_url: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Discord API Key (Remote Fulfillment)</label><input type="password" value={settings.discord_api_key || ''} onChange={e => setSettings({ ...settings, discord_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* G2G Master Switch */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255, 170, 0, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#ffaa00', marginBottom: '1rem' }}>G2G Automation Master</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center' }}>
+                                            <div>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={settings.g2g_auto_pilot === 'true'}
+                                                        onChange={e => setSettings({ ...settings, g2g_auto_pilot: e.target.checked ? 'true' : 'false' })}
+                                                        style={{ width: '20px', height: '20px' }}
+                                                    />
+                                                    <span style={{ color: '#fff' }}>Enable Auto-Pilot Fulfillment</span>
+                                                </label>
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                                When enabled, "Paid" G2G orders for accounts will be fulfilled automatically using available stock.
+                                            </div>
                                         </div>
                                     </div>
 

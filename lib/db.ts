@@ -242,6 +242,7 @@ export async function initDB() {
     `);
 
     // --- MIGRATIONS & NEW COLUMNS ---
+    try { await query("ALTER TABLE products ADD COLUMN g2g_listing_id VARCHAR(100)"); } catch (e) { }
     try { await query("ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
     try { await query("ALTER TABLE users ADD COLUMN affiliate_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
     try { await query("ALTER TABLE users ADD COLUMN total_affiliate_earnings DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }

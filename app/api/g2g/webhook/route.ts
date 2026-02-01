@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { query } from '@/lib/db';
-import { makeG2GRequest } from '@/lib/g2g';
+import { makeG2GRequest, sendG2GMessage } from '@/lib/g2g';
+import { sendDiscordNotification } from '@/lib/discord';
 
-// Webhook Secrets (Should match what user puts in G2G Dashboard)
 const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET || "nKkGeGGv5Gzx";
 const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET || "5xaz6MvvSBV661I";
 
@@ -11,7 +11,6 @@ export async function POST(request: Request) {
     const rawBody = await request.text();
     const signature = request.headers.get('g2g-signature') || request.headers.get('x-g2g-signature');
 
-    // Choose secret based on event type in body
     let data;
     try {
         data = JSON.parse(rawBody);
@@ -22,7 +21,6 @@ export async function POST(request: Request) {
     const eventType = data.event_type || '';
     const secret = eventType.startsWith('order.') ? ORDER_WEBHOOK_SECRET : OFFER_WEBHOOK_SECRET;
 
-    // Verify Signature
     if (signature) {
         const expectedSignature = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
         if (expectedSignature !== signature) {
@@ -46,6 +44,7 @@ export async function POST(request: Request) {
                 purchase_cost DECIMAL(10,2) DEFAULT 0,
                 profit DECIMAL(10,2) DEFAULT 0,
                 is_auto_delivered BOOLEAN DEFAULT FALSE,
+                auto_message_sent BOOLEAN DEFAULT FALSE,
                 raw_payload JSON,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -56,6 +55,7 @@ export async function POST(request: Request) {
         try { await query("ALTER TABLE g2g_orders ADD COLUMN purchase_cost DECIMAL(10,2) DEFAULT 0"); } catch (e) { }
         try { await query("ALTER TABLE g2g_orders ADD COLUMN profit DECIMAL(10,2) DEFAULT 0"); } catch (e) { }
         try { await query("ALTER TABLE g2g_orders ADD COLUMN is_auto_delivered BOOLEAN DEFAULT FALSE"); } catch (e) { }
+        try { await query("ALTER TABLE g2g_orders ADD COLUMN auto_message_sent BOOLEAN DEFAULT FALSE"); } catch (e) { }
 
         if (eventType.startsWith('order.')) {
             const payload = data.payload || {};
@@ -84,66 +84,80 @@ export async function POST(request: Request) {
                 JSON.stringify(payload)
             ]);
 
-            // --- AUTO-PILOT LOGIC ---
-            // Only auto-pilot if it's Paid and not already delivered
-            if (status.toLowerCase().includes('paid')) {
-                // Check if already auto-delivered (check DB)
-                const [existing]: any = await query("SELECT is_auto_delivered FROM g2g_orders WHERE order_id = ?", [orderId]);
+            // Discord Notification for New Orders
+            if (eventType === 'order.paid' || (eventType === 'order.status_changed' && status.toLowerCase().includes('paid'))) {
+                await sendDiscordNotification(`🛍️ **New G2G Order Paid!**`, {
+                    title: `Order #${orderId}`,
+                    description: `Product: **${productName}**\nBuyer: **${payload.display_name || 'G2G Customer'}**\nAmount: **${amount} ${payload.currency || 'USD'}**`,
+                    color: 3066993, // Green
+                    timestamp: new Date().toISOString()
+                });
+            }
 
-                if (existing && !existing.is_auto_delivered) {
+            // --- AUTO-PILOT LOGIC ---
+            if (status.toLowerCase().includes('paid')) {
+                // Check if Auto-Pilot is enabled in settings
+                const [setting]: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'g2g_auto_pilot'");
+                const isAutoPilotEnabled = setting?.setting_value === 'true';
+
+                const [existing]: any = await query("SELECT is_auto_delivered, auto_message_sent FROM g2g_orders WHERE order_id = ?", [orderId]);
+
+                if (existing) {
                     const isBoosting = productName.toLowerCase().includes('boost');
 
-                    if (isBoosting) {
-                        console.log(`Auto-Pilot: Order ${orderId} is a Boosting service. Skipping automation.`);
-                    } else {
-                        // 1. Try to find a matching Account in Inventory
+                    // --- AUTO CHAT LOGIC ---
+                    if (!existing.auto_message_sent) {
+                        let greeting = "";
+                        if (isBoosting) {
+                            greeting = `Hi ${payload.display_name || 'there'}! 👋 Thanks for choosing OfficialUM1 for your boosting service. Our pro is being assigned now. Please provide your character name/server here if not already specified!`;
+                        } else {
+                            greeting = `Hi ${payload.display_name || 'there'}! 👋 Your account is being prepared for instant delivery. Please stay online. If you are happy with the service, don't forget to leave us a 5-star review! ⭐⭐⭐⭐⭐`;
+                        }
+                        await sendG2GMessage(orderId, greeting);
+                        await query("UPDATE g2g_orders SET auto_message_sent = TRUE WHERE order_id = ?", [orderId]);
+                    }
+
+                    if (isAutoPilotEnabled && !existing.is_auto_delivered && !isBoosting) {
                         const [stock]: any = await query(
                             "SELECT * FROM inventory WHERE (name LIKE ? OR platform LIKE ?) AND status = 'In Stock' LIMIT 1",
                             [`%${productName}%`, `%${productName}%`]
                         );
 
                         if (stock) {
-                            // FOUND STOCK! Start Auto-Delivery
                             console.log(`Auto-Pilot: Delivering Order ${orderId} using stock ${stock.id}`);
-
-                            const deliveryPayload = {
-                                status: 'completed',
-                                content: stock.accountDetails
-                            };
-
+                            const deliveryPayload = { status: 'completed', content: stock.accountDetails };
                             const g2gRes = await makeG2GRequest('POST', `/orders/${orderId}/delivery`, deliveryPayload);
 
                             if (g2gRes.status === 200 || g2gRes.status === 201 || (g2gRes.data && g2gRes.data.success)) {
-                                // Mark Stock as Sold
                                 await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stock.id]);
-
-                                // Update G2G Order Record with profit stats
                                 const profit = amount - stock.purchasePrice;
                                 await query(`
-                                UPDATE g2g_orders 
-                                SET is_auto_delivered = TRUE, 
-                                    purchase_cost = ?,
-                                    profit = ?,
-                                    status = 'Delivered'
-                                WHERE order_id = ?
-                            `, [stock.purchasePrice, profit, orderId]);
+                                    UPDATE g2g_orders 
+                                    SET is_auto_delivered = TRUE, purchase_cost = ?, profit = ?, status = 'Delivered'
+                                    WHERE order_id = ?
+                                `, [stock.purchasePrice, profit, orderId]);
 
-                                // Log Action
                                 await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
                                     [`log_${Date.now()}`, 'System (Auto-Pilot)', 'Auto Delivery', `G2G Order ${orderId} fulfilled automatically.`]
                                 );
+
+                                // Discord Notification for Auto-Delivery
+                                await sendDiscordNotification(`✅ **G2G Auto-Pilot Delivered!**`, {
+                                    title: `Order #${orderId} Fulfilled`,
+                                    description: `Item: **${productName}**\nStock Used: \`${stock.id}\`\nProfit: **+$${profit}** 🛡️`,
+                                    color: 1752220, // Aqua
+                                    timestamp: new Date().toISOString()
+                                });
                             }
-                        } else {
-                            // If no stock, check if it's Boosting (maybe just log it)
-                            console.log(`Auto-Pilot: No matching stock for ${productName}. Likely Boosting or manual fulfillment needed.`);
                         }
                     }
                 }
             }
-
-            return NextResponse.json({ success: true });
-        } catch (e: any) {
-            console.error("G2G Webhook Error:", e.message);
-            return NextResponse.json({ error: e.message }, { status: 500 });
         }
+
+        return NextResponse.json({ success: true });
+    } catch (e: any) {
+        console.error("G2G Webhook Error:", e.message);
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
+}
