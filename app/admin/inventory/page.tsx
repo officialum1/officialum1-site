@@ -2395,13 +2395,19 @@ function AdminDashboard() {
                                                             const data = await res.json();
                                                             if (res.ok) {
                                                                 setG2GOrderData(data);
-                                                                // Auto-Sense Logic: Check Inventory
+                                                                // Auto-Sense Logic: Check Inventory & Type
                                                                 const pName = (data.product_name || data.title || '').toLowerCase();
+
+                                                                if (pName.includes('top up') || pName.includes('views') || pName.includes('followers')) {
+                                                                    setG2GDelivery(prev => ({ ...prev, type: 'direct_top_up' }));
+                                                                } else {
+                                                                    setG2GDelivery(prev => ({ ...prev, type: 'account' }));
+                                                                }
+
                                                                 if (inventory.length > 0 && pName) {
                                                                     const match = inventory.find((i: any) => i.name && (pName === i.name.toLowerCase() || pName.includes(i.name.toLowerCase())));
                                                                     if (match && match.data) {
                                                                         setG2GDelivery(prev => ({ ...prev, account_details: match.data, type: 'account' }));
-                                                                        // Toast or visual cue could be added here
                                                                     }
                                                                 }
                                                             }
@@ -2618,18 +2624,24 @@ function AdminDashboard() {
                                                                 style={{ width: '100%', marginBottom: '1rem', background: '#fff', color: '#333' }}
                                                             >
                                                                 <option value="account">Account (Login Details)</option>
+                                                                <option value="direct_top_up">Direct Top Up</option>
                                                                 <option value="code">Digital Code / Key</option>
                                                                 <option value="manual">Manual / Service</option>
                                                             </select>
 
                                                             <label style={{ display: 'block', color: '#888', fontSize: '0.9rem', marginBottom: '0.5rem', borderLeft: '3px solid #ced6e0', paddingLeft: '0.5rem' }}>
-                                                                {(g2gDelivery as any).type === 'code' ? 'Code / Key' : 'Account Details / Note'}
+                                                                {(g2gDelivery as any).type === 'code' ? 'Code / Key' :
+                                                                    (g2gDelivery as any).type === 'direct_top_up' ? 'Proof / Completion Node' :
+                                                                        'Account Details / Note'}
                                                             </label>
                                                             <textarea
                                                                 className="input-field"
                                                                 value={g2gDelivery.account_details}
                                                                 onChange={(e) => setG2GDelivery({ ...g2gDelivery, account_details: e.target.value })}
-                                                                placeholder="Login:Password:Token etc."
+                                                                placeholder={
+                                                                    (g2gDelivery as any).type === 'direct_top_up' ? 'Order Completed. Link: ...' :
+                                                                        'Login:Password:Token etc.'
+                                                                }
                                                                 style={{ width: '100%', height: '120px', marginBottom: '1rem', fontFamily: 'monospace', background: '#222', color: '#00ff88', border: '1px solid #444' }}
                                                                 required
                                                             />
