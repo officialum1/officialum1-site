@@ -137,6 +137,7 @@ function AdminDashboard() {
         status: 'completed'
     });
     const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
+    const [g2gStats, setG2GStats] = useState({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false });
     const [fulfillDetails, setFulfillDetails] = useState('');
 
     // Tools State
@@ -292,7 +293,7 @@ function AdminDashboard() {
         try {
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
                 blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
-                categRes, tRes, kbRes, g2Res
+                categRes, tRes, kbRes, g2Res, g2StatsRes
             ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
@@ -316,7 +317,8 @@ function AdminDashboard() {
                 fetch('/api/admin/categories'),
                 fetch('/api/tickets'),
                 fetch('/api/kb?admin=true'),
-                fetch('/api/admin/g2g?action=get_tracked_orders')
+                fetch('/api/admin/g2g?action=get_tracked_orders'),
+                fetch('/api/admin/g2g?action=get_stats')
             ]);
 
             const invData = await invRes.json();
@@ -356,9 +358,15 @@ function AdminDashboard() {
             } catch { setKbArticles([]); }
 
             try {
-                const g2Data = await g2Res.json();
-                setTrackedG2GOrders(Array.isArray(g2Data) ? g2Data : []);
+                const trackedData = await g2Res.json();
+                setTrackedG2GOrders(Array.isArray(trackedData) ? trackedData : []);
             } catch { setTrackedG2GOrders([]); }
+
+            try {
+                const statsData = await g2StatsRes.json();
+                if (statsData) setG2GStats(statsData);
+            } catch { setG2GStats({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false }); }
+
 
             // Set Restored Data with Array Validation
             try { const b = await blogsRes.json(); setManualBlogs(Array.isArray(b) ? b : []); } catch { setManualBlogs([]); }
@@ -2214,8 +2222,50 @@ function AdminDashboard() {
                         <div className="FadeIn">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                 <h2 style={{ margin: 0, fontFamily: 'var(--font-outfit)' }}>🎮 G2G Fulfillment Hub</h2>
-                                <div style={{ background: 'rgba(0,188,255,0.1)', color: '#00ccff', padding: '6px 15px', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(0,204,255,0.2)' }}>
-                                    API CONNECTED ✅
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <div style={{ background: 'rgba(0,188,255,0.1)', color: '#00ccff', padding: '6px 15px', borderRadius: '30px', fontSize: '0.8rem', fontWeight: 'bold', border: '1px solid rgba(0,204,255,0.2)' }}>
+                                        API CONNECTED ✅
+                                    </div>
+                                    <button onClick={fetchData} className="btn" style={{ padding: '6px 15px', background: 'rgba(255,255,255,0.05)', border: '1px solid #333', color: '#fff' }}>🔄 Sync</button>
+                                </div>
+                            </div>
+
+                            {/* G2G Stats Row */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: '#888', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Total Sales (G2G)</div>
+                                    <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#fff' }}>${Number(g2gStats.totalRevenue || 0).toLocaleString()}</div>
+                                </div>
+                                {hasPermission('finance') && (
+                                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '15px', border: '1px solid rgba(0,255,136,0.3)', background: 'linear-gradient(135deg, rgba(0,255,136,0.05), transparent)' }}>
+                                        <div style={{ color: '#00ff88', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Net Profit 🛡️</div>
+                                        <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#00ff88' }}>${Number(g2gStats.totalProfit || 0).toLocaleString()}</div>
+                                    </div>
+                                )}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ color: '#888', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Lifetime Orders</div>
+                                    <div style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#fff' }}>{g2gStats.totalOrders || 0}</div>
+                                </div>
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '15px', border: g2gStats.autoPilot ? '1px solid #00ff88' : '1px solid #444', position: 'relative', overflow: 'hidden' }}>
+                                    {g2gStats.autoPilot && <div className="pulse" style={{ position: 'absolute', top: '-10px', right: '-10px', width: '40px', height: '40px', background: 'rgba(0,255,136,0.1)', borderRadius: '50%' }}></div>}
+                                    <div style={{ color: '#888', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Auto-Pilot System</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: g2gStats.autoPilot ? '#00ff88' : '#888' }}>{g2gStats.autoPilot ? 'ACTIVE 🤖' : 'OFF'}</div>
+                                        <button
+                                            onClick={async () => {
+                                                const res = await fetch('/api/admin/g2g', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ action: 'toggle_auto_pilot', enabled: !g2gStats.autoPilot })
+                                                });
+                                                if (res.ok) fetchData();
+                                            }}
+                                            className="btn"
+                                            style={{ padding: '5px 12px', fontSize: '0.7rem', background: g2gStats.autoPilot ? 'rgba(0,255,136,0.2)' : '#222', border: g2gStats.autoPilot ? '1px solid #00ff88' : '1px solid #444', color: g2gStats.autoPilot ? '#fff' : '#666' }}
+                                        >
+                                            {g2gStats.autoPilot ? 'Stop' : 'Enable'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2340,6 +2390,9 @@ function AdminDashboard() {
                                                             color: (o.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#888',
                                                             fontWeight: 'bold'
                                                         }}>{(o.status || 'NEW').toUpperCase()}</span>
+                                                        {hasPermission('finance') && o.profit > 0 && (
+                                                            <span style={{ fontSize: '0.7rem', color: '#00ff88', marginLeft: '0.5rem' }}>+${o.profit}</span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )) : (
@@ -2364,16 +2417,29 @@ function AdminDashboard() {
                                         <div className="FadeIn">
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
                                                 <div>
-                                                    <h3 style={{ margin: 0, color: '#00ccff', fontSize: '1.8rem' }}>Order #{g2gOrderData.order_number || g2gOrderData.order_id || g2gOrderId}</h3>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                        <h3 style={{ margin: 0, color: '#00ccff', fontSize: '1.8rem' }}>Order #{g2gOrderData.order_number || g2gOrderData.order_id || g2gOrderId}</h3>
+                                                        {((g2gOrderData.product_name || '').toLowerCase().includes('boost') || (g2gOrderData.title || '').toLowerCase().includes('boost')) ? (
+                                                            <span style={{ padding: '4px 10px', borderRadius: '4px', background: 'rgba(255,170,0,0.1)', color: '#ffaa00', fontSize: '0.65rem', fontWeight: 'bold', border: '1px solid #ffaa00' }}>⚡ BOOSTING SERVICE</span>
+                                                        ) : (
+                                                            <span style={{ padding: '4px 10px', borderRadius: '4px', background: 'rgba(0,188,255,0.1)', color: '#00ccff', fontSize: '0.65rem', fontWeight: 'bold', border: '1px solid #00ccff' }}>🎮 ACCOUNT SALE</span>
+                                                        )}
+                                                        {g2gOrderData.is_auto_delivered && <span style={{ padding: '4px 10px', borderRadius: '4px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', fontSize: '0.65rem', fontWeight: 'bold', border: '1px solid #00ff88' }}>🤖 AUTO-PILOT</span>}
+                                                    </div>
                                                     <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.4rem' }}>Source: G2G Marketplace API v2</div>
                                                 </div>
-                                                <div style={{
-                                                    padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold',
-                                                    background: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                                    color: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#888',
-                                                    border: '1px solid rgba(255,255,255,0.05)'
-                                                }}>
-                                                    {(g2gOrderData.order_status || g2gOrderData.status || 'NEW').toUpperCase()}
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                                    <div style={{
+                                                        padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold',
+                                                        background: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') || (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('delivered') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                        color: (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('paid') || (g2gOrderData.order_status || g2gOrderData.status || '').toLowerCase().includes('delivered') ? '#00ff88' : '#888',
+                                                        border: '1px solid rgba(255,255,255,0.05)'
+                                                    }}>
+                                                        {(g2gOrderData.order_status || g2gOrderData.status || 'NEW').toUpperCase()}
+                                                    </div>
+                                                    {hasPermission('finance') && g2gOrderData.profit > 0 && (
+                                                        <div style={{ fontSize: '0.75rem', color: '#00ff88', fontWeight: 'bold' }}>Profit: +${g2gOrderData.profit} 🛡️</div>
+                                                    )}
                                                 </div>
                                             </div>
 
