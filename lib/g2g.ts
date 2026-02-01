@@ -45,16 +45,17 @@ export async function makeG2GRequest(method: string, path: string, body: any = n
         return { status: 500, data: { error: "G2G credentials not configured" } };
     }
 
-    const timestamp = Date.now().toString();
+    const timestamp = Math.floor(Date.now() / 1000).toString();
     const signaturePath = `/v1${path}`;
     const signature = generateSignature(signaturePath, timestamp, apiKey, secretKey, userId);
 
     const headers: any = {
-        'g2g-api-key': apiKey,
-        'g2g-timestamp': timestamp,
-        'g2g-signature': signature,
-        'g2g-userid': userId,
-        'Content-Type': 'application/json'
+        'G2G-API-KEY': apiKey,
+        'G2G-TIMESTAMP': timestamp,
+        'G2G-SIGNATURE': signature,
+        'G2G-USERID': userId,
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     };
 
     const url = `${BASE_URL}${path}`;

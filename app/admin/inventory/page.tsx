@@ -2610,8 +2610,40 @@ function AdminDashboard() {
                                                             <input className="input-field" value={settings.g2g_user_id || g2gOrderData.seller_id || ''} readOnly style={{ background: '#111', border: '1px solid #333', color: '#fff', width: '100%' }} />
                                                         </div>
                                                         <div style={{ display: 'flex', gap: '1rem' }}>
-                                                            <input className="input-field" value={g2gOrderData.order_id || ''} readOnly style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff' }} />
-                                                            <button className="btn btn-primary" style={{ background: '#6e62f9' }}>FETCH ORDER</button>
+                                                            <input
+                                                                className="input-field"
+                                                                value={g2gOrderId}
+                                                                onChange={(e) => setG2GOrderId(e.target.value)}
+                                                                placeholder="Enter G2G Order ID (e.g. 1735...)"
+                                                                style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff' }}
+                                                            />
+                                                            <button
+                                                                className="btn btn-primary"
+                                                                style={{ background: '#6e62f9' }}
+                                                                disabled={g2gLoading}
+                                                                onClick={async () => {
+                                                                    if (!g2gOrderId) return;
+                                                                    setG2GLoading(true);
+                                                                    try {
+                                                                        const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
+                                                                        const data = await res.json();
+                                                                        if (res.ok) {
+                                                                            setG2GOrderData(data);
+                                                                            const pName = (data.product_name || data.title || '').toLowerCase();
+                                                                            if (pName.includes('top up') || pName.includes('views') || pName.includes('followers')) {
+                                                                                setG2GDelivery((prev: any) => ({ ...prev, type: 'direct_top_up' }));
+                                                                            } else {
+                                                                                setG2GDelivery((prev: any) => ({ ...prev, type: 'account' }));
+                                                                            }
+                                                                        } else {
+                                                                            setG2GOrderData(data);
+                                                                        }
+                                                                    } catch { alert('Network error'); }
+                                                                    finally { setG2GLoading(false); }
+                                                                }}
+                                                            >
+                                                                {g2gLoading ? '...' : 'FETCH ORDER'}
+                                                            </button>
                                                         </div>
                                                     </div>
 
