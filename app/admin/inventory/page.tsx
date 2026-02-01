@@ -2377,8 +2377,8 @@ function AdminDashboard() {
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
                                         {/* Left: Search & Action */}
                                         <div className="glass" style={{ padding: '2rem', borderRadius: '20px', height: 'fit-content' }}>
-                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>🔍 Fetch G2G Order</h3>
-                                            <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
+
+                                            {false && (<div style={{ display: 'flex', gap: '0.8rem', marginBottom: '1.5rem' }}>
                                                 <input
                                                     className="input-field"
                                                     placeholder="Enter G2G Order #"
@@ -2421,7 +2421,7 @@ function AdminDashboard() {
                                                 >
                                                     {g2gLoading ? '...' : 'Fetch'}
                                                 </button>
-                                            </div>
+                                            </div>)}
 
 
 
@@ -2513,7 +2513,48 @@ function AdminDashboard() {
                                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#444', textAlign: 'center' }}>
                                                     <div className="pulse" style={{ fontSize: '4rem', marginBottom: '1.5rem', opacity: 0.3 }}>🎮</div>
                                                     <h3 style={{ color: '#333' }}>Ready for Fulfillment</h3>
-                                                    <p>Select an order from the Live Feed or enter an ID manually to begin delivery.</p>
+                                                    <p>Select an order from the Live Feed below or enter an ID manually.</p>
+                                                    <div style={{ width: '100%', maxWidth: '450px', marginTop: '1.5rem', display: 'flex', gap: '0.8rem' }}>
+                                                        <input
+                                                            className="input-field"
+                                                            placeholder="Enter G2G Order ID (e.g. 12345678)"
+                                                            value={g2gOrderId}
+                                                            onChange={(e) => setG2GOrderId(e.target.value)}
+                                                            style={{ flex: 1 }}
+                                                        />
+                                                        <button
+                                                            className="btn btn-primary"
+                                                            disabled={g2gLoading}
+                                                            onClick={async () => {
+                                                                if (!g2gOrderId) return;
+                                                                setG2GLoading(true);
+                                                                try {
+                                                                    const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
+                                                                    const data = await res.json();
+                                                                    if (res.ok) {
+                                                                        setG2GOrderData(data);
+                                                                        // Auto-Sense Logic
+                                                                        const pName = (data.product_name || data.title || '').toLowerCase();
+                                                                        if (pName.includes('top up') || pName.includes('views') || pName.includes('followers')) {
+                                                                            setG2GDelivery(prev => ({ ...prev, type: 'direct_top_up' }));
+                                                                        } else {
+                                                                            setG2GDelivery(prev => ({ ...prev, type: 'account' }));
+                                                                        }
+                                                                        if (inventory.length > 0 && pName) {
+                                                                            const match = inventory.find((i: any) => i.name && (pName === i.name.toLowerCase() || pName.includes(i.name.toLowerCase())));
+                                                                            if (match && match.data) {
+                                                                                setG2GDelivery(prev => ({ ...prev, account_details: match.data, type: 'account' }));
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else alert(data.error || 'Order not found on G2G');
+                                                                } catch { alert('Network error'); }
+                                                                finally { setG2GLoading(false); }
+                                                            }}
+                                                        >
+                                                            {g2gLoading ? '...' : 'Fetch Order'}
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <div className="FadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
