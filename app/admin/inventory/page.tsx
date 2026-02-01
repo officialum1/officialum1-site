@@ -4201,65 +4201,6 @@ function AdminDashboard() {
                                 <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
                                 <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
 
-                                <div style={{ marginBottom: '3rem', padding: '2rem', background: 'rgba(0,255,136,0.05)', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                    <h3 style={{ color: '#00ff88', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>💳 Payment Gateways Control</h3>
-                                    <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Select which payment methods are active for customers on Checkout and Deposit pages.</p>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                                        {[
-                                            { id: 'stripe', name: 'Stripe (Credit Card)', icon: '💳' },
-                                            { id: 'crypto', name: 'Cryptomus (Crypto)', icon: '₿' },
-                                            { id: 'binance', name: 'Binance Pay', icon: '🔹' },
-                                            { id: 'wallet', name: 'Internal Wallet', icon: '💼' }
-                                        ].map(m => {
-                                            let config: any = {};
-                                            try { config = settings.payment_gateways ? JSON.parse(settings.payment_gateways) : { stripe: true, crypto: true, binance: true, wallet: true }; } catch { }
-                                            const isActive = config[m.id] !== false; // Default to true if not found
-
-                                            return (
-                                                <div
-                                                    key={m.id}
-                                                    onClick={() => toggleGateway(m.id)}
-                                                    style={{
-                                                        padding: '1.2rem',
-                                                        borderRadius: '12px',
-                                                        background: isActive ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                                        border: `1px solid ${isActive ? '#00ff88' : 'rgba(255,255,255,0.1)'}`,
-                                                        cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'space-between',
-                                                        transition: 'all 0.2s'
-                                                    }}
-                                                >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                        <span style={{ fontSize: '1.3rem' }}>{m.icon}</span>
-                                                        <span style={{ fontWeight: 'bold', color: isActive ? '#fff' : '#666' }}>{m.name}</span>
-                                                    </div>
-                                                    <div style={{
-                                                        width: '40px',
-                                                        height: '20px',
-                                                        borderRadius: '20px',
-                                                        background: isActive ? '#00ff88' : '#333',
-                                                        position: 'relative',
-                                                        transition: 'background 0.3s'
-                                                    }}>
-                                                        <div style={{
-                                                            width: '16px',
-                                                            height: '16px',
-                                                            borderRadius: '50%',
-                                                            background: '#fff',
-                                                            position: 'absolute',
-                                                            top: '2px',
-                                                            left: isActive ? '22px' : '2px',
-                                                            transition: 'left 0.3s'
-                                                        }} />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
 
                                 <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
                                     {/* Twitter */}
