@@ -15,8 +15,13 @@ export async function GET(request: Request) {
         }
 
         if (action === 'get_tracked_orders') {
-            const rows = await query("SELECT * FROM g2g_orders ORDER BY updated_at DESC LIMIT 50");
-            return NextResponse.json(rows);
+            try {
+                const rows = await query("SELECT * FROM g2g_orders ORDER BY updated_at DESC LIMIT 50");
+                return NextResponse.json(rows);
+            } catch (e: any) {
+                // Return empty if table doesn't exist
+                return NextResponse.json([]);
+            }
         }
 
         if (action === 'get_tracked_offers') {
@@ -24,33 +29,36 @@ export async function GET(request: Request) {
                 const rows = await query("SELECT * FROM g2g_offers ORDER BY updated_at DESC");
                 return NextResponse.json(rows);
             } catch (e) {
-                // Table might not exist yet if no webhook events received
                 return NextResponse.json([]);
             }
         }
 
         if (action === 'get_products') {
             const categoryId = searchParams.get('category_id');
-            const query = categoryId ? `?category_id=${categoryId}` : '';
-            const result = await makeG2GRequest('GET', `/products${query}`);
+            const queryName = categoryId ? `?category_id=${categoryId}` : '';
+            const result = await makeG2GRequest('GET', `/products${queryName}`);
             return NextResponse.json(result.data, { status: result.status });
         }
 
         if (action === 'get_stats') {
-            const stats: any = await query(`
-                SELECT 
-                    SUM(amount) as totalRevenue,
-                    SUM(profit) as totalProfit,
-                    COUNT(*) as totalOrders
-                FROM g2g_orders
-            `);
+            try {
+                const stats: any = await query(`
+                    SELECT 
+                        SUM(amount) as totalRevenue,
+                        SUM(profit) as totalProfit,
+                        COUNT(*) as totalOrders
+                    FROM g2g_orders
+                `);
 
-            const [autoPilot]: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'g2g_auto_pilot'");
+                const [autoPilot]: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'g2g_auto_pilot'");
 
-            return NextResponse.json({
-                ...stats[0],
-                autoPilot: autoPilot?.setting_value === 'true'
-            });
+                return NextResponse.json({
+                    ...stats[0],
+                    autoPilot: autoPilot?.setting_value === 'true'
+                });
+            } catch (e) {
+                return NextResponse.json({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false });
+            }
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
