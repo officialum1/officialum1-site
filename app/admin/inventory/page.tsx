@@ -2680,1149 +2680,318 @@ function AdminDashboard() {
                             )}
 
                         </div>
-                        </div>
+
                     )}
 
-                {/* FINANCE TAB (was Sales) */}
-                {activeTab === 'finance' && (
-                    <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                            {/* ROI & Profitability */}
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,215,0,0.2)', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, transparent 100%)' }}>
-                                <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>📈 ROI & Profitability</h3>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                                    <span style={{ color: '#ccc' }}>Net Profit</span>
-                                    <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.2rem' }}>$ {stats.profit.toFixed(2)}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                                    <span style={{ color: '#ccc' }}>Profit Margin</span>
-                                    <span style={{ fontWeight: 'bold' }}>{stats.margin.toFixed(1)}%</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #333', paddingTop: '0.8rem' }}>
-                                    <span style={{ color: '#ccc' }}>Asset Value (In Stock)</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {stats.stockValue.toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            {/* PKR Wallet */}
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                    <span style={{ color: '#ccc' }}>Meezan Bank</span>
-                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#ccc' }}>UBL / Other</span>
-                                    <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            {/* USD Wallet */}
-                            <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
-                                <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                                    <span style={{ color: '#ccc' }}>Z2U</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
-                                    <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-                            {/* Monthly Profit Breakdown */}
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                                <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📅 Monthly Net Profit</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                    {Object.entries(stats.monthlyProfit).sort((a, b) => b[0].localeCompare(a[0])).map(([month, val]: [string, any]) => (
-                                        <div key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                                            <span style={{ color: '#aaa', fontWeight: 'bold' }}>{new Date(month + '-01').toLocaleDateString('default', { month: 'long', year: 'numeric' })}</span>
-                                            <span style={{ color: val >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
-                                        </div>
-                                    ))}
-                                    {Object.keys(stats.monthlyProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
-                                </div>
-                            </div>
-
-                            {/* Top Performing Accounts */}
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                                <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>💎 Profit per Product/Account</h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                    {Object.entries(stats.productProfit).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5).map(([name, val]: [string, any]) => (
-                                        <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                                            <span style={{ color: '#ddd', fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
-                                            <span style={{ color: '#00ff88', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
-                                        </div>
-                                    ))}
-                                    {Object.keys(stats.productProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                <h2 style={{ color: '#ffd700', margin: 0 }}>💰 Transaction History</h2>
-                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <button onClick={() => setShowAddFunds(true)} className="btn btn-primary" style={{ background: 'rgba(255,255,255,0.1)' }}>+ Add Funds</button>
-                                </div>
-                            </div>
-
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <tr>
-                                        <th style={{ padding: '1rem' }}>Description</th>
-                                        <th style={{ padding: '1rem' }}>Source</th>
-                                        <th style={{ padding: '1rem' }}>By</th>
-                                        <th style={{ padding: '1rem' }}>Date</th>
-                                        <th style={{ padding: '1rem' }}>Amount</th>
-                                        <th style={{ padding: '1rem' }}>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
-                                        <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1rem' }}>{sale.description}</td>
-                                            <td style={{ padding: '1rem' }}>{sale.platform}</td>
-                                            <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
-                                            <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
-                                            <td style={{ padding: '1rem', color: Number(sale.amount) >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
-                                                {sale.currency === 'PKR' ? '₨ ' : '$ '}
-                                                {Number(sale.amount).toLocaleString()}
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>
-                                                {sale.deliveryToken ? (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                        <button
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
-                                                                setCopiedId(sale.id);
-                                                                setTimeout(() => setCopiedId(null), 2000);
-                                                            }}
-                                                            style={{
-                                                                background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
-                                                                border: '1px solid #00ff88',
-                                                                color: '#00ff88',
-                                                                borderRadius: '4px',
-                                                                padding: '0.4rem 0.8rem',
-                                                                cursor: 'pointer',
-                                                                fontSize: '0.8rem',
-                                                                minWidth: '100px',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
-                                                        </button>
-                                                        <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                                                            👁️ {sale.deliveryViews || 0}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Add Funds Modal */}
-                        {/* MOVED: Generate Link Modal */}
-
-
-                        {/* Modernized Add Funds Modal */}
-                        {showAddFunds && (
-                            <div style={{
-                                position: 'fixed',
-                                top: 0, left: 0, right: 0, bottom: 0,
-                                background: 'rgba(0,0,0,0.85)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: 10000,
-                                backdropFilter: 'blur(10px)',
-                                padding: '20px'
-                            }}>
-                                <div className="glass" style={{
-                                    padding: '2.5rem',
-                                    borderRadius: '24px',
-                                    border: '1px solid rgba(0,255,136,0.3)',
-                                    width: '100%',
-                                    maxWidth: '500px',
-                                    boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
-                                    position: 'relative',
-                                    animation: 'modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-                                        <div>
-                                            <h2 style={{ margin: 0, fontSize: '1.6rem', color: '#00ff88', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                <span>💸</span> Finance Adjustment
-                                            </h2>
-                                            <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '4px' }}>Manually adjust account or bank balances.</p>
-                                        </div>
-                                        <button
-                                            onClick={() => setShowAddFunds(false)}
-                                            style={{
-                                                background: 'rgba(255,255,255,0.05)',
-                                                border: 'none',
-                                                color: '#fff',
-                                                width: '36px',
-                                                height: '36px',
-                                                borderRadius: '50%',
-                                                cursor: 'pointer',
-                                                fontSize: '1.2rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
-                                        >×</button>
+                    {/* FINANCE TAB (was Sales) */}
+                    {activeTab === 'finance' && (
+                        <>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                {/* ROI & Profitability */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,215,0,0.2)', background: 'linear-gradient(135deg, rgba(255,215,0,0.05) 0%, transparent 100%)' }}>
+                                    <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>📈 ROI & Profitability</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Net Profit</span>
+                                        <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.2rem' }}>$ {stats.profit.toFixed(2)}</span>
                                     </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Profit Margin</span>
+                                        <span style={{ fontWeight: 'bold' }}>{stats.margin.toFixed(1)}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #333', paddingTop: '0.8rem' }}>
+                                        <span style={{ color: '#ccc' }}>Asset Value (In Stock)</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {stats.stockValue.toLocaleString()}</span>
+                                    </div>
+                                </div>
 
-                                    <form onSubmit={handleAddFunds} style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-                                        <div className="form-group">
-                                            <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Platform / Bank Account</label>
-                                            <select className="input-field" value={fundForm.platform} onChange={e => {
-                                                const p = e.target.value;
-                                                const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
-                                                setFundForm({ ...fundForm, platform: p, currency: c });
-                                            }} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
-                                                <option value="Meezan">Meezan Bank 🇵🇰</option>
-                                                <option value="UBL">UBL (United Bank Limited) 🇵🇰</option>
-                                                <option value="Z2U">Z2U Marketplace 🇺🇸</option>
-                                                <option value="PlayerUp">PlayerUp 🇺🇸</option>
-                                                <option value="G2G">G2G Marketplace 🇺🇸</option>
-                                                <option value="RedotPay">RedotPay Card 💳</option>
-                                                <option value="Direct">Cash / Manual Other 💰</option>
-                                            </select>
+                                {/* PKR Wallet */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                        <span style={{ color: '#ccc' }}>Meezan Bank</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#ccc' }}>UBL / Other</span>
+                                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
+                                    </div>
+                                </div>
+
+                                {/* USD Wallet */}
+                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
+                                    <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                                        <span style={{ color: '#ccc' }}>Z2U</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
+                                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                {/* Monthly Profit Breakdown */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📅 Monthly Net Profit</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {Object.entries(stats.monthlyProfit).sort((a, b) => b[0].localeCompare(a[0])).map(([month, val]: [string, any]) => (
+                                            <div key={month} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                                <span style={{ color: '#aaa', fontWeight: 'bold' }}>{new Date(month + '-01').toLocaleDateString('default', { month: 'long', year: 'numeric' })}</span>
+                                                <span style={{ color: val >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                        {Object.keys(stats.monthlyProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
+                                    </div>
+                                </div>
+
+                                {/* Top Performing Accounts */}
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                    <h3 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>💎 Profit per Product/Account</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                        {Object.entries(stats.productProfit).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5).map(([name, val]: [string, any]) => (
+                                            <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                                <span style={{ color: '#ddd', fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                                                <span style={{ color: '#00ff88', fontWeight: 'bold' }}>$ {Number(val).toLocaleString()}</span>
+                                            </div>
+                                        ))}
+                                        {Object.keys(stats.productProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h2 style={{ color: '#ffd700', margin: 0 }}>💰 Transaction History</h2>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <button onClick={() => setShowAddFunds(true)} className="btn btn-primary" style={{ background: 'rgba(255,255,255,0.1)' }}>+ Add Funds</button>
+                                    </div>
+                                </div>
+
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                        <tr>
+                                            <th style={{ padding: '1rem' }}>Description</th>
+                                            <th style={{ padding: '1rem' }}>Source</th>
+                                            <th style={{ padding: '1rem' }}>By</th>
+                                            <th style={{ padding: '1rem' }}>Date</th>
+                                            <th style={{ padding: '1rem' }}>Amount</th>
+                                            <th style={{ padding: '1rem' }}>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {balanceHistory && balanceHistory.length > 0 ? balanceHistory.map((sale: any) => (
+                                            <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem' }}>{sale.description}</td>
+                                                <td style={{ padding: '1rem' }}>{sale.platform}</td>
+                                                <td style={{ padding: '1rem' }}>{sale.processedBy}</td>
+                                                <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                                <td style={{ padding: '1rem', color: Number(sale.amount) >= 0 ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
+                                                    {sale.currency === 'PKR' ? '₨ ' : '$ '}
+                                                    {Number(sale.amount).toLocaleString()}
+                                                </td>
+                                                <td style={{ padding: '1rem' }}>
+                                                    {sale.deliveryToken ? (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                            <button
+                                                                onClick={() => {
+                                                                    navigator.clipboard.writeText(`${window.location.origin}/delivery/${sale.deliveryToken}`);
+                                                                    setCopiedId(sale.id);
+                                                                    setTimeout(() => setCopiedId(null), 2000);
+                                                                }}
+                                                                style={{
+                                                                    background: copiedId === sale.id ? 'rgba(0,255,136,0.3)' : 'rgba(0,255,136,0.1)',
+                                                                    border: '1px solid #00ff88',
+                                                                    color: '#00ff88',
+                                                                    borderRadius: '4px',
+                                                                    padding: '0.4rem 0.8rem',
+                                                                    cursor: 'pointer',
+                                                                    fontSize: '0.8rem',
+                                                                    minWidth: '100px',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                {copiedId === sale.id ? '✅ Copied' : '🔗 Copy Link'}
+                                                            </button>
+                                                            <span title={`Link Viewed ${sale.deliveryViews || 0} times`} style={{ fontSize: '0.8rem', color: '#aaa' }}>
+                                                                👁️ {sale.deliveryViews || 0}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: '#666', fontSize: '0.8rem' }}>{sale.type === 'manual_adjustment' ? 'Adjusted' : (sale.type === 'expense' ? 'Expense' : 'Funding')}</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No financial activity yet.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Add Funds Modal */}
+                            {/* MOVED: Generate Link Modal */}
+
+
+                            {/* Modernized Add Funds Modal */}
+                            {showAddFunds && (
+                                <div style={{
+                                    position: 'fixed',
+                                    top: 0, left: 0, right: 0, bottom: 0,
+                                    background: 'rgba(0,0,0,0.85)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 10000,
+                                    backdropFilter: 'blur(10px)',
+                                    padding: '20px'
+                                }}>
+                                    <div className="glass" style={{
+                                        padding: '2.5rem',
+                                        borderRadius: '24px',
+                                        border: '1px solid rgba(0,255,136,0.3)',
+                                        width: '100%',
+                                        maxWidth: '500px',
+                                        boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+                                        position: 'relative',
+                                        animation: 'modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                                            <div>
+                                                <h2 style={{ margin: 0, fontSize: '1.6rem', color: '#00ff88', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    <span>💸</span> Finance Adjustment
+                                                </h2>
+                                                <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '4px' }}>Manually adjust account or bank balances.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowAddFunds(false)}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.05)',
+                                                    border: 'none',
+                                                    color: '#fff',
+                                                    width: '36px',
+                                                    height: '36px',
+                                                    borderRadius: '50%',
+                                                    cursor: 'pointer',
+                                                    fontSize: '1.2rem',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}
+                                            >×</button>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '1.2rem' }}>
-                                            <div style={{ flex: 2 }}>
-                                                <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Amount</label>
-                                                <div style={{ position: 'relative' }}>
-                                                    <input
-                                                        type="number"
-                                                        required
-                                                        className="input-field"
-                                                        value={fundForm.amount}
-                                                        onChange={e => setFundForm({ ...fundForm, amount: e.target.value })}
-                                                        placeholder="e.g. 5000 or -50"
-                                                        style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div style={{ flex: 1 }}>
-                                                <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Currency</label>
-                                                <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
-                                                    <option value="USD">USD ($)</option>
-                                                    <option value="PKR">PKR (₨)</option>
+                                        <form onSubmit={handleAddFunds} style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
+                                            <div className="form-group">
+                                                <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Platform / Bank Account</label>
+                                                <select className="input-field" value={fundForm.platform} onChange={e => {
+                                                    const p = e.target.value;
+                                                    const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
+                                                    setFundForm({ ...fundForm, platform: p, currency: c });
+                                                }} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
+                                                    <option value="Meezan">Meezan Bank 🇵🇰</option>
+                                                    <option value="UBL">UBL (United Bank Limited) 🇵🇰</option>
+                                                    <option value="Z2U">Z2U Marketplace 🇺🇸</option>
+                                                    <option value="PlayerUp">PlayerUp 🇺🇸</option>
+                                                    <option value="G2G">G2G Marketplace 🇺🇸</option>
+                                                    <option value="RedotPay">RedotPay Card 💳</option>
+                                                    <option value="Direct">Cash / Manual Other 💰</option>
                                                 </select>
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Reason / Memo</label>
-                                            <input
-                                                type="text"
-                                                className="input-field"
-                                                placeholder="Briefly explain this adjustment..."
-                                                value={fundForm.description}
-                                                onChange={e => setFundForm({ ...fundForm, description: e.target.value })}
-                                                style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
-                                            />
-                                        </div>
+                                            <div style={{ display: 'flex', gap: '1.2rem' }}>
+                                                <div style={{ flex: 2 }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Amount</label>
+                                                    <div style={{ position: 'relative' }}>
+                                                        <input
+                                                            type="number"
+                                                            required
+                                                            className="input-field"
+                                                            value={fundForm.amount}
+                                                            onChange={e => setFundForm({ ...fundForm, amount: e.target.value })}
+                                                            placeholder="e.g. 5000 or -50"
+                                                            style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Currency</label>
+                                                    <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
+                                                        <option value="USD">USD ($)</option>
+                                                        <option value="PKR">PKR (₨)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
-                                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowAddFunds(false)}
-                                                style={{ flex: 1, height: '54px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', color: '#888', border: '1px solid #333', cursor: 'pointer', fontWeight: '600' }}
-                                            >Cancel</button>
-                                            <button
-                                                type="submit"
-                                                style={{ flex: 2, height: '54px', borderRadius: '14px', background: 'linear-gradient(90deg, #00ff88, #00c3ff)', color: '#000', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
-                                            >Save Transaction</button>
-                                        </div>
-                                    </form>
-                                </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Reason / Memo</label>
+                                                <input
+                                                    type="text"
+                                                    className="input-field"
+                                                    placeholder="Briefly explain this adjustment..."
+                                                    value={fundForm.description}
+                                                    onChange={e => setFundForm({ ...fundForm, description: e.target.value })}
+                                                    style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
+                                                />
+                                            </div>
 
-                                <style jsx>{`
+                                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAddFunds(false)}
+                                                    style={{ flex: 1, height: '54px', borderRadius: '14px', background: 'rgba(255,255,255,0.03)', color: '#888', border: '1px solid #333', cursor: 'pointer', fontWeight: '600' }}
+                                                >Cancel</button>
+                                                <button
+                                                    type="submit"
+                                                    style={{ flex: 2, height: '54px', borderRadius: '14px', background: 'linear-gradient(90deg, #00ff88, #00c3ff)', color: '#000', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
+                                                >Save Transaction</button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <style jsx>{`
                                         @keyframes modalSlideUp {
                                             from { transform: translateY(30px); opacity: 0; }
                                             to { transform: translateY(0); opacity: 1; }
                                         }
                                     `}</style>
-                            </div>
-                        )}
-                    </>
-                )}
-
-                {/* PROMOS TAB */}
-                {activeTab === 'promos' && (
-                    <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
-                        <div className="glass" style={{ flex: 1, padding: '2rem', borderRadius: '16px', minWidth: '300px' }}>
-                            <h2 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Create Promo Code</h2>
-                            <form onSubmit={handlePromoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="Code (e.g. SUMMER20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} className="input-field" required style={{ textTransform: 'uppercase' }} />
-                                <input type="number" placeholder="Discount %" value={promoForm.discount} onChange={e => setPromoForm({ ...promoForm, discount: e.target.value })} className="input-field" required min="1" max="100" />
-                                <button type="submit" className="btn btn-primary">Create Code</button>
-                            </form>
-                        </div>
-                        <div style={{ flex: 1, minWidth: '300px' }}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Active Codes</h2>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {promoCodes.length === 0 ? <p style={{ color: '#888' }}>No active codes.</p> : promoCodes.map((code: any) => (
-                                    <div key={code.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div><h4 style={{ color: '#00ff88', fontSize: '1.2rem' }}>{code.code}</h4><div style={{ fontSize: '0.9rem', color: '#ccc' }}>{code.discount}% Off</div></div>
-                                        <button onClick={() => handleDeletePromo(code.id)} style={{ background: 'red', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* WEBSITE TAB */}
-                {activeTab === 'website' && (
-                    <div style={{ display: 'grid', gap: '2rem' }}>
-                        {/* Website Sub-Navigation */}
-                        <div style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            borderBottom: '1px solid #333',
-                            paddingBottom: '1rem',
-                            overflowX: 'auto',
-                            marginBottom: '1rem'
-                        }}>
-                            {['blogs', 'pages', 'services', 'projects', 'rentals', 'reviews', 'messages'].map(t => (
-                                <button
-                                    key={t}
-                                    onClick={() => setWebsiteTab(t)}
-                                    style={{
-                                        padding: '0.5rem 1rem',
-                                        background: websiteTab === t ? '#00ff88' : 'rgba(255,255,255,0.05)',
-                                        color: websiteTab === t ? '#000' : '#888',
-                                        borderRadius: '6px',
-                                        border: 'none',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer',
-                                        textTransform: 'capitalize'
-                                    }}
-                                >
-                                    {t === 'blogs' ? '📝 Blogs' :
-                                        t === 'pages' ? '📄 Pages' :
-                                            t === 'services' ? '🛠️ Services' :
-                                                t === 'projects' ? '🚀 Projects' :
-                                                    t === 'rentals' ? '🏘️ Rentals' :
-                                                        t === 'reviews' ? '⭐ Reviews' :
-                                                            '📬 Messages'}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* 1. BLOGS */}
-                        {websiteTab === 'blogs' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
-                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span>📝</span> Publish New Blog Post
-                                    </h2>
-                                    <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                        <div style={{ gridColumn: 'span 2' }}>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Blog Title</label>
-                                            <input placeholder="Enter catchy title..." value={blogForm.title} onChange={e => setBlogForm({ ...blogForm, title: e.target.value })} className="input-field" required />
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Category</label>
-                                            <input placeholder="e.g. Technology, Lifestyle" value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })} className="input-field" />
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Feature Image URL</label>
-                                            <input placeholder="https://..." value={blogForm.image} onChange={e => setBlogForm({ ...blogForm, image: e.target.value })} className="input-field" />
-                                        </div>
-                                        <div style={{ gridColumn: 'span 2' }}>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Excerpt</label>
-                                            <textarea placeholder="Brief summary of the post..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} className="input-field" style={{ height: '80px' }} />
-                                        </div>
-                                        <div style={{ gridColumn: 'span 2' }}>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Full Content (Markdown)</label>
-                                            <textarea placeholder="Write your post content here..." value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} className="input-field" style={{ height: '250px' }} required />
-                                        </div>
-                                        <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Publish Post</button>
-                                        </div>
-                                    </form>
                                 </div>
-                                <div className="glass" style={{ padding: '2rem', borderRadius: '20px' }}>
-                                    <h3 style={{ marginBottom: '1rem', opacity: 0.8 }}>Existing Posts ({manualBlogs.length})</h3>
-                                    <div style={{ display: 'grid', gap: '0.5rem' }}>
-                                        {manualBlogs.map((b: any) => (
-                                            <div key={b.id} style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <div>
-                                                    <h4 style={{ color: '#fff' }}>{b.title}</h4>
-                                                    <span style={{ fontSize: '0.8rem', color: '#00ff88' }}>{b.category || 'Uncategorized'}</span>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '1rem' }}>
-                                                    <button onClick={() => handleDeleteBlog(b.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Delete</button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {manualBlogs.length === 0 && <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No blog posts found.</p>}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                            )}
+                        </>
+                    )}
 
-                        {/* 2. PAGES */}
-                        {websiteTab === 'pages' && (
-                            <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>📄</span> Content Management System
-                                </h2>
-                                <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem' }}>
-                                    {['terms', 'privacy', 'about'].map(p => (
-                                        <button
-                                            key={p}
-                                            onClick={() => { setPageKey(p); setPageContent(pages[p] || ''); }}
-                                            style={{
-                                                padding: '0.8rem 1.5rem',
-                                                borderRadius: '10px',
-                                                border: '1px solid #333',
-                                                background: pageKey === p ? '#00ff88' : 'transparent',
-                                                color: pageKey === p ? '#000' : '#888',
-                                                fontWeight: 'bold',
-                                                cursor: 'pointer',
-                                                flex: 1
-                                            }}
-                                        >
-                                            {p.toUpperCase()}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div style={{ position: 'relative' }}>
-                                    <label style={{ position: 'absolute', top: '-10px', left: '15px', background: '#000', padding: '0 5px', fontSize: '0.7rem', color: '#00ff88' }}>Content Editor</label>
-                                    <textarea
-                                        value={pageContent}
-                                        onChange={e => setPageContent(e.target.value)}
-                                        className="input-field"
-                                        style={{ width: '100%', height: '500px', fontFamily: 'monospace', padding: '1.5rem', lineHeight: '1.6' }}
-                                        placeholder={`Start writing content for ${pageKey} page...`}
-                                    />
-                                </div>
-                                <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
-                                    <button onClick={handlePageSave} className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Update {pageKey} Page</button>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 3. SERVICES */}
-                        {websiteTab === 'services' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <span>🛠️</span> Add New Service
-                                    </h2>
-                                    <form onSubmit={handleServiceSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Service Name</label>
-                                                <input placeholder="e.g. Modern Web Design" value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} className="input-field" required />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Icon</label>
-                                                <input placeholder="Emoji" value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })} className="input-field" maxLength={2} />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Description</label>
-                                            <textarea placeholder="Tell clients what this service covers..." value={serviceForm.desc} onChange={e => setServiceForm({ ...serviceForm, desc: e.target.value })} className="input-field" style={{ height: '80px' }} />
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Add Service</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                                    {services.map((s: any) => (
-                                        <div key={s.id} className="card" style={{ padding: '1.5rem', position: 'relative', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
-                                            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{s.icon || '🛠️'}</div>
-                                            <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#fff' }}>{s.title}</h4>
-                                            <p style={{ fontSize: '0.9rem', color: '#888', lineHeight: '1.5' }}>{s.desc}</p>
-                                            <button onClick={() => handleDeleteService(s.id)} style={{ position: 'absolute', top: '15px', right: '15px', color: '#ff4444', background: 'rgba(255,0,0,0.1)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 4. PROJECTS */}
-                        {websiteTab === 'projects' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🚀 Add Portfolio Project</h2>
-                                    <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Project Name</label>
-                                            <input placeholder="Project Name" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} className="input-field" required />
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Description / URL</label>
-                                            <textarea placeholder="Give some context or a live link..." value={projectForm.description} onChange={e => setProjectForm({ ...projectForm, description: e.target.value })} className="input-field" style={{ height: '80px' }} />
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <button type="submit" className="btn btn-primary">Add Project</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div className="glass" style={{ padding: '1rem', borderRadius: '15px' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                        <thead>
-                                            <tr style={{ textAlign: 'left', color: '#00ff88', borderBottom: '1px solid #333' }}>
-                                                <th style={{ padding: '1rem' }}>Project</th>
-                                                <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {projects.map((p: any) => (
-                                                <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                    <td style={{ padding: '1rem' }}>
-                                                        <div style={{ fontWeight: 'bold' }}>{p.title}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{p.description}</div>
-                                                    </td>
-                                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                                        <button onClick={() => handleDeleteProject(p.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 5. RENTALS */}
-                        {websiteTab === 'rentals' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🏘️ Add Rental Asset</h2>
-                                    <form onSubmit={handleRentalSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Domain / Name</label>
-                                            <input placeholder="example.com" value={rentalForm.domain} onChange={e => setRentalForm({ ...rentalForm, domain: e.target.value })} className="input-field" required />
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Monthly Rent Price</label>
-                                            <input placeholder="$99/mo" value={rentalForm.price} onChange={e => setRentalForm({ ...rentalForm, price: e.target.value })} className="input-field" />
-                                        </div>
-                                        <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                                            <button type="submit" className="btn btn-primary">Add Asset</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-                                    {rentals.map((r: any) => (
-                                        <div key={r.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <div style={{ fontWeight: 'bold', color: '#fff' }}>{r.domain}</div>
-                                                <div style={{ color: '#00ff88', fontSize: '0.9rem' }}>{r.price}</div>
-                                            </div>
-                                            <button onClick={() => handleDeleteRental(r.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 6. REVIEWS */}
-                        {websiteTab === 'reviews' && (
-                            <div style={{ display: 'grid', gap: '2rem' }}>
-                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>⭐ Add Client Feedback</h2>
-                                    <form onSubmit={handleReviewSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Client Name</label>
-                                                <input placeholder="e.g. John Doe" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} className="input-field" required />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Rating</label>
-                                                <select
-                                                    value={reviewForm.rating}
-                                                    onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
-                                                    className="input-field"
-                                                    style={{ color: '#00ff88', fontWeight: 'bold' }}
-                                                >
-                                                    {[5, 4, 3, 2, 1].map(num => <option key={num} value={num}>{num} Stars</option>)}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Review Content</label>
-                                            <textarea placeholder="What did they say about your work?" value={reviewForm.review} onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })} className="input-field" style={{ height: '100px' }} required />
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Add Review</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div style={{ display: 'grid', gap: '1rem' }}>
-                                    {reviews.map((r: any) => (
-                                        <div key={r.id} className="glass" style={{ padding: '1.5rem', borderRadius: '15px', position: 'relative' }}>
-                                            <div style={{ color: '#ffcc00', marginBottom: '0.5rem', fontSize: '1.2rem' }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
-                                            <p style={{ fontStyle: 'italic', color: '#eee', marginBottom: '1rem', lineHeight: '1.5' }}>"{r.review}"</p>
-                                            <div style={{ fontWeight: 'bold' }}>- {r.name}</div>
-                                            <button onClick={() => handleDeleteReview(r.id)} style={{ position: 'absolute', top: '20px', right: '20px', color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 7. MESSAGES */}
-                        {websiteTab === 'messages' && (
-                            <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
-                                <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📬 Website Inquiries</h2>
-                                <div style={{ display: 'grid', gap: '1rem' }}>
-                                    {messages.length === 0 ? <p style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>Your inbox is clean. No messages!</p> : messages.map((m: any) => (
-                                        <div key={m.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                                                <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{m.name}</strong>
-                                                <span style={{ fontSize: '0.8rem', color: '#666' }}>{new Date(m.createdAt).toLocaleString()}</span>
-                                            </div>
-                                            <div style={{ color: '#00ff88', fontSize: '0.9rem', marginBottom: '1rem' }}>{m.email}</div>
-                                            <div style={{ color: '#ccc', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>{m.message}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* LEADS TAB */}
-                {activeTab === 'leads' && (
-                    <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                        <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <h2 style={{ color: '#00ff88' }}>All Company Leads</h2>
-                            <p style={{ color: '#666' }}>Full CRM Database</p>
-                        </div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                    <th style={{ padding: '1.5rem' }}>Lead Name</th>
-                                    <th style={{ padding: '1.5rem' }}>Contact</th>
-                                    <th style={{ padding: '1.5rem' }}>Value</th>
-                                    <th style={{ padding: '1.5rem' }}>Status</th>
-                                    <th style={{ padding: '1.5rem' }}>Owner</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {leads.map((lead: any) => (
-                                    <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{lead.name}</td>
-                                        <td style={{ padding: '1.5rem', color: '#888' }}>{lead.contact}</td>
-                                        <td style={{ padding: '1.5rem' }}>${lead.value}</td>
-                                        <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,100,255,0.2)' }}>{lead.status}</span></td>
-                                        <td style={{ padding: '1.5rem', color: '#aaa' }}>{lead.createdBy}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-
-                {/* PAYMENTS TAB (New Modern Layout) */}
-                {activeTab === 'payments' && (
-                    <div className="FadeIn" style={{ display: 'flex', gap: '2rem', minHeight: '600px' }}>
-                        {/* Inner Sidebar for Payments */}
-                        <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <h3 style={{ color: '#fff', marginBottom: '1rem', paddingLeft: '0.5rem' }}>Payment Methods</h3>
-                            {['general', 'stripe', 'cryptomus', 'binance', 'manual'].map(sub => (
-                                <button
-                                    key={sub}
-                                    onClick={() => setSettings({ ...settings, activePaymentTab: sub })}
-                                    style={{
-                                        textAlign: 'left',
-                                        padding: '1rem',
-                                        borderRadius: '8px',
-                                        background: settings.activePaymentTab === sub ? 'rgba(0,255,136,0.1)' : 'transparent',
-                                        color: settings.activePaymentTab === sub ? '#00ff88' : '#888',
-                                        border: 'none',
-                                        fontWeight: settings.activePaymentTab === sub ? 'bold' : 'normal',
-                                        cursor: 'pointer',
-                                        textTransform: 'capitalize',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem'
-                                    }}
-                                >
-                                    {sub === 'general' && '⚙️ General'}
-                                    {sub === 'stripe' && '💳 Stripe'}
-                                    {sub === 'cryptomus' && '🟠 Cryptomus'}
-                                    {sub === 'binance' && '🟡 Binance Pay'}
-                                    {sub === 'manual' && '🏦 Manual / Bank'}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Content Area */}
-                        <div style={{ flex: 1 }}>
-                            <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <h2 style={{ color: '#00ff88', marginBottom: '0.5rem', textTransform: 'capitalize' }}>
-                                    {(settings.activePaymentTab && settings.activePaymentTab !== 'general') ? settings.activePaymentTab : 'General'} Configuration
-                                </h2>
-                                <p style={{ color: '#666', marginBottom: '2rem' }}>Update your payment gateway credentials securely.</p>
-
-                                {(!settings.activePaymentTab || settings.activePaymentTab === 'general') && (
-                                    <div style={{ marginBottom: '2.5rem', padding: '1.5rem', background: 'rgba(0,255,136,0.03)', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
-                                        <h4 style={{ color: '#fff', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Live Gateways Control</h4>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                                            {[
-                                                { id: 'stripe', name: 'Stripe Cards', icon: '💳' },
-                                                { id: 'crypto', name: 'Cryptomus', icon: '₿' },
-                                                { id: 'binance', name: 'Binance Pay', icon: '🟡' },
-                                                { id: 'wallet', name: 'Wallet Pay', icon: '💼' }
-                                            ].map(m => {
-                                                let config: any = {};
-                                                try { config = settings.payment_gateways ? JSON.parse(settings.payment_gateways) : { stripe: true, crypto: true, binance: true, wallet: true }; } catch { }
-                                                const isActive = config[m.id] !== false;
-
-                                                return (
-                                                    <div
-                                                        key={m.id}
-                                                        onClick={() => toggleGateway(m.id)}
-                                                        style={{
-                                                            padding: '1.2rem',
-                                                            borderRadius: '16px',
-                                                            background: isActive ? 'rgba(0,255,136,0.08)' : 'rgba(255,255,255,0.02)',
-                                                            border: isActive ? '1px solid #00ff8855' : '1px solid rgba(255,255,255,0.05)',
-                                                            cursor: 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'space-between',
-                                                            transition: 'all 0.3s'
-                                                        }}
-                                                    >
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                            <span style={{ fontSize: '1.2rem' }}>{m.icon}</span>
-                                                            <span style={{ fontWeight: '600', color: isActive ? '#fff' : '#666', fontSize: '0.9rem' }}>{m.name}</span>
-                                                        </div>
-                                                        <div style={{
-                                                            width: '38px',
-                                                            height: '20px',
-                                                            borderRadius: '20px',
-                                                            background: isActive ? '#00ff88' : '#333',
-                                                            position: 'relative'
-                                                        }}>
-                                                            <div style={{
-                                                                width: '14px',
-                                                                height: '14px',
-                                                                borderRadius: '50%',
-                                                                background: '#fff',
-                                                                position: 'absolute',
-                                                                top: '3px',
-                                                                left: isActive ? '21px' : '3px',
-                                                                transition: 'all 0.3s'
-                                                            }} />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-
-                                    {(!settings.activePaymentTab || settings.activePaymentTab === 'general') && (
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                            {/* Global Settings */}
-                                            <div style={{ gridColumn: 'span 2' }}>
-                                                <h4 style={{ color: '#fff', borderBottom: '1px solid #333', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Global Shopping Rules</h4>
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Primary Site Currency</label>
-                                                <select className="input-field" value={settings.site_currency || 'USD'} onChange={e => setSettings({ ...settings, site_currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                                    <option value="USD">USD ($) - International</option>
-                                                    <option value="PKR">PKR (₨) - Pakistan</option>
-                                                    <option value="EUR">EUR (€) - Europe</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Admin Notification Email</label>
-                                                <input className="input-field" value={settings.admin_email || ''} onChange={e => setSettings({ ...settings, admin_email: e.target.value })} placeholder="alerts@officialum1.com" style={{ width: '100%' }} />
-                                            </div>
-                                            <div style={{ gridColumn: 'span 2', display: 'flex', gap: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid #333' }}>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
-                                                    <input type="checkbox" checked={settings.allow_guest_checkout === 'true'} onChange={e => setSettings({ ...settings, allow_guest_checkout: e.target.checked ? 'true' : 'false' })} />
-                                                    Allow Guest Checkout
-                                                </label>
-                                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
-                                                    <input type="checkbox" checked={settings.allow_wallet_payment === 'true'} onChange={e => setSettings({ ...settings, allow_wallet_payment: e.target.checked ? 'true' : 'false' })} />
-                                                    Allow Wallet Payments
-                                                </label>
-                                            </div>
-
-                                            {/* VIP SaaS Configuration */}
-                                            <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
-                                                <h4 style={{ color: '#ffd700', borderBottom: '1px solid #222', paddingBottom: '0.5rem', marginBottom: '1rem' }}>SaaS Membership Discounts (%)</h4>
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Silver VIP Discount</label>
-                                                <input type="number" className="input-field" value={settings.discount_silver || '5'} onChange={e => setSettings({ ...settings, discount_silver: e.target.value })} style={{ width: '100%', borderColor: '#C0C0C033' }} />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Gold VIP Discount</label>
-                                                <input type="number" className="input-field" value={settings.discount_gold || '10'} onChange={e => setSettings({ ...settings, discount_gold: e.target.value })} style={{ width: '100%', borderColor: '#FFD70033' }} />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Diamond VIP Discount</label>
-                                                <input type="number" className="input-field" value={settings.discount_diamond || '15'} onChange={e => setSettings({ ...settings, discount_diamond: e.target.value })} style={{ width: '100%', borderColor: '#B9F2FF33' }} />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {settings.activePaymentTab === 'stripe' && (
-                                        <>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Publishable Key</label>
-                                                <input
-                                                    className="input-field"
-                                                    value={settings.stripePublic || ''}
-                                                    onChange={e => setSettings({ ...settings, stripePublic: e.target.value })}
-                                                    placeholder="pk_test_..."
-                                                    style={{ width: '100%' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Secret Key</label>
-                                                <input
-                                                    type="password"
-                                                    className="input-field"
-                                                    value={settings.stripeSecret || ''}
-                                                    onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })}
-                                                    placeholder="sk_test_..."
-                                                    style={{ width: '100%' }}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {settings.activePaymentTab === 'cryptomus' && (
-                                        <>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Cryptomus Merchant ID</label>
-                                                <input
-                                                    className="input-field"
-                                                    value={settings.cryptomusId || ''}
-                                                    onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })}
-                                                    style={{ width: '100%', borderColor: '#fdd835' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Payment API Key</label>
-                                                <input
-                                                    type="password"
-                                                    className="input-field"
-                                                    value={settings.cryptomusKey || ''}
-                                                    onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })}
-                                                    style={{ width: '100%', borderColor: '#fdd835' }}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {settings.activePaymentTab === 'binance' && (
-                                        <>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance API Key</label>
-                                                <input
-                                                    className="input-field"
-                                                    value={settings.binanceKey || ''}
-                                                    onChange={e => setSettings({ ...settings, binanceKey: e.target.value })}
-                                                    style={{ width: '100%', borderColor: '#FCD535' }}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance Secret Key</label>
-                                                <input
-                                                    type="password"
-                                                    className="input-field"
-                                                    value={settings.binanceSecret || ''}
-                                                    onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })}
-                                                    style={{ width: '100%', borderColor: '#FCD535' }}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {settings.activePaymentTab === 'manual' && (
-                                        <div>
-                                            <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Bank / Manual Transfer Instructions</label>
-                                            <textarea
-                                                className="input-field h-32"
-                                                value={settings.manualPaymentInstructions || ''}
-                                                onChange={e => setSettings({ ...settings, manualPaymentInstructions: e.target.value })}
-                                                placeholder="Bank Name: ... IBAN: ..."
-                                                style={{ width: '100%', minHeight: '150px' }}
-                                            />
-                                        </div>
-                                    )}
-
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Calculate & Save</button>
-                                    </div>
+                    {/* PROMOS TAB */}
+                    {activeTab === 'promos' && (
+                        <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
+                            <div className="glass" style={{ flex: 1, padding: '2rem', borderRadius: '16px', minWidth: '300px' }}>
+                                <h2 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Create Promo Code</h2>
+                                <form onSubmit={handlePromoSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <input placeholder="Code (e.g. SUMMER20)" value={promoForm.code} onChange={e => setPromoForm({ ...promoForm, code: e.target.value })} className="input-field" required style={{ textTransform: 'uppercase' }} />
+                                    <input type="number" placeholder="Discount %" value={promoForm.discount} onChange={e => setPromoForm({ ...promoForm, discount: e.target.value })} className="input-field" required min="1" max="100" />
+                                    <button type="submit" className="btn btn-primary">Create Code</button>
                                 </form>
                             </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* USERS TAB (BUYERS) */}
-                {activeTab === 'users' && (
-                    <div className="FadeIn">
-                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                            <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <h2 style={{ color: '#00ff88' }}>Website Buyers</h2>
-                                    <p style={{ color: '#666' }}>Manage your site customers ({users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length} Total)</p>
-                                </div>
-                            </div>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1.5rem' }}>Buyer Info</th>
-                                        <th style={{ padding: '1.5rem' }}>Status / Tier</th>
-                                        <th style={{ padding: '1.5rem' }}>Spent / Points</th>
-                                        <th style={{ padding: '1.5rem' }}>Wallet Balance</th>
-                                        <th style={{ padding: '1.5rem' }}>Affiliate Earned</th>
-                                        <th style={{ padding: '1.5rem' }}>Joined</th>
-                                        <th style={{ padding: '1.5rem', textAlign: 'right' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length === 0 ? (
-                                        <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No buyers found.</td></tr>
-                                    ) : users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).map((u: any) => (
-                                        <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <div style={{ fontWeight: 'bold' }}>{u.email}</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#666', fontFamily: 'monospace' }}>ID: {u.id}</div>
-                                            </td>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                                    <span style={{
-                                                        padding: '4px 10px',
-                                                        borderRadius: '20px',
-                                                        fontSize: '0.75rem',
-                                                        background: u.is_verified ? 'rgba(0,180,100,0.1)' : 'rgba(255,100,0,0.1)',
-                                                        color: u.is_verified ? '#00ff88' : '#ff9900',
-                                                        border: u.is_verified ? '1px solid #00ff8833' : '1px solid #ff990033'
-                                                    }}>
-                                                        {u.is_guest ? 'GUEST' : (u.is_verified ? 'VERIFIED' : 'PENDING')}
-                                                    </span>
-                                                    {!u.is_guest && u.membership && u.membership !== 'none' && (
-                                                        <span style={{
-                                                            padding: '4px 10px',
-                                                            borderRadius: '20px',
-                                                            fontSize: '0.75rem',
-                                                            background: 'rgba(255,215,0,0.15)',
-                                                            color: '#ffd700',
-                                                            border: '1px solid #ffd70055',
-                                                            fontWeight: 'bold'
-                                                        }}>
-                                                            ★ {u.membership.toUpperCase()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.total_spent || 0).toFixed(2)}</div>
-                                                <div style={{ fontSize: '0.82rem', color: '#888' }}>{u.points || 0} pts</div>
-                                            </td>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.wallet_balance || 0).toFixed(2)}</div>
-                                            </td>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <div style={{ color: '#ffd700' }}>${Number(u.affiliate_balance || 0).toFixed(2)}</div>
-                                                <div style={{ fontSize: '0.7rem', color: '#666' }}>{u.is_guest ? 'N/A' : `Ref: ${u.referral_code}`}</div>
-                                            </td>
-                                            <td style={{ padding: '1.5rem', color: '#666' }}>{new Date(u.created_at).toLocaleDateString()}</td>
-                                            <td style={{ padding: '1.5rem', textAlign: 'right' }}>
-                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                                                    {!u.is_guest && (
-                                                        <>
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedUser(u);
-                                                                    setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
-                                                                    setShowUserEdit(true);
-                                                                }}
-                                                                className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem' }}
-                                                            >
-                                                                Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleResendUserEmail(u.id, u.email, 'resend_registration')}
-                                                                className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#ffd700', borderColor: '#ffd70033' }}
-                                                            >
-                                                                Verify
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleResendUserEmail(u.id, u.email, 'resend_forgot')}
-                                                                className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00d1ff', borderColor: '#00d1ff33' }}
-                                                            >
-                                                                Reset
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    {u.is_guest && <span style={{ fontSize: '0.75rem', color: '#666' }}>Guest Buyer</span>}
-                                                    <button
-                                                        onClick={async () => {
-                                                            const amount = prompt(`Adjustment amount for ${u.email} (Positive to add, Negative to subtract):`);
-                                                            if (amount && !isNaN(parseFloat(amount))) {
-                                                                const res = await fetch('/api/user/wallet', {
-                                                                    method: 'POST',
-                                                                    headers: { 'Content-Type': 'application/json' },
-                                                                    body: JSON.stringify({ userId: u.id, amount: parseFloat(amount), source: 'Admin Adjustment' })
-                                                                });
-                                                                if (res.ok) {
-                                                                    alert('Wallet Updated');
-                                                                    fetchData();
-                                                                } else {
-                                                                    alert('Failed to update wallet');
-                                                                }
-                                                            }
-                                                        }}
-                                                        className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00ff88', borderColor: '#00ff8833' }}
-                                                    >
-                                                        Wallet
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (confirm(`Delete buyer ${u.email}?`)) {
-                                                                await fetch(`/api/admin/users?id=${u.id}`, { method: 'DELETE' });
-                                                                fetchData();
-                                                            }
-                                                        }}
-                                                        style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                            <div style={{ flex: 1, minWidth: '300px' }}>
+                                <h2 style={{ marginBottom: '1.5rem' }}>Active Codes</h2>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {promoCodes.length === 0 ? <p style={{ color: '#888' }}>No active codes.</p> : promoCodes.map((code: any) => (
+                                        <div key={code.id} className="card" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div><h4 style={{ color: '#00ff88', fontSize: '1.2rem' }}>{code.code}</h4><div style={{ fontSize: '0.9rem', color: '#ccc' }}>{code.discount}% Off</div></div>
+                                            <button onClick={() => handleDeletePromo(code.id)} style={{ background: 'red', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* USER EDIT MODAL */}
-                        {showUserEdit && selectedUser && (
-                            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
-                                <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                        <h3 style={{ color: '#00ff88' }}>Edit User profile</h3>
-                                        <button onClick={() => setShowUserEdit(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.5rem' }}>✕</button>
-                                    </div>
-                                    <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Email Address</label>
-                                            <input className="input-field" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} style={{ width: '100%' }} required />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>New Password (Leave blank to keep current)</label>
-                                            <input className="input-field" type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} style={{ width: '100%' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Telegram</label>
-                                            <input className="input-field" value={userForm.telegram} onChange={e => setUserForm({ ...userForm, telegram: e.target.value })} style={{ width: '100%' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>User Role</label>
-                                            <select className="input-field" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
-                                                <option value="buyer">Buyer / Customer</option>
-                                                <option value="seller">Seller / Partner</option>
-                                                <option value="admin">System Admin</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Membership Tier</label>
-                                            <select className="input-field" value={selectedUser.membership || 'none'} onChange={e => setSelectedUser({ ...selectedUser, membership: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
-                                                <option value="none">None (Standard)</option>
-                                                <option value="silver">Silver VIP</option>
-                                                <option value="gold">Gold VIP</option>
-                                                <option value="diamond">Diamond VIP</option>
-                                            </select>
-                                        </div>
-                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
-                                            <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Creation Details:</p>
-                                            <div style={{ fontSize: '0.85rem', color: '#eee' }}>Joined: {new Date(selectedUser.created_at).toLocaleString()}</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#eee' }}>Referral Code: {selectedUser.referral_code || 'None'}</div>
-                                        </div>
-                                        <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Update User Profile</button>
-                                    </form>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                )}
-
-                {/* SUPPORT TAB */}
-                {activeTab === 'support' && (
-                    <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden', padding: '2rem' }}>
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Support Tickets</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {tickets.length === 0 && <p style={{ color: '#666' }}>No tickets found.</p>}
-                            {tickets.map(t => (
-                                <div key={t.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.5rem', borderLeft: t.status === 'open' ? '4px solid #00ff88' : '4px solid #555' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', alignItems: 'center' }} onClick={() => setActiveTicketId(activeTicketId === t.id ? null : t.id)}>
-                                        <div>
-                                            <h4 style={{ color: '#fff', marginBottom: '0.2rem' }}>{t.subject}</h4>
-                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>User: {t.email} (ID: {t.user_id})</div>
-                                        </div>
-                                        <span style={{ padding: '4px 8px', borderRadius: '4px', background: t.status === 'open' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.1)', color: t.status === 'open' ? '#00ff88' : '#aaa', fontSize: '0.8rem' }}>{t.status.toUpperCase()}</span>
-                                    </div>
-
-                                    {activeTicketId === t.id && (
-                                        <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-                                            <div style={{ background: '#000', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
-                                                {t.message}
-                                            </div>
-                                            {/* Replies */}
-                                            <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                {t.replies && t.replies.map((r: any, i: number) => (
-                                                    <div key={i} style={{ alignSelf: r.sender === 'admin' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
-                                                        <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '2px', textAlign: r.sender === 'admin' ? 'right' : 'left' }}>{r.sender === 'admin' ? 'You' : 'User'}</div>
-                                                        <div style={{ background: r.sender === 'admin' ? '#00ff88' : '#333', color: r.sender === 'admin' ? '#000' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                                                            {r.message}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                                <input placeholder="Type a reply..." value={replyMsg} onChange={e => setReplyMsg(e.target.value)} className="input-field" style={{ flex: 1 }} />
-                                                <button onClick={() => handleReplyTicket(t.id)} className="btn btn-primary">Send Reply</button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {activeTab === 'marketing' && (
-                    <>
+                    {/* WEBSITE TAB */}
+                    {activeTab === 'website' && (
                         <div style={{ display: 'grid', gap: '2rem' }}>
-                            {/* Marketing Sub-Navigation */}
+                            {/* Website Sub-Navigation */}
                             <div style={{
                                 display: 'flex',
                                 gap: '0.5rem',
@@ -3831,14 +3000,14 @@ function AdminDashboard() {
                                 overflowX: 'auto',
                                 marginBottom: '1rem'
                             }}>
-                                {['all', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                {['blogs', 'pages', 'services', 'projects', 'rentals', 'reviews', 'messages'].map(t => (
                                     <button
-                                        key={p}
-                                        onClick={() => setMarketingTab(p)}
+                                        key={t}
+                                        onClick={() => setWebsiteTab(t)}
                                         style={{
                                             padding: '0.5rem 1rem',
-                                            background: marketingTab === p ? '#00ff88' : 'rgba(255,255,255,0.05)',
-                                            color: marketingTab === p ? '#000' : '#888',
+                                            background: websiteTab === t ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                            color: websiteTab === t ? '#000' : '#888',
                                             borderRadius: '6px',
                                             border: 'none',
                                             fontWeight: 'bold',
@@ -3846,1026 +3015,1857 @@ function AdminDashboard() {
                                             textTransform: 'capitalize'
                                         }}
                                     >
-                                        {p === 'all' ? '🌐 All Feed' : p}
+                                        {t === 'blogs' ? '📝 Blogs' :
+                                            t === 'pages' ? '📄 Pages' :
+                                                t === 'services' ? '🛠️ Services' :
+                                                    t === 'projects' ? '🚀 Projects' :
+                                                        t === 'rentals' ? '🏘️ Rentals' :
+                                                            t === 'reviews' ? '⭐ Reviews' :
+                                                                '📬 Messages'}
                                     </button>
                                 ))}
                             </div>
 
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h2 style={{ color: '#00ff88' }}>{marketingTab === 'all' ? 'Social Media Hub' : `${marketingTab} Feed`}</h2>
-                                    <button onClick={() => setShowAddPost(true)} className="btn btn-primary">+ Draft New Post</button>
-                                </div>
-
-                                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                    {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).map((post: any) => (
-                                        <div key={post.id} className="glass" style={{ padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#00ff88', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' }}>
-                                                        {(post.author || 'S').charAt(0).toUpperCase()}
-                                                    </div>
+                            {/* 1. BLOGS */}
+                            {websiteTab === 'blogs' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span>📝</span> Publish New Blog Post
+                                        </h2>
+                                        <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Blog Title</label>
+                                                <input placeholder="Enter catchy title..." value={blogForm.title} onChange={e => setBlogForm({ ...blogForm, title: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Category</label>
+                                                <input placeholder="e.g. Technology, Lifestyle" value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Feature Image URL</label>
+                                                <input placeholder="https://..." value={blogForm.image} onChange={e => setBlogForm({ ...blogForm, image: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Excerpt</label>
+                                                <textarea placeholder="Brief summary of the post..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2' }}>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Full Content (Markdown)</label>
+                                                <textarea placeholder="Write your post content here..." value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} className="input-field" style={{ height: '250px' }} required />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Publish Post</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div className="glass" style={{ padding: '2rem', borderRadius: '20px' }}>
+                                        <h3 style={{ marginBottom: '1rem', opacity: 0.8 }}>Existing Posts ({manualBlogs.length})</h3>
+                                        <div style={{ display: 'grid', gap: '0.5rem' }}>
+                                            {manualBlogs.map((b: any) => (
+                                                <div key={b.id} style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
-                                                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{post.author || 'System Admin'}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>{new Date(post.createdAt).toLocaleString()}</div>
+                                                        <h4 style={{ color: '#fff' }}>{b.title}</h4>
+                                                        <span style={{ fontSize: '0.8rem', color: '#00ff88' }}>{b.category || 'Uncategorized'}</span>
+                                                    </div>
+                                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                                        <button onClick={() => handleDeleteBlog(b.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}>Delete</button>
                                                     </div>
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '20px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                                        {post.platform}
-                                                    </span>
-                                                    <span style={{ fontSize: '0.75rem', color: '#666' }}>{post.status}</span>
+                                            ))}
+                                            {manualBlogs.length === 0 && <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No blog posts found.</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 2. PAGES */}
+                            {websiteTab === 'pages' && (
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>📄</span> Content Management System
+                                    </h2>
+                                    <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2rem' }}>
+                                        {['terms', 'privacy', 'about'].map(p => (
+                                            <button
+                                                key={p}
+                                                onClick={() => { setPageKey(p); setPageContent(pages[p] || ''); }}
+                                                style={{
+                                                    padding: '0.8rem 1.5rem',
+                                                    borderRadius: '10px',
+                                                    border: '1px solid #333',
+                                                    background: pageKey === p ? '#00ff88' : 'transparent',
+                                                    color: pageKey === p ? '#000' : '#888',
+                                                    fontWeight: 'bold',
+                                                    cursor: 'pointer',
+                                                    flex: 1
+                                                }}
+                                            >
+                                                {p.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={{ position: 'relative' }}>
+                                        <label style={{ position: 'absolute', top: '-10px', left: '15px', background: '#000', padding: '0 5px', fontSize: '0.7rem', color: '#00ff88' }}>Content Editor</label>
+                                        <textarea
+                                            value={pageContent}
+                                            onChange={e => setPageContent(e.target.value)}
+                                            className="input-field"
+                                            style={{ width: '100%', height: '500px', fontFamily: 'monospace', padding: '1.5rem', lineHeight: '1.6' }}
+                                            placeholder={`Start writing content for ${pageKey} page...`}
+                                        />
+                                    </div>
+                                    <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+                                        <button onClick={handlePageSave} className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Update {pageKey} Page</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 3. SERVICES */}
+                            {websiteTab === 'services' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span>🛠️</span> Add New Service
+                                        </h2>
+                                        <form onSubmit={handleServiceSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Service Name</label>
+                                                    <input placeholder="e.g. Modern Web Design" value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} className="input-field" required />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Icon</label>
+                                                    <input placeholder="Emoji" value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })} className="input-field" maxLength={2} />
                                                 </div>
                                             </div>
-
-                                            <p style={{ color: '#eee', lineHeight: '1.6', fontSize: '1.05rem', marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
-                                                {post.content}
-                                            </p>
-
-                                            <div style={{ display: 'flex', gap: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.2rem' }}>
-                                                {(post.platform && (post.platform.includes('All') || post.platform.includes('Twitter'))) && (
-                                                    <a
-                                                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-outline"
-                                                        style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#1DA1F2', color: '#1DA1F2' }}
-                                                    >
-                                                        🐦 Tweet This
-                                                    </a>
-                                                )}
-
-                                                <button
-                                                    className="btn btn-outline"
-                                                    style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#444' }}
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(post.content);
-                                                        alert('Content copied to clipboard!');
-                                                    }}
-                                                >
-                                                    📋 Copy Content
-                                                </button>
-
-                                                <button
-                                                    onClick={async () => {
-                                                        if (confirm('Delete this post draft?')) {
-                                                            await fetch(`/api/admin/marketing?id=${post.id}`, { method: 'DELETE' });
-                                                            window.location.reload();
-                                                        }
-                                                    }}
-                                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '0.85rem' }}
-                                                >
-                                                    Delete Draft
-                                                </button>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Description</label>
+                                                <textarea placeholder="Tell clients what this service covers..." value={serviceForm.desc} onChange={e => setServiceForm({ ...serviceForm, desc: e.target.value })} className="input-field" style={{ height: '80px' }} />
                                             </div>
-                                        </div>
-                                    ))}
-                                    {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).length === 0 && (
-                                        <div className="glass" style={{ padding: '4rem', textAlign: 'center', opacity: 0.6 }}>
-                                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
-                                            <p>No posts found for {marketingTab}.</p>
-                                        </div>
-                                    )}
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Add Service</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                                        {services.map((s: any) => (
+                                            <div key={s.id} className="card" style={{ padding: '1.5rem', position: 'relative', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
+                                                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{s.icon || '🛠️'}</div>
+                                                <h4 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#fff' }}>{s.title}</h4>
+                                                <p style={{ fontSize: '0.9rem', color: '#888', lineHeight: '1.5' }}>{s.desc}</p>
+                                                <button onClick={() => handleDeleteService(s.id)} style={{ position: 'absolute', top: '15px', right: '15px', color: '#ff4444', background: 'rgba(255,0,0,0.1)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            )}
 
-                        {showAddPost && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
-                                <h3>Draft Social Post</h3>
-                                <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-                                            {['All', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
-                                                <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: newPost.platforms.includes(p) ? '1px solid #00ff88' : '1px solid transparent' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={newPost.platforms.includes(p)}
-                                                        onChange={e => {
-                                                            const current = newPost.platforms;
-                                                            if (e.target.checked) setNewPost({ ...newPost, platforms: [...current, p] });
-                                                            else setNewPost({ ...newPost, platforms: current.filter(x => x !== p) });
-                                                        }}
-                                                    />
-                                                    <span style={{ color: newPost.platforms.includes(p) ? '#00ff88' : '#ccc', fontSize: '0.9rem' }}>
-                                                        {p === 'All' ? 'All (Broadcast)' : p}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
+                            {/* 4. PROJECTS */}
+                            {websiteTab === 'projects' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🚀 Add Portfolio Project</h2>
+                                        <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Project Name</label>
+                                                <input placeholder="Project Name" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Description / URL</label>
+                                                <textarea placeholder="Give some context or a live link..." value={projectForm.description} onChange={e => setProjectForm({ ...projectForm, description: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary">Add Project</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    <textarea placeholder="Post Content (Description, Hashtags...)" className="input-field" style={{ height: '100px' }} value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} required />
-                                    <div style={{ display: 'flex', gap: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary">Save Draft</button>
-                                        <button type="button" onClick={() => setShowAddPost(false)} className="btn btn-outline">Cancel</button>
+                                    <div className="glass" style={{ padding: '1rem', borderRadius: '15px' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', color: '#00ff88', borderBottom: '1px solid #333' }}>
+                                                    <th style={{ padding: '1rem' }}>Project</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {projects.map((p: any) => (
+                                                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '1rem' }}>
+                                                            <div style={{ fontWeight: 'bold' }}>{p.title}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>{p.description}</div>
+                                                        </td>
+                                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                                            <button onClick={() => handleDeleteProject(p.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                </form>
-                            </div>
-                        )}
-                    </>
-                )}
-                {/* TOOLS TAB (New) */}
-                {activeTab === 'tools' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+                                </div>
+                            )}
 
-                        {/* Backlink Service */}
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
-                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🔗 Backlink Authority Checker</h2>
-                            <p style={{ color: '#888', marginBottom: '1.5rem' }}>Check DA/PA metrics for any domain using Moz API.</p>
-                            <form onSubmit={handleBacklinkCheck} style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                                <input placeholder="https://example.com" value={toolUrl} onChange={e => setToolUrl(e.target.value)} className="input-field" style={{ flex: 1 }} required />
-                                <button type="submit" className="btn btn-primary" disabled={toolLoading}>{toolLoading ? 'Scanning...' : 'Check'}</button>
-                            </form>
-                            {toolMetrics && (
-                                <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #333' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: '1rem' }}>
-                                        <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.da}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Domain Auth</div></div>
-                                        <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.pa}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Page Auth</div></div>
-                                        <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.links}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Backlinks</div></div>
+                            {/* 5. RENTALS */}
+                            {websiteTab === 'rentals' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🏘️ Add Rental Asset</h2>
+                                        <form onSubmit={handleRentalSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Domain / Name</label>
+                                                <input placeholder="example.com" value={rentalForm.domain} onChange={e => setRentalForm({ ...rentalForm, domain: e.target.value })} className="input-field" required />
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Monthly Rent Price</label>
+                                                <input placeholder="$99/mo" value={rentalForm.price} onChange={e => setRentalForm({ ...rentalForm, price: e.target.value })} className="input-field" />
+                                            </div>
+                                            <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary">Add Asset</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#ccc' }}>
-                                        <strong>Analysis:</strong>
-                                        <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
-                                            {toolMetrics.details?.map((d: string, i: number) => <li key={i}>{d}</li>)}
-                                        </ul>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                                        {rentals.map((r: any) => (
+                                            <div key={r.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div>
+                                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{r.domain}</div>
+                                                    <div style={{ color: '#00ff88', fontSize: '0.9rem' }}>{r.price}</div>
+                                                </div>
+                                                <button onClick={() => handleDeleteRental(r.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 6. REVIEWS */}
+                            {websiteTab === 'reviews' && (
+                                <div style={{ display: 'grid', gap: '2rem' }}>
+                                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>⭐ Add Client Feedback</h2>
+                                        <form onSubmit={handleReviewSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Client Name</label>
+                                                    <input placeholder="e.g. John Doe" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} className="input-field" required />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Rating</label>
+                                                    <select
+                                                        value={reviewForm.rating}
+                                                        onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                                                        className="input-field"
+                                                        style={{ color: '#00ff88', fontWeight: 'bold' }}
+                                                    >
+                                                        {[5, 4, 3, 2, 1].map(num => <option key={num} value={num}>{num} Stars</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Review Content</label>
+                                                <textarea placeholder="What did they say about your work?" value={reviewForm.review} onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })} className="input-field" style={{ height: '100px' }} required />
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Add Review</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {reviews.map((r: any) => (
+                                            <div key={r.id} className="glass" style={{ padding: '1.5rem', borderRadius: '15px', position: 'relative' }}>
+                                                <div style={{ color: '#ffcc00', marginBottom: '0.5rem', fontSize: '1.2rem' }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
+                                                <p style={{ fontStyle: 'italic', color: '#eee', marginBottom: '1rem', lineHeight: '1.5' }}>"{r.review}"</p>
+                                                <div style={{ fontWeight: 'bold' }}>- {r.name}</div>
+                                                <button onClick={() => handleDeleteReview(r.id)} style={{ position: 'absolute', top: '20px', right: '20px', color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer' }}>Delete</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 7. MESSAGES */}
+                            {websiteTab === 'messages' && (
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>📬 Website Inquiries</h2>
+                                    <div style={{ display: 'grid', gap: '1rem' }}>
+                                        {messages.length === 0 ? <p style={{ textAlign: 'center', padding: '3rem', color: '#666' }}>Your inbox is clean. No messages!</p> : messages.map((m: any) => (
+                                            <div key={m.id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '15px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                                                    <strong style={{ fontSize: '1.1rem', color: '#fff' }}>{m.name}</strong>
+                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>{new Date(m.createdAt).toLocaleString()}</span>
+                                                </div>
+                                                <div style={{ color: '#00ff88', fontSize: '0.9rem', marginBottom: '1rem' }}>{m.email}</div>
+                                                <div style={{ color: '#ccc', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>{m.message}</div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}
                         </div>
+                    )}
 
-                        {/* AI Writer */}
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(138, 56, 255, 0.2)' }}>
-                            <h2 style={{ color: '#ae68ff', marginBottom: '1rem' }}>✨ AI Content Generator</h2>
-                            <p style={{ color: '#888', marginBottom: '1.5rem' }}>Generate SEO-optimized blog posts instantly.</p>
-                            <form onSubmit={handleGenerateBlog} style={{ display: 'flex', gap: '1rem' }}>
-                                <input placeholder="Topic (e.g. Best Game Accounts)" value={blogTopic} onChange={e => setBlogTopic(e.target.value)} className="input-field" style={{ flex: 1 }} required />
-                                <button type="submit" className="btn btn-outline" style={{ color: '#ae68ff', borderColor: '#ae68ff' }} disabled={blogLoading}>{blogLoading ? 'Writing...' : 'Generate'}</button>
-                            </form>
-                        </div>
-
-                        {/* Telegram Bot Setup - MOVED TO SETTINGS */}
-                        {/* The Telegram configuration is now centralized in the Settings tab under API Integrations */}
-
-                    </div>
-                )}
-
-                {/* HR TAB */}
-                {activeTab === 'hr' && (
-                    <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ color: '#00ff88' }}>Administrative Staff & Admins</h2>
-                            <button onClick={() => { setShowAddStaff(!showAddStaff); if (!showAddStaff) setEditingEmp(null); }} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
-                        </div>
-
-                        {showAddStaff && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>{editingEmp ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
-                                <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required disabled={!!editingEmp} className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%', opacity: editingEmp ? 0.6 : 1 }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password {editingEmp && '(Leave empty to keep current)'}</label><input type="text" required={!editingEmp} className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Department</label>
-                                        <select className="input-field" value={newEmp.department} onChange={e => setNewEmp({ ...newEmp, department: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                            <option value="" style={{ background: '#111' }}>Select Department</option>
-                                            <option value="Development" style={{ background: '#111' }}>Development</option>
-                                            <option value="Design" style={{ background: '#111' }}>Design</option>
-                                            <option value="Marketing" style={{ background: '#111' }}>Marketing</option>
-                                            <option value="Sales" style={{ background: '#111' }}>Sales</option>
-                                            <option value="Support" style={{ background: '#111' }}>Support</option>
-                                            <option value="Management" style={{ background: '#111' }}>Management</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Compensation Type</label>
-                                        <select className="input-field" value={newEmp.compensationType} onChange={e => setNewEmp({ ...newEmp, compensationType: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
-                                            <option value="Fixed" style={{ background: '#111' }}>Fixed Salary</option>
-                                            <option value="Commission" style={{ background: '#111' }}>Commission Based</option>
-                                        </select>
-                                    </div>
-
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ display: 'block', marginBottom: '1rem', color: '#00ff88', fontWeight: 'bold' }}>Access Permissions</label>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222' }}>
-                                            {[
-                                                { id: 'orders', label: '📦 Orders' },
-                                                { id: 'inventory', label: '📊 Stock' },
-                                                { id: 'website', label: '🌐 Website' },
-                                                { id: 'sales', label: '💸 Sales' },
-                                                { id: 'finance', label: '💰 Finance' },
-                                                { id: 'leads', label: '👥 Leads' },
-                                                { id: 'users', label: '👤 Buyers' },
-                                                { id: 'support', label: '🎫 Support' },
-                                                { id: 'marketing', label: '📢 Marketing' },
-                                                { id: 'tools', label: '🛠️ Tools' },
-                                                { id: 'hr', label: '👔 HR/Staff' },
-                                                { id: 'settings', label: '⚙️ Settings' }
-                                            ].map(p => (
-                                                <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', color: newEmp.permissions.includes(p.id) ? '#fff' : '#666' }}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={newEmp.permissions.includes(p.id)}
-                                                        onChange={e => {
-                                                            const perms = e.target.checked
-                                                                ? [...newEmp.permissions, p.id]
-                                                                : newEmp.permissions.filter(x => x !== p.id);
-                                                            setNewEmp({ ...newEmp, permissions: perms });
-                                                        }}
-                                                        style={{ width: '18px', height: '18px', accentColor: '#00ff88' }}
-                                                    />
-                                                    {p.label}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        {newEmp.compensationType === 'Fixed' ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Monthly Salary ($)</label>
-                                                <input type="number" required className="input-field" value={newEmp.salary} onChange={e => setNewEmp({ ...newEmp, salary: e.target.value })} style={{ width: '100%' }} />
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Commission Rate (%)</label>
-                                                <input type="number" required className="input-field" value={newEmp.commissionRate} onChange={e => setNewEmp({ ...newEmp, commissionRate: e.target.value })} style={{ width: '100%' }} />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div style={{ gridColumn: 'span 2' }}>
-                                        <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc' }}>Platform Access</label>
-                                        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                                            {['Z2U', 'PlayerUp', 'G2G', 'Direct'].map(platform => (
-                                                <label key={platform} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                                                    <input type="checkbox" checked={newEmp.allowedPlatforms.includes(platform)} onChange={e => { const current = newEmp.allowedPlatforms; if (e.target.checked) setNewEmp({ ...newEmp, allowedPlatforms: [...current, platform] }); else setNewEmp({ ...newEmp, allowedPlatforms: current.filter(p => p !== platform) }); }} />
-                                                    {platform}
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>{editingEmp ? 'Save Changes' : 'Create Staff Account'}</button>
-                                    </div>
-                                </form>
+                    {/* LEADS TAB */}
+                    {activeTab === 'leads' && (
+                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                            <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <h2 style={{ color: '#00ff88' }}>All Company Leads</h2>
+                                <p style={{ color: '#666' }}>Full CRM Database</p>
                             </div>
-                        )}
-
-                        <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1.5rem' }}>Name / Email</th>
-                                        <th style={{ padding: '1.5rem' }}>Role</th>
-                                        <th style={{ padding: '1.5rem' }}>Department</th>
-                                        <th style={{ padding: '1.5rem' }}>Compensation</th>
+                                        <th style={{ padding: '1.5rem' }}>Lead Name</th>
+                                        <th style={{ padding: '1.5rem' }}>Contact</th>
+                                        <th style={{ padding: '1.5rem' }}>Value</th>
                                         <th style={{ padding: '1.5rem' }}>Status</th>
-                                        <th style={{ padding: '1.5rem', textAlign: 'right' }}>Actions</th>
+                                        <th style={{ padding: '1.5rem' }}>Owner</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* Internal Admins from Users Table */}
-                                    {users.filter(u => u.role === 'admin').map((u: any) => (
-                                        <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,255,136,0.02)' }}>
-                                            <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>System Admin</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{u.email}</div></td>
-                                            <td style={{ padding: '1.5rem' }}>Management / Owner</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,180,100,0.1)', color: '#00ff88' }}>Core Admin</span></td>
-                                            <td style={{ padding: '1.5rem' }}>${Number(u.wallet_balance || 0).toFixed(2)}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ color: '#00ff88' }}>• ACTIVE</span></td>
-                                            <td style={{ padding: '1.5rem', textAlign: 'right' }}>
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUser(u);
-                                                        setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
-                                                        setShowUserEdit(true);
-                                                    }}
-                                                    className="btn btn-outline"
-                                                    style={{ fontSize: '0.8rem', borderColor: '#4dacff', color: '#4dacff' }}
-                                                >
-                                                    Edit Admin
-                                                </button>
-                                            </td>
+                                    {leads.map((lead: any) => (
+                                        <tr key={lead.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{lead.name}</td>
+                                            <td style={{ padding: '1.5rem', color: '#888' }}>{lead.contact}</td>
+                                            <td style={{ padding: '1.5rem' }}>${lead.value}</td>
+                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(0,100,255,0.2)' }}>{lead.status}</span></td>
+                                            <td style={{ padding: '1.5rem', color: '#aaa' }}>{lead.createdBy}</td>
                                         </tr>
                                     ))}
-                                    {/* Staff from Employees Table */}
-                                    {employees.map((emp: any) => (
-                                        <tr key={emp.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>{emp.name}</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{emp.email}</div></td>
-                                            <td style={{ padding: '1.5rem' }}>{emp.position}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,100,255,0.2)', color: '#4dacff' }}>{emp.department}</span></td>
-                                            <td style={{ padding: '1.5rem' }}>{emp.compensationType === 'Commission' ? <span style={{ color: '#ffd700' }}>{emp.commissionRate}% Commission</span> : <span>${Number(emp.salary).toLocaleString()} /mo</span>}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ color: emp.status === 'Active' ? '#00ff88' : '#ff4444' }}>• {emp.status}</span></td>
-                                            <td style={{ padding: '1.5rem', textAlign: 'right' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* PAYMENTS TAB (New Modern Layout) */}
+                    {activeTab === 'payments' && (
+                        <div className="FadeIn" style={{ display: 'flex', gap: '2rem', minHeight: '600px' }}>
+                            {/* Inner Sidebar for Payments */}
+                            <div style={{ width: '250px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <h3 style={{ color: '#fff', marginBottom: '1rem', paddingLeft: '0.5rem' }}>Payment Methods</h3>
+                                {['general', 'stripe', 'cryptomus', 'binance', 'manual'].map(sub => (
+                                    <button
+                                        key={sub}
+                                        onClick={() => setSettings({ ...settings, activePaymentTab: sub })}
+                                        style={{
+                                            textAlign: 'left',
+                                            padding: '1rem',
+                                            borderRadius: '8px',
+                                            background: settings.activePaymentTab === sub ? 'rgba(0,255,136,0.1)' : 'transparent',
+                                            color: settings.activePaymentTab === sub ? '#00ff88' : '#888',
+                                            border: 'none',
+                                            fontWeight: settings.activePaymentTab === sub ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
+                                        {sub === 'general' && '⚙️ General'}
+                                        {sub === 'stripe' && '💳 Stripe'}
+                                        {sub === 'cryptomus' && '🟠 Cryptomus'}
+                                        {sub === 'binance' && '🟡 Binance Pay'}
+                                        {sub === 'manual' && '🏦 Manual / Bank'}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Content Area */}
+                            <div style={{ flex: 1 }}>
+                                <div className="glass" style={{ padding: '2.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h2 style={{ color: '#00ff88', marginBottom: '0.5rem', textTransform: 'capitalize' }}>
+                                        {(settings.activePaymentTab && settings.activePaymentTab !== 'general') ? settings.activePaymentTab : 'General'} Configuration
+                                    </h2>
+                                    <p style={{ color: '#666', marginBottom: '2rem' }}>Update your payment gateway credentials securely.</p>
+
+                                    {(!settings.activePaymentTab || settings.activePaymentTab === 'general') && (
+                                        <div style={{ marginBottom: '2.5rem', padding: '1.5rem', background: 'rgba(0,255,136,0.03)', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
+                                            <h4 style={{ color: '#fff', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Live Gateways Control</h4>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                                {[
+                                                    { id: 'stripe', name: 'Stripe Cards', icon: '💳' },
+                                                    { id: 'crypto', name: 'Cryptomus', icon: '₿' },
+                                                    { id: 'binance', name: 'Binance Pay', icon: '🟡' },
+                                                    { id: 'wallet', name: 'Wallet Pay', icon: '💼' }
+                                                ].map(m => {
+                                                    let config: any = {};
+                                                    try { config = settings.payment_gateways ? JSON.parse(settings.payment_gateways) : { stripe: true, crypto: true, binance: true, wallet: true }; } catch { }
+                                                    const isActive = config[m.id] !== false;
+
+                                                    return (
+                                                        <div
+                                                            key={m.id}
+                                                            onClick={() => toggleGateway(m.id)}
+                                                            style={{
+                                                                padding: '1.2rem',
+                                                                borderRadius: '16px',
+                                                                background: isActive ? 'rgba(0,255,136,0.08)' : 'rgba(255,255,255,0.02)',
+                                                                border: isActive ? '1px solid #00ff8855' : '1px solid rgba(255,255,255,0.05)',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'space-between',
+                                                                transition: 'all 0.3s'
+                                                            }}
+                                                        >
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                                <span style={{ fontSize: '1.2rem' }}>{m.icon}</span>
+                                                                <span style={{ fontWeight: '600', color: isActive ? '#fff' : '#666', fontSize: '0.9rem' }}>{m.name}</span>
+                                                            </div>
+                                                            <div style={{
+                                                                width: '38px',
+                                                                height: '20px',
+                                                                borderRadius: '20px',
+                                                                background: isActive ? '#00ff88' : '#333',
+                                                                position: 'relative'
+                                                            }}>
+                                                                <div style={{
+                                                                    width: '14px',
+                                                                    height: '14px',
+                                                                    borderRadius: '50%',
+                                                                    background: '#fff',
+                                                                    position: 'absolute',
+                                                                    top: '3px',
+                                                                    left: isActive ? '21px' : '3px',
+                                                                    transition: 'all 0.3s'
+                                                                }} />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                                        {(!settings.activePaymentTab || settings.activePaymentTab === 'general') && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                                {/* Global Settings */}
+                                                <div style={{ gridColumn: 'span 2' }}>
+                                                    <h4 style={{ color: '#fff', borderBottom: '1px solid #333', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Global Shopping Rules</h4>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Primary Site Currency</label>
+                                                    <select className="input-field" value={settings.site_currency || 'USD'} onChange={e => setSettings({ ...settings, site_currency: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                        <option value="USD">USD ($) - International</option>
+                                                        <option value="PKR">PKR (₨) - Pakistan</option>
+                                                        <option value="EUR">EUR (€) - Europe</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Admin Notification Email</label>
+                                                    <input className="input-field" value={settings.admin_email || ''} onChange={e => setSettings({ ...settings, admin_email: e.target.value })} placeholder="alerts@officialum1.com" style={{ width: '100%' }} />
+                                                </div>
+                                                <div style={{ gridColumn: 'span 2', display: 'flex', gap: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid #333' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
+                                                        <input type="checkbox" checked={settings.allow_guest_checkout === 'true'} onChange={e => setSettings({ ...settings, allow_guest_checkout: e.target.checked ? 'true' : 'false' })} />
+                                                        Allow Guest Checkout
+                                                    </label>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer' }}>
+                                                        <input type="checkbox" checked={settings.allow_wallet_payment === 'true'} onChange={e => setSettings({ ...settings, allow_wallet_payment: e.target.checked ? 'true' : 'false' })} />
+                                                        Allow Wallet Payments
+                                                    </label>
+                                                </div>
+
+                                                {/* VIP SaaS Configuration */}
+                                                <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                                                    <h4 style={{ color: '#ffd700', borderBottom: '1px solid #222', paddingBottom: '0.5rem', marginBottom: '1rem' }}>SaaS Membership Discounts (%)</h4>
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Silver VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_silver || '5'} onChange={e => setSettings({ ...settings, discount_silver: e.target.value })} style={{ width: '100%', borderColor: '#C0C0C033' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Gold VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_gold || '10'} onChange={e => setSettings({ ...settings, discount_gold: e.target.value })} style={{ width: '100%', borderColor: '#FFD70033' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Diamond VIP Discount</label>
+                                                    <input type="number" className="input-field" value={settings.discount_diamond || '15'} onChange={e => setSettings({ ...settings, discount_diamond: e.target.value })} style={{ width: '100%', borderColor: '#B9F2FF33' }} />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {settings.activePaymentTab === 'stripe' && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Publishable Key</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.stripePublic || ''}
+                                                        onChange={e => setSettings({ ...settings, stripePublic: e.target.value })}
+                                                        placeholder="pk_test_..."
+                                                        style={{ width: '100%' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Stripe Secret Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.stripeSecret || ''}
+                                                        onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })}
+                                                        placeholder="sk_test_..."
+                                                        style={{ width: '100%' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'cryptomus' && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Cryptomus Merchant ID</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.cryptomusId || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#fdd835' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Payment API Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.cryptomusKey || ''}
+                                                        onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#fdd835' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'binance' && (
+                                            <>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance API Key</label>
+                                                    <input
+                                                        className="input-field"
+                                                        value={settings.binanceKey || ''}
+                                                        onChange={e => setSettings({ ...settings, binanceKey: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#FCD535' }}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Binance Secret Key</label>
+                                                    <input
+                                                        type="password"
+                                                        className="input-field"
+                                                        value={settings.binanceSecret || ''}
+                                                        onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })}
+                                                        style={{ width: '100%', borderColor: '#FCD535' }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {settings.activePaymentTab === 'manual' && (
+                                            <div>
+                                                <label style={{ color: '#ccc', display: 'block', marginBottom: '0.5rem' }}>Bank / Manual Transfer Instructions</label>
+                                                <textarea
+                                                    className="input-field h-32"
+                                                    value={settings.manualPaymentInstructions || ''}
+                                                    onChange={e => setSettings({ ...settings, manualPaymentInstructions: e.target.value })}
+                                                    placeholder="Bank Name: ... IBAN: ..."
+                                                    style={{ width: '100%', minHeight: '150px' }}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Calculate & Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* USERS TAB (BUYERS) */}
+                    {activeTab === 'users' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <h2 style={{ color: '#00ff88' }}>Website Buyers</h2>
+                                        <p style={{ color: '#666' }}>Manage your site customers ({users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length} Total)</p>
+                                    </div>
+                                </div>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <th style={{ padding: '1.5rem' }}>Buyer Info</th>
+                                            <th style={{ padding: '1.5rem' }}>Status / Tier</th>
+                                            <th style={{ padding: '1.5rem' }}>Spent / Points</th>
+                                            <th style={{ padding: '1.5rem' }}>Wallet Balance</th>
+                                            <th style={{ padding: '1.5rem' }}>Affiliate Earned</th>
+                                            <th style={{ padding: '1.5rem' }}>Joined</th>
+                                            <th style={{ padding: '1.5rem', textAlign: 'right' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).length === 0 ? (
+                                            <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No buyers found.</td></tr>
+                                        ) : users.filter((u: any) => (u.role === 'buyer' || u.role === 'user')).map((u: any) => (
+                                            <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ fontWeight: 'bold' }}>{u.email}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#666', fontFamily: 'monospace' }}>ID: {u.id}</div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                                        <span style={{
+                                                            padding: '4px 10px',
+                                                            borderRadius: '20px',
+                                                            fontSize: '0.75rem',
+                                                            background: u.is_verified ? 'rgba(0,180,100,0.1)' : 'rgba(255,100,0,0.1)',
+                                                            color: u.is_verified ? '#00ff88' : '#ff9900',
+                                                            border: u.is_verified ? '1px solid #00ff8833' : '1px solid #ff990033'
+                                                        }}>
+                                                            {u.is_guest ? 'GUEST' : (u.is_verified ? 'VERIFIED' : 'PENDING')}
+                                                        </span>
+                                                        {!u.is_guest && u.membership && u.membership !== 'none' && (
+                                                            <span style={{
+                                                                padding: '4px 10px',
+                                                                borderRadius: '20px',
+                                                                fontSize: '0.75rem',
+                                                                background: 'rgba(255,215,0,0.15)',
+                                                                color: '#ffd700',
+                                                                border: '1px solid #ffd70055',
+                                                                fontWeight: 'bold'
+                                                            }}>
+                                                                ★ {u.membership.toUpperCase()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.total_spent || 0).toFixed(2)}</div>
+                                                    <div style={{ fontSize: '0.82rem', color: '#888' }}>{u.points || 0} pts</div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ color: '#00ff88', fontWeight: 'bold' }}>${Number(u.wallet_balance || 0).toFixed(2)}</div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <div style={{ color: '#ffd700' }}>${Number(u.affiliate_balance || 0).toFixed(2)}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: '#666' }}>{u.is_guest ? 'N/A' : `Ref: ${u.referral_code}`}</div>
+                                                </td>
+                                                <td style={{ padding: '1.5rem', color: '#666' }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                                                        {!u.is_guest && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSelectedUser(u);
+                                                                        setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
+                                                                        setShowUserEdit(true);
+                                                                    }}
+                                                                    className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem' }}
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleResendUserEmail(u.id, u.email, 'resend_registration')}
+                                                                    className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#ffd700', borderColor: '#ffd70033' }}
+                                                                >
+                                                                    Verify
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleResendUserEmail(u.id, u.email, 'resend_forgot')}
+                                                                    className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00d1ff', borderColor: '#00d1ff33' }}
+                                                                >
+                                                                    Reset
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {u.is_guest && <span style={{ fontSize: '0.75rem', color: '#666' }}>Guest Buyer</span>}
+                                                        <button
+                                                            onClick={async () => {
+                                                                const amount = prompt(`Adjustment amount for ${u.email} (Positive to add, Negative to subtract):`);
+                                                                if (amount && !isNaN(parseFloat(amount))) {
+                                                                    const res = await fetch('/api/user/wallet', {
+                                                                        method: 'POST',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ userId: u.id, amount: parseFloat(amount), source: 'Admin Adjustment' })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        alert('Wallet Updated');
+                                                                        fetchData();
+                                                                    } else {
+                                                                        alert('Failed to update wallet');
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className="btn btn-outline" style={{ padding: '5px 10px', fontSize: '0.8rem', color: '#00ff88', borderColor: '#00ff8833' }}
+                                                        >
+                                                            Wallet
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm(`Delete buyer ${u.email}?`)) {
+                                                                    await fetch(`/api/admin/users?id=${u.id}`, { method: 'DELETE' });
+                                                                    fetchData();
+                                                                }
+                                                            }}
+                                                            style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* USER EDIT MODAL */}
+                            {showUserEdit && selectedUser && (
+                                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
+                                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                            <h3 style={{ color: '#00ff88' }}>Edit User profile</h3>
+                                            <button onClick={() => setShowUserEdit(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.5rem' }}>✕</button>
+                                        </div>
+                                        <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Email Address</label>
+                                                <input className="input-field" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} style={{ width: '100%' }} required />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>New Password (Leave blank to keep current)</label>
+                                                <input className="input-field" type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} style={{ width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Telegram</label>
+                                                <input className="input-field" value={userForm.telegram} onChange={e => setUserForm({ ...userForm, telegram: e.target.value })} style={{ width: '100%' }} />
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>User Role</label>
+                                                <select className="input-field" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                                    <option value="buyer">Buyer / Customer</option>
+                                                    <option value="seller">Seller / Partner</option>
+                                                    <option value="admin">System Admin</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.5rem', display: 'block' }}>Membership Tier</label>
+                                                <select className="input-field" value={selectedUser.membership || 'none'} onChange={e => setSelectedUser({ ...selectedUser, membership: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                                    <option value="none">None (Standard)</option>
+                                                    <option value="silver">Silver VIP</option>
+                                                    <option value="gold">Gold VIP</option>
+                                                    <option value="diamond">Diamond VIP</option>
+                                                </select>
+                                            </div>
+                                            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
+                                                <p style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Creation Details:</p>
+                                                <div style={{ fontSize: '0.85rem', color: '#eee' }}>Joined: {new Date(selectedUser.created_at).toLocaleString()}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#eee' }}>Referral Code: {selectedUser.referral_code || 'None'}</div>
+                                            </div>
+                                            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Update User Profile</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* SUPPORT TAB */}
+                    {activeTab === 'support' && (
+                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden', padding: '2rem' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Support Tickets</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                {tickets.length === 0 && <p style={{ color: '#666' }}>No tickets found.</p>}
+                                {tickets.map(t => (
+                                    <div key={t.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.5rem', borderLeft: t.status === 'open' ? '4px solid #00ff88' : '4px solid #555' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', alignItems: 'center' }} onClick={() => setActiveTicketId(activeTicketId === t.id ? null : t.id)}>
+                                            <div>
+                                                <h4 style={{ color: '#fff', marginBottom: '0.2rem' }}>{t.subject}</h4>
+                                                <div style={{ fontSize: '0.8rem', color: '#888' }}>User: {t.email} (ID: {t.user_id})</div>
+                                            </div>
+                                            <span style={{ padding: '4px 8px', borderRadius: '4px', background: t.status === 'open' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.1)', color: t.status === 'open' ? '#00ff88' : '#aaa', fontSize: '0.8rem' }}>{t.status.toUpperCase()}</span>
+                                        </div>
+
+                                        {activeTicketId === t.id && (
+                                            <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+                                                <div style={{ background: '#000', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
+                                                    {t.message}
+                                                </div>
+                                                {/* Replies */}
+                                                <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {t.replies && t.replies.map((r: any, i: number) => (
+                                                        <div key={i} style={{ alignSelf: r.sender === 'admin' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+                                                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '2px', textAlign: r.sender === 'admin' ? 'right' : 'left' }}>{r.sender === 'admin' ? 'You' : 'User'}</div>
+                                                            <div style={{ background: r.sender === 'admin' ? '#00ff88' : '#333', color: r.sender === 'admin' ? '#000' : '#fff', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                                                                {r.message}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                                    <input placeholder="Type a reply..." value={replyMsg} onChange={e => setReplyMsg(e.target.value)} className="input-field" style={{ flex: 1 }} />
+                                                    <button onClick={() => handleReplyTicket(t.id)} className="btn btn-primary">Send Reply</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'marketing' && (
+                        <>
+                            <div style={{ display: 'grid', gap: '2rem' }}>
+                                {/* Marketing Sub-Navigation */}
+                                <div style={{
+                                    display: 'flex',
+                                    gap: '0.5rem',
+                                    borderBottom: '1px solid #333',
+                                    paddingBottom: '1rem',
+                                    overflowX: 'auto',
+                                    marginBottom: '1rem'
+                                }}>
+                                    {['all', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                        <button
+                                            key={p}
+                                            onClick={() => setMarketingTab(p)}
+                                            style={{
+                                                padding: '0.5rem 1rem',
+                                                background: marketingTab === p ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                                color: marketingTab === p ? '#000' : '#888',
+                                                borderRadius: '6px',
+                                                border: 'none',
+                                                fontWeight: 'bold',
+                                                cursor: 'pointer',
+                                                textTransform: 'capitalize'
+                                            }}
+                                        >
+                                            {p === 'all' ? '🌐 All Feed' : p}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h2 style={{ color: '#00ff88' }}>{marketingTab === 'all' ? 'Social Media Hub' : `${marketingTab} Feed`}</h2>
+                                        <button onClick={() => setShowAddPost(true)} className="btn btn-primary">+ Draft New Post</button>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                        {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).map((post: any) => (
+                                            <div key={post.id} className="glass" style={{ padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#00ff88', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' }}>
+                                                            {(post.author || 'S').charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <div style={{ fontWeight: 'bold', color: '#fff' }}>{post.author || 'System Admin'}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>{new Date(post.createdAt).toLocaleString()}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                        <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '20px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                                            {post.platform}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.75rem', color: '#666' }}>{post.status}</span>
+                                                    </div>
+                                                </div>
+
+                                                <p style={{ color: '#eee', lineHeight: '1.6', fontSize: '1.05rem', marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }}>
+                                                    {post.content}
+                                                </p>
+
+                                                <div style={{ display: 'flex', gap: '0.8rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.2rem' }}>
+                                                    {(post.platform && (post.platform.includes('All') || post.platform.includes('Twitter'))) && (
+                                                        <a
+                                                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.content)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#1DA1F2', color: '#1DA1F2' }}
+                                                        >
+                                                            🐦 Tweet This
+                                                        </a>
+                                                    )}
+
+                                                    <button
+                                                        className="btn btn-outline"
+                                                        style={{ fontSize: '0.85rem', padding: '0.5rem 1.2rem', borderColor: '#444' }}
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(post.content);
+                                                            alert('Content copied to clipboard!');
+                                                        }}
+                                                    >
+                                                        📋 Copy Content
+                                                    </button>
+
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Delete this post draft?')) {
+                                                                await fetch(`/api/admin/marketing?id=${post.id}`, { method: 'DELETE' });
+                                                                window.location.reload();
+                                                            }
+                                                        }}
+                                                        style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                    >
+                                                        Delete Draft
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {(marketingTab === 'all' ? posts : posts.filter((p: any) => p.platform && p.platform.includes(marketingTab))).length === 0 && (
+                                            <div className="glass" style={{ padding: '4rem', textAlign: 'center', opacity: 0.6 }}>
+                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+                                                <p>No posts found for {marketingTab}.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {showAddPost && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.3)', marginTop: '2rem' }}>
+                                    <h3>Draft Social Post</h3>
+                                    <form onSubmit={handleAddPost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                                                {['All', 'Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'Telegram'].map(p => (
+                                                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px', border: newPost.platforms.includes(p) ? '1px solid #00ff88' : '1px solid transparent' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={newPost.platforms.includes(p)}
+                                                            onChange={e => {
+                                                                const current = newPost.platforms;
+                                                                if (e.target.checked) setNewPost({ ...newPost, platforms: [...current, p] });
+                                                                else setNewPost({ ...newPost, platforms: current.filter(x => x !== p) });
+                                                            }}
+                                                        />
+                                                        <span style={{ color: newPost.platforms.includes(p) ? '#00ff88' : '#ccc', fontSize: '0.9rem' }}>
+                                                            {p === 'All' ? 'All (Broadcast)' : p}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <textarea placeholder="Post Content (Description, Hashtags...)" className="input-field" style={{ height: '100px' }} value={newPost.content} onChange={e => setNewPost({ ...newPost, content: e.target.value })} required />
+                                        <div style={{ display: 'flex', gap: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary">Save Draft</button>
+                                            <button type="button" onClick={() => setShowAddPost(false)} className="btn btn-outline">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </>
+                    )}
+                    {/* TOOLS TAB (New) */}
+                    {activeTab === 'tools' && (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+
+                            {/* Backlink Service */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🔗 Backlink Authority Checker</h2>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Check DA/PA metrics for any domain using Moz API.</p>
+                                <form onSubmit={handleBacklinkCheck} style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <input placeholder="https://example.com" value={toolUrl} onChange={e => setToolUrl(e.target.value)} className="input-field" style={{ flex: 1 }} required />
+                                    <button type="submit" className="btn btn-primary" disabled={toolLoading}>{toolLoading ? 'Scanning...' : 'Check'}</button>
+                                </form>
+                                {toolMetrics && (
+                                    <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #333' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: '1rem' }}>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.da}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Domain Auth</div></div>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.pa}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Page Auth</div></div>
+                                            <div><div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>{toolMetrics.links}</div><div style={{ color: '#888', fontSize: '0.8rem' }}>Backlinks</div></div>
+                                        </div>
+                                        <div style={{ fontSize: '0.9rem', color: '#ccc' }}>
+                                            <strong>Analysis:</strong>
+                                            <ul style={{ paddingLeft: '1.2rem', marginTop: '0.5rem' }}>
+                                                {toolMetrics.details?.map((d: string, i: number) => <li key={i}>{d}</li>)}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* AI Writer */}
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', border: '1px solid rgba(138, 56, 255, 0.2)' }}>
+                                <h2 style={{ color: '#ae68ff', marginBottom: '1rem' }}>✨ AI Content Generator</h2>
+                                <p style={{ color: '#888', marginBottom: '1.5rem' }}>Generate SEO-optimized blog posts instantly.</p>
+                                <form onSubmit={handleGenerateBlog} style={{ display: 'flex', gap: '1rem' }}>
+                                    <input placeholder="Topic (e.g. Best Game Accounts)" value={blogTopic} onChange={e => setBlogTopic(e.target.value)} className="input-field" style={{ flex: 1 }} required />
+                                    <button type="submit" className="btn btn-outline" style={{ color: '#ae68ff', borderColor: '#ae68ff' }} disabled={blogLoading}>{blogLoading ? 'Writing...' : 'Generate'}</button>
+                                </form>
+                            </div>
+
+                            {/* Telegram Bot Setup - MOVED TO SETTINGS */}
+                            {/* The Telegram configuration is now centralized in the Settings tab under API Integrations */}
+
+                        </div>
+                    )}
+
+                    {/* HR TAB */}
+                    {activeTab === 'hr' && (
+                        <>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ color: '#00ff88' }}>Administrative Staff & Admins</h2>
+                                <button onClick={() => { setShowAddStaff(!showAddStaff); if (!showAddStaff) setEditingEmp(null); }} className="btn btn-primary">{showAddStaff ? 'Cancel' : '+ Add Staff'}</button>
+                            </div>
+
+                            {showAddStaff && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                    <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>{editingEmp ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
+                                    <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required disabled={!!editingEmp} className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%', opacity: editingEmp ? 0.6 : 1 }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password {editingEmp && '(Leave empty to keep current)'}</label><input type="text" required={!editingEmp} className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Department</label>
+                                            <select className="input-field" value={newEmp.department} onChange={e => setNewEmp({ ...newEmp, department: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                <option value="" style={{ background: '#111' }}>Select Department</option>
+                                                <option value="Development" style={{ background: '#111' }}>Development</option>
+                                                <option value="Design" style={{ background: '#111' }}>Design</option>
+                                                <option value="Marketing" style={{ background: '#111' }}>Marketing</option>
+                                                <option value="Sales" style={{ background: '#111' }}>Sales</option>
+                                                <option value="Support" style={{ background: '#111' }}>Support</option>
+                                                <option value="Management" style={{ background: '#111' }}>Management</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Compensation Type</label>
+                                            <select className="input-field" value={newEmp.compensationType} onChange={e => setNewEmp({ ...newEmp, compensationType: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                                <option value="Fixed" style={{ background: '#111' }}>Fixed Salary</option>
+                                                <option value="Commission" style={{ background: '#111' }}>Commission Based</option>
+                                            </select>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '1rem', color: '#00ff88', fontWeight: 'bold' }}>Access Permissions</label>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #222' }}>
+                                                {[
+                                                    { id: 'orders', label: '📦 Orders' },
+                                                    { id: 'inventory', label: '📊 Stock' },
+                                                    { id: 'website', label: '🌐 Website' },
+                                                    { id: 'sales', label: '💸 Sales' },
+                                                    { id: 'finance', label: '💰 Finance' },
+                                                    { id: 'leads', label: '👥 Leads' },
+                                                    { id: 'users', label: '👤 Buyers' },
+                                                    { id: 'support', label: '🎫 Support' },
+                                                    { id: 'marketing', label: '📢 Marketing' },
+                                                    { id: 'tools', label: '🛠️ Tools' },
+                                                    { id: 'hr', label: '👔 HR/Staff' },
+                                                    { id: 'settings', label: '⚙️ Settings' }
+                                                ].map(p => (
+                                                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', cursor: 'pointer', color: newEmp.permissions.includes(p.id) ? '#fff' : '#666' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={newEmp.permissions.includes(p.id)}
+                                                            onChange={e => {
+                                                                const perms = e.target.checked
+                                                                    ? [...newEmp.permissions, p.id]
+                                                                    : newEmp.permissions.filter(x => x !== p.id);
+                                                                setNewEmp({ ...newEmp, permissions: perms });
+                                                            }}
+                                                            style={{ width: '18px', height: '18px', accentColor: '#00ff88' }}
+                                                        />
+                                                        {p.label}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            {newEmp.compensationType === 'Fixed' ? (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Monthly Salary ($)</label>
+                                                    <input type="number" required className="input-field" value={newEmp.salary} onChange={e => setNewEmp({ ...newEmp, salary: e.target.value })} style={{ width: '100%' }} />
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Commission Rate (%)</label>
+                                                    <input type="number" required className="input-field" value={newEmp.commissionRate} onChange={e => setNewEmp({ ...newEmp, commissionRate: e.target.value })} style={{ width: '100%' }} />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2' }}>
+                                            <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc' }}>Platform Access</label>
+                                            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                                                {['Z2U', 'PlayerUp', 'G2G', 'Direct'].map(platform => (
+                                                    <label key={platform} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+                                                        <input type="checkbox" checked={newEmp.allowedPlatforms.includes(platform)} onChange={e => { const current = newEmp.allowedPlatforms; if (e.target.checked) setNewEmp({ ...newEmp, allowedPlatforms: [...current, platform] }); else setNewEmp({ ...newEmp, allowedPlatforms: current.filter(p => p !== platform) }); }} />
+                                                        {platform}
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ width: '200px' }}>{editingEmp ? 'Save Changes' : 'Create Staff Account'}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+
+                            <div className="glass" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <th style={{ padding: '1.5rem' }}>Name / Email</th>
+                                            <th style={{ padding: '1.5rem' }}>Role</th>
+                                            <th style={{ padding: '1.5rem' }}>Department</th>
+                                            <th style={{ padding: '1.5rem' }}>Compensation</th>
+                                            <th style={{ padding: '1.5rem' }}>Status</th>
+                                            <th style={{ padding: '1.5rem', textAlign: 'right' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Internal Admins from Users Table */}
+                                        {users.filter(u => u.role === 'admin').map((u: any) => (
+                                            <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,255,136,0.02)' }}>
+                                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>System Admin</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{u.email}</div></td>
+                                                <td style={{ padding: '1.5rem' }}>Management / Owner</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,180,100,0.1)', color: '#00ff88' }}>Core Admin</span></td>
+                                                <td style={{ padding: '1.5rem' }}>${Number(u.wallet_balance || 0).toFixed(2)}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ color: '#00ff88' }}>• ACTIVE</span></td>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
                                                     <button
                                                         onClick={() => {
-                                                            setEditingEmp(emp);
-                                                            setNewEmp({
-                                                                name: emp.name,
-                                                                email: emp.email,
-                                                                password: '', // Hidden
-                                                                position: emp.position,
-                                                                department: emp.department,
-                                                                salary: emp.salary,
-                                                                commissionRate: emp.commissionRate,
-                                                                compensationType: emp.compensationType,
-                                                                allowedPlatforms: emp.allowedPlatforms || [],
-                                                                permissions: Array.isArray(emp.permissions) ? emp.permissions : (emp.permissions ? JSON.parse(emp.permissions) : [])
-                                                            });
-                                                            setShowAddStaff(true);
+                                                            setSelectedUser(u);
+                                                            setUserForm({ email: u.email, password: '', telegram: u.telegram || '', role: u.role });
+                                                            setShowUserEdit(true);
                                                         }}
                                                         className="btn btn-outline"
                                                         style={{ fontSize: '0.8rem', borderColor: '#4dacff', color: '#4dacff' }}
                                                     >
-                                                        Edit
+                                                        Edit Admin
                                                     </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            const newStatus = emp.status === 'Active' ? 'Suspended' : 'Active';
-                                                            if (confirm(`Change status of ${emp.name} to ${newStatus}?`)) {
-                                                                await fetch('/api/hr/employees', {
-                                                                    method: 'PATCH',
-                                                                    headers: { 'Content-Type': 'application/json' },
-                                                                    body: JSON.stringify({ id: emp.id, status: newStatus })
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {/* Staff from Employees Table */}
+                                        {employees.map((emp: any) => (
+                                            <tr key={emp.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>{emp.name}</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{emp.email}</div></td>
+                                                <td style={{ padding: '1.5rem' }}>{emp.position}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,100,255,0.2)', color: '#4dacff' }}>{emp.department}</span></td>
+                                                <td style={{ padding: '1.5rem' }}>{emp.compensationType === 'Commission' ? <span style={{ color: '#ffd700' }}>{emp.commissionRate}% Commission</span> : <span>${Number(emp.salary).toLocaleString()} /mo</span>}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ color: emp.status === 'Active' ? '#00ff88' : '#ff4444' }}>• {emp.status}</span></td>
+                                                <td style={{ padding: '1.5rem', textAlign: 'right' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingEmp(emp);
+                                                                setNewEmp({
+                                                                    name: emp.name,
+                                                                    email: emp.email,
+                                                                    password: '', // Hidden
+                                                                    position: emp.position,
+                                                                    department: emp.department,
+                                                                    salary: emp.salary,
+                                                                    commissionRate: emp.commissionRate,
+                                                                    compensationType: emp.compensationType,
+                                                                    allowedPlatforms: emp.allowedPlatforms || [],
+                                                                    permissions: Array.isArray(emp.permissions) ? emp.permissions : (emp.permissions ? JSON.parse(emp.permissions) : [])
                                                                 });
-                                                                fetchData();
-                                                            }
-                                                        }}
-                                                        className="btn btn-outline"
-                                                        style={{ fontSize: '0.8rem', borderColor: emp.status === 'Active' ? '#ffaa00' : '#00ff88', color: emp.status === 'Active' ? '#ffaa00' : '#00ff88' }}
-                                                    >
-                                                        {emp.status === 'Active' ? 'Suspend' : 'Activate'}
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (confirm(`Terminate and delete staff account for ${emp.name}? This cannot be undone.`)) {
-                                                                await fetch(`/api/hr/employees?id=${emp.id}`, { method: 'DELETE' });
-                                                                fetchData();
-                                                            }
-                                                        }}
-                                                        style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1.2rem' }}
-                                                    >
-                                                        ×
-                                                    </button>
+                                                                setShowAddStaff(true);
+                                                            }}
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.8rem', borderColor: '#4dacff', color: '#4dacff' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                const newStatus = emp.status === 'Active' ? 'Suspended' : 'Active';
+                                                                if (confirm(`Change status of ${emp.name} to ${newStatus}?`)) {
+                                                                    await fetch('/api/hr/employees', {
+                                                                        method: 'PATCH',
+                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                        body: JSON.stringify({ id: emp.id, status: newStatus })
+                                                                    });
+                                                                    fetchData();
+                                                                }
+                                                            }}
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.8rem', borderColor: emp.status === 'Active' ? '#ffaa00' : '#00ff88', color: emp.status === 'Active' ? '#ffaa00' : '#00ff88' }}
+                                                        >
+                                                            {emp.status === 'Active' ? 'Suspend' : 'Activate'}
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (confirm(`Terminate and delete staff account for ${emp.name}? This cannot be undone.`)) {
+                                                                    await fetch(`/api/hr/employees?id=${emp.id}`, { method: 'DELETE' });
+                                                                    fetchData();
+                                                                }
+                                                            }}
+                                                            style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1.2rem' }}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {(employees.length === 0 && users.filter(u => u.role === 'admin').length === 0) && <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No administrative accounts found.</td></tr>}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )
+                    }
+
+                    {/* KB TAB */}
+                    {activeTab === 'kb' && (
+                        <div className="FadeIn">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                <h2 style={{ color: '#00ff88' }}>📚 Knowledge Base & FAQ</h2>
+                                <button onClick={() => setShowAddKb(!showAddKb)} className="btn btn-primary">{showAddKb ? 'Cancel' : '+ Add Article'}</button>
+                            </div>
+
+                            {showAddKb && (
+                                <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ margin: 0, color: '#00ff88' }}>Create New Article</h3>
+                                        <button
+                                            type="button"
+                                            disabled={isGeneratingKb}
+                                            onClick={async () => {
+                                                const topic = prompt("What is the Help Article about? (e.g. 'How to buy Netflix')");
+                                                if (!topic) return;
+                                                setIsGeneratingKb(true);
+                                                try {
+                                                    const res = await fetch('/api/admin/generate-kb', {
+                                                        method: 'POST', body: JSON.stringify({ topic })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        setKbForm(prev => ({ ...prev, ...data.data, is_published: true }));
+                                                    } else {
+                                                        alert("AI Error: " + data.error);
+                                                    }
+                                                } catch (e) { alert("Generation failed"); }
+                                                setIsGeneratingKb(false);
+                                            }}
+                                            className="btn btn-outline"
+                                            style={{ borderColor: '#00c3ff', color: '#00c3ff', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                        >
+                                            {isGeneratingKb ? '✨ Writing...' : '✨ Auto-Write with AI'}
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={async (e) => {
+                                        e.preventDefault();
+                                        await fetch('/api/kb', { method: 'POST', body: JSON.stringify({ ...kbForm, action: 'create' }) });
+                                        setShowAddKb(false);
+                                        fetchData();
+                                    }} style={{ display: 'grid', gap: '1rem' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Article Title</label>
+                                                <input type="text" required className="input-field" value={kbForm.title} onChange={e => setKbForm({ ...kbForm, title: e.target.value })} style={{ width: '100%' }} placeholder="How to use..." />
+                                            </div>
+                                            <div>
+                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>URL Slug</label>
+                                                <input type="text" required className="input-field" value={kbForm.slug} onChange={e => setKbForm({ ...kbForm, slug: e.target.value })} style={{ width: '100%' }} placeholder="how-to-use" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Category</label>
+                                            <select className="input-field" value={kbForm.category} onChange={e => setKbForm({ ...kbForm, category: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                                <option value="General">General</option>
+                                                <option value="Accounts">Accounts</option>
+                                                <option value="Payments">Payments</option>
+                                                <option value="Security">Security</option>
+                                                <option value="Affiliate">Affiliate</option>
+                                                <option value="Netflix">Netflix</option>
+                                                <option value="Spotify">Spotify</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Content (HTML/Markdown)</label>
+                                            <textarea required className="input-field" value={kbForm.content} onChange={e => setKbForm({ ...kbForm, content: e.target.value })} style={{ width: '100%', height: '300px', fontFamily: 'monospace', lineHeight: '1.5' }} />
+                                        </div>
+
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <h4 style={{ color: '#aaa', marginBottom: '1rem', borderBottom: '1px solid #333' }}>SEO Settings (Optional but Recommended)</h4>
+                                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888', fontSize: '0.8rem' }}>Meta Description (160 chars)</label>
+                                                    <input type="text" className="input-field" value={kbForm.meta_description} onChange={e => setKbForm({ ...kbForm, meta_description: e.target.value })} style={{ width: '100%' }} />
                                                 </div>
-                                            </td>
+                                                <div>
+                                                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888', fontSize: '0.8rem' }}>Keywords (comma separated)</label>
+                                                    <input type="text" className="input-field" value={kbForm.keywords} onChange={e => setKbForm({ ...kbForm, keywords: e.target.value })} style={{ width: '100%' }} placeholder="help, guide, tutorial" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                                            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Publish Article</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+
+                            <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                        <tr style={{ textAlign: 'left' }}>
+                                            <th style={{ padding: '1.5rem' }}>Title</th>
+                                            <th style={{ padding: '1.5rem' }}>Category</th>
+                                            <th style={{ padding: '1.5rem' }}>Views</th>
+                                            <th style={{ padding: '1.5rem' }}>Status</th>
+                                            <th style={{ padding: '1.5rem' }}>Action</th>
                                         </tr>
-                                    ))}
-                                    {(employees.length === 0 && users.filter(u => u.role === 'admin').length === 0) && <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>No administrative accounts found.</td></tr>}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {kbArticles.map((kb: any) => (
+                                            <tr key={kb.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{kb.title}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>{kb.category}</span></td>
+                                                <td style={{ padding: '1.5rem' }}>{kb.views || 0}</td>
+                                                <td style={{ padding: '1.5rem' }}><span style={{ color: kb.is_published ? '#00ff88' : '#888' }}>{kb.is_published ? 'Published' : 'Draft'}</span></td>
+                                                <td style={{ padding: '1.5rem' }}>
+                                                    <button onClick={async () => { if (confirm('Delete?')) { await fetch('/api/kb', { method: 'DELETE', body: JSON.stringify({ id: kb.id }) }); fetchData(); } }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>Delete</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {kbArticles.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No articles found. Create your first guide!</td></tr>}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </>
-                )
-                }
+                    )}
 
-                {/* KB TAB */}
-                {activeTab === 'kb' && (
-                    <div className="FadeIn">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ color: '#00ff88' }}>📚 Knowledge Base & FAQ</h2>
-                            <button onClick={() => setShowAddKb(!showAddKb)} className="btn btn-primary">{showAddKb ? 'Cancel' : '+ Add Article'}</button>
-                        </div>
+                    {/* LOGS TAB */}
+                    {
+                        activeTab === 'logs' && (
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Security & Activity Logs</h2>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
+                                    <thead>
+                                        <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
+                                            <th style={{ padding: '1rem' }}>Time</th>
+                                            <th style={{ padding: '1rem' }}>User</th>
+                                            <th style={{ padding: '1rem' }}>Action</th>
+                                            <th style={{ padding: '1rem' }}>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {logs && logs.length > 0 ? logs.map((log: any) => (
+                                            <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{log.date ? new Date(log.date).toLocaleString() : 'N/A'}</td>
+                                                <td style={{ padding: '1rem' }}>{log.user}</td>
+                                                <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{log.action}</span></td>
+                                                <td style={{ padding: '1rem', color: '#ccc' }}>{log.details}</td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No logs recorded yet.</td></tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    }
 
-                        {showAddKb && (
-                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: 0, color: '#00ff88' }}>Create New Article</h3>
+                    {/* SETTINGS TAB */}
+                    {
+                        activeTab === 'settings' && (
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+
+                                <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Admin Security</h2>
+                                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2rem' }}>
+                                    <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Change Admin Credentials</h3>
+                                    <form onSubmit={handleUpdateAdminProfile} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) auto', alignItems: 'end' }}>
+                                        <div>
+                                            <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Email (Optional)</label>
+                                            <input type="email" name="email" placeholder="admin@example.com" className="input-field" style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Password</label>
+                                            <input type="password" name="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Update Profile</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
+                                <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
+
+
+                                <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
+                                    {/* Twitter */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(29, 161, 242, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#1DA1F2', marginBottom: '1rem' }}>Twitter / X</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Key</label><input type="password" value={settings.twitter_api_key || ''} onChange={e => setSettings({ ...settings, twitter_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Secret</label><input type="password" value={settings.twitter_api_secret || ''} onChange={e => setSettings({ ...settings, twitter_api_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.twitter_access_token || ''} onChange={e => setSettings({ ...settings, twitter_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Secret</label><input type="password" value={settings.twitter_access_secret || ''} onChange={e => setSettings({ ...settings, twitter_access_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Facebook */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(24, 119, 242, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#1877F2', marginBottom: '1rem' }}>Facebook Page</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page ID</label><input type="text" value={settings.facebook_page_id || ''} onChange={e => setSettings({ ...settings, facebook_page_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page Access Token</label><input type="password" value={settings.facebook_page_token || ''} onChange={e => setSettings({ ...settings, facebook_page_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* LinkedIn */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(0, 119, 181, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#0077b5', marginBottom: '1rem' }}>LinkedIn</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Person URN</label><input type="text" value={settings.linkedin_person_urn || ''} onChange={e => setSettings({ ...settings, linkedin_person_urn: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.linkedin_access_token || ''} onChange={e => setSettings({ ...settings, linkedin_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Telegram */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(0, 136, 204, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#0088cc', marginBottom: '1rem' }}>Telegram Channel</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label><input type="password" value={settings.telegram_bot_token || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Chat ID (e.g. @channelname)</label><input type="text" value={settings.telegram_chat_id || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Discord */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(114, 137, 218, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#7289da', marginBottom: '1rem' }}>Discord Command Center</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Webhook URL (Sales Pings)</label><input type="password" value={settings.discord_webhook_url || ''} onChange={e => setSettings({ ...settings, discord_webhook_url: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Discord API Key (Remote Fulfillment)</label><input type="password" value={settings.discord_api_key || ''} onChange={e => setSettings({ ...settings, discord_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* G2G Master Switch */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255, 170, 0, 0.1)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#ffaa00', marginBottom: '1rem' }}>G2G Automation Master</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center' }}>
+                                            <div>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={settings.g2g_auto_pilot === 'true'}
+                                                        onChange={e => setSettings({ ...settings, g2g_auto_pilot: e.target.checked ? 'true' : 'false' })}
+                                                        style={{ width: '20px', height: '20px' }}
+                                                    />
+                                                    <span style={{ color: '#fff' }}>Enable Auto-Pilot Fulfillment</span>
+                                                </label>
+                                            </div>
+                                            <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                                When enabled, "Paid" G2G orders for accounts will be fulfilled automatically using available stock.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Instagram */}
+                                    <div style={{ padding: '1.5rem', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '12px' }}>
+                                        <h3 style={{ color: '#fff', marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Instagram Business</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                            <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#eee' }}>IG User ID (Linked to FB Page)</label><input type="text" value={settings.instagram_user_id || ''} onChange={e => setSettings({ ...settings, instagram_user_id: e.target.value })} className="input-field" style={{ width: '100%', background: 'rgba(0,0,0,0.3)', color: '#fff' }} /></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Referral System */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
+                                        <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>Referral & Affiliate System</h3>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Global Commission Rate (%)</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="10"
+                                                    value={settings.referral_commission_rate || ''}
+                                                    onChange={e => setSettings({ ...settings, referral_commission_rate: e.target.value })}
+                                                    className="input-field"
+                                                    style={{ width: '100%' }}
+                                                />
+                                                <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>Percentage earch user gets from their referral's successful purchases.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* RESTORED: Other Services */}
+                                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                                        <h3 style={{ marginBottom: '1rem', color: '#fff' }}>External Services</h3>
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Access ID (SEO)</label><input value={settings.mozId || ''} onChange={e => setSettings({ ...settings, mozId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Secret Key</label><input type="password" value={settings.mozKey || ''} onChange={e => setSettings({ ...settings, mozKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Gemini API Key (AI Blog)</label><input type="password" value={settings.geminiKey || ''} onChange={e => setSettings({ ...settings, geminiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>OpenAI API Key (AI Blog Backup)</label><input type="password" value={settings.openaiKey || ''} onChange={e => setSettings({ ...settings, openaiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+
+                                            <h4 style={{ color: '#aaa', marginTop: '1rem' }}>SMTP Email Server</h4>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Host</label><input value={settings.smtpHost || ''} onChange={e => setSettings({ ...settings, smtpHost: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                                <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>User</label><input value={settings.smtpUser || ''} onChange={e => setSettings({ ...settings, smtpUser: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                                <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Password</label><input type="password" value={settings.smtpPass || ''} onChange={e => setSettings({ ...settings, smtpPass: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" className="btn btn-primary" style={{ padding: '1rem' }}>💾 Save Configuration</button>
+                                </form>
+
+                                {/* DANGER ZONE */}
+                                <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #ff4444', borderRadius: '16px', background: 'rgba(255, 68, 68, 0.05)' }}>
+                                    <h3 style={{ color: '#ff4444', marginBottom: '1rem' }}>Danger Zone</h3>
+                                    <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>This action will wipe all inventory, sales history, and social posts. It cannot be undone.</p>
                                     <button
                                         type="button"
-                                        disabled={isGeneratingKb}
                                         onClick={async () => {
-                                            const topic = prompt("What is the Help Article about? (e.g. 'How to buy Netflix')");
-                                            if (!topic) return;
-                                            setIsGeneratingKb(true);
-                                            try {
-                                                const res = await fetch('/api/admin/generate-kb', {
-                                                    method: 'POST', body: JSON.stringify({ topic })
-                                                });
-                                                const data = await res.json();
-                                                if (data.success) {
-                                                    setKbForm(prev => ({ ...prev, ...data.data, is_published: true }));
-                                                } else {
-                                                    alert("AI Error: " + data.error);
+                                            if (confirm('⚠️ ARE YOU SURE? This will DELETE ALL DATA forever.')) {
+                                                if (confirm('Really? Click OK to confirm wiping your entire database.')) {
+                                                    await fetch('/api/admin/reset', { method: 'POST' });
+                                                    alert('System Reset Complete.');
+                                                    window.location.reload();
                                                 }
-                                            } catch (e) { alert("Generation failed"); }
-                                            setIsGeneratingKb(false);
+                                            }
                                         }}
-                                        className="btn btn-outline"
-                                        style={{ borderColor: '#00c3ff', color: '#00c3ff', display: 'flex', alignItems: 'center', gap: '5px' }}
+                                        className="btn"
+                                        style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '1rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}
                                     >
-                                        {isGeneratingKb ? '✨ Writing...' : '✨ Auto-Write with AI'}
+                                        🗑️ RESET SYSTEM / CLEAR ALL DATA
                                     </button>
                                 </div>
-
-                                <form onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    await fetch('/api/kb', { method: 'POST', body: JSON.stringify({ ...kbForm, action: 'create' }) });
-                                    setShowAddKb(false);
-                                    fetchData();
-                                }} style={{ display: 'grid', gap: '1rem' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Article Title</label>
-                                            <input type="text" required className="input-field" value={kbForm.title} onChange={e => setKbForm({ ...kbForm, title: e.target.value })} style={{ width: '100%' }} placeholder="How to use..." />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>URL Slug</label>
-                                            <input type="text" required className="input-field" value={kbForm.slug} onChange={e => setKbForm({ ...kbForm, slug: e.target.value })} style={{ width: '100%' }} placeholder="how-to-use" />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Category</label>
-                                        <select className="input-field" value={kbForm.category} onChange={e => setKbForm({ ...kbForm, category: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
-                                            <option value="General">General</option>
-                                            <option value="Accounts">Accounts</option>
-                                            <option value="Payments">Payments</option>
-                                            <option value="Security">Security</option>
-                                            <option value="Affiliate">Affiliate</option>
-                                            <option value="Netflix">Netflix</option>
-                                            <option value="Spotify">Spotify</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Content (HTML/Markdown)</label>
-                                        <textarea required className="input-field" value={kbForm.content} onChange={e => setKbForm({ ...kbForm, content: e.target.value })} style={{ width: '100%', height: '300px', fontFamily: 'monospace', lineHeight: '1.5' }} />
-                                    </div>
-
-                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <h4 style={{ color: '#aaa', marginBottom: '1rem', borderBottom: '1px solid #333' }}>SEO Settings (Optional but Recommended)</h4>
-                                        <div style={{ display: 'grid', gap: '1rem' }}>
-                                            <div>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888', fontSize: '0.8rem' }}>Meta Description (160 chars)</label>
-                                                <input type="text" className="input-field" value={kbForm.meta_description} onChange={e => setKbForm({ ...kbForm, meta_description: e.target.value })} style={{ width: '100%' }} />
-                                            </div>
-                                            <div>
-                                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#888', fontSize: '0.8rem' }}>Keywords (comma separated)</label>
-                                                <input type="text" className="input-field" value={kbForm.keywords} onChange={e => setKbForm({ ...kbForm, keywords: e.target.value })} style={{ width: '100%' }} placeholder="help, guide, tutorial" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                                        <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem' }}>Publish Article</button>
-                                    </div>
-                                </form>
                             </div>
-                        )}
+                        )
+                    }
+                </div>
+            </div>
 
-                        <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                    <tr style={{ textAlign: 'left' }}>
-                                        <th style={{ padding: '1.5rem' }}>Title</th>
-                                        <th style={{ padding: '1.5rem' }}>Category</th>
-                                        <th style={{ padding: '1.5rem' }}>Views</th>
-                                        <th style={{ padding: '1.5rem' }}>Status</th>
-                                        <th style={{ padding: '1.5rem' }}>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {kbArticles.map((kb: any) => (
-                                        <tr key={kb.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1.5rem', fontWeight: 'bold' }}>{kb.title}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)', fontSize: '0.8rem' }}>{kb.category}</span></td>
-                                            <td style={{ padding: '1.5rem' }}>{kb.views || 0}</td>
-                                            <td style={{ padding: '1.5rem' }}><span style={{ color: kb.is_published ? '#00ff88' : '#888' }}>{kb.is_published ? 'Published' : 'Draft'}</span></td>
-                                            <td style={{ padding: '1.5rem' }}>
-                                                <button onClick={async () => { if (confirm('Delete?')) { await fetch('/api/kb', { method: 'DELETE', body: JSON.stringify({ id: kb.id }) }); fetchData(); } }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.3rem 0.8rem', fontSize: '0.8rem' }}>Delete</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {kbArticles.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>No articles found. Create your first guide!</td></tr>}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
+            {
+                showBulkUpdateModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <button onClick={() => setShowBulkUpdateModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
 
-                {/* LOGS TAB */}
-                {
-                    activeTab === 'logs' && (
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Security & Activity Logs</h2>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', color: '#eee' }}>
-                                <thead>
-                                    <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-                                        <th style={{ padding: '1rem' }}>Time</th>
-                                        <th style={{ padding: '1rem' }}>User</th>
-                                        <th style={{ padding: '1rem' }}>Action</th>
-                                        <th style={{ padding: '1rem' }}>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {logs && logs.length > 0 ? logs.map((log: any) => (
-                                        <tr key={log.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '1rem', color: '#888', fontSize: '0.85rem' }}>{log.date ? new Date(log.date).toLocaleString() : 'N/A'}</td>
-                                            <td style={{ padding: '1rem' }}>{log.user}</td>
-                                            <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>{log.action}</span></td>
-                                            <td style={{ padding: '1rem', color: '#ccc' }}>{log.details}</td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No logs recorded yet.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    )
-                }
-
-                {/* SETTINGS TAB */}
-                {
-                    activeTab === 'settings' && (
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
-
-                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>Admin Security</h2>
-                            <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', marginBottom: '2rem' }}>
-                                <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Change Admin Credentials</h3>
-                                <form onSubmit={handleUpdateAdminProfile} style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(200px, 1fr) minmax(200px, 1fr) auto', alignItems: 'end' }}>
-                                    <div>
-                                        <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Email (Optional)</label>
-                                        <input type="email" name="email" placeholder="admin@example.com" className="input-field" style={{ width: '100%' }} />
-                                    </div>
-                                    <div>
-                                        <label style={{ color: '#aaa', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>New Password</label>
-                                        <input type="password" name="password" placeholder="New Password" className="input-field" style={{ width: '100%' }} />
-                                    </div>
-                                    <div>
-                                        <button type="submit" className="btn btn-primary" style={{ height: '42px' }}>Update Profile</button>
-                                    </div>
-                                </form>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h3 style={{ margin: 0, color: '#00ff88' }}>📝 Bulk Editor</h3>
+                                <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>Update Price, Stock, and Category in bulk.</p>
                             </div>
 
-                            <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>API Integrations</h2>
-                            <p style={{ color: '#888', marginBottom: '2rem' }}>Connect your social accounts to enable auto-posting. API Keys are stored securely.</p>
-
-
-                            <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
-                                {/* Twitter */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(29, 161, 242, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#1DA1F2', marginBottom: '1rem' }}>Twitter / X</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Key</label><input type="password" value={settings.twitter_api_key || ''} onChange={e => setSettings({ ...settings, twitter_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>API Secret</label><input type="password" value={settings.twitter_api_secret || ''} onChange={e => setSettings({ ...settings, twitter_api_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.twitter_access_token || ''} onChange={e => setSettings({ ...settings, twitter_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Secret</label><input type="password" value={settings.twitter_access_secret || ''} onChange={e => setSettings({ ...settings, twitter_access_secret: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    </div>
+                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>🚀 Quick Set Tools</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Set all stocks to:</span>
+                                    <button onClick={() => handleQuickSetStock('100')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>100</button>
+                                    <button onClick={() => handleQuickSetStock('50')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>50</button>
+                                    <button onClick={() => handleQuickSetStock('10')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>10</button>
+                                    <button onClick={() => {
+                                        const val = prompt("Enter stock value for all:");
+                                        if (val) handleQuickSetStock(val);
+                                    }} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>Custom Value</button>
                                 </div>
+                            </div>
 
-                                {/* Facebook */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(24, 119, 242, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#1877F2', marginBottom: '1rem' }}>Facebook Page</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page ID</label><input type="text" value={settings.facebook_page_id || ''} onChange={e => setSettings({ ...settings, facebook_page_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Page Access Token</label><input type="password" value={settings.facebook_page_token || ''} onChange={e => setSettings({ ...settings, facebook_page_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    </div>
-                                </div>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Update Data (Format: ID, PRICE, STOCK, CATEGORY)</label>
+                                <textarea
+                                    className="input-field"
+                                    value={bulkUpdateText}
+                                    onChange={(e) => setBulkUpdateText(e.target.value)}
+                                    style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.5)', fontSize: '0.9rem', lineHeight: '1.5' }}
+                                    placeholder="Example:\n23,66,100,Reddit\n22,77,100,Reddit"
+                                />
+                            </div>
 
-                                {/* LinkedIn */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(0, 119, 181, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#0077b5', marginBottom: '1rem' }}>LinkedIn</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Person URN</label><input type="text" value={settings.linkedin_person_urn || ''} onChange={e => setSettings({ ...settings, linkedin_person_urn: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Access Token</label><input type="password" value={settings.linkedin_access_token || ''} onChange={e => setSettings({ ...settings, linkedin_access_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    </div>
-                                </div>
-
-                                {/* Telegram */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(0, 136, 204, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#0088cc', marginBottom: '1rem' }}>Telegram Channel</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Bot Token</label><input type="password" value={settings.telegram_bot_token || ''} onChange={e => setSettings({ ...settings, telegram_bot_token: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Chat ID (e.g. @channelname)</label><input type="text" value={settings.telegram_chat_id || ''} onChange={e => setSettings({ ...settings, telegram_chat_id: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    </div>
-                                </div>
-
-                                {/* Discord */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(114, 137, 218, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#7289da', marginBottom: '1rem' }}>Discord Command Center</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Webhook URL (Sales Pings)</label><input type="password" value={settings.discord_webhook_url || ''} onChange={e => setSettings({ ...settings, discord_webhook_url: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Discord API Key (Remote Fulfillment)</label><input type="password" value={settings.discord_api_key || ''} onChange={e => setSettings({ ...settings, discord_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                    </div>
-                                </div>
-
-                                {/* G2G Master Switch */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(255, 170, 0, 0.1)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#ffaa00', marginBottom: '1rem' }}>G2G Automation Master</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center' }}>
-                                        <div>
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={settings.g2g_auto_pilot === 'true'}
-                                                    onChange={e => setSettings({ ...settings, g2g_auto_pilot: e.target.checked ? 'true' : 'false' })}
-                                                    style={{ width: '20px', height: '20px' }}
-                                                />
-                                                <span style={{ color: '#fff' }}>Enable Auto-Pilot Fulfillment</span>
-                                            </label>
-                                        </div>
-                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>
-                                            When enabled, "Paid" G2G orders for accounts will be fulfilled automatically using available stock.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Instagram */}
-                                <div style={{ padding: '1.5rem', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', borderRadius: '12px' }}>
-                                    <h3 style={{ color: '#fff', marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Instagram Business</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                                        <div><label style={{ display: 'block', fontSize: '0.8rem', color: '#eee' }}>IG User ID (Linked to FB Page)</label><input type="text" value={settings.instagram_user_id || ''} onChange={e => setSettings({ ...settings, instagram_user_id: e.target.value })} className="input-field" style={{ width: '100%', background: 'rgba(0,0,0,0.3)', color: '#fff' }} /></div>
-                                    </div>
-                                </div>
-
-                                {/* Referral System */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(255, 215, 0, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 215, 0, 0.1)' }}>
-                                    <h3 style={{ color: '#ffd700', marginBottom: '1rem' }}>Referral & Affiliate System</h3>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa' }}>Global Commission Rate (%)</label>
-                                            <input
-                                                type="number"
-                                                placeholder="10"
-                                                value={settings.referral_commission_rate || ''}
-                                                onChange={e => setSettings({ ...settings, referral_commission_rate: e.target.value })}
-                                                className="input-field"
-                                                style={{ width: '100%' }}
-                                            />
-                                            <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.5rem' }}>Percentage earch user gets from their referral's successful purchases.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* RESTORED: Other Services */}
-                                <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                                    <h3 style={{ marginBottom: '1rem', color: '#fff' }}>External Services</h3>
-                                    <div style={{ display: 'grid', gap: '1rem' }}>
-                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Access ID (SEO)</label><input value={settings.mozId || ''} onChange={e => setSettings({ ...settings, mozId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Secret Key</label><input type="password" value={settings.mozKey || ''} onChange={e => setSettings({ ...settings, mozKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-
-                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Gemini API Key (AI Blog)</label><input type="password" value={settings.geminiKey || ''} onChange={e => setSettings({ ...settings, geminiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>OpenAI API Key (AI Blog Backup)</label><input type="password" value={settings.openaiKey || ''} onChange={e => setSettings({ ...settings, openaiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-
-                                        <h4 style={{ color: '#aaa', marginTop: '1rem' }}>SMTP Email Server</h4>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Host</label><input value={settings.smtpHost || ''} onChange={e => setSettings({ ...settings, smtpHost: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>User</label><input value={settings.smtpUser || ''} onChange={e => setSettings({ ...settings, smtpUser: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                            <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Password</label><input type="password" value={settings.smtpPass || ''} onChange={e => setSettings({ ...settings, smtpPass: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" className="btn btn-primary" style={{ padding: '1rem' }}>💾 Save Configuration</button>
-                            </form>
-
-                            {/* DANGER ZONE */}
-                            <div style={{ marginTop: '3rem', padding: '2rem', border: '1px solid #ff4444', borderRadius: '16px', background: 'rgba(255, 68, 68, 0.05)' }}>
-                                <h3 style={{ color: '#ff4444', marginBottom: '1rem' }}>Danger Zone</h3>
-                                <p style={{ color: '#aaa', marginBottom: '1.5rem' }}>This action will wipe all inventory, sales history, and social posts. It cannot be undone.</p>
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        if (confirm('⚠️ ARE YOU SURE? This will DELETE ALL DATA forever.')) {
-                                            if (confirm('Really? Click OK to confirm wiping your entire database.')) {
-                                                await fetch('/api/admin/reset', { method: 'POST' });
-                                                alert('System Reset Complete.');
-                                                window.location.reload();
-                                            }
-                                        }
-                                    }}
-                                    className="btn"
-                                    style={{ background: '#ff4444', color: '#fff', border: 'none', padding: '1rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}
-                                >
-                                    🗑️ RESET SYSTEM / CLEAR ALL DATA
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
+                                <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
+                                    ✅ Save All Updates
                                 </button>
                             </div>
                         </div>
-                    )
-                }
-            </div>
-        </div>
-
-                {
-        showBulkUpdateModal && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
-                    <button onClick={() => setShowBulkUpdateModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <h3 style={{ margin: 0, color: '#00ff88' }}>📝 Bulk Editor</h3>
-                        <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>Update Price, Stock, and Category in bulk.</p>
                     </div>
+                )
+            }
 
-                    <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
-                        <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>🚀 Quick Set Tools</label>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Set all stocks to:</span>
-                            <button onClick={() => handleQuickSetStock('100')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>100</button>
-                            <button onClick={() => handleQuickSetStock('50')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>50</button>
-                            <button onClick={() => handleQuickSetStock('10')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>10</button>
-                            <button onClick={() => {
-                                const val = prompt("Enter stock value for all:");
-                                if (val) handleQuickSetStock(val);
-                            }} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>Custom Value</button>
-                        </div>
-                    </div>
+            {
+                showDeleteModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #ff4444', textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+                            <h2 style={{ margin: '0 0 1rem 0', color: '#ff4444' }}>Admin Verification</h2>
+                            <p style={{ color: '#aaa', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                                You are about to delete a transaction and restore stock. Please enter your 4-digit security PIN to confirm.
+                            </p>
 
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Update Data (Format: ID, PRICE, STOCK, CATEGORY)</label>
-                        <textarea
-                            className="input-field"
-                            value={bulkUpdateText}
-                            onChange={(e) => setBulkUpdateText(e.target.value)}
-                            style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.5)', fontSize: '0.9rem', lineHeight: '1.5' }}
-                            placeholder="Example:\n23,66,100,Reddit\n22,77,100,Reddit"
-                        />
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                        <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
-                        <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
-                            ✅ Save All Updates
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    {
-        showDeleteModal && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #ff4444', textAlign: 'center' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
-                    <h2 style={{ margin: '0 0 1rem 0', color: '#ff4444' }}>Admin Verification</h2>
-                    <p style={{ color: '#aaa', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                        You are about to delete a transaction and restore stock. Please enter your 4-digit security PIN to confirm.
-                    </p>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <input
-                            type="password"
-                            placeholder="Enter Security PIN"
-                            value={confirmPin}
-                            onChange={(e) => setConfirmPin(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '1.2rem',
-                                borderRadius: '12px',
-                                border: '2px solid rgba(255, 68, 68, 0.2)',
-                                background: 'rgba(0,0,0,0.3)',
-                                color: '#fff',
-                                fontSize: '1.5rem',
-                                textAlign: 'center',
-                                letterSpacing: '1rem'
-                            }}
-                            maxLength={4}
-                        />
-                        {deleteError && <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '1rem' }}>{deleteError}</p>}
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <button onClick={() => { setShowDeleteModal(false); setConfirmPin(''); setDeleteError(''); }} className="btn btn-outline" style={{ borderRadius: '12px' }}>Cancel</button>
-                        <button
-                            onClick={handleDeleteSale}
-                            disabled={isDeleting}
-                            className="btn"
-                            style={{ background: '#ff4444', color: '#fff', borderRadius: '12px', fontWeight: 'bold' }}
-                        >
-                            {isDeleting ? 'Deleting...' : 'Delete Sale'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-    {
-        showAddCategory && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
-                    <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-                    <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
-
-                    <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
-                        <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
-                        <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
-                        <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
-                        <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
-                    </form>
-
-                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                        {categories.map((cat: any) => (
-                            <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
-                                    <div>
-                                        <div style={{ fontWeight: '600' }}>{cat.name}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888' }}>
-                                        {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Sale'}
-                                    </button>
-                                    <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: '#ff4d4d', borderColor: '#ff4d4d33' }}>Delete</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    {
-        showCategorySale && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(15px)' }}>
-                <div className="glass" style={{ width: '400px', padding: '2rem', borderRadius: '24px', border: '1px solid #ff4d4d' }}>
-                    <h4 style={{ marginBottom: '1rem', color: '#ff4d4d' }}>🔥 Flash Sale: {showCategorySale.name}</h4>
-                    <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>This will apply a discount to all products in this category.</p>
-
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Discount Percentage (%)</label>
-                        <input type="number" className="input-field" value={categorySaleForm.discount} onChange={e => setCategorySaleForm({ ...categorySaleForm, discount: e.target.value })} placeholder="e.g. 10" style={{ width: '100%' }} />
-                    </div>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Sale Ends At</label>
-                        <input type="datetime-local" className="input-field" value={categorySaleForm.expiry} onChange={e => setCategorySaleForm({ ...categorySaleForm, expiry: e.target.value })} style={{ width: '100%' }} />
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button onClick={() => setShowCategorySale(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
-                        <button onClick={handleSetCategorySale} className="btn btn-primary" style={{ flex: 1, background: '#ff4d4d', color: '#fff' }}>Apply Sale</button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    {
-        showGenerator && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '30px', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ margin: 0, color: '#00ff88' }}>⚡ Quick Catalog Generator</h2>
-                        <button onClick={() => setShowGenerator(false)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: '2rem' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '20px' }}>
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Select Platform</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                    {['Reddit', 'Snapchat', 'Instagram', 'TikTok'].map(plat => (
-                                        <button
-                                            key={plat}
-                                            onClick={() => setGenConfig({ ...genConfig, platform: plat })}
-                                            style={{
-                                                padding: '0.8rem',
-                                                borderRadius: '12px',
-                                                border: '1px solid',
-                                                borderColor: genConfig.platform === plat ? '#00ff88' : 'rgba(255,255,255,0.1)',
-                                                background: genConfig.platform === plat ? 'rgba(0,255,136,0.1)' : 'transparent',
-                                                color: genConfig.platform === plat ? '#00ff88' : '#888',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            {plat}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Assign Category</label>
-                                <select className="input-field" value={genConfig.category_id} onChange={e => setGenConfig({ ...genConfig, category_id: e.target.value })} style={{ width: '100%' }}>
-                                    <option value="">No Category</option>
-                                    {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                                </select>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <input
+                                    type="password"
+                                    placeholder="Enter Security PIN"
+                                    value={confirmPin}
+                                    onChange={(e) => setConfirmPin(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '1.2rem',
+                                        borderRadius: '12px',
+                                        border: '2px solid rgba(255, 68, 68, 0.2)',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        color: '#fff',
+                                        fontSize: '1.5rem',
+                                        textAlign: 'center',
+                                        letterSpacing: '1rem'
+                                    }}
+                                    maxLength={4}
+                                />
+                                {deleteError && <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '1rem' }}>{deleteError}</p>}
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Count</label>
-                                    <input type="number" className="input-field" value={genConfig.count} onChange={e => setGenConfig({ ...genConfig, count: parseInt(e.target.value) })} style={{ width: '100%' }} />
+                                <button onClick={() => { setShowDeleteModal(false); setConfirmPin(''); setDeleteError(''); }} className="btn btn-outline" style={{ borderRadius: '12px' }}>Cancel</button>
+                                <button
+                                    onClick={handleDeleteSale}
+                                    disabled={isDeleting}
+                                    className="btn"
+                                    style={{ background: '#ff4444', color: '#fff', borderRadius: '12px', fontWeight: 'bold' }}
+                                >
+                                    {isDeleting ? 'Deleting...' : 'Delete Sale'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                showAddCategory && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
+                            <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                            <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
+
+                            <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
+                                <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
+                                <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
+                                <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
+                            </form>
+
+                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {categories.map((cat: any) => (
+                                    <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
+                                            <div>
+                                                <div style={{ fontWeight: '600' }}>{cat.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888' }}>
+                                                {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Sale'}
+                                            </button>
+                                            <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: '#ff4d4d', borderColor: '#ff4d4d33' }}>Delete</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                showCategorySale && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(15px)' }}>
+                        <div className="glass" style={{ width: '400px', padding: '2rem', borderRadius: '24px', border: '1px solid #ff4d4d' }}>
+                            <h4 style={{ marginBottom: '1rem', color: '#ff4d4d' }}>🔥 Flash Sale: {showCategorySale.name}</h4>
+                            <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>This will apply a discount to all products in this category.</p>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Discount Percentage (%)</label>
+                                <input type="number" className="input-field" value={categorySaleForm.discount} onChange={e => setCategorySaleForm({ ...categorySaleForm, discount: e.target.value })} placeholder="e.g. 10" style={{ width: '100%' }} />
+                            </div>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Sale Ends At</label>
+                                <input type="datetime-local" className="input-field" value={categorySaleForm.expiry} onChange={e => setCategorySaleForm({ ...categorySaleForm, expiry: e.target.value })} style={{ width: '100%' }} />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setShowCategorySale(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
+                                <button onClick={handleSetCategorySale} className="btn btn-primary" style={{ flex: 1, background: '#ff4d4d', color: '#fff' }}>Apply Sale</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                showGenerator && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '30px', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                <h2 style={{ margin: 0, color: '#00ff88' }}>⚡ Quick Catalog Generator</h2>
+                                <button onClick={() => setShowGenerator(false)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', gap: '2rem' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '20px' }}>
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Select Platform</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                            {['Reddit', 'Snapchat', 'Instagram', 'TikTok'].map(plat => (
+                                                <button
+                                                    key={plat}
+                                                    onClick={() => setGenConfig({ ...genConfig, platform: plat })}
+                                                    style={{
+                                                        padding: '0.8rem',
+                                                        borderRadius: '12px',
+                                                        border: '1px solid',
+                                                        borderColor: genConfig.platform === plat ? '#00ff88' : 'rgba(255,255,255,0.1)',
+                                                        background: genConfig.platform === plat ? 'rgba(0,255,136,0.1)' : 'transparent',
+                                                        color: genConfig.platform === plat ? '#00ff88' : '#888',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {plat}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Assign Category</label>
+                                        <select className="input-field" value={genConfig.category_id} onChange={e => setGenConfig({ ...genConfig, category_id: e.target.value })} style={{ width: '100%' }}>
+                                            <option value="">No Category</option>
+                                            {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                                        </select>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Count</label>
+                                            <input type="number" className="input-field" value={genConfig.count} onChange={e => setGenConfig({ ...genConfig, count: parseInt(e.target.value) })} style={{ width: '100%' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Price ($)</label>
+                                            <input type="number" className="input-field" value={genConfig.basePrice} onChange={e => setGenConfig({ ...genConfig, basePrice: e.target.value })} style={{ width: '100%' }} />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Price ($)</label>
-                                    <input type="number" className="input-field" value={genConfig.basePrice} onChange={e => setGenConfig({ ...genConfig, basePrice: e.target.value })} style={{ width: '100%' }} />
+
+                                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h4 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>{genConfig.platform} Configuration</h4>
+
+                                    {genConfig.platform === 'Reddit' && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Post Karma Range</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.reddit.minPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.reddit.maxPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Comment Karma Range</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.reddit.minCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.reddit.maxCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Age Range (Months)</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.reddit.minAge} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.reddit.maxAge} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {genConfig.platform === 'Snapchat' && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Snapscore Range</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.snapchat.minScore} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, minScore: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.snapchat.maxScore} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, maxScore: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Account Age (Months)</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.snapchat.minAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, minAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.snapchat.maxAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, maxAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {genConfig.platform === 'Instagram' && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" value={genConfig.instagram.minFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" value={genConfig.instagram.maxFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Min. Account Age (Months)</label>
+                                                <input className="input-field" type="number" value={genConfig.instagram.accountAge} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, accountAge: parseInt(e.target.value) } })} style={{ width: '100%', marginTop: '0.4rem' }} />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {genConfig.platform === 'TikTok' && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <div>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers / Likes Range</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                    <input className="input-field" type="number" placeholder="Min Follow" value={genConfig.tiktok.minFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" placeholder="Max Follow" value={genConfig.tiktok.maxFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                    <input className="input-field" type="number" placeholder="Min Likes" value={genConfig.tiktok.minLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    <input className="input-field" type="number" placeholder="Max Likes" value={genConfig.tiktok.maxLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        onClick={handleGenerateCatalog}
+                                        style={{
+                                            width: '100%',
+                                            padding: '1.2rem',
+                                            borderRadius: '16px',
+                                            marginTop: '1.5rem',
+                                            background: 'linear-gradient(45deg, #00ff88, #00ccff)',
+                                            border: 'none',
+                                            color: '#000',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 10px 30px rgba(0,255,136,0.3)'
+                                        }}
+                                    >
+                                        🚀 Generate {genConfig.count} Listings Now
+                                    </button>
                                 </div>
                             </div>
                         </div>
-
-                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <h4 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>{genConfig.platform} Configuration</h4>
-
-                            {genConfig.platform === 'Reddit' && (
-                                <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Post Karma Range</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.reddit.minPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.reddit.maxPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Comment Karma Range</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.reddit.minCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.reddit.maxCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Age Range (Months)</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.reddit.minAge} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.reddit.maxAge} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {genConfig.platform === 'Snapchat' && (
-                                <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Snapscore Range</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.snapchat.minScore} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, minScore: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.snapchat.maxScore} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, maxScore: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Account Age (Months)</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.snapchat.minAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, minAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.snapchat.maxAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, maxAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {genConfig.platform === 'Instagram' && (
-                                <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" value={genConfig.instagram.minFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" value={genConfig.instagram.maxFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Min. Account Age (Months)</label>
-                                        <input className="input-field" type="number" value={genConfig.instagram.accountAge} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, accountAge: parseInt(e.target.value) } })} style={{ width: '100%', marginTop: '0.4rem' }} />
-                                    </div>
-                                </div>
-                            )}
-
-                            {genConfig.platform === 'TikTok' && (
-                                <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers / Likes Range</label>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                            <input className="input-field" type="number" placeholder="Min Follow" value={genConfig.tiktok.minFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" placeholder="Max Follow" value={genConfig.tiktok.maxFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                            <input className="input-field" type="number" placeholder="Min Likes" value={genConfig.tiktok.minLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                            <input className="input-field" type="number" placeholder="Max Likes" value={genConfig.tiktok.maxLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <button
-                                onClick={handleGenerateCatalog}
-                                style={{
-                                    width: '100%',
-                                    padding: '1.2rem',
-                                    borderRadius: '16px',
-                                    marginTop: '1.5rem',
-                                    background: 'linear-gradient(45deg, #00ff88, #00ccff)',
-                                    border: 'none',
-                                    color: '#000',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    boxShadow: '0 10px 30px rgba(0,255,136,0.3)'
-                                }}
-                            >
-                                🚀 Generate {genConfig.count} Listings Now
-                            </button>
-                        </div>
                     </div>
-                </div>
-            </div>
-        )
-    }
-    <Footer />
+                )
+            }
+            <Footer />
         </main >
     );
 }
