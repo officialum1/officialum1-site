@@ -392,11 +392,13 @@ function AdminDashboard() {
             try { const pc = await promoRes.json(); setPromoCodes(Array.isArray(pc) ? pc : []); } catch { setPromoCodes([]); }
             try { const u = await usersRes.json(); setUsers(Array.isArray(u) ? u : []); } catch { setUsers([]); }
 
+            // Set Market Intel
+            try { const intl = await intelRes.json(); setMarketIntel(Array.isArray(intl) ? intl : []); } catch { setMarketIntel([]); }
+
             calculateStats(balData, empData, invData);
         } catch (e) {
             console.error("Failed to load admin data", e);
         } finally {
-            setMarketIntel(await intelRes.json());
             setLoading(false);
         }
     };
