@@ -134,7 +134,8 @@ function AdminDashboard() {
     const [g2gLoading, setG2GLoading] = useState(false);
     const [g2gDelivery, setG2GDelivery] = useState({
         account_details: '',
-        status: 'completed'
+        status: 'completed',
+        type: 'account'
     });
     const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
     const [g2gStats, setG2GStats] = useState({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false });
@@ -2522,7 +2523,10 @@ function AdminDashboard() {
                                             )}
 
                                             <div style={{ borderTop: '1px solid #222', paddingTop: '2rem', marginTop: '2rem' }}>
-                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', color: '#fff' }}>📦 New Delivery / Update</h3>
+                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#fff' }}>📦 New Delivery / Update</h3>
+                                                <div style={{ marginBottom: '1.5rem', color: '#ccc', fontSize: '0.9rem' }}>
+                                                    Order For: <strong style={{ color: '#00ccff' }}>{g2gOrderData.product_name}</strong>
+                                                </div>
                                                 <form onSubmit={async (e) => {
                                                     e.preventDefault();
                                                     if (!confirm('Confirm G2G Delivery? This action is permanent on G2G.')) return;
@@ -2536,7 +2540,8 @@ function AdminDashboard() {
                                                                 orderId: g2gOrderId || g2gOrderData.order_id,
                                                                 delivery_details: {
                                                                     status: g2gDelivery.status,
-                                                                    content: g2gDelivery.account_details
+                                                                    content: g2gDelivery.account_details,
+                                                                    type: (g2gDelivery as any).type || 'account'
                                                                 }
                                                             })
                                                         });
@@ -2551,7 +2556,21 @@ function AdminDashboard() {
                                                     } catch { alert('Network error'); }
                                                     finally { setG2GLoading(false); }
                                                 }}>
-                                                    <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Account Details (Shared with Buyer)</label>
+                                                    <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Delivery Type</label>
+                                                    <select
+                                                        className="input-field"
+                                                        value={(g2gDelivery as any).type}
+                                                        onChange={(e) => setG2GDelivery({ ...g2gDelivery, type: e.target.value } as any)}
+                                                        style={{ width: '100%', marginBottom: '1rem' }}
+                                                    >
+                                                        <option value="account">Account (Login Details)</option>
+                                                        <option value="code">Digital Code / Key</option>
+                                                        <option value="manual">Manual / Service</option>
+                                                    </select>
+
+                                                    <label style={{ display: 'block', color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
+                                                        {(g2gDelivery as any).type === 'code' ? 'Code / Key' : 'Account Details / Note'}
+                                                    </label>
                                                     <textarea
                                                         className="input-field"
                                                         value={g2gDelivery.account_details}
