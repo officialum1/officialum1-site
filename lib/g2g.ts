@@ -53,7 +53,17 @@ export async function makeG2GRequest(method: string, path: string, body: any = n
     }
 
     const res = await fetch(url, options);
-    const data = await res.json();
+    let data;
+    try {
+        const text = await res.text();
+        try {
+            data = JSON.parse(text);
+        } catch {
+            data = { error: text || res.statusText };
+        }
+    } catch (e) {
+        data = { error: "Failed to read response" };
+    }
     return { status: res.status, data };
 }
 

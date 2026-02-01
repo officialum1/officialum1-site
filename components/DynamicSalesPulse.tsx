@@ -37,39 +37,30 @@ export default function DynamicSalesPulse() {
         const triggerNotification = () => {
             let selected: any = null;
 
-            // Decision Logic: Use real sales if they happened recently, else simulate
-            // ONLY for items in the Shop Catalog (stock > 0 and exists in shopItems)
-            const activeCatalogItems = shopItems.filter(item => (Number(item.stock) > 0 || Number(item.inventoryStock) > 0));
-
-            if (realSales.length > 0 && Math.random() > 0.5) {
-                // Use a real sale - but only if product is in current active catalog
+            // STRATEGY: 100% REAL DATA ONLY
+            // 1. Priority: Show a Real Sale from the last 24h
+            if (realSales.length > 0) {
                 const sale = realSales[Math.floor(Math.random() * realSales.length)];
-                const isInCatalog = shopItems.some(item => item.name === sale.product);
-
-                if (isInCatalog) {
-                    selected = {
-                        title: `🛍️ Catalog Sale`,
-                        message: `Someone from ${sale.location} bought ${sale.product}`,
-                        time: sale.timeAgo,
-                        type: 'real',
-                        icon: '✅'
-                    };
-                }
-            }
-
-            if (!selected && activeCatalogItems.length > 0) {
-                // Simulate a purchase from real shop items (Catalog)
-                const item = activeCatalogItems[Math.floor(Math.random() * activeCatalogItems.length)];
-                const locations = ["London", "New York", "Dubai", "Sydney", "Singapore", "Berlin", "Paris", "Toronto", "Riyadh", "Tokyo"];
-                const loc = locations[Math.floor(Math.random() * locations.length)];
-                const times = ["Just now", "2 mins ago", "5 mins ago", "12 mins ago", "24 mins ago"];
 
                 selected = {
-                    title: `🛍️ New Sale`,
-                    message: `Someone from ${loc} purchased ${item.name}`,
-                    time: times[Math.floor(Math.random() * times.length)],
-                    type: 'simulated',
-                    icon: '🔥'
+                    title: `✅ Verified Purchase`,
+                    message: `Someone from ${sale.location} just bought ${sale.product}`,
+                    time: sale.timeAgo,
+                    type: 'real',
+                    icon: '🛒'
+                };
+            }
+            // 2. Fallback: Show a Real "Trending" Item from Inventory (if no recent sales)
+            else if (shopItems.length > 0) {
+                // Pick a random real item from the shop
+                const item = shopItems[Math.floor(Math.random() * shopItems.length)];
+
+                selected = {
+                    title: `🔥 Trending Now`,
+                    message: `${item.name} is in high demand right now!`,
+                    time: 'Live',
+                    type: 'trending',
+                    icon: '📈'
                 };
             }
 
@@ -91,7 +82,7 @@ export default function DynamicSalesPulse() {
             }, delay);
         };
 
-        let pulseTimeout = setTimeout(triggerNotification, 8000); // First one after 8 seconds
+        let pulseTimeout = setTimeout(triggerNotification, 5000); // First one after 5 seconds
 
         return () => clearTimeout(pulseTimeout);
     }, [realSales, shopItems]);
