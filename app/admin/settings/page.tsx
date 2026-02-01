@@ -17,6 +17,13 @@ export default function GlobalSettings() {
         stripe: true,
         crypto: true
     });
+    const [g2gConfig, setG2GConfig] = useState<any>({
+        g2g_api_key: '',
+        g2g_secret_key: '',
+        g2g_user_id: '',
+        g2g_order_webhook_secret: '',
+        g2g_offer_webhook_secret: ''
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -37,6 +44,15 @@ export default function GlobalSettings() {
                         setPaymentMethods(JSON.parse(data.payment_gateways));
                     } catch { }
                 }
+                // Load G2G Config
+                setG2GConfig({
+                    g2g_api_key: data.g2g_api_key || '',
+                    g2g_secret_key: data.g2g_secret_key || '',
+                    g2g_user_id: data.g2g_user_id || '',
+                    g2g_order_webhook_secret: data.g2g_order_webhook_secret || '',
+                    g2g_offer_webhook_secret: data.g2g_offer_webhook_secret || ''
+                });
+
                 setLoading(false);
             });
     }, []);
@@ -44,6 +60,7 @@ export default function GlobalSettings() {
     const handleSave = async () => {
         const payload = {
             ...settings,
+            ...g2gConfig,
             announcement_banner: JSON.stringify(banner),
             daily_bonus_amount: bonusAmount,
             payment_gateways: JSON.stringify(paymentMethods)
@@ -185,6 +202,66 @@ export default function GlobalSettings() {
                                 <div style={{ fontSize: '0.8rem', color: '#666' }}>BTC, ETH, LTC, and more.</div>
                             </div>
                         </label>
+                    </div>
+                </section>
+
+                {/* G2G Integration */}
+                <section className="glass" style={{ padding: '2rem', borderRadius: '24px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.1)' }}>
+                    <h3 style={{ color: '#00ff88' }}>🎮 G2G Integration</h3>
+                    <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Configure your G2G API credentials here. These will override environment variables.</p>
+
+                    <div style={{ display: 'grid', gap: '1.2rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>G2G API Key</label>
+                            <input
+                                className="input-field"
+                                type="password"
+                                value={g2gConfig.g2g_api_key}
+                                onChange={e => setG2GConfig({ ...g2gConfig, g2g_api_key: e.target.value })}
+                                placeholder="Enter your G2G API Key"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>G2G Secret Key</label>
+                            <input
+                                className="input-field"
+                                type="password"
+                                value={g2gConfig.g2g_secret_key}
+                                onChange={e => setG2GConfig({ ...g2gConfig, g2g_secret_key: e.target.value })}
+                                placeholder="Enter your G2G Secret Key"
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>G2G User ID</label>
+                            <input
+                                className="input-field"
+                                value={g2gConfig.g2g_user_id}
+                                onChange={e => setG2GConfig({ ...g2gConfig, g2g_user_id: e.target.value })}
+                                placeholder="e.g. 7788063"
+                            />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Order Webhook Secret</label>
+                                <input
+                                    className="input-field"
+                                    type="password"
+                                    value={g2gConfig.g2g_order_webhook_secret}
+                                    onChange={e => setG2GConfig({ ...g2gConfig, g2g_order_webhook_secret: e.target.value })}
+                                    placeholder="Secret for Order Webhook"
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Offer Webhook Secret</label>
+                                <input
+                                    className="input-field"
+                                    type="password"
+                                    value={g2gConfig.g2g_offer_webhook_secret}
+                                    onChange={e => setG2GConfig({ ...g2gConfig, g2g_offer_webhook_secret: e.target.value })}
+                                    placeholder="Secret for Offer Webhook"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </section>
 

@@ -2,14 +2,12 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { query } from '@/lib/db';
 
-const WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET;
-
-if (!WEBHOOK_SECRET) {
-    console.error("FATAL: OFFER_WEBHOOK_SECRET not configured");
-}
+import { getG2GCredentials } from '@/lib/g2g';
 
 export async function POST(req: Request) {
     try {
+        const { offerWebhookSecret: WEBHOOK_SECRET } = await getG2GCredentials();
+
         if (!WEBHOOK_SECRET) {
             return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
         }

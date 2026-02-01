@@ -97,7 +97,16 @@ export async function initDB() {
         )
     `);
 
-    // Ticket Replies Table
+
+
+    // Settings Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS settings (
+            setting_key VARCHAR(100) PRIMARY KEY,
+            setting_value TEXT
+        )
+    `);
+
     await query(`
         CREATE TABLE IF NOT EXISTS ticket_replies (
             id INT AUTO_INCREMENT PRIMARY KEY,

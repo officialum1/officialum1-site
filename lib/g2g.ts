@@ -1,44 +1,59 @@
 import crypto from 'crypto';
 import { query } from './db';
 
-// Security: Require environment variables (no fallbacks)
-const G2G_API_KEY = process.env.G2G_API_KEY;
-const G2G_SECRET_KEY = process.env.G2G_SECRET_KEY;
-const G2G_USER_ID = process.env.G2G_USER_ID;
 const BASE_URL = "https://api.g2g.com/v1";
 
-// Validate required credentials
-if (!G2G_API_KEY || !G2G_SECRET_KEY || !G2G_USER_ID) {
-    console.error("FATAL: G2G credentials not configured. Set G2G_API_KEY, G2G_SECRET_KEY, and G2G_USER_ID in environment variables.");
+interface G2GProduct { }
+
+export async function getG2GCredentials() {
+    // Try env first, then DB
+    let apiKey = process.env.G2G_API_KEY;
+    let secretKey = process.env.G2G_SECRET_KEY;
+    let userId = process.env.G2G_USER_ID;
+    let orderWebhookSecret = process.env.ORDER_WEBHOOK_SECRET;
+    let offerWebhookSecret = process.env.OFFER_WEBHOOK_SECRET;
+
+    if (!apiKey || !secretKey || !userId || !orderWebhookSecret || !offerWebhookSecret) {
+        try {
+            const settings: any = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('g2g_api_key', 'g2g_secret_key', 'g2g_user_id', 'g2g_order_webhook_secret', 'g2g_offer_webhook_secret')");
+            const map: any = {};
+            settings.forEach((s: any) => map[s.setting_key] = s.setting_value);
+
+            apiKey = apiKey || map['g2g_api_key'];
+            secretKey = secretKey || map['g2g_secret_key'];
+            userId = userId || map['g2g_user_id'];
+            orderWebhookSecret = orderWebhookSecret || map['g2g_order_webhook_secret'];
+            offerWebhookSecret = offerWebhookSecret || map['g2g_offer_webhook_secret'];
+        } catch (e) {
+            console.error("Failed to fetch G2G credentials from DB:", e);
+        }
+    }
+
+    return { apiKey, secretKey, userId, orderWebhookSecret, offerWebhookSecret };
 }
 
-interface G2GProduct { } // This line was incomplete in the instruction, assuming it's an empty interface for now.
-
-function generateSignature(path: string, timestamp: string) {
-    // Ensure credentials are not undefined before using them
-    if (!G2G_API_KEY || !G2G_USER_ID || !G2G_SECRET_KEY) {
-        throw new Error("G2G credentials are not set. Cannot generate signature.");
-    }
-    const stringToSign = path + G2G_API_KEY + G2G_USER_ID + timestamp;
-    return crypto.createHmac('sha256', G2G_SECRET_KEY).update(stringToSign).digest('hex');
+function generateSignature(path: string, timestamp: string, apiKey: string, secretKey: string, userId: string) {
+    const stringToSign = path + apiKey + userId + timestamp;
+    return crypto.createHmac('sha256', secretKey).update(stringToSign).digest('hex');
 }
 
 export async function makeG2GRequest(method: string, path: string, body: any = null) {
-    // Ensure credentials are not undefined before making a request
-    if (!G2G_API_KEY || !G2G_USER_ID || !G2G_SECRET_KEY) {
-        console.error("G2G credentials are not set. Cannot make G2G request.");
+    const { apiKey, secretKey, userId } = await getG2GCredentials();
+
+    if (!apiKey || !secretKey || !userId) {
+        console.error("G2G credentials are not set (Env or DB). Cannot make G2G request.");
         return { status: 500, data: { error: "G2G credentials not configured" } };
     }
 
     const timestamp = Date.now().toString();
     const signaturePath = `/v1${path}`;
-    const signature = generateSignature(signaturePath, timestamp);
+    const signature = generateSignature(signaturePath, timestamp, apiKey, secretKey, userId);
 
-    const headers = {
-        'g2g-api-key': G2G_API_KEY,
+    const headers: any = {
+        'g2g-api-key': apiKey,
         'g2g-timestamp': timestamp,
         'g2g-signature': signature,
-        'g2g-userid': G2G_USER_ID,
+        'g2g-userid': userId,
         'Content-Type': 'application/json'
     };
 

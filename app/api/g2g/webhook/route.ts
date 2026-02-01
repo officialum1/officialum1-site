@@ -5,16 +5,20 @@ import { sendTelegramMessage } from '@/lib/telegram';
 import { makeG2GRequest, sendG2GMessage } from '@/lib/g2g';
 import { sendDiscordNotification } from '@/lib/discord';
 
-const ORDER_WEBHOOK_SECRET = process.env.ORDER_WEBHOOK_SECRET;
-const OFFER_WEBHOOK_SECRET = process.env.OFFER_WEBHOOK_SECRET;
-
-if (!ORDER_WEBHOOK_SECRET || !OFFER_WEBHOOK_SECRET) {
-    console.error("FATAL: G2G webhook secrets not configured");
-}
+import { getG2GCredentials } from '@/lib/g2g';
 
 export async function POST(request: Request) {
     const rawBody = await request.text();
     const signature = request.headers.get('g2g-signature') || request.headers.get('x-g2g-signature');
+
+    const { orderWebhookSecret, offerWebhookSecret } = await getG2GCredentials();
+
+    const ORDER_WEBHOOK_SECRET = orderWebhookSecret;
+    const OFFER_WEBHOOK_SECRET = offerWebhookSecret;
+
+    if (!ORDER_WEBHOOK_SECRET || !OFFER_WEBHOOK_SECRET) {
+        console.error("FATAL: G2G webhook secrets not configured (Env or DB)");
+    }
 
     let data;
     try {
