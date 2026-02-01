@@ -31,7 +31,7 @@ export async function makeG2GRequest(method: string, path: string, body: any = n
     }
 
     const timestamp = Date.now().toString();
-    const signaturePath = `/v2${path}`;
+    const signaturePath = `/v1${path}`;
     const signature = generateSignature(signaturePath, timestamp);
 
     const headers = {
