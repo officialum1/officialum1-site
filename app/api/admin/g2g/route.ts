@@ -19,6 +19,13 @@ export async function GET(request: Request) {
             return NextResponse.json(rows);
         }
 
+        if (action === 'get_products') {
+            const categoryId = searchParams.get('category_id');
+            const query = categoryId ? `?category_id=${categoryId}` : '';
+            const result = await makeG2GRequest('GET', `/products${query}`);
+            return NextResponse.json(result.data, { status: result.status });
+        }
+
         if (action === 'get_stats') {
             const stats: any = await query(`
                 SELECT 
@@ -55,6 +62,12 @@ export async function POST(request: Request) {
                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
             `, [enabled ? 'true' : 'false']);
             return NextResponse.json({ success: true });
+        }
+
+        if (action === 'create_offer') {
+            const { payload } = body;
+            const result = await makeG2GRequest('POST', '/offers', payload);
+            return NextResponse.json(result.data, { status: result.status });
         }
 
         if (action === 'deliver_order') {
