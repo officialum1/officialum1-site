@@ -9,7 +9,7 @@ export async function GET() {
     // Basic check for authenticated session
     const isAuth = await isAuthenticated();
     if (!isAuth) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json([]);
     }
     try {
         const fileContents = await fs.readFile(dataFilePath, 'utf8');
