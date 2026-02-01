@@ -2393,7 +2393,18 @@ function AdminDashboard() {
                                                         try {
                                                             const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
                                                             const data = await res.json();
-                                                            if (res.ok) setG2GOrderData(data);
+                                                            if (res.ok) {
+                                                                setG2GOrderData(data);
+                                                                // Auto-Sense Logic: Check Inventory
+                                                                const pName = (data.product_name || data.title || '').toLowerCase();
+                                                                if (inventory.length > 0 && pName) {
+                                                                    const match = inventory.find((i: any) => i.name && (pName === i.name.toLowerCase() || pName.includes(i.name.toLowerCase())));
+                                                                    if (match && match.data) {
+                                                                        setG2GDelivery(prev => ({ ...prev, account_details: match.data, type: 'account' }));
+                                                                        // Toast or visual cue could be added here
+                                                                    }
+                                                                }
+                                                            }
                                                             else alert(data.error || 'Order not found on G2G');
                                                         } catch { alert('Network error'); }
                                                         finally { setG2GLoading(false); }
@@ -2427,7 +2438,25 @@ function AdminDashboard() {
                                                                 try {
                                                                     const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${o.order_id}`);
                                                                     const data = await res.json();
-                                                                    if (res.ok) setG2GOrderData(data);
+                                                                    if (res.ok) {
+                                                                        setG2GOrderData(data);
+                                                                        // Auto-Sense Logic
+                                                                        const pName = (data.product_name || data.title || '').toLowerCase();
+                                                                        if (inventory.length > 0 && pName) {
+                                                                            const match = inventory.find((i: any) => i.name && (pName === i.name.toLowerCase() || pName.includes(i.name.toLowerCase())));
+                                                                            if (match && match.data) {
+                                                                                setG2GDelivery(prev => ({ ...prev, account_details: match.data, type: 'account' }));
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        // Fallback to local data if API fails
+                                                                        if (o.payload) {
+                                                                            try {
+                                                                                const localData = typeof o.payload === 'string' ? JSON.parse(o.payload) : o.payload;
+                                                                                setG2GOrderData({ ...localData, message: 'Fetched from Local Cache (Webhook)', code: 'CACHED' });
+                                                                            } catch (e) { }
+                                                                        }
+                                                                    }
                                                                 } catch { }
                                                                 finally { setG2GLoading(false); }
                                                             }}
