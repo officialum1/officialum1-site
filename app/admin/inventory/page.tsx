@@ -2499,55 +2499,65 @@ function AdminDashboard() {
                                                     </div>
 
                                                     {/* Order Details Card */}
-                                                    <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(136,84,208,0.3)', borderLeft: '4px solid #8854d0' }}>
-                                                        <h4 style={{ margin: '0 0 1.5rem 0', color: '#a55eea', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                            📄 Order Details
-                                                        </h4>
+                                                    {g2gOrderData.message ? (
+                                                        <div style={{ background: 'rgba(255,59,48,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #ff3b30' }}>
+                                                            <h4 style={{ margin: '0 0 1rem 0', color: '#ff3b30', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>❌ G2G API Error</h4>
+                                                            <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem' }}>{g2gOrderData.message}</div>
+                                                            {g2gOrderData.code && <div style={{ color: '#ccc', fontSize: '0.9rem', marginTop: '0.5rem' }}>Code: {g2gOrderData.code}</div>}
+                                                            <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#aaa' }}>* Check if Order ID is correct and belongs to your account.</div>
+                                                            <div style={{ marginTop: '1.5rem' }}><details><summary style={{ color: '#ff3b30', cursor: 'pointer', fontSize: '0.9rem' }}>▶ View Raw JSON</summary><pre style={{ margin: '1rem 0', padding: '1rem', background: '#000', borderRadius: '8px', fontSize: '0.75rem', color: '#ff3b30', overflowX: 'auto' }}>{JSON.stringify(g2gOrderData, null, 2)}</pre></details></div>
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(136,84,208,0.3)', borderLeft: '4px solid #8854d0' }}>
+                                                            <h4 style={{ margin: '0 0 1.5rem 0', color: '#a55eea', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                📄 Order Details
+                                                            </h4>
 
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Order ID:</span>
-                                                                <span style={{ color: '#00ccff', fontWeight: 'bold' }}>{g2gOrderData.order_id}</span>
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Order ID:</span>
+                                                                    <span style={{ color: '#00ccff', fontWeight: 'bold' }}>{g2gOrderData.order_id}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Status:</span>
+                                                                    <span style={{
+                                                                        padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold',
+                                                                        background: (g2gOrderData.status || '').toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
+                                                                        color: (g2gOrderData.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#aaa'
+                                                                    }}>{(g2gOrderData.status || 'NEW').toUpperCase()}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Quantity:</span>
+                                                                    <span style={{ color: '#fff', fontWeight: 'bold' }}>{g2gOrderData.quantity}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Price:</span>
+                                                                    <span style={{ color: '#00ccff', fontWeight: 'bold' }}>{g2gOrderData.unit_price} {g2gOrderData.currency}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Total Amount:</span>
+                                                                    <span style={{ color: '#00ff88', fontWeight: 'bold' }}>{g2gOrderData.amount || g2gOrderData.total_price} {g2gOrderData.currency}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Buyer:</span>
+                                                                    <span style={{ color: '#fff' }}>{g2gOrderData.buyer_name || 'G2G User'}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Seller ID:</span>
+                                                                    <span style={{ color: '#fff' }}>{g2gOrderData.seller_id || '7788063'}</span>
+                                                                </div>
                                                             </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Status:</span>
-                                                                <span style={{
-                                                                    padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold',
-                                                                    background: (g2gOrderData.status || '').toLowerCase().includes('paid') ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                                                    color: (g2gOrderData.status || '').toLowerCase().includes('paid') ? '#00ff88' : '#aaa'
-                                                                }}>{(g2gOrderData.status || 'NEW').toUpperCase()}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Quantity:</span>
-                                                                <span style={{ color: '#fff', fontWeight: 'bold' }}>{g2gOrderData.quantity}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Price:</span>
-                                                                <span style={{ color: '#00ccff', fontWeight: 'bold' }}>{g2gOrderData.unit_price} {g2gOrderData.currency}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Total Amount:</span>
-                                                                <span style={{ color: '#00ff88', fontWeight: 'bold' }}>{g2gOrderData.amount || g2gOrderData.total_price} {g2gOrderData.currency}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Buyer:</span>
-                                                                <span style={{ color: '#fff' }}>{g2gOrderData.buyer_name || 'G2G User'}</span>
-                                                            </div>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
-                                                                <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Seller ID:</span>
-                                                                <span style={{ color: '#fff' }}>{g2gOrderData.seller_id || '7788063'}</span>
+
+                                                            <div style={{ marginTop: '1.5rem' }}>
+                                                                <details>
+                                                                    <summary style={{ color: '#a55eea', cursor: 'pointer', fontSize: '0.9rem' }}>▶ View Raw JSON</summary>
+                                                                    <pre style={{ margin: '1rem 0', padding: '1rem', background: '#000', borderRadius: '8px', fontSize: '0.75rem', color: '#00ff88', overflowX: 'auto' }}>
+                                                                        {JSON.stringify(g2gOrderData, null, 2)}
+                                                                    </pre>
+                                                                </details>
                                                             </div>
                                                         </div>
-
-                                                        <div style={{ marginTop: '1.5rem' }}>
-                                                            <details>
-                                                                <summary style={{ color: '#a55eea', cursor: 'pointer', fontSize: '0.9rem' }}>▶ View Raw JSON</summary>
-                                                                <pre style={{ margin: '1rem 0', padding: '1rem', background: '#000', borderRadius: '8px', fontSize: '0.75rem', color: '#00ff88', overflowX: 'auto' }}>
-                                                                    {JSON.stringify(g2gOrderData, null, 2)}
-                                                                </pre>
-                                                            </details>
-                                                        </div>
-                                                    </div>
+                                                    )}
 
                                                     {/* Delivery Info Block (Existing) */}
                                                     {g2gOrderData.delivery_details && (
