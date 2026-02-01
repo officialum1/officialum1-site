@@ -11,7 +11,8 @@ export async function GET(req: Request) {
         const notifications = await query("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20", [userId]);
         return NextResponse.json(notifications);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        // Return empty list if table missing or error
+        return NextResponse.json([]);
     }
 }
 

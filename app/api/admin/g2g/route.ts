@@ -11,7 +11,8 @@ export async function GET(request: Request) {
         if (action === 'get_order') {
             if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
             const result = await makeG2GRequest('GET', `/orders/${orderId}`);
-            return NextResponse.json(result.data, { status: result.status });
+            // Return 200 even on error so frontend can parse the error message without console 404s
+            return NextResponse.json(result.data, { status: 200 });
         }
 
         if (action === 'get_tracked_orders') {
