@@ -2607,16 +2607,16 @@ function AdminDashboard() {
                                                         </h4>
                                                         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(100px, auto) 1fr', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
                                                             <label style={{ color: '#888', fontSize: '0.9rem' }}>G2G User ID:</label>
-                                                            <input className="input-field" value={g2gOrderData.seller_id || '7788063'} readOnly style={{ background: '#111', border: '1px solid #333', color: '#fff', width: '100%' }} />
+                                                            <input className="input-field" value={settings.g2g_user_id || g2gOrderData.seller_id || ''} readOnly style={{ background: '#111', border: '1px solid #333', color: '#fff', width: '100%' }} />
                                                         </div>
                                                         <div style={{ display: 'flex', gap: '1rem' }}>
-                                                            <input className="input-field" value={g2gOrderData.order_id} readOnly style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff' }} />
+                                                            <input className="input-field" value={g2gOrderData.order_id || ''} readOnly style={{ flex: 1, background: '#111', border: '1px solid #333', color: '#fff' }} />
                                                             <button className="btn btn-primary" style={{ background: '#6e62f9' }}>FETCH ORDER</button>
                                                         </div>
                                                     </div>
 
                                                     {/* Order Details Card */}
-                                                    {g2gOrderData.message ? (
+                                                    {(g2gOrderData.message || g2gOrderData.error) ? (
                                                         <div style={{ background: 'rgba(255,59,48,0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid #ff3b30' }}>
                                                             <h4 style={{ margin: '0 0 1rem 0', color: '#ff3b30', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>❌ G2G API Error</h4>
                                                             <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1.1rem' }}>{g2gOrderData.message}</div>
@@ -2661,7 +2661,11 @@ function AdminDashboard() {
                                                                 </div>
                                                                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
                                                                     <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Seller ID:</span>
-                                                                    <span style={{ color: '#fff' }}>{g2gOrderData.seller_id || '7788063'}</span>
+                                                                    <span style={{ color: '#fff' }}>{settings.g2g_user_id || 'N/A'}</span>
+                                                                </div>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.5rem' }}>
+                                                                    <span style={{ color: '#a55eea', fontWeight: 'bold', fontSize: '0.9rem', borderLeft: '3px solid #a55eea', paddingLeft: '0.5rem' }}>Delivered Qty:</span>
+                                                                    <span style={{ color: '#fff' }}>{g2gOrderData.delivered_qty || '0'}</span>
                                                                 </div>
                                                             </div>
 
@@ -2677,12 +2681,27 @@ function AdminDashboard() {
                                                     )}
 
                                                     {/* Delivery Info Block (Existing) */}
-                                                    {g2gOrderData.delivery_details && (
-                                                        <div style={{ background: '#111', padding: '1.5rem', borderRadius: '12px', border: '1px solid #333' }}>
-                                                            <h4 style={{ color: '#888', margin: '0 0 1rem 0' }}>🚚 Delivery Information</h4>
-                                                            <pre style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                                                                {JSON.stringify(g2gOrderData.delivery_details, null, 2)}
-                                                            </pre>
+                                                    {(g2gOrderData.delivery_list || g2gOrderData.delivery_details) && (
+                                                        <div style={{ background: 'rgba(52, 152, 219, 0.1)', padding: '1.5rem', borderRadius: '12px', border: '1px solid rgba(52, 152, 219, 0.3)', borderLeft: '4px solid #3498db' }}>
+                                                            <h4 style={{ color: '#3498db', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                🚚 Delivery Information
+                                                            </h4>
+                                                            {Array.isArray(g2gOrderData.delivery_list) && g2gOrderData.delivery_list.length > 0 ? (
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                                    {g2gOrderData.delivery_list.map((item: any, idx: number) => (
+                                                                        <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                            <div style={{ fontWeight: 'bold', color: '#fff', marginBottom: '0.3rem' }}>Item #{idx + 1}</div>
+                                                                            <div style={{ fontFamily: 'monospace', color: '#ccc', wordBreak: 'break-all', fontSize: '0.9rem' }}>
+                                                                                {typeof item === 'string' ? item : JSON.stringify(item)}
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <pre style={{ color: '#ccc', fontSize: '0.8rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
+                                                                    {JSON.stringify(g2gOrderData.delivery_list || g2gOrderData.delivery_details, null, 2)}
+                                                                </pre>
+                                                            )}
                                                         </div>
                                                     )}
 
