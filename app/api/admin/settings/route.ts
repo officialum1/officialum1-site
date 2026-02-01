@@ -23,21 +23,28 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-
-        // Loop through keys and save/update
         const keys = Object.keys(body);
-        for (const key of keys) {
-            // Check if exists
-            const existing: any = await query("SELECT setting_key FROM settings WHERE setting_key = ?", [key]);
-            if (existing.length > 0) {
-                await query("UPDATE settings SET setting_value = ? WHERE setting_key = ?", [body[key], key]);
-            } else {
-                await query("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)", [key, body[key]]);
-            }
-        }
+
+        // Prepare queries for atomic updates
+        const promises = keys.map(key => {
+            // Skip empty keys if necessary, or trim values
+            if (!key) return Promise.resolve();
+            const value = typeof body[key] === 'string' ? body[key].trim() : body[key];
+
+            return query(`
+                INSERT INTO settings (setting_key, setting_value) 
+                VALUES (?, ?) 
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+            `, [key, value]);
+        });
+
+        await Promise.all(promises);
+
+        console.log(`Saved ${keys.length} settings successfully.`);
 
         return NextResponse.json({ success: true });
     } catch (e: any) {
+        console.error("Settings Save Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

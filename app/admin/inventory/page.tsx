@@ -609,12 +609,21 @@ function AdminDashboard() {
 
     const handleSaveSettings = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch('/api/admin/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settings)
-        });
-        alert('Configuration Saved Securely!');
+        try {
+            const res = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+            if (res.ok) {
+                alert('Configuration Saved Securely!');
+            } else {
+                const err = await res.json();
+                alert('Failed to save settings: ' + (err.error || 'Unknown Error'));
+            }
+        } catch (error) {
+            alert('Failed to save settings. Please try again.');
+        }
     };
 
     const handleAddPost = async (e: React.FormEvent) => {
