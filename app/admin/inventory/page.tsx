@@ -138,6 +138,7 @@ function AdminDashboard() {
         type: 'account'
     });
     const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
+    const [trackedG2GOffers, setTrackedG2GOffers] = useState<any[]>([]);
     const [g2gStats, setG2GStats] = useState({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false });
     const [g2gTab, setG2GTab] = useState<'orders' | 'create_offer' | 'my_offers' | 'my_orders'>('orders');
     const [offerForm, setOfferForm] = useState({ product_id: '', unit_price: '', min_qty: 1, api_qty: 10, description: '', currency: 'USD' });
@@ -296,7 +297,7 @@ function AdminDashboard() {
         try {
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
                 blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
-                categRes, tRes, kbRes, g2Res, g2StatsRes
+                categRes, tRes, kbRes, g2Res, g2StatsRes, g2OffersRes
             ] = await Promise.all([
                 fetch('/api/admin/inventory?type=inventory'),
                 fetch('/api/admin/inventory?type=balance'),
@@ -321,7 +322,8 @@ function AdminDashboard() {
                 fetch('/api/tickets'),
                 fetch('/api/kb?admin=true'),
                 fetch('/api/admin/g2g?action=get_tracked_orders'),
-                fetch('/api/admin/g2g?action=get_stats')
+                fetch('/api/admin/g2g?action=get_stats'),
+                fetch('/api/admin/g2g?action=get_tracked_offers')
             ]);
 
             const invData = await invRes.json();
@@ -369,6 +371,11 @@ function AdminDashboard() {
                 const statsData = await g2StatsRes.json();
                 if (statsData) setG2GStats(statsData);
             } catch { setG2GStats({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false }); }
+
+            try {
+                const offersData = await g2OffersRes.json();
+                setTrackedG2GOffers(Array.isArray(offersData) ? offersData : []);
+            } catch { setTrackedG2GOffers([]); }
 
 
             // Set Restored Data with Array Validation
@@ -2664,10 +2671,59 @@ function AdminDashboard() {
                             )}
 
                             {g2gTab === 'my_offers' && (
-                                <div className="FadeIn" style={{ textAlign: 'center', padding: '4rem', color: '#666', border: '1px dashed #333', borderRadius: '16px' }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
-                                    <p style={{ fontSize: '1.2rem', color: '#aaa' }}>Tracked Offers Management</p>
-                                    <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>Please configure webhooks to populate this list automatically.</p>
+                                <div className="FadeIn">
+                                    <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                                        <h3 style={{ marginBottom: '1.5rem', color: '#fff' }}>📋 Tracked Offers</h3>
+                                        <div style={{ marginBottom: '1rem', color: '#888', fontSize: '0.9rem' }}>
+                                            Note: This list is populated via Webhook events. <br />
+                                            Callback URL: <code style={{ color: '#00ccff', background: '#222', padding: '2px 6px', borderRadius: '4px' }}>{typeof window !== 'undefined' ? window.location.origin : ''}/api/webhook/g2g/offer</code>
+                                        </div>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ color: '#888', borderBottom: '1px solid #333' }}>
+                                                    <th style={{ padding: '0.8rem', textAlign: 'left' }}>Product Name</th>
+                                                    <th style={{ padding: '0.8rem', textAlign: 'right' }}>Price</th>
+                                                    <th style={{ padding: '0.8rem', textAlign: 'center' }}>Qty</th>
+                                                    <th style={{ padding: '0.8rem', textAlign: 'center' }}>Status</th>
+                                                    <th style={{ padding: '0.8rem', textAlign: 'right' }}>Updated</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {trackedG2GOffers && trackedG2GOffers.length > 0 ? trackedG2GOffers.map(offer => (
+                                                    <tr key={offer.offer_id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <td style={{ padding: '0.8rem' }}>
+                                                            <div style={{ fontWeight: 'bold' }}>{offer.product_name || 'N/A'}</div>
+                                                            <div style={{ fontSize: '0.8rem', color: '#666' }}>ID: {offer.offer_id}</div>
+                                                        </td>
+                                                        <td style={{ padding: '0.8rem', textAlign: 'right', color: '#00ff88' }}>
+                                                            {offer.unit_price} {offer.currency}
+                                                        </td>
+                                                        <td style={{ padding: '0.8rem', textAlign: 'center' }}>
+                                                            {offer.api_qty}
+                                                        </td>
+                                                        <td style={{ padding: '0.8rem', textAlign: 'center' }}>
+                                                            <span style={{
+                                                                padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold',
+                                                                background: offer.status === 'active' || offer.status === 'offer.updated' ? 'rgba(0,255,136,0.1)' : 'rgba(255,68,68,0.1)',
+                                                                color: offer.status === 'active' || offer.status === 'offer.updated' ? '#00ff88' : '#ff4444'
+                                                            }}>
+                                                                {offer.status ? offer.status.replace('offer.', '').toUpperCase() : 'UNKNOWN'}
+                                                            </span>
+                                                        </td>
+                                                        <td style={{ padding: '0.8rem', textAlign: 'right', fontSize: '0.8rem', color: '#888' }}>
+                                                            {new Date(offer.updated_at).toLocaleDateString()}
+                                                        </td>
+                                                    </tr>
+                                                )) : (
+                                                    <tr>
+                                                        <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                                                            No offers tracked yet. Ensure webhook is active.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
 

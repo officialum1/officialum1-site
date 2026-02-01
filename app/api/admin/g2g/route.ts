@@ -19,6 +19,16 @@ export async function GET(request: Request) {
             return NextResponse.json(rows);
         }
 
+        if (action === 'get_tracked_offers') {
+            try {
+                const rows = await query("SELECT * FROM g2g_offers ORDER BY updated_at DESC");
+                return NextResponse.json(rows);
+            } catch (e) {
+                // Table might not exist yet if no webhook events received
+                return NextResponse.json([]);
+            }
+        }
+
         if (action === 'get_products') {
             const categoryId = searchParams.get('category_id');
             const query = categoryId ? `?category_id=${categoryId}` : '';
