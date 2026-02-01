@@ -4892,7 +4892,7 @@ function AdminDashboard() {
                                     {/* G2G Master Switch */}
                                     <div style={{ padding: '1.5rem', background: 'rgba(255, 170, 0, 0.1)', borderRadius: '12px' }}>
                                         <h3 style={{ color: '#ffaa00', marginBottom: '1rem' }}>G2G Automation Master</h3>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
                                             <div>
                                                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                                                     <input
@@ -4906,6 +4906,33 @@ function AdminDashboard() {
                                             </div>
                                             <div style={{ fontSize: '0.8rem', color: '#888' }}>
                                                 When enabled, "Paid" G2G orders for accounts will be fulfilled automatically using available stock.
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gap: '1rem', borderTop: '1px solid rgba(255,170,0,0.2)', paddingTop: '1.5rem' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#ffaa00' }}>G2G API Key</label>
+                                                    <input type="password" value={settings.g2g_api_key || ''} onChange={e => setSettings({ ...settings, g2g_api_key: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="From G2G Settings" />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#ffaa00' }}>G2G Secret Key</label>
+                                                    <input type="password" value={settings.g2g_secret_key || ''} onChange={e => setSettings({ ...settings, g2g_secret_key: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="From G2G Settings" />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#ffaa00' }}>G2G User ID</label>
+                                                    <input type="text" value={settings.g2g_user_id || ''} onChange={e => setSettings({ ...settings, g2g_user_id: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="e.g. 7788063" />
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#ffaa00' }}>Order Webhook Secret</label>
+                                                    <input type="password" value={settings.g2g_order_webhook_secret || ''} onChange={e => setSettings({ ...settings, g2g_order_webhook_secret: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="Verify Signature" />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#ffaa00' }}>Offer Webhook Secret</label>
+                                                    <input type="password" value={settings.g2g_offer_webhook_secret || ''} onChange={e => setSettings({ ...settings, g2g_offer_webhook_secret: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="Verify Signature" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
