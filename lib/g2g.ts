@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { query } from './db';
 
-const BASE_URL = "https://api.g2g.com/v1";
+const BASE_URL = "https://open-api.g2g.com/v2";
 
 interface G2GProduct { }
 
@@ -45,15 +45,15 @@ export async function makeG2GRequest(method: string, path: string, body: any = n
         return { status: 500, data: { error: "G2G credentials not configured" } };
     }
 
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const signaturePath = `/v1${path}`;
+    const timestamp = Date.now().toString();
+    const signaturePath = `/v2${path}`;
     const signature = generateSignature(signaturePath, timestamp, apiKey, secretKey, userId);
 
     const headers: any = {
-        'G2G-API-KEY': apiKey,
-        'G2G-TIMESTAMP': timestamp,
-        'G2G-SIGNATURE': signature,
-        'G2G-USERID': userId,
+        'g2g-api-key': apiKey,
+        'g2g-timestamp': timestamp,
+        'g2g-signature': signature,
+        'g2g-userid': userId,
         'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     };
