@@ -2438,7 +2438,7 @@ function AdminDashboard() {
                                                                 try {
                                                                     const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${o.order_id}`);
                                                                     const data = await res.json();
-                                                                    if (res.ok) setG2GOrderData(data);
+                                                                    if (res.ok) setG2GOrderData(data.payload || data);
                                                                     else setG2GOrderData({ ...o.payload, message: 'Cached Webhook Data', code: 'WEBHOOK' });
                                                                 } catch { }
                                                                 finally { setG2GLoading(false); }
@@ -2506,7 +2506,7 @@ function AdminDashboard() {
                                                         try {
                                                             const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${encodeURIComponent(cleanId)}`);
                                                             const data = await res.json();
-                                                            setG2GOrderData(data);
+                                                            setG2GOrderData(data.payload || data);
                                                         } catch { alert('Connection Error'); }
                                                         finally { setG2GLoading(false); }
                                                     }}
@@ -2651,13 +2651,9 @@ function AdminDashboard() {
                                                         action: 'create_offer',
                                                         payload: {
                                                             product_id: offerForm.product_id,
-                                                            unit_price: parseFloat(offerForm.unit_price),
-                                                            min_qty: parseInt(offerForm.min_qty as any),
-                                                            api_qty: parseInt(offerForm.api_qty as any),
-                                                            currency: offerForm.currency,
-                                                            description: offerForm.description,
-                                                            offer_attributes: [],
-                                                            delivery_method_ids: []
+                                                            unit_price: offerForm.unit_price,
+                                                            api_qty: offerForm.api_qty,
+                                                            description: offerForm.description
                                                         }
                                                     })
                                                 });

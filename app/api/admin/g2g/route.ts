@@ -85,30 +85,39 @@ export async function POST(request: Request) {
 
         if (action === 'create_offer') {
             const { payload } = body;
-            const result = await makeG2GRequest('POST', '/offers', payload);
+            const storeRes = await makeG2GRequest('GET', '/store');
+            const storeData = storeRes.data?.payload || {};
+
+            const finalPayload = {
+                product_id: payload.product_id,
+                currency: payload.currency || storeData.selling_currencies?.[0] || 'USD',
+                unit_price: parseFloat(payload.unit_price),
+                api_qty: parseInt(payload.api_qty),
+                min_qty: 1,
+                offer_attributes: [],
+                delivery_method_ids: [storeData.delivery_method_list?.[0]?.delivery_method_id].filter(Boolean),
+                sales_territory_settings: { settings_type: "global", countries: [] }
+            };
+
+            const result = await makeG2GRequest('POST', '/offers', finalPayload);
             return NextResponse.json(result.data, { status: result.status });
         }
 
         if (action === 'deliver_order') {
             if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
-
-            const { type, content } = delivery_details;
-
-            if (type === 'account' || type === 'manual') {
-                // API Limitation: Cannot use /delivery for Accounts. Send via Chat.
+            const { content } = delivery_details;
+            const payload = {
+                delivery_id: `ID-${Date.now()}`,
+                codes: [{ content, content_type: 'text/plain' }]
+            };
+            const result = await makeG2GRequest('POST', `/orders/${orderId}/delivery`, payload);
+            if (result.status !== 200 && result.status !== 201) {
                 const chatRes = await makeG2GRequest('POST', `/orders/${orderId}/chats`, { message: content });
-
                 if (chatRes.status === 200 || chatRes.status === 201) {
-                    return NextResponse.json({ success: true, message: 'Sent via Chat (Account Delivery)', data: chatRes.data });
-                } else {
-                    return NextResponse.json(chatRes.data, { status: chatRes.status });
+                    return NextResponse.json({ success: true, message: 'Sent via Chat (Fallback)', data: chatRes.data });
                 }
-            } else {
-                // For 'code', use the official endpoint. Remove 'type' from payload.
-                const { type, ...payload } = delivery_details;
-                const result = await makeG2GRequest('POST', `/orders/${orderId}/delivery`, payload);
-                return NextResponse.json(result.data, { status: result.status });
             }
+            return NextResponse.json(result.data, { status: result.status });
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

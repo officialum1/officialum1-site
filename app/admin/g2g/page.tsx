@@ -40,9 +40,7 @@ function G2GDashboard() {
             const ordersRes = await fetch('/api/admin/g2g?action=get_tracked_orders');
             setTrackedG2GOrders(await ordersRes.json());
 
-            const setRes = await fetch('/api/admin/settings');
-            const setJson = await setRes.json();
-            const g2gSettings = setJson.reduce((acc: any, curr: any) => ({ ...acc, [curr.setting_key]: curr.setting_value }), {});
+            const g2gSettings = await (await fetch('/api/admin/settings')).json();
             setSettings(g2gSettings);
         } catch (e) {
             console.error("Failed to load G2G data", e);
@@ -145,7 +143,7 @@ function G2GDashboard() {
                                         {trackedG2GOrders.map((o: any) => (
                                             <div
                                                 key={o.id}
-                                                onClick={() => { setG2GOrderId(o.order_id); setG2GOrderData(o.payload); }}
+                                                onClick={() => { setG2GOrderId(o.order_id); setG2GOrderData(o.payload?.payload || o.payload); }}
                                                 style={{
                                                     padding: '1rem', background: g2gOrderId === o.order_id ? 'rgba(0,188,255,0.1)' : 'rgba(255,255,255,0.02)',
                                                     borderRadius: '12px', border: g2gOrderId === o.order_id ? '1px solid #00ccff' : '1px solid #222', cursor: 'pointer'
@@ -173,7 +171,8 @@ function G2GDashboard() {
                                             setG2GLoading(true);
                                             try {
                                                 const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
-                                                setG2GOrderData(await res.json());
+                                                const data = await res.json();
+                                                setG2GOrderData(data.payload || data);
                                             } catch { alert('API Error'); }
                                             finally { setG2GLoading(false); }
                                         }}
