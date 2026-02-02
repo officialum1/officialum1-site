@@ -36,8 +36,13 @@ export async function GET(request: Request) {
 
         if (action === 'get_products') {
             const categoryId = searchParams.get('category_id');
-            const queryName = categoryId ? `?category_id=${categoryId}` : '';
-            const result = await makeG2GRequest('GET', `/products${queryName}`);
+            const q = searchParams.get('q');
+            let urlParams = new URLSearchParams();
+            if (categoryId) urlParams.append('category_id', categoryId);
+            if (q) urlParams.append('q', q);
+
+            const queryString = urlParams.toString() ? `?${urlParams.toString()}` : '';
+            const result = await makeG2GRequest('GET', `/products${queryString}`);
             return NextResponse.json(result.data, { status: result.status });
         }
 
