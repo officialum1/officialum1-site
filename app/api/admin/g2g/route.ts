@@ -34,15 +34,30 @@ export async function GET(request: Request) {
             }
         }
 
+        if (action === 'get_services') {
+            const result = await makeG2GRequest('GET', '/services');
+            return NextResponse.json(result.data, { status: result.status });
+        }
+
+        if (action === 'get_brands') {
+            const serviceId = searchParams.get('service_id');
+            const q = searchParams.get('q');
+            let queryStr = '';
+            if (q) queryStr = `?q=${encodeURIComponent(q)}`;
+            const result = await makeG2GRequest('GET', `/services/${serviceId}/brands${queryStr}`);
+            return NextResponse.json(result.data, { status: result.status });
+        }
+
         if (action === 'get_products') {
-            const categoryId = searchParams.get('category_id');
+            const serviceId = searchParams.get('service_id');
+            const brandId = searchParams.get('brand_id');
             const q = searchParams.get('q');
             let urlParams = new URLSearchParams();
-            if (categoryId) urlParams.append('category_id', categoryId);
+            if (serviceId) urlParams.append('service_id', serviceId);
+            if (brandId) urlParams.append('brand_id', brandId);
             if (q) urlParams.append('q', q);
 
-            const queryString = urlParams.toString() ? `?${urlParams.toString()}` : '';
-            const result = await makeG2GRequest('GET', `/products${queryString}`);
+            const result = await makeG2GRequest('GET', `/products?${urlParams.toString()}`);
             return NextResponse.json(result.data, { status: result.status });
         }
 
