@@ -46,6 +46,13 @@ export async function GET(request: Request) {
             return NextResponse.json(result.data, { status: result.status });
         }
 
+        if (action === 'get_attributes') {
+            const productId = searchParams.get('productId');
+            if (!productId) return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+            const result = await makeG2GRequest('GET', `/products/${productId}/attributes`);
+            return NextResponse.json(result.data, { status: result.status });
+        }
+
         if (action === 'get_stats') {
             try {
                 const stats: any = await query(`
@@ -99,8 +106,8 @@ export async function POST(request: Request) {
                 unit_price: parseFloat(payload.unit_price),
                 api_qty: parseInt(payload.api_qty),
                 min_qty: 1,
-                offer_attributes: [],
-                delivery_method_ids: [storeData.delivery_method_list?.[0]?.delivery_method_id].filter(Boolean),
+                offer_attributes: payload.offer_attributes || [],
+                delivery_method_ids: payload.delivery_method_ids || [storeData.delivery_method_list?.[0]?.delivery_method_id].filter(Boolean),
                 sales_territory_settings: { settings_type: "global", countries: [] }
             };
 

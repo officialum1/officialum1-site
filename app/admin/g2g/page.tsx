@@ -24,10 +24,12 @@ function G2GDashboard() {
     const [g2gLoading, setG2GLoading] = useState(false);
     const [g2gTab, setG2GTab] = useState<'orders' | 'create_offer' | 'my_offers' | 'my_orders'>('orders');
     const [g2gDelivery, setG2GDelivery] = useState({ status: 'delivered', account_details: '', type: 'account' });
-    const [offerForm, setOfferForm] = useState({ product_id: '', unit_price: '', api_qty: 10, currency: 'USD', description: '' });
+    const [offerForm, setOfferForm] = useState<any>({ product_id: '', unit_price: '', api_qty: 10, currency: 'USD', description: '', offer_attributes: [], delivery_method_ids: [] });
     const [productSearch, setProductSearch] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searchLoading, setSearchLoading] = useState(false);
+    const [productAttributes, setProductAttributes] = useState<any[]>([]);
+    const [deliveryMethods, setDeliveryMethods] = useState<any[]>([]);
     const [settings, setSettings] = useState<any>({});
 
     const fetchData = async () => {
@@ -332,10 +334,21 @@ function G2GDashboard() {
                                             {searchResults.map((p: any) => (
                                                 <div
                                                     key={p.product_id}
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         setOfferForm({ ...offerForm, product_id: p.product_id });
                                                         setSearchResults([]);
                                                         setProductSearch(p.product_name);
+
+                                                        // Fetch attributes for this product
+                                                        setSearchLoading(true);
+                                                        try {
+                                                            const res = await fetch(`/api/admin/g2g?action=get_attributes&productId=${p.product_id}`);
+                                                            const attrData = await res.json();
+                                                            const payload = attrData.payload || attrData;
+                                                            setProductAttributes(payload.attribute_group_list || []);
+                                                            setDeliveryMethods(payload.delivery_method_list || []);
+                                                        } catch (e) { console.error("Attr fetch failed", e); }
+                                                        finally { setSearchLoading(false); }
                                                     }}
                                                     style={{
                                                         padding: '1rem',
@@ -367,12 +380,7 @@ function G2GDashboard() {
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({
                                                     action: 'create_offer',
-                                                    payload: {
-                                                        product_id: offerForm.product_id,
-                                                        unit_price: offerForm.unit_price,
-                                                        api_qty: offerForm.api_qty,
-                                                        description: offerForm.description
-                                                    }
+                                                    payload: offerForm
                                                 })
                                             });
                                             const data = await res.json();
@@ -390,6 +398,52 @@ function G2GDashboard() {
                                             <label style={{ display: 'block', color: '#00ccff', marginBottom: '0.8rem', fontSize: '0.8rem', fontWeight: 'bold' }}>G2G PRODUCT (LISTING) ID</label>
                                             <input className="input-field" value={offerForm.product_id} onChange={e => setOfferForm({ ...offerForm, product_id: e.target.value })} style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', background: '#000' }} placeholder="e.g. 176283..." required />
                                         </div>
+
+                                        {/* Dynamic Attributes */}
+                                        {productAttributes.length > 0 && (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                                {productAttributes.map((group: any) => (
+                                                    <div key={group.attribute_group_id}>
+                                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>{group.attribute_group_name}</label>
+                                                        <select
+                                                            className="input-field"
+                                                            style={{ width: '100%', padding: '1rem', background: '#000' }}
+                                                            required
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                const attrs = [...(offerForm.offer_attributes || [])].filter(a => a.attribute_group_id !== group.attribute_group_id);
+                                                                if (val) attrs.push({ attribute_group_id: group.attribute_group_id, attribute_id: val });
+                                                                setOfferForm({ ...offerForm, offer_attributes: attrs });
+                                                            }}
+                                                        >
+                                                            <option value="">Select...</option>
+                                                            {group.attribute_list?.map((attr: any) => (
+                                                                <option key={attr.attribute_id} value={attr.attribute_id}>{attr.attribute_name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Delivery Methods */}
+                                        {deliveryMethods.length > 0 && (
+                                            <div style={{ marginBottom: '2rem' }}>
+                                                <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Delivery Method</label>
+                                                <select
+                                                    className="input-field"
+                                                    style={{ width: '100%', padding: '1rem', background: '#000' }}
+                                                    required
+                                                    onChange={(e) => setOfferForm({ ...offerForm, delivery_method_ids: [e.target.value] })}
+                                                >
+                                                    <option value="">Select...</option>
+                                                    {deliveryMethods.map((dm: any) => (
+                                                        <option key={dm.delivery_method_id} value={dm.delivery_method_id}>{dm.delivery_method_name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
                                             <div>
                                                 <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Unit Price (USD)</label>
@@ -402,7 +456,7 @@ function G2GDashboard() {
                                         </div>
                                         <div style={{ marginBottom: '2.5rem' }}>
                                             <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Offer Description</label>
-                                            <textarea className="input-field" value={offerForm.description} onChange={e => setOfferForm({ ...offerForm, description: e.target.value })} style={{ width: '100%', height: '150px', padding: '1rem', background: '#000', resize: 'none' }} placeholder="Optional details for buyers..." />
+                                            <textarea className="input-field" value={offerForm.description} onChange={e => setOfferForm({ ...offerForm, description: e.target.value })} style={{ width: '100%', height: '100px', padding: '1rem', background: '#000', resize: 'none' }} placeholder="Optional details for buyers..." />
                                         </div>
                                         <button disabled={g2gLoading} type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', fontWeight: 'bold', fontSize: '1.2rem', background: 'linear-gradient(90deg, #00ccff, #00ff88)', color: '#000', borderRadius: '15px' }}>
                                             {g2gLoading ? 'CREATING...' : '🚀 PUBLISH GLOBAL OFFER'}
