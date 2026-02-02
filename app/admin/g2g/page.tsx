@@ -18,11 +18,13 @@ function G2GDashboard() {
     const [loading, setLoading] = useState(true);
     const [g2gStats, setG2GStats] = useState<any>({});
     const [trackedG2GOrders, setTrackedG2GOrders] = useState<any[]>([]);
+    const [trackedG2GOffers, setTrackedG2GOffers] = useState<any[]>([]);
     const [g2gOrderId, setG2GOrderId] = useState('');
     const [g2gOrderData, setG2GOrderData] = useState<any>(null);
     const [g2gLoading, setG2GLoading] = useState(false);
     const [g2gTab, setG2GTab] = useState<'orders' | 'create_offer' | 'my_offers' | 'my_orders'>('orders');
     const [g2gDelivery, setG2GDelivery] = useState({ status: 'delivered', account_details: '', type: 'account' });
+    const [offerForm, setOfferForm] = useState({ product_id: '', unit_price: '', api_qty: 10, currency: 'USD', description: '' });
     const [settings, setSettings] = useState<any>({});
 
     const fetchData = async () => {
@@ -39,6 +41,9 @@ function G2GDashboard() {
 
             const ordersRes = await fetch('/api/admin/g2g?action=get_tracked_orders');
             setTrackedG2GOrders(await ordersRes.json());
+
+            const offersRes = await fetch('/api/admin/g2g?action=get_tracked_offers');
+            setTrackedG2GOffers(await offersRes.json());
 
             const g2gSettings = await (await fetch('/api/admin/settings')).json();
             setSettings(g2gSettings);
@@ -143,7 +148,11 @@ function G2GDashboard() {
                                         {trackedG2GOrders.map((o: any) => (
                                             <div
                                                 key={o.id}
-                                                onClick={() => { setG2GOrderId(o.order_id); setG2GOrderData(o.payload?.payload || o.payload); }}
+                                                onClick={() => {
+                                                    setG2GOrderId(o.order_id);
+                                                    const innerPayload = o.payload?.payload || o.payload || {};
+                                                    setG2GOrderData(innerPayload);
+                                                }}
                                                 style={{
                                                     padding: '1rem', background: g2gOrderId === o.order_id ? 'rgba(0,188,255,0.1)' : 'rgba(255,255,255,0.02)',
                                                     borderRadius: '12px', border: g2gOrderId === o.order_id ? '1px solid #00ccff' : '1px solid #222', cursor: 'pointer'
@@ -258,6 +267,137 @@ function G2GDashboard() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {g2gTab === 'create_offer' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '3rem', borderRadius: '32px', maxWidth: '900px', margin: '0 auto', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                                    <h3 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>Create New G2G Offer</h3>
+                                    <p style={{ color: '#666' }}>List your product on the global marketplace</p>
+                                </div>
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!confirm('Proceed with creating this G2G listing?')) return;
+                                    setG2GLoading(true);
+                                    try {
+                                        const res = await fetch('/api/admin/g2g', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                action: 'create_offer',
+                                                payload: {
+                                                    product_id: offerForm.product_id,
+                                                    unit_price: offerForm.unit_price,
+                                                    api_qty: offerForm.api_qty,
+                                                    description: offerForm.description
+                                                }
+                                            })
+                                        });
+                                        const data = await res.json();
+                                        if (res.ok) {
+                                            alert('✅ Offer Created Successfully!\nOffer ID: ' + (data.payload?.offer_id || data.offer_id));
+                                            setG2GTab('my_offers');
+                                            fetchData();
+                                        } else {
+                                            alert('❌ Error: ' + (data.error || JSON.stringify(data)));
+                                        }
+                                    } catch (e) { alert('Network Error: ' + e); }
+                                    finally { setG2GLoading(false); }
+                                }}>
+                                    <div style={{ marginBottom: '2rem' }}>
+                                        <label style={{ display: 'block', color: '#00ccff', marginBottom: '0.8rem', fontSize: '0.8rem', fontWeight: 'bold' }}>G2G PRODUCT (LISTING) ID</label>
+                                        <input className="input-field" value={offerForm.product_id} onChange={e => setOfferForm({ ...offerForm, product_id: e.target.value })} style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', background: '#000' }} placeholder="e.g. 176283..." required />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Unit Price (USD)</label>
+                                            <input type="number" className="input-field" value={offerForm.unit_price} onChange={e => setOfferForm({ ...offerForm, unit_price: e.target.value })} style={{ width: '100%', padding: '1rem', background: '#000' }} step="0.01" required placeholder="0.00" />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Available Stock</label>
+                                            <input type="number" className="input-field" value={offerForm.api_qty} onChange={e => setOfferForm({ ...offerForm, api_qty: parseInt(e.target.value) })} style={{ width: '100', padding: '1rem', background: '#000' }} required placeholder="10" />
+                                        </div>
+                                    </div>
+                                    <div style={{ marginBottom: '2.5rem' }}>
+                                        <label style={{ display: 'block', color: '#888', marginBottom: '0.8rem', fontSize: '0.8rem' }}>Offer Description</label>
+                                        <textarea className="input-field" value={offerForm.description} onChange={e => setOfferForm({ ...offerForm, description: e.target.value })} style={{ width: '100%', height: '150px', padding: '1rem', background: '#000', resize: 'none' }} placeholder="Optional details for buyers..." />
+                                    </div>
+                                    <button disabled={g2gLoading} type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1.5rem', fontWeight: 'bold', fontSize: '1.2rem', background: 'linear-gradient(90deg, #00ccff, #00ff88)', color: '#000', borderRadius: '15px' }}>
+                                        {g2gLoading ? 'CREATING...' : '🚀 PUBLISH GLOBAL OFFER'}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {g2gTab === 'my_offers' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h3 style={{ margin: 0 }}>📋 Tracked Listings</h3>
+                                    <button onClick={fetchData} className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>Refresh List</button>
+                                </div>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid #222', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                                <th style={{ padding: '1.2rem', textAlign: 'left' }}>Product / Details</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'center' }}>Stock</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'right' }}>Price</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'center' }}>Status</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'right' }}>Synced</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {trackedG2GOffers.length > 0 ? trackedG2GOffers.map(offer => (
+                                                <tr key={offer.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} className="hover-row">
+                                                    <td style={{ padding: '1.2rem' }}>
+                                                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{offer.product_name || 'G2G Offer'}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#00ccff' }}>ID: {offer.offer_id}</div>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'center' }}>
+                                                        <span style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>{offer.api_qty}</span>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'right', color: '#00ff88', fontWeight: 'bold' }}>
+                                                        {offer.unit_price} {offer.currency}
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '5px 12px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 'bold',
+                                                            background: offer.status === 'active' || offer.status === 'offer.updated' ? 'rgba(0,255,136,0.1)' : 'rgba(255,68,68,0.1)',
+                                                            color: offer.status === 'active' || offer.status === 'offer.updated' ? '#00ff88' : '#ff4444'
+                                                        }}>
+                                                            {offer.status ? offer.status.replace('offer.', '').toUpperCase() : 'ACTIVE'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'right', color: '#444', fontSize: '0.75rem' }}>
+                                                        {new Date(offer.updated_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', opacity: 0.3 }}>
+                                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
+                                                        <div>No tracked listings found. Create your first offer to see it here.</div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {g2gTab === 'my_orders' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '4rem', borderRadius: '24px', textAlign: 'center', opacity: 0.5 }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🛒</div>
+                                <h2>Buying Dashboard</h2>
+                                <p>Manage orders where you are the buyer. Coming soon.</p>
                             </div>
                         </div>
                     )}
