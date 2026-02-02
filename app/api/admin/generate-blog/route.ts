@@ -12,16 +12,46 @@ export async function POST(req: Request) {
         // Fetch Keys
         let geminiKey = process.env.GEMINI_API_KEY;
         let openaiKey = process.env.OPENAI_API_KEY;
+        let deepseekKey = process.env.DEEPSEEK_API_KEY;
 
-        if (!geminiKey || !openaiKey) {
-            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('geminiKey', 'openaiKey')") as any[];
+        if (!geminiKey || !openaiKey || !deepseekKey) {
+            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('geminiKey', 'openaiKey', 'deepseekKey')") as any[];
             rows.forEach((r: any) => {
                 if (r.setting_key === 'geminiKey') geminiKey = r.setting_value;
                 if (r.setting_key === 'openaiKey') openaiKey = r.setting_value;
+                if (r.setting_key === 'deepseekKey') deepseekKey = r.setting_value;
             });
         }
 
         let content = "";
+
+        // Strategy 0: DeepSeek (Newly added primary)
+        if (deepseekKey) {
+            try {
+                console.log("Using DeepSeek API...");
+                const dsRes = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${deepseekKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [
+                            { role: "system", content: "You are an expert SEO Blog Writer." },
+                            { role: "user", content: `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.` }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const dsData = await dsRes.json();
+                if (dsData.choices?.[0]?.message?.content) {
+                    content = dsData.choices[0].message.content;
+                }
+            } catch (e) {
+                console.error("DeepSeek Failed, trying others...");
+            }
+        }
 
         // Strategy 1: OpenAI (Preferred if available)
         if (openaiKey) {
