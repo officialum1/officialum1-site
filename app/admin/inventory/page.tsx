@@ -203,6 +203,9 @@ function AdminDashboard() {
         if (storedUser) {
             const user = JSON.parse(storedUser);
             setCurrentUser(user);
+            // Sync staff name for new sales
+            setNewSale(prev => ({ ...prev, staffName: user.name || user.email || 'Admin' }));
+
             // Permissions are stored as a JSON string in the DB
             try {
                 const perms = user.permissions ? (typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions) : ((user.role || '').toLowerCase() === 'admin' ? ['all'] : []);
@@ -210,6 +213,9 @@ function AdminDashboard() {
             } catch (e) {
                 setPermissions((user.role || '').toLowerCase() === 'admin' ? ['all'] : []);
             }
+            fetchData(user); // Fetch data with user context
+        } else {
+            fetchData(); // Fallback for no user (will likely redirect or show guest)
         }
     }, []);
 
@@ -218,10 +224,6 @@ function AdminDashboard() {
         const tab = searchParams.get('tab');
         if (tab && tab !== activeTab) setActiveTab(tab);
     }, [searchParams]);
-
-    useEffect(() => {
-        fetchData();
-    }, []);
 
     // Real-time G2G Polling
     const playBeep = () => {
@@ -299,14 +301,18 @@ function AdminDashboard() {
         return permissions.includes('all') || permissions.includes(perm);
     };
 
-    const fetchData = async () => {
+    const fetchData = async (userCtx?: any) => {
         try {
+            const u = userCtx || currentUser;
+            const role = (u?.role || '').toLowerCase();
+            const email = u?.email || '';
+
             const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
                 blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
                 categRes, tRes, kbRes, g2Res, g2StatsRes, g2OffersRes, intelRes
             ] = await Promise.all([
-                fetch('/api/admin/inventory?type=inventory'),
-                fetch('/api/admin/inventory?type=balance'),
+                fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`),
+                fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`),
                 fetch('/api/leads'),
                 fetch('/api/social'),
                 fetch('/api/admin/settings'),
@@ -1298,6 +1304,7 @@ function AdminDashboard() {
             body: JSON.stringify({
                 action: 'record_sale',
                 ...newSale,
+                staffName: currentUser?.name || currentUser?.email || 'Admin',
                 mode: sellMode, // 'single' or 'bulk'
                 quantity: newSale.quantity, // For bulk
                 productName: newSale.productName // For bulk
@@ -2344,15 +2351,25 @@ function AdminDashboard() {
                                         <tr>
                                             <th style={{ padding: '1rem' }}>Item</th>
                                             <th style={{ padding: '1rem' }}>Date</th>
+                                            {hasPermission('all') && <th style={{ padding: '1rem' }}>Staff</th>}
                                             <th style={{ padding: '1rem' }}>Amount</th>
                                             <th style={{ padding: '1rem' }}>Link / Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {balanceHistory && balanceHistory.filter((s: any) => s.deliveryToken).length > 0 ? balanceHistory.filter((s: any) => s.deliveryToken).slice(0, 10).map((sale: any) => (
+                                        {balanceHistory && balanceHistory.filter((s: any) => {
+                                            if (!s.deliveryToken) return false;
+                                            if (hasPermission('all')) return true; // Admins/Owners see all
+                                            return s.processedBy === (currentUser?.name || currentUser?.email || 'Admin');
+                                        }).length > 0 ? balanceHistory.filter((s: any) => {
+                                            if (!s.deliveryToken) return false;
+                                            if (hasPermission('all')) return true;
+                                            return s.processedBy === (currentUser?.name || currentUser?.email || 'Admin');
+                                        }).slice(0, 50).map((sale: any) => (
                                             <tr key={sale.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <td style={{ padding: '1rem' }}>{sale.description}</td>
                                                 <td style={{ padding: '1rem', color: '#888' }}>{sale.date ? new Date(sale.date).toLocaleDateString() : 'N/A'}</td>
+                                                {hasPermission('all') && <td style={{ padding: '1rem', color: '#888' }}>{sale.processedBy || 'Admin'}</td>}
                                                 <td style={{ padding: '1rem', color: '#00ff88', fontWeight: 'bold' }}>${Number(sale.amount).toLocaleString()}</td>
                                                 <td style={{ padding: '1rem' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
