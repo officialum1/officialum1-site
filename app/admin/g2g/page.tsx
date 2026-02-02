@@ -151,10 +151,16 @@ function G2GDashboard() {
                                         {trackedG2GOrders.map((o: any) => (
                                             <div
                                                 key={o.id}
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     setG2GOrderId(o.order_id);
-                                                    const innerPayload = o.payload?.payload || o.payload || {};
-                                                    setG2GOrderData(innerPayload);
+                                                    setG2GLoading(true);
+                                                    try {
+                                                        const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${encodeURIComponent(o.order_id)}`);
+                                                        const data = await res.json();
+                                                        if (res.ok) setG2GOrderData(data.payload || data);
+                                                        else setG2GOrderData({ ...o, message: 'Cached Webhook Data', code: 'WEBHOOK' });
+                                                    } catch { setG2GOrderData(o); }
+                                                    finally { setG2GLoading(false); }
                                                 }}
                                                 style={{
                                                     padding: '1rem', background: g2gOrderId === o.order_id ? 'rgba(0,188,255,0.1)' : 'rgba(255,255,255,0.02)',
@@ -239,13 +245,17 @@ function G2GDashboard() {
                                                             🚀 {(g2gOrderData.delivery_method_code || g2gOrderData.delivery_mode || 'Standard').toUpperCase()}
                                                         </div>
                                                     </div>
-                                                    <div className="glass" style={{ padding: '1rem', borderRadius: '12px' }}>
-                                                        <span style={{ display: 'block', fontSize: '0.6rem', color: '#666' }}>BUYER</span>
-                                                        <span style={{ fontWeight: 'bold' }}>{g2gOrderData.buyer_name}</span>
+                                                    <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px' }}>
+                                                        <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Buyer Name</span>
+                                                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{g2gOrderData.buyer_name || 'N/A'}</span>
                                                     </div>
-                                                    <div className="glass" style={{ padding: '1rem', borderRadius: '12px' }}>
-                                                        <span style={{ display: 'block', fontSize: '0.6rem', color: '#666' }}>EST. INCOME</span>
-                                                        <span style={{ fontWeight: 'bold', color: '#00ff88' }}>+${(Number(g2gOrderData.amount || 0) * 0.95).toFixed(2)}</span>
+                                                    <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px' }}>
+                                                        <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Buyer ID</span>
+                                                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#00ccff' }}>{g2gOrderData.buyer_id || 'N/A'}</span>
+                                                    </div>
+                                                    <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px', borderLeft: '3px solid #00ff88' }}>
+                                                        <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Est. Income</span>
+                                                        <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || 0) * 0.95).toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -400,79 +410,80 @@ function G2GDashboard() {
                                     </form>
                                 </div>
                             </div>
+                        </div>
                     )}
 
-                            {g2gTab === 'my_offers' && (
-                                <div className="FadeIn">
-                                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                            <h3 style={{ margin: 0 }}>📋 Tracked Listings</h3>
-                                            <button onClick={fetchData} className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>Refresh List</button>
-                                        </div>
-                                        <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                <thead>
-                                                    <tr style={{ borderBottom: '1px solid #222', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                                        <th style={{ padding: '1.2rem', textAlign: 'left' }}>Product / Details</th>
-                                                        <th style={{ padding: '1.2rem', textAlign: 'center' }}>Stock</th>
-                                                        <th style={{ padding: '1.2rem', textAlign: 'right' }}>Price</th>
-                                                        <th style={{ padding: '1.2rem', textAlign: 'center' }}>Status</th>
-                                                        <th style={{ padding: '1.2rem', textAlign: 'right' }}>Synced</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {trackedG2GOffers.length > 0 ? trackedG2GOffers.map(offer => (
-                                                        <tr key={offer.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} className="hover-row">
-                                                            <td style={{ padding: '1.2rem' }}>
-                                                                <div style={{ fontWeight: 'bold', color: '#fff' }}>{offer.product_name || 'G2G Offer'}</div>
-                                                                <div style={{ fontSize: '0.75rem', color: '#00ccff' }}>ID: {offer.offer_id}</div>
-                                                            </td>
-                                                            <td style={{ padding: '1.2rem', textAlign: 'center' }}>
-                                                                <span style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>{offer.api_qty}</span>
-                                                            </td>
-                                                            <td style={{ padding: '1.2rem', textAlign: 'right', color: '#00ff88', fontWeight: 'bold' }}>
-                                                                {offer.unit_price} {offer.currency}
-                                                            </td>
-                                                            <td style={{ padding: '1.2rem', textAlign: 'center' }}>
-                                                                <span style={{
-                                                                    padding: '5px 12px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 'bold',
-                                                                    background: offer.status === 'active' || offer.status === 'offer.updated' ? 'rgba(0,255,136,0.1)' : 'rgba(255,68,68,0.1)',
-                                                                    color: offer.status === 'active' || offer.status === 'offer.updated' ? '#00ff88' : '#ff4444'
-                                                                }}>
-                                                                    {offer.status ? offer.status.replace('offer.', '').toUpperCase() : 'ACTIVE'}
-                                                                </span>
-                                                            </td>
-                                                            <td style={{ padding: '1.2rem', textAlign: 'right', color: '#444', fontSize: '0.75rem' }}>
-                                                                {new Date(offer.updated_at).toLocaleDateString()}
-                                                            </td>
-                                                        </tr>
-                                                    )) : (
-                                                        <tr>
-                                                            <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', opacity: 0.3 }}>
-                                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
-                                                                <div>No tracked listings found. Create your first offer to see it here.</div>
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                    {g2gTab === 'my_offers' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h3 style={{ margin: 0 }}>📋 Tracked Listings</h3>
+                                    <button onClick={fetchData} className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>Refresh List</button>
                                 </div>
-                            )}
-
-                            {g2gTab === 'my_orders' && (
-                                <div className="FadeIn">
-                                    <div className="glass" style={{ padding: '4rem', borderRadius: '24px', textAlign: 'center', opacity: 0.5 }}>
-                                        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🛒</div>
-                                        <h2>Buying Dashboard</h2>
-                                        <p>Manage orders where you are the buyer. Coming soon.</p>
-                                    </div>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '1px solid #222', color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                                                <th style={{ padding: '1.2rem', textAlign: 'left' }}>Product / Details</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'center' }}>Stock</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'right' }}>Price</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'center' }}>Status</th>
+                                                <th style={{ padding: '1.2rem', textAlign: 'right' }}>Synced</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {trackedG2GOffers.length > 0 ? trackedG2GOffers.map(offer => (
+                                                <tr key={offer.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }} className="hover-row">
+                                                    <td style={{ padding: '1.2rem' }}>
+                                                        <div style={{ fontWeight: 'bold', color: '#fff' }}>{offer.product_name || 'G2G Offer'}</div>
+                                                        <div style={{ fontSize: '0.75rem', color: '#00ccff' }}>ID: {offer.offer_id}</div>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'center' }}>
+                                                        <span style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>{offer.api_qty}</span>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'right', color: '#00ff88', fontWeight: 'bold' }}>
+                                                        {offer.unit_price} {offer.currency}
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'center' }}>
+                                                        <span style={{
+                                                            padding: '5px 12px', borderRadius: '30px', fontSize: '0.7rem', fontWeight: 'bold',
+                                                            background: offer.status === 'active' || offer.status === 'offer.updated' ? 'rgba(0,255,136,0.1)' : 'rgba(255,68,68,0.1)',
+                                                            color: offer.status === 'active' || offer.status === 'offer.updated' ? '#00ff88' : '#ff4444'
+                                                        }}>
+                                                            {offer.status ? offer.status.replace('offer.', '').toUpperCase() : 'ACTIVE'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '1.2rem', textAlign: 'right', color: '#444', fontSize: '0.75rem' }}>
+                                                        {new Date(offer.updated_at).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', opacity: 0.3 }}>
+                                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
+                                                        <div>No tracked listings found. Create your first offer to see it here.</div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
-                            )}
+                            </div>
                         </div>
+                    )}
+
+                    {g2gTab === 'my_orders' && (
+                        <div className="FadeIn">
+                            <div className="glass" style={{ padding: '4rem', borderRadius: '24px', textAlign: 'center', opacity: 0.5 }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🛒</div>
+                                <h2>Buying Dashboard</h2>
+                                <p>Manage orders where you are the buyer. Coming soon.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-                <Footer />
+            <Footer />
         </main>
     );
 }

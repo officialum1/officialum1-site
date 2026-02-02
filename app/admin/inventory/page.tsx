@@ -2587,9 +2587,17 @@ function AdminDashboard() {
                                                                         <span>⚡</span> {(g2gOrderData.delivery_method_code || g2gOrderData.delivery_mode || 'Standard').toUpperCase()}
                                                                     </div>
                                                                 </div>
-                                                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
-                                                                    <span style={{ display: 'block', fontSize: '0.65rem', color: '#666' }}>BUYER NOTIFICATION</span>
-                                                                    <span style={{ fontSize: '0.8rem', color: '#aaa' }}>Buyer will receive details via G2G Chat.</span>
+                                                                <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px' }}>
+                                                                    <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Buyer Name</span>
+                                                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{g2gOrderData.buyer_name || 'N/A'}</span>
+                                                                </div>
+                                                                <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px' }}>
+                                                                    <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Buyer ID</span>
+                                                                    <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#00ccff' }}>{g2gOrderData.buyer_id || 'N/A'}</span>
+                                                                </div>
+                                                                <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px', borderLeft: '3px solid #00ff88' }}>
+                                                                    <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Est. Income</span>
+                                                                    <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || 0) * 0.95).toFixed(2)}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
