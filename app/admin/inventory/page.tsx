@@ -891,26 +891,27 @@ function AdminDashboard() {
         const created = [];
 
         for (let i = 0; i < productsCount; i++) {
-            let name = "";
-            let platform = genConfig.platform;
-            let desc = "";
+            const platform = genConfig.platform;
+            let name = `${platform} - Premium Account`;
+            let desc = `High quality verified ${platform} account. Secure and private with custom credentials.`;
 
-            if (platform === 'Reddit') {
+            const pLower = platform.toLowerCase();
+            if (pLower.includes('reddit')) {
                 const karma = Math.floor(Math.random() * (genConfig.reddit.maxPostKarma - genConfig.reddit.minPostKarma + 1)) + genConfig.reddit.minPostKarma;
                 const cKarma = Math.floor(Math.random() * (genConfig.reddit.maxCommentKarma - genConfig.reddit.minCommentKarma + 1)) + genConfig.reddit.minCommentKarma;
                 const age = Math.floor(Math.random() * (genConfig.reddit.maxAge - genConfig.reddit.minAge + 1)) + genConfig.reddit.minAge;
                 name = `Reddit Account - ${karma} Karma (${age}mo Old)`;
                 desc = `Verified Reddit account with ${karma} Post Karma and ${cKarma} Comment Karma. Age: ${age} months. Clean history.`;
-            } else if (platform === 'Snapchat') {
+            } else if (pLower.includes('snapchat')) {
                 const score = Math.floor(Math.random() * (genConfig.snapchat.maxScore - genConfig.snapchat.minScore + 1)) + genConfig.snapchat.minScore;
                 const age = Math.floor(Math.random() * (genConfig.snapchat.maxAge - genConfig.snapchat.minAge + 1)) + genConfig.snapchat.minAge;
                 name = `Snapchat Account - ${score.toLocaleString()} Score (${age}mo)`;
                 desc = `High score Snapchat account. Snapscore: ${score.toLocaleString()}. Account age: ${age} months. Private and secure.`;
-            } else if (platform === 'Instagram') {
+            } else if (pLower.includes('instagram')) {
                 const followers = Math.floor(Math.random() * (genConfig.instagram.maxFollowers - genConfig.instagram.minFollowers + 1)) + genConfig.instagram.minFollowers;
                 name = `Instagram - ${followers.toLocaleString()} Followers`;
                 desc = `Instagram account with ${followers.toLocaleString()} followers. Created ${genConfig.instagram.accountAge} months ago. Real engagement.`;
-            } else if (platform === 'TikTok') {
+            } else if (pLower.includes('tiktok')) {
                 const followers = Math.floor(Math.random() * (genConfig.tiktok.maxFollowers - genConfig.tiktok.minFollowers + 1)) + genConfig.tiktok.minFollowers;
                 const likes = Math.floor(Math.random() * (genConfig.tiktok.maxLikes - genConfig.tiktok.minLikes + 1)) + genConfig.tiktok.minLikes;
                 name = `TikTok - ${followers.toLocaleString()} Follows / ${likes.toLocaleString()} Likes`;
@@ -5068,23 +5069,45 @@ function AdminDashboard() {
                                     <div style={{ marginBottom: '1.5rem' }}>
                                         <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Select Platform</label>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                                            {['Reddit', 'Snapchat', 'Instagram', 'TikTok'].map(plat => (
-                                                <button
-                                                    key={plat}
-                                                    onClick={() => setGenConfig({ ...genConfig, platform: plat })}
-                                                    style={{
-                                                        padding: '0.8rem',
-                                                        borderRadius: '12px',
-                                                        border: '1px solid',
-                                                        borderColor: genConfig.platform === plat ? '#00ff88' : 'rgba(255,255,255,0.1)',
-                                                        background: genConfig.platform === plat ? 'rgba(0,255,136,0.1)' : 'transparent',
-                                                        color: genConfig.platform === plat ? '#00ff88' : '#888',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    {plat}
-                                                </button>
-                                            ))}
+                                            {categories.length > 0 ? (
+                                                categories.map(cat => (
+                                                    <button
+                                                        key={`plat-${cat.id}`}
+                                                        onClick={() => setGenConfig({ ...genConfig, platform: cat.name, category_id: String(cat.id) })}
+                                                        style={{
+                                                            padding: '0.8rem',
+                                                            borderRadius: '12px',
+                                                            border: '1px solid',
+                                                            borderColor: genConfig.category_id === String(cat.id) ? '#00ff88' : 'rgba(255,255,255,0.1)',
+                                                            background: genConfig.category_id === String(cat.id) ? 'rgba(0,255,136,0.1)' : 'transparent',
+                                                            color: genConfig.category_id === String(cat.id) ? '#00ff88' : '#888',
+                                                            cursor: 'pointer',
+                                                            fontSize: '0.9rem',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        {cat.icon} {cat.name}
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                ['Reddit', 'Snapchat', 'Instagram', 'TikTok'].map(plat => (
+                                                    <button
+                                                        key={plat}
+                                                        onClick={() => setGenConfig({ ...genConfig, platform: plat })}
+                                                        style={{
+                                                            padding: '0.8rem',
+                                                            borderRadius: '12px',
+                                                            border: '1px solid',
+                                                            borderColor: genConfig.platform === plat ? '#00ff88' : 'rgba(255,255,255,0.1)',
+                                                            background: genConfig.platform === plat ? 'rgba(0,255,136,0.1)' : 'transparent',
+                                                            color: genConfig.platform === plat ? '#00ff88' : '#888',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {plat}
+                                                    </button>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
 
@@ -5111,7 +5134,7 @@ function AdminDashboard() {
                                 <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <h4 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>{genConfig.platform} Configuration</h4>
 
-                                    {genConfig.platform === 'Reddit' && (
+                                    {genConfig.platform.toLowerCase().includes('reddit') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.8rem', color: '#888' }}>Post Karma Range</label>
@@ -5137,7 +5160,7 @@ function AdminDashboard() {
                                         </div>
                                     )}
 
-                                    {genConfig.platform === 'Snapchat' && (
+                                    {genConfig.platform.toLowerCase().includes('snapchat') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.8rem', color: '#888' }}>Snapscore Range</label>
@@ -5156,7 +5179,7 @@ function AdminDashboard() {
                                         </div>
                                     )}
 
-                                    {genConfig.platform === 'Instagram' && (
+                                    {genConfig.platform.toLowerCase().includes('instagram') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
@@ -5172,7 +5195,7 @@ function AdminDashboard() {
                                         </div>
                                     )}
 
-                                    {genConfig.platform === 'TikTok' && (
+                                    {genConfig.platform.toLowerCase().includes('tiktok') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers / Likes Range</label>
@@ -5185,6 +5208,16 @@ function AdminDashboard() {
                                                     <input className="input-field" type="number" placeholder="Max Likes" value={genConfig.tiktok.maxLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
                                                 </div>
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {!['reddit', 'snapchat', 'instagram', 'tiktok'].some(p => genConfig.platform.toLowerCase().includes(p)) && (
+                                        <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                                            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📦</div>
+                                            <p style={{ color: '#888', fontSize: '0.9rem' }}>
+                                                Generic configuration for <b>{genConfig.platform}</b>.<br />
+                                                Products will be generated with standard titles and descriptions.
+                                            </p>
                                         </div>
                                     )}
 
