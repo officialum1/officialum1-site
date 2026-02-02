@@ -308,57 +308,80 @@ export default function DeliveryPage() {
                                             </table>
                                         </div>
                                     ) : (
-                                        <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                            {order.details.username && (
-                                                <div className="credential-field">
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                        <label style={{ fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase' }}>Account / Mail</label>
-                                                        <span style={{ fontSize: '0.65rem', color: '#00ff88', background: 'rgba(0,255,136,0.05)', padding: '2px 8px', borderRadius: '4px' }}>VERIFIED USER</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                        <div style={{ flex: 1, padding: '1rem', fontSize: '1.1rem', fontFamily: 'monospace', color: '#00ff88', letterSpacing: '0.5px' }}>
-                                                            {order.details.username}
+                                        <div style={{ display: 'grid', gap: '2rem' }}>
+                                            {order.details.extraInfo ? (
+                                                <div className="credential-field" style={{ animation: 'fadeIn 0.8s ease-out' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+                                                        <label style={{ fontSize: '0.75rem', color: '#444', letterSpacing: '3px', fontWeight: '800', textTransform: 'uppercase' }}>Access Intelligence</label>
+                                                        <div style={{ display: 'flex', gap: '0.8rem' }}>
+                                                            <span style={{ fontSize: '0.65rem', color: '#00ff88', background: 'rgba(0,255,136,0.05)', padding: '4px 12px', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>PREMIUM DATA</span>
+                                                            <button
+                                                                onClick={() => handleCopy(order.details.extraInfo, 101)}
+                                                                className="mini-copy-btn"
+                                                                style={{
+                                                                    background: copiedIndex === 101 ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                                                    color: copiedIndex === 101 ? '#000' : '#fff',
+                                                                    padding: '4px 15px',
+                                                                    borderRadius: '20px'
+                                                                }}
+                                                            >
+                                                                {copiedIndex === 101 ? 'Copied!' : 'Copy All Details'}
+                                                            </button>
                                                         </div>
-                                                        <button onClick={() => handleCopy(order.details.username, 99)} className="premium-copy-btn">
-                                                            {copiedIndex === 99 ? 'Copied' : 'Copy'}
-                                                        </button>
                                                     </div>
-                                                </div>
-                                            )}
-
-                                            {order.details.password && (
-                                                <div className="credential-field">
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                                        <label style={{ fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase' }}>Security Key</label>
-                                                        <span style={{ fontSize: '0.65rem', color: '#aaa' }}>ENCRYPTED PASS</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                                        <div style={{ flex: 1, padding: '1rem', fontSize: '1.1rem', fontFamily: 'monospace', color: '#fff', letterSpacing: '2px' }}>
-                                                            {order.details.password}
-                                                        </div>
-                                                        <button onClick={() => handleCopy(order.details.password, 100)} className="premium-copy-btn">
-                                                            {copiedIndex === 100 ? 'Copied' : 'Copy'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {order.details.extraInfo && (
-                                                <div style={{ marginTop: '1rem' }}>
-                                                    <label style={{ display: 'block', fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '1rem' }}>Additional Intelligence</label>
                                                     <div style={{
-                                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
-                                                        borderRadius: '20px',
-                                                        padding: '1.5rem',
-                                                        fontSize: '0.95rem',
-                                                        color: '#888',
+                                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.4))',
+                                                        borderRadius: '28px',
+                                                        padding: '2.5rem',
+                                                        fontSize: '1.05rem',
+                                                        color: '#00ff88',
                                                         border: '1px solid rgba(255,255,255,0.05)',
-                                                        fontFamily: 'monospace',
+                                                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                                                         lineHeight: '1.8',
-                                                        whiteSpace: 'pre-wrap'
+                                                        whiteSpace: 'pre-wrap',
+                                                        boxShadow: 'inset 0 0 30px rgba(0,0,0,0.5)',
+                                                        position: 'relative',
+                                                        overflow: 'hidden'
                                                     }}>
+                                                        <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px', opacity: 0.05, fontSize: '4rem', pointerEvents: 'none' }}>🔐</div>
                                                         {order.details.extraInfo}
                                                     </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                                    {order.details.username && (
+                                                        <div className="credential-field">
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                                <label style={{ fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase' }}>Account / Mail</label>
+                                                                <span style={{ fontSize: '0.65rem', color: '#00ff88', background: 'rgba(0,255,136,0.05)', padding: '2px 8px', borderRadius: '4px' }}>VERIFIED USER</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                <div style={{ flex: 1, padding: '1rem', fontSize: '1.1rem', fontFamily: 'monospace', color: '#00ff88', letterSpacing: '0.5px' }}>
+                                                                    {order.details.username}
+                                                                </div>
+                                                                <button onClick={() => handleCopy(order.details.username, 99)} className="premium-copy-btn">
+                                                                    {copiedIndex === 99 ? 'Copied' : 'Copy'}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {order.details.password && (
+                                                        <div className="credential-field">
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                                <label style={{ fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase' }}>Security Key</label>
+                                                                <span style={{ fontSize: '0.65rem', color: '#aaa' }}>ENCRYPTED PASS</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                                <div style={{ flex: 1, padding: '1rem', fontSize: '1.1rem', fontFamily: 'monospace', color: '#fff', letterSpacing: '2px' }}>
+                                                                    {order.details.password}
+                                                                </div>
+                                                                <button onClick={() => handleCopy(order.details.password, 100)} className="premium-copy-btn">
+                                                                    {copiedIndex === 100 ? 'Copied' : 'Copy'}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
