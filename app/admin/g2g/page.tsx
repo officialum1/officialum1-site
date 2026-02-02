@@ -168,9 +168,12 @@ function G2GDashboard() {
                                         className="btn btn-primary"
                                         disabled={g2gLoading}
                                         onClick={async () => {
+                                            let cleanId = g2gOrderId.trim();
+                                            if (cleanId.includes('-')) cleanId = cleanId.split('-')[0];
+                                            if (!cleanId) return;
                                             setG2GLoading(true);
                                             try {
-                                                const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${g2gOrderId}`);
+                                                const res = await fetch(`/api/admin/g2g?action=get_order&orderId=${encodeURIComponent(cleanId)}`);
                                                 const data = await res.json();
                                                 setG2GOrderData(data.payload || data);
                                             } catch { alert('API Error'); }
@@ -212,10 +215,17 @@ function G2GDashboard() {
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                                     <div>
                                                         <label style={{ color: '#888', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Delivery Method</label>
-                                                        <select className="input-field" value={g2gDelivery.type} onChange={(e) => setG2GDelivery({ ...g2gDelivery, type: e.target.value })} style={{ width: '100%' }}>
-                                                            <option value="account">Account Details</option>
-                                                            <option value="code">Product Key / Code</option>
-                                                        </select>
+                                                        <div style={{
+                                                            background: 'rgba(0, 204, 255, 0.1)',
+                                                            padding: '0.8rem 1rem',
+                                                            borderRadius: '10px',
+                                                            color: '#00ccff',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '0.85rem',
+                                                            border: '1px solid rgba(0, 204, 255, 0.2)'
+                                                        }}>
+                                                            🚀 {(g2gOrderData.delivery_method_code || g2gOrderData.delivery_mode || 'Standard').toUpperCase()}
+                                                        </div>
                                                     </div>
                                                     <div className="glass" style={{ padding: '1rem', borderRadius: '12px' }}>
                                                         <span style={{ display: 'block', fontSize: '0.6rem', color: '#666' }}>BUYER</span>

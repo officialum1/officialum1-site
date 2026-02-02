@@ -2571,17 +2571,21 @@ function AdminDashboard() {
                                                             </div>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                                                 <div>
-                                                                    <label style={{ color: '#888', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Delivery Type</label>
-                                                                    <select
-                                                                        className="input-field"
-                                                                        value={(g2gDelivery as any).type}
-                                                                        onChange={(e) => setG2GDelivery({ ...g2gDelivery, type: e.target.value } as any)}
-                                                                        style={{ width: '100%', background: '#111' }}
-                                                                    >
-                                                                        <option value="account">Account (Full Access)</option>
-                                                                        <option value="code">Digital Code / Giftcard</option>
-                                                                        <option value="direct_top_up">Direct Top-Up / Service</option>
-                                                                    </select>
+                                                                    <label style={{ color: '#888', fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Delivery Method</label>
+                                                                    <div style={{
+                                                                        background: 'rgba(52, 152, 219, 0.1)',
+                                                                        padding: '1rem',
+                                                                        borderRadius: '12px',
+                                                                        color: '#3498db',
+                                                                        fontWeight: 'bold',
+                                                                        fontSize: '0.9rem',
+                                                                        border: '1px solid rgba(52, 152, 219, 0.2)',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '0.5rem'
+                                                                    }}>
+                                                                        <span>⚡</span> {(g2gOrderData.delivery_method_code || g2gOrderData.delivery_mode || 'Standard').toUpperCase()}
+                                                                    </div>
                                                                 </div>
                                                                 <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
                                                                     <span style={{ display: 'block', fontSize: '0.65rem', color: '#666' }}>BUYER NOTIFICATION</span>
