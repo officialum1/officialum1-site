@@ -109,13 +109,17 @@ function AdminDashboard() {
     const [showGenerator, setShowGenerator] = useState(false);
     const [genConfig, setGenConfig] = useState({
         platform: 'Reddit',
+        serviceType: 'Accounts',
         category_id: '',
         count: 5,
         basePrice: '10',
         reddit: { minPostKarma: 100, maxPostKarma: 500, minCommentKarma: 0, maxCommentKarma: 50, minAge: 1, maxAge: 12 },
         snapchat: { minScore: 1000, maxScore: 5000, minAge: 1, maxAge: 24 },
-        instagram: { minFollowers: 100, maxFollowers: 1000, accountAge: 6 },
-        tiktok: { minFollowers: 100, maxFollowers: 1000, minLikes: 500, maxLikes: 2000, age: 3 }
+        instagram: { minFollowers: 100, maxFollowers: 1000, minLikes: 100, maxLikes: 1000, minViews: 500, maxViews: 5000, accountAge: 6 },
+        tiktok: { minFollowers: 100, maxFollowers: 1000, minLikes: 500, maxLikes: 2000, age: 3 },
+        telegram: { minMembers: 100, maxMembers: 1000, minViews: 1000, maxViews: 10000 },
+        facebook: { minFollowers: 100, maxFollowers: 5000 },
+        discord: { minMembers: 100, maxMembers: 2000 }
     });
 
     const [orders, setOrders] = useState<any[]>([]);
@@ -892,26 +896,87 @@ function AdminDashboard() {
 
         for (let i = 0; i < productsCount; i++) {
             const platform = genConfig.platform;
-            let name = `${platform} - Premium Account`;
-            let desc = `High quality verified ${platform} account. Secure and private with custom credentials.`;
+            const sType = genConfig.serviceType;
+            let name = `${platform} - ${sType}`;
+            let desc = `High quality ${platform} ${sType.toLowerCase()} service. Fast delivery and secure processing.`;
 
             const pLower = platform.toLowerCase();
+
+            // 1. REDDIT
             if (pLower.includes('reddit')) {
-                const karma = Math.floor(Math.random() * (genConfig.reddit.maxPostKarma - genConfig.reddit.minPostKarma + 1)) + genConfig.reddit.minPostKarma;
-                const cKarma = Math.floor(Math.random() * (genConfig.reddit.maxCommentKarma - genConfig.reddit.minCommentKarma + 1)) + genConfig.reddit.minCommentKarma;
-                const age = Math.floor(Math.random() * (genConfig.reddit.maxAge - genConfig.reddit.minAge + 1)) + genConfig.reddit.minAge;
-                name = `Reddit Account - ${karma} Karma (${age}mo Old)`;
-                desc = `Verified Reddit account with ${karma} Post Karma and ${cKarma} Comment Karma. Age: ${age} months. Clean history.`;
-            } else if (pLower.includes('snapchat')) {
+                if (sType === 'Accounts') {
+                    const karma = Math.floor(Math.random() * (genConfig.reddit.maxPostKarma - genConfig.reddit.minPostKarma + 1)) + genConfig.reddit.minPostKarma;
+                    const cKarma = Math.floor(Math.random() * (genConfig.reddit.maxCommentKarma - genConfig.reddit.minCommentKarma + 1)) + genConfig.reddit.minCommentKarma;
+                    const age = Math.floor(Math.random() * (genConfig.reddit.maxAge - genConfig.reddit.minAge + 1)) + genConfig.reddit.minAge;
+                    name = `Reddit Account - ${karma} Karma (${age}mo Old)`;
+                    desc = `Verified Reddit account with ${karma} Post Karma and ${cKarma} Comment Karma. Age: ${age} months. Clean history.`;
+                } else if (sType === 'Subreddit Members') {
+                    const count = Math.floor(Math.random() * 500) + 100;
+                    name = `${count}+ Reddit Subreddit Members`;
+                    desc = `Boost your community with ${count} real-looking Reddit subreddit members. Safe and permanent.`;
+                } else if (sType === 'Subreddit') {
+                    name = `Premium Reddit Subreddit (r/Name)`;
+                    desc = `Custom created/transferred Reddit subreddit. Clean name, no bans, ready for growth.`;
+                }
+            }
+            // 2. SNAPCHAT
+            else if (pLower.includes('snapchat')) {
                 const score = Math.floor(Math.random() * (genConfig.snapchat.maxScore - genConfig.snapchat.minScore + 1)) + genConfig.snapchat.minScore;
                 const age = Math.floor(Math.random() * (genConfig.snapchat.maxAge - genConfig.snapchat.minAge + 1)) + genConfig.snapchat.minAge;
                 name = `Snapchat Account - ${score.toLocaleString()} Score (${age}mo)`;
                 desc = `High score Snapchat account. Snapscore: ${score.toLocaleString()}. Account age: ${age} months. Private and secure.`;
-            } else if (pLower.includes('instagram')) {
-                const followers = Math.floor(Math.random() * (genConfig.instagram.maxFollowers - genConfig.instagram.minFollowers + 1)) + genConfig.instagram.minFollowers;
-                name = `Instagram - ${followers.toLocaleString()} Followers`;
-                desc = `Instagram account with ${followers.toLocaleString()} followers. Created ${genConfig.instagram.accountAge} months ago. Real engagement.`;
-            } else if (pLower.includes('tiktok')) {
+            }
+            // 3. INSTAGRAM
+            else if (pLower.includes('instagram')) {
+                if (sType === 'Followers') {
+                    const followers = Math.floor(Math.random() * (genConfig.instagram.maxFollowers - genConfig.instagram.minFollowers + 1)) + genConfig.instagram.minFollowers;
+                    name = `${followers.toLocaleString()} Instagram Followers`;
+                    desc = `High-quality Instagram followers for your profile. ${followers.toLocaleString()} real-looking accounts. Fast start.`;
+                } else if (sType === 'Likes') {
+                    const likes = Math.floor(Math.random() * (genConfig.instagram.maxLikes - genConfig.instagram.minLikes + 1)) + genConfig.instagram.minLikes;
+                    name = `${likes.toLocaleString()} Instagram Likes`;
+                    desc = `Boost your post with ${likes.toLocaleString()} Instagram likes. Safe and organic-looking delivery.`;
+                } else if (sType === 'Views') {
+                    const views = Math.floor(Math.random() * (genConfig.instagram.maxViews - genConfig.instagram.minViews + 1)) + genConfig.instagram.minViews;
+                    name = `${views.toLocaleString()} Instagram Video Views`;
+                    desc = `Increase your reel or video visibility with ${views.toLocaleString()} views. Safe for your account.`;
+                }
+            }
+            // 4. TELEGRAM
+            else if (pLower.includes('telegram')) {
+                if (sType === 'Members') {
+                    const members = Math.floor(Math.random() * (genConfig.telegram.maxMembers - genConfig.telegram.minMembers + 1)) + genConfig.telegram.minMembers;
+                    name = `${members.toLocaleString()} Telegram Channel Members`;
+                    desc = `Grow your Telegram community with ${members.toLocaleString()} members. Safe and fast delivery.`;
+                } else if (sType === 'Views') {
+                    const views = Math.floor(Math.random() * (genConfig.telegram.maxViews - genConfig.telegram.minViews + 1)) + genConfig.telegram.minViews;
+                    name = `${views.toLocaleString()} Telegram Post Views`;
+                    desc = `Get ${views.toLocaleString()} views on your Telegram posts. Improve your channel metrics instantly.`;
+                }
+            }
+            // 5. FACEBOOK
+            else if (pLower.includes('facebook')) {
+                const followers = Math.floor(Math.random() * (genConfig.facebook.maxFollowers - genConfig.facebook.minFollowers + 1)) + genConfig.facebook.minFollowers;
+                name = `${followers.toLocaleString()} Facebook Page Followers`;
+                desc = `Professional Facebook page growth. ${followers.toLocaleString()} followers delivered securely to your page.`;
+            }
+            // 6. DISCORD
+            else if (pLower.includes('discord')) {
+                if (sType === 'Accounts') {
+                    name = `Discord Account - Aged & Verified`;
+                    desc = `Fully verified aged Discord account. Phone and email verified. Ready for server joining.`;
+                } else if (sType === 'Online Members') {
+                    const m = Math.floor(Math.random() * (genConfig.discord.maxMembers - genConfig.discord.minMembers + 1)) + genConfig.discord.minMembers;
+                    name = `${m.toLocaleString()} Discord Online Members (Real)`;
+                    desc = `Boost your server with ${m.toLocaleString()} online members. Includes custom status and avatars.`;
+                } else if (sType === 'Offline Members') {
+                    const m = Math.floor(Math.random() * (genConfig.discord.maxMembers - genConfig.discord.minMembers + 1)) + genConfig.discord.minMembers;
+                    name = `${m.toLocaleString()} Discord Offline Members`;
+                    desc = `Standard server boost. ${m.toLocaleString()} offline members added to your server list.`;
+                }
+            }
+            // 7. TIKTOK
+            else if (pLower.includes('tiktok')) {
                 const followers = Math.floor(Math.random() * (genConfig.tiktok.maxFollowers - genConfig.tiktok.minFollowers + 1)) + genConfig.tiktok.minFollowers;
                 const likes = Math.floor(Math.random() * (genConfig.tiktok.maxLikes - genConfig.tiktok.minLikes + 1)) + genConfig.tiktok.minLikes;
                 name = `TikTok - ${followers.toLocaleString()} Follows / ${likes.toLocaleString()} Likes`;
@@ -5119,6 +5184,57 @@ function AdminDashboard() {
                                         </select>
                                     </div>
 
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Select Service</label>
+                                        <select
+                                            className="input-field"
+                                            value={genConfig.serviceType}
+                                            onChange={e => setGenConfig({ ...genConfig, serviceType: e.target.value })}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {genConfig.platform.toLowerCase().includes('reddit') && (
+                                                <>
+                                                    <option value="Accounts">Reddit Accounts</option>
+                                                    <option value="Subreddit Members">Subreddit Members</option>
+                                                    <option value="Subreddit">Subreddit (r/)</option>
+                                                </>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('instagram') && (
+                                                <>
+                                                    <option value="Followers">Followers</option>
+                                                    <option value="Likes">Likes</option>
+                                                    <option value="Views">Views</option>
+                                                </>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('telegram') && (
+                                                <>
+                                                    <option value="Members">Channel Members</option>
+                                                    <option value="Views">Post Views</option>
+                                                </>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('discord') && (
+                                                <>
+                                                    <option value="Accounts">Discord Accounts</option>
+                                                    <option value="Server Members">Server Members (Mixed)</option>
+                                                    <option value="Online Members">Online Members</option>
+                                                    <option value="Offline Members">Offline Members</option>
+                                                </>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('facebook') && (
+                                                <option value="Followers">Page Followers</option>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('snapchat') && (
+                                                <option value="Accounts">Snapchat Accounts</option>
+                                            )}
+                                            {genConfig.platform.toLowerCase().includes('tiktok') && (
+                                                <option value="Accounts">TikTok Accounts</option>
+                                            )}
+                                            {!['reddit', 'instagram', 'telegram', 'discord', 'facebook', 'snapchat', 'tiktok'].some(p => genConfig.platform.toLowerCase().includes(p)) && (
+                                                <option value="Service">Generic Service</option>
+                                            )}
+                                        </select>
+                                    </div>
+
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Count</label>
@@ -5132,22 +5248,15 @@ function AdminDashboard() {
                                 </div>
 
                                 <div style={{ background: 'rgba(0,0,0,0.2)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <h4 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>{genConfig.platform} Configuration</h4>
+                                    <h4 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>{genConfig.platform} - {genConfig.serviceType}</h4>
 
-                                    {genConfig.platform.toLowerCase().includes('reddit') && (
+                                    {genConfig.platform.toLowerCase().includes('reddit') && genConfig.serviceType === 'Accounts' && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
                                             <div>
                                                 <label style={{ fontSize: '0.8rem', color: '#888' }}>Post Karma Range</label>
                                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
                                                     <input className="input-field" type="number" value={genConfig.reddit.minPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
                                                     <input className="input-field" type="number" value={genConfig.reddit.maxPostKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxPostKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Comment Karma Range</label>
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                                    <input className="input-field" type="number" value={genConfig.reddit.minCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, minCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                                    <input className="input-field" type="number" value={genConfig.reddit.maxCommentKarma} onChange={e => setGenConfig({ ...genConfig, reddit: { ...genConfig.reddit, maxCommentKarma: parseInt(e.target.value) } })} style={{ flex: 1 }} />
                                                 </div>
                                             </div>
                                             <div>
@@ -5170,7 +5279,7 @@ function AdminDashboard() {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Account Age (Months)</label>
+                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Age Range (Months)</label>
                                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
                                                     <input className="input-field" type="number" value={genConfig.snapchat.minAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, minAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
                                                     <input className="input-field" type="number" value={genConfig.snapchat.maxAge} onChange={e => setGenConfig({ ...genConfig, snapchat: { ...genConfig.snapchat, maxAge: parseInt(e.target.value) } })} style={{ flex: 1 }} />
@@ -5181,42 +5290,79 @@ function AdminDashboard() {
 
                                     {genConfig.platform.toLowerCase().includes('instagram') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                            <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                                    <input className="input-field" type="number" value={genConfig.instagram.minFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                                    <input className="input-field" type="number" value={genConfig.instagram.maxFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                            {genConfig.serviceType === 'Followers' && (
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                        <input className="input-field" type="number" value={genConfig.instagram.minFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                        <input className="input-field" type="number" value={genConfig.instagram.maxFollowers} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Min. Account Age (Months)</label>
-                                                <input className="input-field" type="number" value={genConfig.instagram.accountAge} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, accountAge: parseInt(e.target.value) } })} style={{ width: '100%', marginTop: '0.4rem' }} />
-                                            </div>
+                                            )}
+                                            {genConfig.serviceType === 'Likes' && (
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Likes Range</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                        <input className="input-field" type="number" value={genConfig.instagram.minLikes} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, minLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                        <input className="input-field" type="number" value={genConfig.instagram.maxLikes} onChange={e => setGenConfig({ ...genConfig, instagram: { ...genConfig.instagram, maxLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
-                                    {genConfig.platform.toLowerCase().includes('tiktok') && (
+                                    {genConfig.platform.toLowerCase().includes('telegram') && (
                                         <div style={{ display: 'grid', gap: '1.2rem' }}>
-                                            <div>
-                                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers / Likes Range</label>
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
-                                                    <input className="input-field" type="number" placeholder="Min Follow" value={genConfig.tiktok.minFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                                    <input className="input-field" type="number" placeholder="Max Follow" value={genConfig.tiktok.maxFollowers} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                            {genConfig.serviceType === 'Members' ? (
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Members Range</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                        <input className="input-field" type="number" value={genConfig.telegram.minMembers} onChange={e => setGenConfig({ ...genConfig, telegram: { ...genConfig.telegram, minMembers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                        <input className="input-field" type="number" value={genConfig.telegram.maxMembers} onChange={e => setGenConfig({ ...genConfig, telegram: { ...genConfig.telegram, maxMembers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    </div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                                                    <input className="input-field" type="number" placeholder="Min Likes" value={genConfig.tiktok.minLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, minLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
-                                                    <input className="input-field" type="number" placeholder="Max Likes" value={genConfig.tiktok.maxLikes} onChange={e => setGenConfig({ ...genConfig, tiktok: { ...genConfig.tiktok, maxLikes: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                            ) : (
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Views Range</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                        <input className="input-field" type="number" value={genConfig.telegram.minViews} onChange={e => setGenConfig({ ...genConfig, telegram: { ...genConfig.telegram, minViews: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                        <input className="input-field" type="number" value={genConfig.telegram.maxViews} onChange={e => setGenConfig({ ...genConfig, telegram: { ...genConfig.telegram, maxViews: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    </div>
                                                 </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {genConfig.platform.toLowerCase().includes('discord') && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            {(genConfig.serviceType === 'Online Members' || genConfig.serviceType === 'Offline Members' || genConfig.serviceType === 'Server Members') && (
+                                                <div>
+                                                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Members Range</label>
+                                                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                        <input className="input-field" type="number" value={genConfig.discord.minMembers} onChange={e => setGenConfig({ ...genConfig, discord: { ...genConfig.discord, minMembers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                        <input className="input-field" type="number" value={genConfig.discord.maxMembers} onChange={e => setGenConfig({ ...genConfig, discord: { ...genConfig.discord, maxMembers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {genConfig.platform.toLowerCase().includes('facebook') && (
+                                        <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                            <label style={{ fontSize: '0.8rem', color: '#888' }}>Followers Range</label>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                                <input className="input-field" type="number" value={genConfig.facebook.minFollowers} onChange={e => setGenConfig({ ...genConfig, facebook: { ...genConfig.facebook, minFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
+                                                <input className="input-field" type="number" value={genConfig.facebook.maxFollowers} onChange={e => setGenConfig({ ...genConfig, facebook: { ...genConfig.facebook, maxFollowers: parseInt(e.target.value) } })} style={{ flex: 1 }} />
                                             </div>
                                         </div>
                                     )}
 
-                                    {!['reddit', 'snapchat', 'instagram', 'tiktok'].some(p => genConfig.platform.toLowerCase().includes(p)) && (
+                                    {(!['reddit', 'snapchat', 'instagram', 'telegram', 'discord', 'facebook'].some(p => genConfig.platform.toLowerCase().includes(p)) || (genConfig.platform.toLowerCase().includes('reddit') && genConfig.serviceType === 'Subreddit Members') || (genConfig.platform.toLowerCase().includes('tiktok'))) && (
                                         <div style={{ textAlign: 'center', padding: '2rem 0' }}>
                                             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📦</div>
                                             <p style={{ color: '#888', fontSize: '0.9rem' }}>
-                                                Generic configuration for <b>{genConfig.platform}</b>.<br />
-                                                Products will be generated with standard titles and descriptions.
+                                                Standard configuration for <b>{genConfig.platform} {genConfig.serviceType}</b>.<br />
+                                                Products will be generated with professional metrics.
                                             </p>
                                         </div>
                                     )}
