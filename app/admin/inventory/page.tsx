@@ -2257,6 +2257,7 @@ function AdminDashboard() {
                                                     const id = e.target.value;
                                                     const item = inventory.find(i => i.id === id);
                                                     if (item) {
+                                                        // Fallback sale price calculation remains same, but purchase price isn't EXPLICITLY shown to staff
                                                         setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform, salePrice: item.purchasePrice ? String(Number(item.purchasePrice) * 1.5) : '' });
                                                     } else {
                                                         setNewSale({ ...newSale, inventoryId: '' });
@@ -2267,7 +2268,9 @@ function AdminDashboard() {
                                             >
                                                 <option value="">-- Click to Choose Product --</option>
                                                 {inventory.filter(i => i.status === 'In Stock').map(i => (
-                                                    <option key={i.id} value={i.id}>{i.platform} | {i.name} {i.purchasePrice ? `($${i.purchasePrice})` : ''}</option>
+                                                    <option key={i.id} value={i.id}>
+                                                        {i.platform} | {i.name} {hasPermission('finance') && i.purchasePrice ? `(Cost: $${i.purchasePrice})` : ''}
+                                                    </option>
                                                 ))}
                                             </select>
                                         </>
