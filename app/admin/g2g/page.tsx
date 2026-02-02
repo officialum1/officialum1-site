@@ -307,7 +307,7 @@ function G2GDashboard() {
                         <div className="FadeIn">
                             <div className="glass" style={{ padding: '3rem', borderRadius: '32px', maxWidth: '1000px', margin: '0 auto', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                                    <h3 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>Step {offerStep}: {offerStep === 1 ? 'Select Category' : offerStep === 2 ? 'Select Game' : offerStep === 3 ? 'Select Product' : 'Configure Offer'}</h3>
+                                    <h3 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>Step {offerStep}: {offerStep === 1 ? 'Find Product' : offerStep === 2 ? 'Select Template' : offerStep === 3 ? 'Classify Type' : 'Finalize Offer'}</h3>
                                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
                                         {[1, 2, 3, 4].map(s => (
                                             <div key={s} style={{ width: '30px', height: '4px', borderRadius: '2px', background: s <= offerStep ? '#00ccff' : '#222' }}></div>
@@ -315,150 +315,138 @@ function G2GDashboard() {
                                     </div>
                                 </div>
 
-                                {/* STEP 1: SELECT SERVICE */}
+                                {/* STEP 1: GLOBAL PRODUCT SEARCH */}
                                 {offerStep === 1 && (
                                     <div className="FadeIn">
-                                        <p style={{ textAlign: 'center', color: '#888', marginBottom: '2rem' }}>What are you selling today?</p>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
-                                            {(services.length > 0 ? services : [
-                                                { service_id: '42', service_name: 'Game Accounts' },
-                                                { service_id: '45', service_name: 'Game Boosting' },
-                                                { service_id: '43', service_name: 'Game Items' },
-                                                { service_id: '44', service_name: 'Game Coins' }
-                                            ]).map((s: any) => (
-                                                <div
-                                                    key={s.service_id}
-                                                    onClick={() => { setSelectedService(s); setOfferStep(2); }}
-                                                    className="glass hover-row"
-                                                    style={{ padding: '2rem', borderRadius: '20px', textAlign: 'center', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)' }}
-                                                >
-                                                    <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
-                                                        {s.service_name.includes('Account') ? '👤' : s.service_name.includes('Boosting') ? '🚀' : s.service_name.includes('Items') ? '⚔️' : '💰'}
-                                                    </div>
-                                                    <div style={{ fontWeight: 'bold' }}>{s.service_name}</div>
-                                                </div>
-                                            ))}
+                                        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                                            <p style={{ color: '#888' }}>Find the game or service you want to list on G2G</p>
                                         </div>
-                                    </div>
-                                )}
-
-                                {/* STEP 2: SELECT BRAND (GAME) */}
-                                {offerStep === 2 && (
-                                    <div className="FadeIn">
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                            <button onClick={() => setOfferStep(1)} style={{ background: 'none', border: 'none', color: '#00ccff', cursor: 'pointer' }}>← Back</button>
-                                            <span style={{ color: '#888' }}>Category: <b>{selectedService?.service_name}</b></span>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
                                             <input
                                                 className="input-field"
-                                                placeholder="Search Game (e.g. Genshin Impact, Reddit, etc.)..."
+                                                placeholder="Search G2G (e.g. Reddit, Genshin, WoW, etc.)..."
                                                 value={searchBrand}
                                                 onChange={(e) => setSearchBrand(e.target.value)}
-                                                style={{ flex: 1, padding: '1.2rem', background: '#000' }}
-                                                onKeyDown={(e) => e.key === 'Enter' && (document.getElementById('searchBrandsBtn') as any)?.click()}
+                                                style={{ flex: 1, padding: '1.2rem', background: '#000', fontSize: '1.1rem' }}
+                                                onKeyDown={(e) => e.key === 'Enter' && (document.getElementById('searchGlobalBtn') as any)?.click()}
                                                 autoFocus
                                             />
                                             <button
-                                                id="searchBrandsBtn"
+                                                id="searchGlobalBtn"
                                                 className="btn"
                                                 disabled={searchLoading}
                                                 onClick={async () => {
                                                     if (!searchBrand) return;
                                                     setSearchLoading(true);
                                                     try {
-                                                        const res = await fetch(`/api/admin/g2g?action=get_brands&service_id=${selectedService.service_id}&q=${encodeURIComponent(searchBrand)}`);
+                                                        const res = await fetch(`/api/admin/g2g?action=get_products&q=${encodeURIComponent(searchBrand)}`);
                                                         const data = await res.json();
-                                                        setBrandsList(data.payload?.brand_list || data.brand_list || []);
+                                                        const list = data.payload?.product_list || data.product_list || [];
+                                                        setSearchResults(list);
+                                                        if (list.length === 0) alert('No products found for this search');
+                                                        else setOfferStep(2);
                                                     } catch (e) { alert('Search failed'); }
                                                     finally { setSearchLoading(false); }
                                                 }}
                                                 style={{ padding: '0 2.5rem', background: '#00ccff', color: '#000', fontWeight: 'bold' }}
                                             >
-                                                {searchLoading ? '...' : 'FIND GAME'}
+                                                {searchLoading ? '...' : 'SEARCH G2G'}
                                             </button>
                                         </div>
-
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', maxHeight: '400px', overflowY: 'auto', padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '15px' }}>
-                                            {brandsList.map((b: any) => (
-                                                <div
-                                                    key={b.brand_id}
-                                                    onClick={async () => {
-                                                        setSelectedBrand(b);
-                                                        setSearchLoading(true);
-                                                        try {
-                                                            const res = await fetch(`/api/admin/g2g?action=get_products&service_id=${selectedService.service_id}&brand_id=${b.brand_id}`);
-                                                            const data = await res.json();
-                                                            setSearchResults(data.payload?.product_list || data.product_list || []);
-                                                            setOfferStep(3);
-                                                        } catch (e) { alert('Failed to fetch products'); }
-                                                        finally { setSearchLoading(false); }
-                                                    }}
-                                                    className="glass hover-row"
-                                                    style={{ padding: '1rem', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', fontSize: '0.85rem' }}
-                                                >
-                                                    {b.brand_name}
-                                                </div>
-                                            ))}
-                                            {brandsList.length === 0 && !searchLoading && <p style={{ gridColumn: '1/-1', textAlign: 'center', opacity: 0.3, padding: '2rem' }}>Search for a game above to see results</p>}
+                                        <div style={{ textAlign: 'center', marginTop: '3rem', opacity: 0.2 }}>
+                                            <img src="/g2g-logo.png" style={{ height: '30px', filter: 'grayscale(1)' }} alt="" />
                                         </div>
                                     </div>
                                 )}
 
-                                {/* STEP 3: SELECT PRODUCT TEMPLATE */}
-                                {offerStep === 3 && (
+                                {/* STEP 2: SELECT PRODUCT FROM SEARCH LIST */}
+                                {offerStep === 2 && (
                                     <div className="FadeIn">
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                            <button onClick={() => setOfferStep(2)} style={{ background: 'none', border: 'none', color: '#00ccff', cursor: 'pointer' }}>← Back</button>
-                                            <span style={{ color: '#888' }}>Game: <b>{selectedBrand?.brand_name}</b></span>
+                                            <button onClick={() => setOfferStep(1)} style={{ background: 'none', border: 'none', color: '#00ccff', cursor: 'pointer' }}>← Search Again</button>
+                                            <span style={{ color: '#888' }}>Results for: <b>{searchBrand}</b></span>
                                         </div>
-                                        <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Select the specific product template for your listing:</p>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '500px', overflowY: 'auto' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '500px', overflowY: 'auto', padding: '0.5rem' }}>
                                             {searchResults.map((p: any) => (
                                                 <div
                                                     key={p.product_id}
                                                     onClick={async () => {
-                                                        setOfferForm({ ...offerForm, product_id: p.product_id });
-                                                        setSearchLoading(true);
-                                                        try {
-                                                            const res = await fetch(`/api/admin/g2g?action=get_attributes&productId=${p.product_id}`);
-                                                            const attrData = await res.json();
-                                                            const payload = attrData.payload || attrData;
-                                                            setProductAttributes(payload.attribute_group_list || []);
-                                                            setDeliveryMethods(payload.delivery_method_list || []);
-                                                            setOfferStep(4);
-                                                        } catch (e) { alert('Failed to fetch product attributes'); }
-                                                        finally { setSearchLoading(false); }
+                                                        setOfferForm({ ...offerForm, product_id: p.product_id, product_name: p.product_name });
+                                                        setOfferStep(3);
+                                                        // Pre-fetch attributes in background
+                                                        fetch(`/api/admin/g2g?action=get_attributes&productId=${p.product_id}`)
+                                                            .then(r => r.json())
+                                                            .then(data => {
+                                                                const payload = data.payload || data;
+                                                                setProductAttributes(payload.attribute_group_list || []);
+                                                                setDeliveryMethods(payload.delivery_method_list || []);
+                                                            });
                                                     }}
                                                     className="glass hover-row"
-                                                    style={{ padding: '1.5rem', borderRadius: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                                    style={{ padding: '1.2rem', borderRadius: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(255,255,255,0.05)' }}
                                                 >
                                                     <div>
-                                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{p.product_name}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{p.region_name} • {p.brand_name}</div>
+                                                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>{p.product_name}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                                            {p.service_name} • {p.brand_name} ({p.region_name || 'Global'})
+                                                        </div>
                                                     </div>
-                                                    <div style={{ color: '#00ccff', fontSize: '0.8rem' }}>ID: {p.product_id}</div>
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <div style={{ color: '#00ccff', fontSize: '0.7rem' }}>#{p.product_id}</div>
+                                                        <div style={{ color: '#00ff88', fontSize: '0.7rem', fontWeight: 'bold' }}>SELECT →</div>
+                                                    </div>
                                                 </div>
                                             ))}
-                                            {searchResults.length === 0 && <p style={{ textAlign: 'center', padding: '3rem', opacity: 0.3 }}>No product templates found for this Brand/Service combination.</p>}
                                         </div>
                                     </div>
                                 )}
 
-                                {/* STEP 4: CONFIGURE OFFER */}
+                                {/* STEP 3: CLASSIFY SERVICE TYPE */}
+                                {offerStep === 3 && (
+                                    <div className="FadeIn">
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                            <button onClick={() => setOfferStep(2)} style={{ background: 'none', border: 'none', color: '#00ccff', cursor: 'pointer' }}>← Back</button>
+                                            <span style={{ color: '#888' }}>Selected: <b>{offerForm.product_name}</b></span>
+                                        </div>
+                                        <h4 style={{ textAlign: 'center', marginBottom: '2rem' }}>What type of service is this?</h4>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                                            <div
+                                                onClick={() => { setOfferForm({ ...offerForm, internal_type: 'account' }); setOfferStep(4); }}
+                                                className="glass hover-row"
+                                                style={{ padding: '3rem', borderRadius: '24px', textAlign: 'center', cursor: 'pointer' }}
+                                            >
+                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👤</div>
+                                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>ACCOUNT</div>
+                                                <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>Selling a ready-made account (Login/Pass)</p>
+                                            </div>
+                                            <div
+                                                onClick={() => { setOfferForm({ ...offerForm, internal_type: 'boosting' }); setOfferStep(4); }}
+                                                className="glass hover-row"
+                                                style={{ padding: '3rem', borderRadius: '24px', textAlign: 'center', cursor: 'pointer' }}
+                                            >
+                                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚀</div>
+                                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>BOOSTING</div>
+                                                <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>Selling a service or currency delivery</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 4: FINAL CONFIGURATION */}
                                 {offerStep === 4 && (
                                     <div className="FadeIn">
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <button onClick={() => setOfferStep(3)} style={{ background: 'none', border: 'none', color: '#00ccff', cursor: 'pointer' }}>← Back</button>
                                             <div style={{ textAlign: 'right' }}>
                                                 <div style={{ fontSize: '0.7rem', color: '#666' }}>SELECTED PRODUCT</div>
-                                                <div style={{ fontWeight: 'bold', color: '#00ff88' }}>{selectedBrand?.brand_name} - {searchResults.find(p => p.product_id === offerForm.product_id)?.product_name}</div>
+                                                <div style={{ fontWeight: 'bold', color: '#00ff88' }}>{offerForm.product_name}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#00ccff' }}>TYPE: {offerForm.internal_type?.toUpperCase()}</div>
                                             </div>
                                         </div>
 
                                         <form onSubmit={async (e) => {
                                             e.preventDefault();
-                                            if (!confirm('Proceed with creating this G2G listing?')) return;
+                                            if (!confirm('Finalize and publish this offer to G2G?')) return;
                                             setG2GLoading(true);
                                             try {
                                                 const res = await fetch('/api/admin/g2g', {
