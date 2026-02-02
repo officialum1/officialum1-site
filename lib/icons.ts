@@ -13,7 +13,7 @@ export const getPlatformIcon = (platform: string, customImage?: string): string 
 
     // 2. Social Media & Communication
     if (p.includes('discord')) return 'https://cdn-icons-png.flaticon.com/512/5968/5968756.png';
-    if (p.includes('reddit')) return 'https://cdn-icons-png.flaticon.com/512/52/52178.png';
+    if (p.includes('reddit')) return '/icons/reddit.png';
     if (p.includes('telegram')) return 'https://cdn-icons-png.flaticon.com/512/2111/2111646.png';
     if (p.includes('snapchat')) return '/icons/snapchat.png';
     if (p.includes('instagram')) return 'https://cdn-icons-png.flaticon.com/512/174/174855.png';
