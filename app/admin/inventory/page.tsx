@@ -287,6 +287,34 @@ function AdminDashboard() {
         fetchOrderDetail();
     }, [g2gOrderId, activeTab]);
 
+    // REAL-TIME PERMISSION SYNC
+    useEffect(() => {
+        if (!currentUser || (currentUser.role || '').toLowerCase() === 'admin') return;
+
+        const syncPermissions = async () => {
+            try {
+                const res = await fetch(`/api/staff/profile?email=${currentUser.email}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.permissions) {
+                        const newPerms = Array.isArray(data.permissions) ? data.permissions : [];
+                        const oldPerms = Array.isArray(permissions) ? permissions : [];
+
+                        if (JSON.stringify(newPerms) !== JSON.stringify(oldPerms)) {
+                            console.log("🔐 Permissions updated in real-time!");
+                            setPermissions(newPerms);
+                            const updatedUser = { ...currentUser, permissions: newPerms };
+                            localStorage.setItem('buyer_user', JSON.stringify(updatedUser));
+                        }
+                    }
+                }
+            } catch (e) { }
+        };
+
+        const interval = setInterval(syncPermissions, 10000); // Check every 10 seconds
+        return () => clearInterval(interval);
+    }, [currentUser, permissions]);
+
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
         const params = new URLSearchParams(searchParams.toString());
@@ -1527,7 +1555,7 @@ function AdminDashboard() {
                         >
                             🔄 Sync System
                         </button>
-                        <button onClick={() => { localStorage.removeItem('admin_user'); window.location.href = '/admin/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
+                        <button onClick={() => { localStorage.removeItem('admin_user'); localStorage.removeItem('buyer_user'); window.location.href = '/admin/login'; }} className="btn btn-outline" style={{ color: '#ff4444', borderColor: '#444', padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
                             Logout
                         </button>
                     </div>
