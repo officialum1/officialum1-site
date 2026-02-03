@@ -7,6 +7,7 @@ import { useCart } from '@/app/context/CartContext';
 import ReviewsSection from '@/components/ReviewsSection';
 import RelatedProducts from '@/components/RelatedProducts';
 import BulkPricing from '@/components/BulkPricing';
+import { trackEvent } from '@/lib/analytics';
 
 interface ProductClientProps {
     product: any;
@@ -45,7 +46,20 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                     try { setGateways(JSON.parse(data.payment_gateways)); } catch { }
                 }
             });
-    }, []);
+
+        if (product) {
+            trackEvent('view_item', {
+                currency: 'USD',
+                value: parseFloat(product.price),
+                items: [{
+                    item_id: product.id,
+                    item_name: product.name,
+                    item_brand: product.platform,
+                    price: parseFloat(product.price)
+                }]
+            });
+        }
+    }, [product]);
 
     const handleCopyLink = () => {
         if (typeof window !== 'undefined') {
@@ -225,7 +239,18 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                                     {isSale ? '🔥 Buy Sale Price' : 'Buy Now Instantly'}
                                 </Link>
                                 <button
-                                    onClick={() => addToCart(product)}
+                                    onClick={() => {
+                                        addToCart(product);
+                                        trackEvent('add_to_cart', {
+                                            currency: 'USD',
+                                            value: parseFloat(product.price),
+                                            items: [{
+                                                item_id: product.id,
+                                                item_name: product.name,
+                                                price: parseFloat(product.price)
+                                            }]
+                                        });
+                                    }}
                                     className="btn btn-outline"
                                     style={{ flex: 1, border: '1px solid #00c3ff', color: '#00c3ff', background: 'rgba(0,195,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                                 >
@@ -306,6 +331,45 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                     </div>
                 </div>
             )}
+
+            {/* STICKY MOBILE BAR */}
+            <div className="mobile-only sticky-bar" style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                background: 'rgba(5, 5, 5, 0.95)',
+                backdropFilter: 'blur(10px)',
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'none', // Controlled by CSS
+                zIndex: 1000,
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: '0 -5px 20px rgba(0,0,0,0.5)'
+            }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ color: '#00ff88', fontWeight: 'bold', fontSize: '1.2rem' }}>${finalPrice}</div>
+                    <div style={{ color: '#888', fontSize: '0.7rem' }}>{product.name.length > 20 ? product.name.substring(0, 20) + '...' : product.name}</div>
+                </div>
+                {totalStock > 0 ? (
+                    <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', fontSize: '0.9rem' }}>
+                        Buy Now
+                    </Link>
+                ) : (
+                    <button onClick={() => setShowNotifyModal(true)} className="btn btn-outline" style={{ padding: '0.6rem 1rem', fontSize: '0.8rem', color: '#ff4d4d', borderColor: '#ff4d4d' }}>
+                        Notify Me
+                    </button>
+                )}
+            </div>
+
+            <style jsx>{`
+                @media (max-width: 768px) {
+                    .sticky-bar {
+                        display: flex !important;
+                    }
+                }
+            `}</style>
 
             {/* REVIEWS SECTION */}
             <div className="container" style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '50px' }}>

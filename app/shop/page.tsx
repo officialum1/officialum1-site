@@ -14,6 +14,7 @@ export default function ShopPage() {
     const [filter, setFilter] = useState('All');
     const [loading, setLoading] = useState(true);
     const [shareId, setShareId] = useState<string | null>(null);
+    const [user, setUser] = useState<any>(null);
 
     // New Features: Search, Sort, Notify
     const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +35,11 @@ export default function ShopPage() {
                 setLoading(false);
             })
             .catch(e => setLoading(false));
+
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('buyer_user');
+            if (stored) setUser(JSON.parse(stored));
+        }
     }, []);
 
     const handleNotifySubmit = async (e: React.FormEvent) => {
@@ -61,6 +67,13 @@ export default function ShopPage() {
         const matchesPlatform = filter === 'All' || p.platform === filter;
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // VIP Filter: If product is VIP only, user MUST have a membership plan
+        const isVipUser = user?.membership && ['silver', 'gold', 'diamond'].includes(user.membership.toLowerCase());
+        const isProductGated = p.isVipOnly === 1;
+
+        if (isProductGated && !isVipUser) return false;
+
         return matchesPlatform && matchesSearch;
     });
 
@@ -81,7 +94,10 @@ export default function ShopPage() {
             <div className="container page-header" style={{ paddingTop: '150px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
-                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
+                    <p style={{ color: '#aaa', fontSize: '1.2rem', marginBottom: '1.5rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
+                    <Link href="/bundles" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#00ff88', borderColor: '#00ff88' }}>
+                        🎁 Create a Bundle & Save 15%
+                    </Link>
                 </div>
 
                 {/* Search & Sort Bar */}

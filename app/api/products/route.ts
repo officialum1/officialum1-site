@@ -48,7 +48,7 @@ export async function GET() {
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
             SELECT p.*, 
-            c.name as categoryName, c.icon as categoryIcon, c.discount_percent as categoryDiscount,
+            c.name as categoryName, c.icon as categoryIcon, c.discount_percent as categoryDiscount, c.is_vip_only as isVipOnly,
             (SELECT COUNT(*) FROM inventory i 
              WHERE (i.platform = p.platform OR i.name = p.name) AND i.status = 'In Stock') as inventoryStock
             FROM products p

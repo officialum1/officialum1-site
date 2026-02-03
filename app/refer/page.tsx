@@ -113,7 +113,70 @@ export default function ReferPage() {
                 </div>
             </div>
 
+            {/* LEADERBOARD SECTION */}
+            <LeaderboardSection />
+
             <Footer />
         </main>
+    );
+}
+
+function LeaderboardSection() {
+    const [topEarners, setTopEarners] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/referral/leaderboard')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setTopEarners(data);
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    if (loading || topEarners.length === 0) return null;
+
+    return (
+        <div className="container" style={{ paddingBottom: '100px', textAlign: 'center' }}>
+            <h2 style={{ marginBottom: '1rem', color: '#ffd700' }}>🏆 Top Affiliates This Month</h2>
+            <p style={{ color: '#888', marginBottom: '2.5rem' }}>Join the elite circle of earners. Real people, real earnings.</p>
+
+            <div className="glass" style={{ maxWidth: '600px', margin: '0 auto', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255, 215, 0, 0.2)' }}>
+                {topEarners.map((earner, i) => (
+                    <div key={i} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '1.2rem 2rem',
+                        borderBottom: i === topEarners.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)',
+                        background: i === 0 ? 'rgba(255, 215, 0, 0.05)' : 'transparent'
+                    }}>
+                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                            <span style={{
+                                width: '24px',
+                                height: '24px',
+                                borderRadius: '50%',
+                                background: i === 0 ? '#ffd700' : (i === 1 ? '#c0c0c0' : (i === 2 ? '#cd7f32' : 'rgba(255,255,255,0.1)')),
+                                color: i < 3 ? '#000' : '#888',
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                {i + 1}
+                            </span>
+                            <span style={{ fontWeight: i === 0 ? 'bold' : 'normal', color: i === 0 ? '#fff' : '#ccc' }}>
+                                {earner.username} {i === 0 && '👑'}
+                            </span>
+                        </div>
+                        <div style={{ fontWeight: 'bold', color: '#00ff88' }}>
+                            + ${earner.earnings}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <p style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: '#555' }}>* Earnings are updated every 24 hours.</p>
+        </div>
     );
 }

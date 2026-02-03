@@ -108,6 +108,7 @@ export default function Navbar() {
                         <li><Link href="/faq" className="nav-link" onClick={() => setIsOpen(false)}>Knowledge Base</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
                         <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Earn</Link></li>
+                        <li><Link href="/bundles" className="nav-link" style={{ color: '#00c3ff' }} onClick={() => setIsOpen(false)}>🎁 Bundles</Link></li>
                         {user && (user.role === 'admin' || user.role === 'seller') && (
                             <li><Link href="/admin/inventory" className="nav-link" style={{ color: 'var(--accent)' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
                         )}

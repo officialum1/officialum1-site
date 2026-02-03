@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
+import { trackEvent } from '@/lib/analytics';
 
 function CheckoutContent() {
     const searchParams = useSearchParams();
@@ -69,7 +70,44 @@ function CheckoutContent() {
                     try { setGateways(JSON.parse(data.payment_gateways)); } catch { }
                 }
             });
-    }, [id, membership]);
+
+        // Track Begin Checkout
+        if (product || cart.length > 0) {
+            trackEvent('begin_checkout', {
+                currency: 'USD',
+                value: parseFloat(getFinalPrice()),
+                items: isCartMode ? cart.map(item => ({
+                    item_id: item.id,
+                    item_name: item.name,
+                    price: parseFloat(item.price)
+                })) : [{
+                    item_id: product?.id,
+                    item_name: product?.name,
+                    price: parseFloat(product?.price)
+                }]
+            });
+        }
+    }, [id, membership, product, cart.length]);
+
+    // Lead Capture (Abandoned Cart)
+    useEffect(() => {
+        if (email && email.includes('@') && email.length > 5) {
+            const timer = setTimeout(() => {
+                fetch('/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'capture',
+                        email,
+                        productName: isCartMode ? 'Cart Checkout' : (product?.name || 'Unknown'),
+                        productId: id || 'cart',
+                        amount: getFinalPrice()
+                    })
+                }).catch(() => { });
+            }, 2000); // 2 second delay to avoid spamming while typing
+            return () => clearTimeout(timer);
+        }
+    }, [email, product]);
 
     const handleApplyPromo = async () => {
         if (!promoCode) return;
@@ -99,7 +137,7 @@ function CheckoutContent() {
         } else if (isMembershipMode) {
             baseTotal = parseFloat(product?.price || '0');
         } else {
-            if (!product) return 0;
+            if (!product) return "0.00";
             const original = parseFloat(product.price.toString().replace('$', ''));
             baseTotal = original * quantity;
         }
@@ -140,6 +178,11 @@ function CheckoutContent() {
                     if (data.paymentUrl) {
                         window.location.href = data.paymentUrl;
                     } else {
+                        localStorage.setItem('last_order', JSON.stringify({
+                            orderId: data.orderId,
+                            amount: getFinalPrice(),
+                            items: cart.map(item => ({ id: item.id, name: item.name, price: item.price }))
+                        }));
                         window.location.href = `/order-success?orderId=${data.orderId}`;
                     }
                 } else {
@@ -165,6 +208,11 @@ function CheckoutContent() {
                     if (data.paymentUrl) {
                         window.location.href = data.paymentUrl; // Redirect to Gateway
                     } else {
+                        localStorage.setItem('last_order', JSON.stringify({
+                            orderId: data.orderId,
+                            amount: getFinalPrice(),
+                            items: [{ id: product.id, name: product.name, price: product.price, quantity }]
+                        }));
                         window.location.href = `/order-success?orderId=${data.orderId}`; // Manual Success
                     }
                 } else {

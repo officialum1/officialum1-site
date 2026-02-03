@@ -9,7 +9,8 @@ export async function GET(req: Request) {
         if (!productId) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
 
         const reviews = await query(`
-            SELECT r.*, u.email 
+            SELECT r.*, u.email,
+            (SELECT COUNT(*) FROM orders o WHERE o.userId = r.user_id AND CAST(o.productId AS CHAR) = CAST(r.product_id AS CHAR) AND o.status IN ('paid', 'completed')) as has_purchased
             FROM reviews r
             LEFT JOIN users u ON r.user_id = u.id
             WHERE r.product_id = ? AND r.status = 'approved'

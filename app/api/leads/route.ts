@@ -56,6 +56,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true });
         }
 
+        if (body.action === 'capture') {
+            const { email, productName, productId, amount } = body;
+            const id = `cart_${Date.now()}`;
+            // Avoid duplicates for same email+product in short window
+            const existing = await query("SELECT id FROM leads WHERE clientName = ? AND status = 'Abandoned' AND notes LIKE ? AND date > DATE_SUB(NOW(), INTERVAL 1 HOUR)", [email, `%${productName}%`]);
+
+            if ((existing as any[]).length === 0) {
+                await query(
+                    "INSERT INTO leads (id, clientName, platform, budget, status, notes) VALUES (?, ?, ?, ?, ?, ?)",
+                    [id, email, 'Abandoned Cart', parseFloat(amount) || 0, 'Abandoned', `Interested in ${productName} (${productId})`]
+                );
+            }
+            return NextResponse.json({ success: true });
+        }
+
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { query } from '@/lib/db';
+import BlogProductCard from '@/components/BlogProductCard';
 
 async function getPost(id: string) {
     const filePath = path.join(process.cwd(), 'data', 'posts.json');
@@ -9,6 +11,8 @@ async function getPost(id: string) {
     const posts = JSON.parse(fileContents);
     return posts.find((p: any) => p.id.toString() === id);
 }
+
+// ... duplicate getPost removed above for cleanliness in actual tool call
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +41,14 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
         return <div style={{ padding: '100px', textAlign: 'center' }}>Post not found</div>;
     }
 
+    // Find a relevant product based on category
+    const products = await query("SELECT * FROM products WHERE platform LIKE ? OR name LIKE ? ORDER BY RAND() LIMIT 1", [`%${post.category}%`, `%${post.category}%`]) as any[];
+    const featuredProduct = products[0];
+
+    // Split content to insert banner in the middle (after first <h2> or first 4 paragraphs)
+    const contentParts = post.content.split('</h2>');
+    const hasH2 = contentParts.length > 1;
+
     return (
         <main>
             <Navbar />
@@ -53,11 +65,35 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
                     </div>
                 )}
 
-                <div
-                    className="blog-content"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                    style={{ fontSize: '1.2rem', lineHeight: 1.8, color: '#ddd' }}
-                />
+                <div className="blog-content" style={{ fontSize: '1.2rem', lineHeight: 1.8, color: '#ddd' }}>
+                    {hasH2 ? (
+                        <>
+                            <div dangerouslySetInnerHTML={{ __html: contentParts[0] + '</h2>' }} />
+                            {featuredProduct && (
+                                <BlogProductCard
+                                    id={featuredProduct.id}
+                                    name={featuredProduct.name}
+                                    price={featuredProduct.price}
+                                    platform={featuredProduct.platform}
+                                    image={featuredProduct.image}
+                                />
+                            )}
+                            <div dangerouslySetInnerHTML={{ __html: contentParts.slice(1).join('</h2>') }} />
+                        </>
+                    ) : (
+                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                    )}
+                </div>
+
+                {!hasH2 && featuredProduct && (
+                    <BlogProductCard
+                        id={featuredProduct.id}
+                        name={featuredProduct.name}
+                        price={featuredProduct.price}
+                        platform={featuredProduct.platform}
+                        image={featuredProduct.image}
+                    />
+                )}
             </div>
             <Footer />
         </main>

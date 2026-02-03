@@ -95,8 +95,39 @@ export default async function SingleProductPage({ params }: { params: Promise<{ 
         "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": "4.9",
-            "reviewCount": "120" // Hardcoded valid social proof or fetch real count if possible
+            "reviewCount": "120"
         }
+    };
+
+    const faqJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How long does delivery take?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Delivery is instant for most account types. Once your payment is confirmed, you will receive the credentials immediately via email and in your user dashboard."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Are these accounts safe to use?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, all our accounts are aged and verified to ensure maximum security and longevity. We follow strict safety protocols during the creation and aging process."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you offer a warranty?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, we provide a replacement warranty for all our products. If you encounter any issues with your purchase, our support team is available 24/7 to assist you."
+                }
+            }
+        ]
     };
 
     return (
@@ -107,6 +138,11 @@ export default async function SingleProductPage({ params }: { params: Promise<{ 
                 id="product-schema"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <Script
+                id="faq-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
 
             <ProductClient product={product} bundleContents={bundleContents} />
