@@ -24,6 +24,12 @@ export async function query(sql: string, params: any[] = []) {
     }
 }
 
+// Allow getting a dedicated connection for transactions
+export async function getConnection() {
+    return await pool.getConnection();
+}
+
+
 // 1. Initialize Tables (Run this once or check on startup)
 export async function initDB() {
     // Users Table

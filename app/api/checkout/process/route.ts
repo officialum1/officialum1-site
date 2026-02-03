@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { sendAuditReport } from '@/lib/email';
-import { query } from '@/lib/db';
+import { query, getConnection } from '@/lib/db';
 import { sendTelegramMessage, sendTelegramAdminAlert } from '@/lib/telegram';
 import crypto from 'crypto';
 
@@ -272,33 +272,60 @@ export async function POST(req: Request) {
             } catch (e: any) { throw new Error("Binance Error: " + e.message); }
         }
 
-        // D. INTERNAL WALLET
+        // D. INTERNAL WALLET (TRANSACTION SAFE)
         if (method === 'wallet') {
             if (userId === 'guest') throw new Error("Wallet payment is only available for registered users.");
-            const userFullRows = await query("SELECT wallet_balance FROM users WHERE id = ?", [userId]) as any[];
-            const balance = parseFloat(userFullRows[0]?.wallet_balance || 0);
 
-            if (balance < parseFloat(amountToCharge)) {
-                throw new Error(`Insufficient wallet balance. You need $${amountToCharge} but have $${balance.toFixed(2)}.`);
+            // 1. Start Transaction
+            const conn = await getConnection();
+            try {
+                await conn.beginTransaction();
+
+                // 2. Check Balance (Lock Row)
+                const [userRows]: any = await conn.execute("SELECT wallet_balance FROM users WHERE id = ? FOR UPDATE", [userId]);
+                const balance = parseFloat(userRows[0]?.wallet_balance || 0);
+
+                if (balance < parseFloat(amountToCharge)) {
+                    throw new Error(`Insufficient wallet balance. You need $${amountToCharge} but have $${balance.toFixed(2)}.`);
+                }
+
+                // 3. Deduct Balance
+                await conn.execute("UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?", [amountToCharge, userId]);
+
+                // 4. Record Transaction
+                await conn.execute("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'purchase', ?, 'completed')",
+                    [userId, amountToCharge, membershipPlan ? `VIP Membership Upgrade: ${membershipPlan}` : (isBulk ? `Cart Purchase` : `Purchase of ${product.name}`)]);
+
+                // 5. Update Membership / Stats
+                if (membershipPlan) {
+                    await conn.execute("UPDATE users SET membership = ?, membership_expires = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?", [membershipPlan, userId]);
+                }
+                await conn.execute("UPDATE users SET total_spent = total_spent + ?, points = points + ? WHERE id = ?",
+                    [amountToCharge, Math.floor(parseFloat(amountToCharge)), userId]);
+
+                // 6. ATOMIC ORDER CREATION
+                // We insert the order NOW to ensure money isn't lost if the script crashes later.
+                const newOrderObj = {
+                    orderId, userId, guestEmail: user.email, productId: isBulk ? 0 : product.id,
+                    amount: amountToCharge, originalPrice: isBulk ? amountToCharge : product.price,
+                    promoCode: promoCode || null, method, status: 'paid', quantity: isBulk ? cartItems.length : safeQuantity, date: new Date()
+                };
+
+                // Using exact column order as in valid SQL
+                await conn.execute(`
+                    INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity, date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [newOrderObj.orderId, newOrderObj.userId, newOrderObj.guestEmail, newOrderObj.productId, newOrderObj.amount, newOrderObj.originalPrice,
+                newOrderObj.promoCode, newOrderObj.method, newOrderObj.status, newOrderObj.quantity, newOrderObj.date]);
+
+                await conn.commit();
+                orderStatus = 'paid';
+            } catch (err) {
+                await conn.rollback();
+                throw err;
+            } finally {
+                conn.release();
             }
-
-            // Deduct Balance
-            await query("UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?", [amountToCharge, userId]);
-
-            // Record Transaction
-            await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'purchase', ?, 'completed')",
-                [userId, amountToCharge, membershipPlan ? `VIP Membership Upgrade: ${membershipPlan}` : (isBulk ? `Bulk Cart Purchase (${cartItems.length} items)` : `Purchase of ${product.name}`)]);
-
-            // UPDATE MEMBERSHIP IF APPLICABLE
-            if (membershipPlan) {
-                await query("UPDATE users SET membership = ?, membership_expires = DATE_ADD(NOW(), INTERVAL 30 DAY) WHERE id = ?", [membershipPlan, userId]);
-            }
-
-            // UPDATE TOTAL SPENT & POINTS
-            await query("UPDATE users SET total_spent = total_spent + ?, points = points + ? WHERE id = ?",
-                [parseFloat(amountToCharge), Math.floor(parseFloat(amountToCharge)), userId]);
-
-            orderStatus = 'paid';
         }
 
         // CRITICAL CHECK
@@ -320,11 +347,12 @@ export async function POST(req: Request) {
                 commissionAmount = (parseFloat(amountToCharge) * commissionRate) / 100;
 
                 if (commissionAmount > 0) {
-                    await query("UPDATE users SET affiliate_balance = affiliate_balance + ?, total_affiliate_earnings = total_affiliate_earnings + ? WHERE id = ?",
+                    // STORE CREDIT ONLY: Add to wallet_balance
+                    await query("UPDATE users SET wallet_balance = wallet_balance + ?, total_affiliate_earnings = total_affiliate_earnings + ? WHERE id = ?",
                         [commissionAmount, commissionAmount, referrerId]);
 
-                    await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'affiliate_payout', ?, 'completed')",
-                        [referrerId, commissionAmount, `Commission from ${user.email} purchase`]);
+                    await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'affiliate_credit', ?, 'completed')",
+                        [referrerId, commissionAmount, `Store Credit earned from ${user.email}`]);
                 }
             }
         }
@@ -366,25 +394,28 @@ export async function POST(req: Request) {
         };
 
         // Save to Hostinger Database
-        try {
-            await query(`
-                INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity, date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [
-                newOrder.orderId,
-                newOrder.userId,
-                newOrder.guestEmail,
-                newOrder.productId,
-                newOrder.amount,
-                newOrder.originalPrice,
-                newOrder.promoCode,
-                newOrder.method,
-                newOrder.status,
-                newOrder.quantity,
-                newOrder.date
-            ]);
-        } catch (dbError) {
-            console.error("Failed to save order to Database:", dbError);
+        // Save to Hostinger Database (Skip if Wallet, as it's done atomically)
+        if (method !== 'wallet') {
+            try {
+                await query(`
+                    INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity, date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [
+                    newOrder.orderId,
+                    newOrder.userId,
+                    newOrder.guestEmail,
+                    newOrder.productId,
+                    newOrder.amount,
+                    newOrder.originalPrice,
+                    newOrder.promoCode,
+                    newOrder.method,
+                    newOrder.status,
+                    newOrder.quantity,
+                    newOrder.date
+                ]);
+            } catch (dbError) {
+                console.error("Failed to save order to Database:", dbError);
+            }
         }
 
         if (paymentUrl) {
