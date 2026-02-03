@@ -71,13 +71,12 @@ export default function Navbar() {
 
     return (
         <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-            <div className="container navbar-content">
+            <div className="navbar-content">
                 <Link href="/" className="logo text-gradient">
                     <img src="/logo.jpg" alt="OfficialUM1 Logo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                     OfficialUM1
                 </Link>
 
-                {/* Hamburger Button */}
                 <button
                     className="mobile-menu-btn"
                     onClick={() => setIsOpen(!isOpen)}
@@ -88,34 +87,31 @@ export default function Navbar() {
                     <span className={`bar ${isOpen ? 'open' : ''}`}></span>
                 </button>
 
-                {/* Search Bar (Desktop) */}
                 <div className="nav-search-wrapper">
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder="Search products..."
                         onKeyDown={handleSearch}
-                        className="nav-search-input"
+                        className="input-field nav-search-input"
                     />
                     <span className="search-icon">🔍</span>
                 </div>
 
-                {/* Navigation Links & Auth */}
                 <div className={`nav-menu ${isOpen ? 'active' : ''}`}>
                     <ul className="nav-links">
                         <li><Link href="/services" className="nav-link" onClick={() => setIsOpen(false)}>Services</Link></li>
-                        <li><Link href="/shop" className="nav-link" style={{ color: '#00ff88' }} onClick={() => setIsOpen(false)}>Shop</Link></li>
+                        <li><Link href="/shop" className="nav-link highlight" onClick={() => setIsOpen(false)}>Shop</Link></li>
                         <li><Link href="/reviews" className="nav-link" onClick={() => setIsOpen(false)}>Reviews</Link></li>
                         <li><Link href="/store" className="nav-link" onClick={() => setIsOpen(false)}>Rentals</Link></li>
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Blog</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
                         <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Earn</Link></li>
                         {user && (user.role === 'admin' || user.role === 'seller') && (
-                            <li><Link href="/admin/inventory" className="nav-link" style={{ color: '#00ccff' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
+                            <li><Link href="/admin/inventory" className="nav-link" style={{ color: 'var(--accent)' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
                         )}
                     </ul>
 
                     <div className="auth-buttons">
-                        {/* Notifications */}
                         {user && (
                             <div className="nav-icon-wrapper">
                                 <button
@@ -125,46 +121,30 @@ export default function Navbar() {
                                     🔔
                                     {unreadCount > 0 && <span className="nav-badge">{unreadCount}</span>}
                                 </button>
-                                {showNotifications && (
-                                    <div className="nav-dropdown glass">
-                                        <div className="dropdown-header">
-                                            <span>Notifications</span>
-                                            <span className="close-btn" onClick={() => setShowNotifications(false)}>Close</span>
-                                        </div>
-                                        {notifications.length === 0 && <div className="no-data">No notifications yet.</div>}
-                                        {notifications.map(n => (
-                                            <div key={n.id} className={`notification-item ${n.is_read ? 'read' : 'unread'}`}>
-                                                <div className="nt-title">{n.title}</div>
-                                                <div className="nt-msg">{n.message}</div>
-                                                <div className="nt-date">{new Date(n.created_at).toLocaleString()}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         )}
 
-                        {/* Wishlist Link */}
-                        <Link href="/wishlist" className="nav-icon-wrapper" style={{ textDecoration: 'none', fontSize: '1.4rem' }}>
-                            ❤️
+                        <Link href="/wishlist" className="nav-icon-wrapper" style={{ textDecoration: 'none' }}>
+                            <span style={{ fontSize: '1.4rem' }}>❤️</span>
                             {wishlist.length > 0 && <span className="nav-badge badge-red">{wishlist.length}</span>}
                         </Link>
 
-                        {/* Cart Button */}
-                        <button onClick={toggleCart} className="nav-icon-wrapper nav-icon-btn" style={{ fontSize: '1.5rem' }}>
-                            🛒
-                            {cartCount > 0 && <span className="nav-badge badge-green">{cartCount}</span>}
+                        <button onClick={toggleCart} className="nav-icon-wrapper nav-icon-btn">
+                            <span style={{ fontSize: '1.5rem' }}>🛒</span>
+                            {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
                         </button>
 
+                        <div className="auth-divider" style={{ width: '1px', height: '24px', background: 'var(--glass-border)' }}></div>
+
                         {user ? (
-                            <div className="user-menu">
-                                <Link href="/dashboard" className="nav-link highlight" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <Link href="/dashboard" className="nav-link" onClick={() => setIsOpen(false)}>Dashboard</Link>
                                 <button onClick={handleLogout} className="logout-btn">Logout</button>
                             </div>
                         ) : (
-                            <div className="guest-menu">
+                            <div className="guest-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <Link href="/login" className="nav-link" onClick={() => setIsOpen(false)}>Login</Link>
-                                <Link href="/register" className="btn-signup" onClick={() => setIsOpen(false)}>Sign Up</Link>
+                                <Link href="/register" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }} onClick={() => setIsOpen(false)}>Sign Up</Link>
                             </div>
                         )}
                     </div>

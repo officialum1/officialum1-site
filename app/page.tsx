@@ -17,19 +17,19 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-bg"></div>
-        <div className="container" style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
-          <div className="glass" style={{ display: 'inline-block', padding: '0.5rem 1rem', borderRadius: '50px', marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--accent)' }}>
+        <div className="container animate-up" style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+          <div className="glass" style={{ display: 'inline-block', padding: '0.6rem 1.2rem', borderRadius: '50px', marginBottom: '2rem', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--accent)', border: '1px solid rgba(0, 195, 255, 0.2)' }}>
             ✨ Elevate Your Digital Presence
           </div>
           <h1>
             Translating Digital Aspirations <br />
             into <span className="text-gradient">Tangible Results</span>
           </h1>
-          <p className="subheading" style={{ marginTop: '1.5rem' }}>
-            We are OfficialUM1. A premier digital agency crafting high-performance websites,
-            data-driven SEO strategies, and magnetic social media campaigns.
+          <p className="subheading">
+            OfficialUM1 is a premier digital agency crafting high-performance systems,
+            data-driven SEO strategies, and magnetic social ecosystems for global brands.
           </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <div className="btn-group">
             <a href="/contact" className="btn btn-primary">Start Your Project</a>
             <a href="/services" className="btn btn-outline">Explore Services</a>
           </div>
