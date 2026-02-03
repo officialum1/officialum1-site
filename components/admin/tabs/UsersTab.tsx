@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from 'react';
 
 interface UsersTabProps {
     users: any[];
@@ -25,6 +26,12 @@ export default function UsersTab({
     handleResendUserEmail,
     fetchData
 }: UsersTabProps) {
+    const [showImport, setShowImport] = useState(false);
+    const [importText, setImportText] = useState('');
+    const [showEmail, setShowEmail] = useState(false);
+    const [emailForm, setEmailForm] = useState({ subject: '', content: '' });
+    const [isProcessing, setIsProcessing] = useState(false);
+
     const buyers = users.filter((u: any) => (u.role === 'buyer' || u.role === 'user'));
     const topSpenders = [...buyers].sort((a, b) => (b.total_spent || 0) - (a.total_spent || 0)).slice(0, 3);
 
@@ -52,6 +59,14 @@ export default function UsersTab({
                     <div>
                         <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem' }}>User Directory</h2>
                         <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.3rem' }}>Total Members: {buyers.length}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button onClick={() => setShowImport(true)} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.2rem', borderRadius: '12px' }}>
+                            <span>📥</span> Import Buyers
+                        </button>
+                        <button onClick={() => setShowEmail(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#00ccff', borderColor: '#00ccff', padding: '0.6rem 1.2rem', borderRadius: '12px' }}>
+                            <span>📢</span> Send Promo
+                        </button>
                     </div>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -168,6 +183,112 @@ export default function UsersTab({
                     </tbody>
                 </table>
             </div>
+
+            {/* IMPORT MODAL */}
+            {showImport && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.3)' }}>
+                        <h3 style={{ color: '#00ff88', margin: '0 0 1rem 0' }}>📥 Import Buyers</h3>
+                        <p style={{ color: '#888', marginBottom: '1rem', fontSize: '0.9rem' }}>Paste email addresses (one per line). Accounts will be created with a default password.</p>
+                        <textarea
+                            className="input-field"
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            style={{ width: '100%', height: '200px', padding: '1rem', fontFamily: 'monospace', fontSize: '0.9rem' }}
+                            placeholder="user1@example.com&#10;user2@example.com&#10;..."
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                            <button onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
+                            <button
+                                onClick={async () => {
+                                    setIsProcessing(true);
+                                    try {
+                                        const emails = importText.split('\n').map(e => e.trim()).filter(e => e.includes('@'));
+                                        if (emails.length === 0) return alert('No valid emails found');
+                                        const res = await fetch('/api/admin/users', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ action: 'bulk_import', emails })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            alert(`Successfully imported ${data.count} new users!`);
+                                            setImportText('');
+                                            setShowImport(false);
+                                            fetchData();
+                                        }
+                                    } catch (e) { alert('Import failed'); }
+                                    setIsProcessing(false);
+                                }}
+                                className="btn btn-primary"
+                                disabled={isProcessing}
+                            >
+                                {isProcessing ? 'Importing...' : 'Import Now'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* EMAIL MODAL */}
+            {showEmail && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2rem', borderRadius: '24px', border: '1px solid #00ccff' }}>
+                        <h3 style={{ color: '#00ccff', margin: '0 0 1rem 0' }}>📢 Send Promotional Email</h3>
+                        <p style={{ color: '#888', marginBottom: '1rem', fontSize: '0.9rem' }}>Send an email to <b>All Buyers ({buyers.length})</b>.</p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <input
+                                className="input-field"
+                                placeholder="Email Subject"
+                                value={emailForm.subject}
+                                onChange={e => setEmailForm({ ...emailForm, subject: e.target.value })}
+                                style={{ width: '100%', padding: '0.8rem' }}
+                            />
+                            <textarea
+                                className="input-field"
+                                placeholder="HTML Content or Plain Text..."
+                                value={emailForm.content}
+                                onChange={e => setEmailForm({ ...emailForm, content: e.target.value })}
+                                style={{ width: '100%', height: '200px', padding: '1rem', fontFamily: 'monospace', fontSize: '0.9rem' }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+                            <button onClick={() => setShowEmail(false)} className="btn btn-outline">Cancel</button>
+                            <button
+                                onClick={async () => {
+                                    setIsProcessing(true);
+                                    try {
+                                        const res = await fetch('/api/admin/users', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                action: 'send_bulk_email',
+                                                recipients: buyers.map((u: any) => u.email),
+                                                subject: emailForm.subject,
+                                                content: emailForm.content
+                                            })
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            alert(`Email sent to ${data.count} users!`);
+                                            setEmailForm({ subject: '', content: '' });
+                                            setShowEmail(false);
+                                        }
+                                    } catch (e) { alert('Sending failed'); }
+                                    setIsProcessing(false);
+                                }}
+                                className="btn btn-primary"
+                                disabled={isProcessing}
+                                style={{ background: 'linear-gradient(45deg, #00ccff, #0088cc)' }}
+                            >
+                                {isProcessing ? 'Sending...' : 'Send Blast'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* USER EDIT MODAL */}
             {showUserEdit && selectedUser && (

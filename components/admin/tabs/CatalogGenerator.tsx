@@ -185,7 +185,10 @@ export default function CatalogGenerator({
                                                 transition: 'all 0.2s'
                                             }}
                                         >
-                                            {cat.icon} {cat.name}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                                                {cat.icon && (cat.icon.startsWith('/') || cat.icon.startsWith('http')) ? <img src={cat.icon} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} /> : <span>{cat.icon}</span>}
+                                                {cat.name}
+                                            </div>
                                         </button>
                                     ))
                                 ) : (
@@ -212,9 +215,9 @@ export default function CatalogGenerator({
 
                         <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{ display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Assign Category</label>
-                            <select className="input-field" value={genConfig.category_id} onChange={e => setGenConfig({ ...genConfig, category_id: e.target.value })} style={{ width: '100%' }}>
+                            <select className="input-field" value={genConfig.category_id} onChange={e => setGenConfig({ ...genConfig, category_id: e.target.value })} style={{ width: '100%', background: '#0a0a0a', color: '#fff', border: '1px solid #333', padding: '0 1rem', height: '46px', borderRadius: '12px' }}>
                                 <option value="">No Category</option>
-                                {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
 

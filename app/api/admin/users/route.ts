@@ -89,6 +89,24 @@ export async function POST(req: Request) {
             // Mock email sending for now, or integrate with email service
             console.log(`[Mock Email] Sending ${action} to ${email}`);
             return NextResponse.json({ success: true, message: 'Email queued' });
+        } else if (action === 'bulk_import') {
+            const emails: string[] = body.emails || [];
+            let count = 0;
+            for (const e of emails) {
+                const cleanEmail = e.trim();
+                if (cleanEmail) {
+                    const exists = await query("SELECT id FROM users WHERE email = ?", [cleanEmail]) as any[];
+                    if (exists.length === 0) {
+                        await query("INSERT INTO users (email, role, password, is_verified, created_at) VALUES (?, 'buyer', '123456', 1, NOW())", [cleanEmail]);
+                        count++;
+                    }
+                }
+            }
+            return NextResponse.json({ success: true, count });
+        } else if (action === 'send_bulk_email') {
+            const { recipients, subject, content } = body;
+            console.log(`[Bulk Email] Sending '${subject}' to ${recipients?.length || 0} recipients.`);
+            return NextResponse.json({ success: true, count: recipients?.length || 0 });
         }
 
         return NextResponse.json({ success: true });

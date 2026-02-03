@@ -122,7 +122,12 @@ export default function CatalogTab({
                         <div style={{ padding: '1rem' }}>
                             <h3 style={{ marginBottom: '0.2rem', color: '#fff', fontSize: '0.95rem' }}>{prod.name}</h3>
                             <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                {prod.categoryIcon} {prod.categoryName || 'Uncategorized'}
+                                {prod.categoryIcon && (prod.categoryIcon.startsWith('/') || prod.categoryIcon.startsWith('http')) ? (
+                                    <img src={prod.categoryIcon} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                ) : (
+                                    <span>{prod.categoryIcon || '📁'}</span>
+                                )}
+                                <span>{prod.categoryName || 'Uncategorized'}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '0.8rem', fontSize: '0.8rem' }}>
                                 <span>{prod.platform}</span>

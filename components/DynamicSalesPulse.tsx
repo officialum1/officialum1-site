@@ -41,11 +41,13 @@ export default function DynamicSalesPulse() {
             // 1. Priority: Show a Real Sale from the last 24h
             if (realSales.length > 0) {
                 const sale = realSales[Math.floor(Math.random() * realSales.length)];
+                const rawName = sale.customerName || sale.username || 'Customer';
+                const maskedName = rawName.length > 2 ? rawName.substring(0, 3) + '****' : rawName + '****';
 
                 selected = {
                     title: `✅ Verified Purchase`,
-                    message: `Someone from ${sale.location} just bought ${sale.product}`,
-                    time: sale.timeAgo,
+                    message: <span><b style={{ color: '#fff' }}>{maskedName}</b> just bought <b style={{ color: '#fff' }}>{sale.product}</b></span>,
+                    time: 'Just now',
                     type: 'real',
                     icon: '🛒'
                 };

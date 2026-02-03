@@ -324,6 +324,16 @@ function AdminDashboard() {
         return () => clearInterval(interval);
     }, [currentUser, permissions]);
 
+    // Force refresh categories when modal opens
+    useEffect(() => {
+        if (showAddCategory) {
+            fetch('/api/admin/categories')
+                .then(res => res.json())
+                .then(data => setCategories(Array.isArray(data) ? data : []))
+                .catch(err => console.error("Error fetching categories:", err));
+        }
+    }, [showAddCategory]);
+
     const handleTabChange = (tabId: string) => {
         setActiveTab(tabId);
         const params = new URLSearchParams(searchParams.toString());
@@ -396,7 +406,7 @@ function AdminDashboard() {
 
         try {
             switch (tab) {
-                case 'stock':
+                case 'finance':
                     if (inventory.length > 0) return;
                     const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
                     const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
@@ -454,7 +464,7 @@ function AdminDashboard() {
                     setRentals(await safeData(rentRes));
                     setCategories(await safeData(categRes));
                     break;
-                case 'kb_management':
+                case 'kb':
                     const kbRes = await fetch('/api/kb?admin=true');
                     setKbArticles(await safeData(kbRes));
                     break;
@@ -1955,22 +1965,28 @@ function AdminDashboard() {
             {
                 showAddCategory && (
                     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                        <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '750px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
                             <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
                             <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
 
-                            <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
-                                <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
-                                <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
-                                <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
+                            <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr auto', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
+                                <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center', height: '46px', borderRadius: '12px' }} />
+                                <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required style={{ height: '46px', borderRadius: '12px' }} />
+                                <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required style={{ height: '46px', borderRadius: '12px' }} />
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', height: '46px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Add</button>
                             </form>
 
                             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                 {categories.map((cat: any) => (
                                     <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
+                                            <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                {cat.icon && (cat.icon.startsWith('/') || cat.icon.startsWith('http')) ? (
+                                                    <img src={cat.icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                ) : (
+                                                    <span style={{ fontSize: '1.5rem' }}>{cat.icon || '📁'}</span>
+                                                )}
+                                            </div>
                                             <div>
                                                 <div style={{ fontWeight: '600' }}>{cat.name}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
