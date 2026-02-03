@@ -9,6 +9,7 @@ import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
 import ReviewsSection from '@/components/ReviewsSection';
 import RelatedProducts from '@/components/RelatedProducts';
+import BulkPricing from '@/components/BulkPricing';
 
 export default function SingleProductPage() {
     const params = useParams();
@@ -231,7 +232,9 @@ export default function SingleProductPage() {
                             )}
                         </div>
 
-                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        <BulkPricing basePrice={parseFloat(finalPrice)} platform={product.platform} />
+
+                        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
                             {totalStock > 0 ? (
                                 <>
                                     <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>

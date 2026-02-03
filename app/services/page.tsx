@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ServicesSection from "@/components/ServicesSection";
 import ROICalculator from "@/components/ROICalculator";
+import SuccessRoadmap from "@/components/SuccessRoadmap";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function ServicesPage() {
             <Navbar />
             <div style={{ paddingTop: '100px' }}>
                 <ServicesSection />
+                <SuccessRoadmap />
                 <ROICalculator />
             </div>
             <Footer />

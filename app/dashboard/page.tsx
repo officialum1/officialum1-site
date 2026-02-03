@@ -143,6 +143,18 @@ export default function ClientDashboard() {
                             </div>
                         </div>
 
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0, 195, 255, 0.2)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                <h4 style={{ fontSize: '1.1rem' }}>🛡️ Trust Score</h4>
+                                <span style={{ fontSize: '0.8rem', color: '#888' }}>Level 1</span>
+                            </div>
+                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', marginBottom: '1.5rem' }}>
+                                <div style={{ width: '30%', height: '100%', background: '#00c3ff' }}></div>
+                            </div>
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>Verify your identity to increase limits and unlock "Pro" account features.</p>
+                            <a href="/dashboard/verification" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,195,255,0.1)', color: '#00c3ff', border: '1px solid #00c3ff' }}>Verify Identity</a>
+                        </div>
+
                         <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(0,255,136,0.05), transparent)' }}>
                             <h4 style={{ marginBottom: '1rem' }}>Need Assistance?</h4>
                             <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>Our team is available 24/7 for project updates and support.</p>

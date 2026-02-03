@@ -8,7 +8,9 @@ import ScrollProgress from "@/components/ScrollProgress";
 import DynamicSalesPulse from '@/components/DynamicSalesPulse';
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { CompareProvider } from "./context/CompareContext";
 import CartSidebar from "@/components/CartSidebar";
+import CompareFloatingBar from "@/components/CompareFloatingBar";
 import GlobalAnnouncement from "@/components/GlobalAnnouncement";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
 import { Toaster } from "sonner";
@@ -133,13 +135,16 @@ export default function RootLayout({
         </Script>
         <CartProvider>
           <WishlistProvider>
-            <GlobalAnnouncement />
-            <CartSidebar />
-            <CookieBanner />
-            <LoyaltyBanner />
-            <ScrollProgress />
-            <DynamicSalesPulse />
-            {children}
+            <CompareProvider>
+              <GlobalAnnouncement />
+              <CartSidebar />
+              <CompareFloatingBar />
+              <CookieBanner />
+              <LoyaltyBanner />
+              <ScrollProgress />
+              <DynamicSalesPulse />
+              {children}
+            </CompareProvider>
           </WishlistProvider>
         </CartProvider>
       </body>

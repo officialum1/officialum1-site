@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
 import { useWishlist } from '@/app/context/WishlistContext';
+import { useCompare } from '@/app/context/CompareContext';
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
@@ -23,6 +24,7 @@ export default function ShopPage() {
 
     const { addToCart } = useCart();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const { addToCompare, isInCompare } = useCompare();
 
     useEffect(() => {
         fetch('/api/products')
@@ -171,6 +173,18 @@ export default function ShopPage() {
                                             title={isInWishlist(item.id) ? "Remove from Wishlist" : "Add to Wishlist"}
                                         >
                                             {isInWishlist(item.id) ? '❤️' : '🤍'}
+                                        </button>
+
+                                        {/* Compare Button Overlay */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                addToCompare(item);
+                                            }}
+                                            style={{ position: 'absolute', top: '15px', right: '105px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInCompare(item.id) ? 'var(--accent)' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
+                                            title={isInCompare(item.id) ? "Remove from Compare" : "Add to Compare"}
+                                        >
+                                            {isInCompare(item.id) ? '⚖️' : '⚖️'}
                                         </button>
 
                                         <Link href={`/shop/${item.id}`} style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>
