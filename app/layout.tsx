@@ -73,17 +73,36 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebSite",
+        "@id": "https://officialum1.com/#website",
+        "url": "https://officialum1.com",
+        "name": "OfficialUM1",
+        "description": "Premier Digital Agency for SEO, Web Development, and Social Growth.",
+        "publisher": { "@id": "https://officialum1.com/#organization" },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://officialum1.com/shop?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
         "@type": "Organization",
         "@id": "https://officialum1.com/#organization",
         "name": "OfficialUM1",
         "url": "https://officialum1.com",
-        "logo": "https://officialum1.com/logo.jpg",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://officialum1.com/logo.jpg",
+          "width": 512,
+          "height": 512
+        },
         "email": "hello@officialum1.com",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Sahiwal",
           "addressRegion": "Punjab",
-          "addressCountry": "PK"
+          "addressCountry": "PK",
+          "postalCode": "57000"
         },
         "contactPoint": {
           "@type": "ContactPoint",
@@ -96,6 +115,7 @@ export default function RootLayout({
           "https://facebook.com/officialum1",
           "https://instagram.com/officialum1",
           "https://linkedin.com/company/officialum1",
+          "https://twitter.com/officialum1",
           "https://www.trustpilot.com/review/officialum1.com",
           "https://www.crunchbase.com/organization/officialum1"
         ],
@@ -105,7 +125,8 @@ export default function RootLayout({
           "Guest Posting",
           "Backlink Building",
           "Social Media Marketing",
-          "Digital Strategy"
+          "Digital Strategy",
+          "E-commerce Growth"
         ]
       }
     ]

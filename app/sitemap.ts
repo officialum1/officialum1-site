@@ -1,9 +1,11 @@
 import { MetadataRoute } from 'next';
+import { query } from '@/lib/db';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://officialum1.com';
 
-    return [
+    // Static Pages
+    const routes: MetadataRoute.Sitemap = [
         { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1, },
         { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8, },
         { url: `${baseUrl}/shop`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9, },
@@ -14,4 +16,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${baseUrl}/refer`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6, },
         { url: `${baseUrl}/tools/password-generator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7, },
     ];
+
+    try {
+        // Fetch Products
+        const products = await query("SELECT id, created_at FROM products") as any[];
+        const productUrls = products.map((product) => ({
+            url: `${baseUrl}/shop/${product.id}`,
+            lastModified: new Date(product.created_at || new Date()),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        }));
+
+        return [...routes, ...productUrls];
+    } catch (error) {
+        console.error("Sitemap Generation Error:", error);
+        return routes;
+    }
 }
