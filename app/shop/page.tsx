@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
+import { useWishlist } from '@/app/context/WishlistContext';
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
@@ -21,6 +22,7 @@ export default function ShopPage() {
     const [notifyProduct, setNotifyProduct] = useState<any>(null);
 
     const { addToCart } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     useEffect(() => {
         fetch('/api/products')
@@ -153,6 +155,22 @@ export default function ShopPage() {
                                             title="Copy Product Link"
                                         >
                                             {shareId === item.id ? '✓' : '🔗'}
+                                        </button>
+
+                                        {/* Wishlist Button Overlay */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                if (isInWishlist(item.id)) {
+                                                    removeFromWishlist(item.id);
+                                                } else {
+                                                    addToWishlist(item);
+                                                }
+                                            }}
+                                            style={{ position: 'absolute', top: '15px', right: '60px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInWishlist(item.id) ? '#ff4d4d' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
+                                            title={isInWishlist(item.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                                        >
+                                            {isInWishlist(item.id) ? '❤️' : '🤍'}
                                         </button>
 
                                         <Link href={`/shop/${item.id}`} style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>

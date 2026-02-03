@@ -7,9 +7,11 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import ScrollProgress from "@/components/ScrollProgress";
 import DynamicSalesPulse from '@/components/DynamicSalesPulse';
 import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import CartSidebar from "@/components/CartSidebar";
 import GlobalAnnouncement from "@/components/GlobalAnnouncement";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,10 +25,22 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://officialum1.com'),
-  title: "OfficialUM1 | Digital Excellence",
-  description: "Translating digital aspirations into tangible results. Web Development, SEO, and Social Media Marketing experts.",
+  title: {
+    default: "OfficialUM1 | Premier Digital Agency",
+    template: "%s | OfficialUM1"
+  },
+  description: "Translating digital aspirations into tangible results. Experts in Web Development, SEO Optimization, and Social Media Growth.",
   openGraph: {
-    images: ['/logo.jpg'],
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://officialum1.com',
+    siteName: 'OfficialUM1',
+    images: [{
+      url: '/logo.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'OfficialUM1 Digital Excellence'
+    }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -35,13 +49,16 @@ export const metadata: Metadata = {
     images: ['/logo.jpg'],
     creator: '@officialum1',
   },
-  verification: {
-    google: 'google-site-verification-code-here', // Replace with real code
-    yandex: 'yandex-verification-code',
-  },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   }
 };
 
@@ -86,39 +103,6 @@ export default function RootLayout({
           "Social Media Marketing",
           "Digital Strategy"
         ]
-      },
-      {
-        "@type": "LocalBusiness",
-        "parentOrganization": { "@id": "https://officialum1.com/#organization" },
-        "name": "OfficialUM1",
-        "image": "https://officialum1.com/logo.jpg",
-        "telephone": "+92-323-7102924",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Sahiwal",
-          "addressRegion": "Punjab",
-          "addressCountry": "PK"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 30.6682,
-          "longitude": 73.1114
-        },
-        "hasMap": "https://maps.app.goo.gl/vq49Dk3RSGwaizaBF",
-        "priceRange": "$$",
-        "openingHoursSpecification": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-          ],
-          "opens": "09:00",
-          "closes": "23:00"
-        }
       }
     ]
   };
@@ -126,12 +110,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable}`}>
+        <Toaster position="top-right" expand={false} richColors />
         <Script
           id="json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {/* Google Analytics */}
         <Script
           strategy="afterInteractive"
           src={`https://www.googletagmanager.com/gtag/js?id=G-G5WV453K9J`}
@@ -148,14 +132,15 @@ export default function RootLayout({
           `}
         </Script>
         <CartProvider>
-          <GlobalAnnouncement />
-          <CartSidebar />
-          <CookieBanner />
-          <LoyaltyBanner />
-          <ScrollProgress />
-          <DynamicSalesPulse />
-          {/* <WhatsAppButton /> */}
-          {children}
+          <WishlistProvider>
+            <GlobalAnnouncement />
+            <CartSidebar />
+            <CookieBanner />
+            <LoyaltyBanner />
+            <ScrollProgress />
+            <DynamicSalesPulse />
+            {children}
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

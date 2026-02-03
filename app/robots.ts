@@ -5,9 +5,8 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/admin/', '/api/admin/'],
+            disallow: ['/admin/', '/dashboard/', '/api/'],
         },
         sitemap: 'https://officialum1.com/sitemap.xml',
-        host: 'https://officialum1.com',
     };
 }

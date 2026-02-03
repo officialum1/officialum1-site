@@ -4,10 +4,10 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 // Define the cart item structure
 export interface CartItem {
-    uniqueId: string; // generated to distinguish same product added multiple times if needed, or just standard ID
+    uniqueId: string;
     id: number;
     name: string;
-    price: string; // Keep as string to match product.price usually
+    price: string;
     image: string;
     platform: string;
     stock: number;
@@ -23,6 +23,7 @@ interface CartContextType {
     cartCount: number;
     isCartOpen: boolean;
     toggleCart: () => void;
+    updateEmail: (email: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -30,21 +31,42 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [sessionId, setSessionId] = useState<string>('');
 
-    // Load from local storage
+    // 1. Init Session & Load Cart
     useEffect(() => {
+        let storedId = localStorage.getItem('officialum1_cart_id');
+        if (!storedId) {
+            storedId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('officialum1_cart_id', storedId);
+        }
+        setSessionId(storedId);
+
         const savedCart = localStorage.getItem('officialum1_cart');
         if (savedCart) {
-            try {
-                setCart(JSON.parse(savedCart));
-            } catch (e) { console.error("Failed to parse cart", e); }
+            try { setCart(JSON.parse(savedCart)); } catch (e) { }
         }
     }, []);
 
-    // Save to local storage
+    // 2. Sync to Server (Debounced)
     useEffect(() => {
+        if (!sessionId) return;
         localStorage.setItem('officialum1_cart', JSON.stringify(cart));
-    }, [cart]);
+
+        const syncTimeout = setTimeout(() => {
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cartId: sessionId,
+                    items: cart.map(i => ({ id: i.id, quantity: 1 })),
+                    email: localStorage.getItem('officialum1_guest_email')
+                })
+            }).catch(e => console.error("Cart Sync Error:", e));
+        }, 2000);
+
+        return () => clearTimeout(syncTimeout);
+    }, [cart, sessionId]);
 
     const addToCart = (product: any) => {
         const newItem: CartItem = {
@@ -72,11 +94,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const toggleCart = () => setIsCartOpen(!isCartOpen);
 
+    const updateEmail = (email: string) => {
+        localStorage.setItem('officialum1_guest_email', email);
+        if (sessionId) {
+            fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cartId: sessionId, items: cart.map(i => ({ id: i.id, quantity: 1 })), email })
+            });
+        }
+    };
+
     const cartTotal = cart.reduce((acc, item) => acc + parseFloat(item.price), 0);
     const cartCount = cart.length;
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, cartTotal, cartCount, isCartOpen, toggleCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, cartTotal, cartCount, isCartOpen, toggleCart, updateEmail }}>
             {children}
         </CartContext.Provider>
     );

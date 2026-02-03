@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
+import { useWishlist } from "@/app/context/WishlistContext";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -12,10 +13,8 @@ export default function Navbar() {
     const [showNotifications, setShowNotifications] = useState(false);
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
-    // Safety check for Cart Context (in case it's used outside provider during builds/tests)
-    let cartContext;
-    try { cartContext = useCart(); } catch (e) { }
-    const { toggleCart, cartCount } = cartContext || { toggleCart: () => { }, cartCount: 0 };
+    const { toggleCart, cartCount } = useCart() as any;
+    const { wishlist } = useWishlist();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -24,9 +23,11 @@ export default function Navbar() {
         // Check Auth
         const stored = localStorage.getItem('buyer_user');
         if (stored) {
-            const u = JSON.parse(stored);
-            setUser(u);
-            fetchNotifications(u.id);
+            try {
+                const u = JSON.parse(stored);
+                setUser(u);
+                fetchNotifications(u.id);
+            } catch (e) { }
         }
 
         return () => window.removeEventListener("scroll", handleScroll);
@@ -70,8 +71,8 @@ export default function Navbar() {
 
     return (
         <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-            <div className="container navbar-content" style={{ position: 'relative' }}>
-                <Link href="/" className="logo text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 1001 }}>
+            <div className="container navbar-content">
+                <Link href="/" className="logo text-gradient">
                     <img src="/logo.jpg" alt="OfficialUM1 Logo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
                     OfficialUM1
                 </Link>
@@ -87,26 +88,15 @@ export default function Navbar() {
                     <span className={`bar ${isOpen ? 'open' : ''}`}></span>
                 </button>
 
-                {/* Global Search Bar (Desktop) */}
-                <div className="hidden md:block" style={{ flex: 1, maxWidth: '300px', margin: '0 2rem' }}>
-                    <div style={{ position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            onKeyDown={handleSearch}
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                padding: '8px 12px 8px 35px',
-                                borderRadius: '20px',
-                                color: 'white',
-                                fontSize: '0.9rem',
-                                outline: 'none'
-                            }}
-                        />
-                    </div>
+                {/* Search Bar (Desktop) */}
+                <div className="nav-search-wrapper">
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        onKeyDown={handleSearch}
+                        className="nav-search-input"
+                    />
+                    <span className="search-icon">🔍</span>
                 </div>
 
                 {/* Navigation Links & Auth */}
@@ -119,52 +109,34 @@ export default function Navbar() {
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Blog</Link></li>
                         <li><Link href="/about" className="nav-link" onClick={() => setIsOpen(false)}>About</Link></li>
                         <li><Link href="/refer" className="nav-link" style={{ color: '#ffd700' }} onClick={() => setIsOpen(false)}>💸 Earn</Link></li>
-                        {/* Admin/HR Links - Restricted */}
-                        {user && (user.role === 'admin' || user.role === 'seller') ? (
-                            <>
-                                <li><Link href="/admin/inventory" className="nav-link" style={{ color: '#00ccff' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
-                            </>
-                        ) : null}
+                        {user && (user.role === 'admin' || user.role === 'seller') && (
+                            <li><Link href="/admin/inventory" className="nav-link" style={{ color: '#00ccff' }} onClick={() => setIsOpen(false)}>Admin</Link></li>
+                        )}
                     </ul>
 
-                    <div className="auth-buttons" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        {/* Notification Bell */}
+                    <div className="auth-buttons">
+                        {/* Notifications */}
                         {user && (
-                            <div style={{ position: 'relative' }}>
+                            <div className="nav-icon-wrapper">
                                 <button
                                     onClick={() => { setShowNotifications(!showNotifications); if (!showNotifications) markAllRead(); }}
-                                    style={{ background: 'none', border: 'none', fontSize: '1.4rem', cursor: 'pointer' }}
+                                    className="nav-icon-btn"
                                 >
                                     🔔
-                                    {unreadCount > 0 && (
-                                        <span style={{ position: 'absolute', top: '0', right: '0', background: '#00ff88', color: '#000', fontSize: '0.6rem', fontWeight: 'bold', width: '15px', height: '15px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            {unreadCount}
-                                        </span>
-                                    )}
+                                    {unreadCount > 0 && <span className="nav-badge">{unreadCount}</span>}
                                 </button>
-
-                                {/* Dropdown */}
                                 {showNotifications && (
-                                    <div className="glass" style={{
-                                        position: 'absolute', top: '40px', right: '0', width: '280px', maxHeight: '400px',
-                                        overflowY: 'auto', borderRadius: '12px', zIndex: 1002, padding: '10px',
-                                        border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(10, 10, 10, 0.95)',
-                                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                                    }}>
-                                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '10px', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
+                                    <div className="nav-dropdown glass">
+                                        <div className="dropdown-header">
                                             <span>Notifications</span>
-                                            <span style={{ color: '#00ff88', cursor: 'pointer' }} onClick={() => setShowNotifications(false)}>Close</span>
+                                            <span className="close-btn" onClick={() => setShowNotifications(false)}>Close</span>
                                         </div>
-                                        {notifications.length === 0 && <div style={{ textAlign: 'center', color: '#555', padding: '20px 0', fontSize: '0.85rem' }}>No notifications yet.</div>}
+                                        {notifications.length === 0 && <div className="no-data">No notifications yet.</div>}
                                         {notifications.map(n => (
-                                            <div key={n.id} style={{
-                                                padding: '10px', borderRadius: '8px', marginBottom: '5px',
-                                                background: n.is_read ? 'transparent' : 'rgba(0,255,136,0.05)',
-                                                border: '1px solid rgba(255,255,255,0.02)'
-                                            }}>
-                                                <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: n.is_read ? '#ccc' : '#fff' }}>{n.title}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>{n.message}</div>
-                                                <div style={{ fontSize: '0.6rem', color: '#444', marginTop: '5px' }}>{new Date(n.created_at).toLocaleString()}</div>
+                                            <div key={n.id} className={`notification-item ${n.is_read ? 'read' : 'unread'}`}>
+                                                <div className="nt-title">{n.title}</div>
+                                                <div className="nt-msg">{n.message}</div>
+                                                <div className="nt-date">{new Date(n.created_at).toLocaleString()}</div>
                                             </div>
                                         ))}
                                     </div>
@@ -172,32 +144,32 @@ export default function Navbar() {
                             </div>
                         )}
 
+                        {/* Wishlist Link */}
+                        <Link href="/wishlist" className="nav-icon-wrapper" style={{ textDecoration: 'none', fontSize: '1.4rem' }}>
+                            ❤️
+                            {wishlist.length > 0 && <span className="nav-badge badge-red">{wishlist.length}</span>}
+                        </Link>
+
                         {/* Cart Button */}
-                        <button onClick={toggleCart} style={{ position: 'relative', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', marginRight: '0.5rem' }}>
+                        <button onClick={toggleCart} className="nav-icon-wrapper nav-icon-btn" style={{ fontSize: '1.5rem' }}>
                             🛒
-                            {cartCount > 0 && (
-                                <span style={{ position: 'absolute', top: '-5px', right: '-10px', background: '#ff4d4d', color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', padding: '2px 5px', borderRadius: '50%', minWidth: '18px', textAlign: 'center' }}>
-                                    {cartCount}
-                                </span>
-                            )}
+                            {cartCount > 0 && <span className="nav-badge badge-green">{cartCount}</span>}
                         </button>
 
                         {user ? (
                             <div className="user-menu">
-                                <Link href="/dashboard" className="nav-link" onClick={() => setIsOpen(false)} style={{ color: '#00ff88', fontWeight: 'bold' }}>Dashboard</Link>
-                                <Link href="/my-orders" className="nav-link" onClick={() => setIsOpen(false)}>Orders</Link>
-                                <Link href="/support" className="nav-link" onClick={() => setIsOpen(false)}>Support</Link>
+                                <Link href="/dashboard" className="nav-link highlight" onClick={() => setIsOpen(false)}>Dashboard</Link>
                                 <button onClick={handleLogout} className="logout-btn">Logout</button>
                             </div>
                         ) : (
                             <div className="guest-menu">
                                 <Link href="/login" className="nav-link" onClick={() => setIsOpen(false)}>Login</Link>
-                                <Link href="/register" className="btn btn-primary" onClick={() => setIsOpen(false)}>Sign Up</Link>
+                                <Link href="/register" className="btn-signup" onClick={() => setIsOpen(false)}>Sign Up</Link>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-        </nav >
+        </nav>
     );
 }
