@@ -101,6 +101,8 @@ export default function Navbar() {
                     <ul className="nav-links">
                         <li><Link href="/services" className="nav-link" onClick={() => setIsOpen(false)}>Services</Link></li>
                         <li><Link href="/shop" className="nav-link highlight" onClick={() => setIsOpen(false)}>Shop</Link></li>
+                        <li><Link href="/my-orders" className="nav-link" onClick={() => setIsOpen(false)}>Track Order</Link></li>
+                        <li><Link href="/shop?filter=Netflix" className="nav-link" onClick={() => setIsOpen(false)}>Netflix</Link></li>
                         <li><Link href="/reviews" className="nav-link" onClick={() => setIsOpen(false)}>Reviews</Link></li>
                         <li><Link href="/store" className="nav-link" onClick={() => setIsOpen(false)}>Rentals</Link></li>
                         <li><Link href="/blog" className="nav-link" onClick={() => setIsOpen(false)}>Blog</Link></li>

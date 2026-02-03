@@ -8,6 +8,8 @@ import FreeAuditSection from "@/components/FreeAuditSection";
 import TechTicker from "@/components/TechTicker";
 import FAQSection from "@/components/FAQSection";
 import PricingSection from "@/components/PricingSection";
+import FeaturedProductsSection from "@/components/FeaturedProductsSection";
+import SalesFOMOPopup from "@/components/SalesFOMOPopup";
 
 export default function Home() {
   return (
@@ -30,11 +32,17 @@ export default function Home() {
             data-driven SEO strategies, and magnetic social ecosystems for global brands.
           </p>
           <div className="btn-group">
-            <a href="/contact" className="btn btn-primary">Start Your Project</a>
+            <a href="/shop" className="btn btn-primary">🛒 Browse Shop</a>
             <a href="/services" className="btn btn-outline">Explore Services</a>
           </div>
         </div>
       </section>
+
+      {/* FOMO Sales Popup */}
+      <SalesFOMOPopup />
+
+      {/* Featured Products - SHOW IMMEDIATELY to prove we are a shop */}
+      <FeaturedProductsSection />
 
       {/* Tech Stack Ticker */}
       <TechTicker />

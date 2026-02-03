@@ -184,6 +184,28 @@ export default function SingleProductPage() {
                             {product.description || "Premium quality social media account verified and ready for use. Instant delivery after purchase."}
                         </p>
 
+                        {/* PROOF & DETAILS TABS */}
+                        <div style={{ marginBottom: '2.5rem', marginTop: '1rem' }}>
+                            <div className="glass" style={{ padding: '0', borderRadius: '16px', overflow: 'hidden' }}>
+                                <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ flex: 1, padding: '1rem', textAlign: 'center', background: 'rgba(0,255,136,0.1)', color: '#00ff88', fontWeight: 'bold', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                                        ⚡ Instant Delivery
+                                    </div>
+                                    <div style={{ flex: 1, padding: '1rem', textAlign: 'center', color: '#ccc' }}>
+                                        🛡️ Warranty
+                                    </div>
+                                    <div style={{ flex: 1, padding: '1rem', textAlign: 'center', color: '#ccc' }}>
+                                        📝 Instructions
+                                    </div>
+                                </div>
+                                <div style={{ padding: '1.5rem', color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                                    <p>✅ <b>Automatic Delivery:</b> You will receive the account credentials via email within 30 seconds of payment.</p>
+                                    <p style={{ marginTop: '0.5rem' }}>✅ <b>Active Warranty:</b> This product comes with a <b>6-Month Replacement Warranty</b>. If it stops working, we replace it for free.</p>
+                                    <p style={{ marginTop: '0.5rem' }}>✅ <b>Support:</b> Needed help? Contact our 24/7 support via WhatsApp or Live Chat.</p>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Bundle Contents Display */}
                         {bundleContents.length > 0 && (
                             <div style={{ marginBottom: '2.5rem', background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,195,255,0.2)' }}>
