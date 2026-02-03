@@ -10,6 +10,10 @@ export default function MyOrders() {
     const [user, setUser] = useState<any>(null);
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [ticketIssue, setTicketIssue] = useState('Login Issue');
+    const [ticketDesc, setTicketDesc] = useState('');
 
     useEffect(() => {
         // Check Auth
@@ -32,11 +36,6 @@ export default function MyOrders() {
     }, [router]);
 
     if (!user) return null;
-
-    const [showTicketModal, setShowTicketModal] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState<any>(null);
-    const [ticketIssue, setTicketIssue] = useState('Login Issue');
-    const [ticketDesc, setTicketDesc] = useState('');
 
     const handleReportIssue = (order: any) => {
         setSelectedOrder(order);
