@@ -25,9 +25,8 @@ export async function POST(req: Request) {
         if (webhookSecret && sig) {
             event = stripe.webhooks.constructEvent(payload, sig, webhookSecret);
         } else {
-            // Fallback for when webhook secret is not set yet (UNSAFE but handles initial testing)
-            event = JSON.parse(payload);
-            console.warn("Unverified Stripe Webhook received!");
+            console.error("Missing Stripe Webhook Secret or Signature");
+            return NextResponse.json({ error: "Unauthorized: Missing Webhook Secret" }, { status: 401 });
         }
     } catch (err: any) {
         console.error(`Webhook Error: ${err.message}`);

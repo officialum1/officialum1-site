@@ -21,8 +21,7 @@ export async function POST(req: Request) {
 
         if (sign !== calculatedSign) {
             console.error("[Cryptomus] Invalid Signature", { received: sign, expected: calculatedSign });
-            // return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-            // For now, let's just log and proceed if it's a test
+            return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
         }
 
         const status = data.status;
