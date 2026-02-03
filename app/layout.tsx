@@ -95,7 +95,9 @@ export default function RootLayout({
         "sameAs": [
           "https://facebook.com/officialum1",
           "https://instagram.com/officialum1",
-          "https://linkedin.com/company/officialum1"
+          "https://linkedin.com/company/officialum1",
+          "https://www.trustpilot.com/review/officialum1.com",
+          "https://www.crunchbase.com/organization/officialum1"
         ],
         "knowsAbout": [
           "Search Engine Optimization (SEO)",

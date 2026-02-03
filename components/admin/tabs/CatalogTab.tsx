@@ -98,11 +98,11 @@ export default function CatalogTab({
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
                 {catalog.map((prod: any) => (
-                    <div key={prod.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', border: `1px solid ${selectedShopProducts.includes(prod.id) ? '#00ff88' : 'rgba(255,255,255,0.05)'}`, position: 'relative' }}>
+                    <div key={prod.id} className="glass" style={{ borderRadius: '12px', overflow: 'hidden', border: `1px solid ${selectedShopProducts.includes(prod.id) ? '#00ff88' : 'rgba(255,255,255,0.05)'}`, position: 'relative' }}>
                         {/* Bulk Select Checkbox */}
-                        <div style={{ position: 'absolute', top: '15px', left: '15px', zIndex: 10 }}>
+                        <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 10 }}>
                             <input
                                 type="checkbox"
                                 checked={selectedShopProducts.includes(prod.id)}
@@ -110,26 +110,26 @@ export default function CatalogTab({
                                     if (e.target.checked) setSelectedShopProducts([...selectedShopProducts, prod.id]);
                                     else setSelectedShopProducts(selectedShopProducts.filter(id => id !== prod.id));
                                 }}
-                                style={{ width: '20px', height: '20px', accentColor: '#00ff88', cursor: 'pointer' }}
+                                style={{ width: '16px', height: '16px', accentColor: '#00ff88', cursor: 'pointer' }}
                             />
                         </div>
 
-                        <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                            <div style={{ width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '2rem' }}>
+                        <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                            <div style={{ width: '60px', height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#222', borderRadius: '50%', fontSize: '1.5rem' }}>
                                 <img src={getPlatformIcon(prod.platform, prod.image)} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }} />
                             </div>
                         </div>
-                        <div style={{ padding: '1.5rem' }}>
-                            <h3 style={{ marginBottom: '0.2rem', color: '#fff' }}>{prod.name}</h3>
-                            <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ padding: '1rem' }}>
+                            <h3 style={{ marginBottom: '0.2rem', color: '#fff', fontSize: '0.95rem' }}>{prod.name}</h3>
+                            <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                 {prod.categoryIcon} {prod.categoryName || 'Uncategorized'}
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#ccc', marginBottom: '0.8rem', fontSize: '0.8rem' }}>
                                 <span>{prod.platform}</span>
                                 <div style={{ textAlign: 'right' }}>
                                     {(prod.categoryDiscount > 0 || prod.sale_price) ? (
                                         <>
-                                            <span style={{ textDecoration: 'line-through', color: '#666', fontSize: '0.8rem', marginRight: '0.5rem' }}>${prod.price}</span>
+                                            <span style={{ textDecoration: 'line-through', color: '#666', fontSize: '0.7rem', marginRight: '0.3rem' }}>${prod.price}</span>
                                             <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>
                                                 ${Math.min(
                                                     prod.sale_price || 999999,
@@ -142,7 +142,7 @@ export default function CatalogTab({
                                     )}
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.4rem' }}>
+                            <div style={{ display: 'flex', gap: '0.3rem' }}>
                                 <button
                                     onClick={() => {
                                         setEditingProduct(prod);
@@ -163,7 +163,7 @@ export default function CatalogTab({
                                         setImportMode('manual');
                                     }}
                                     className="btn btn-outline"
-                                    style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }}
+                                    style={{ flex: 1, fontSize: '0.7rem', padding: '0.3rem' }}
                                 >
                                     Edit
                                 </button>
@@ -173,14 +173,14 @@ export default function CatalogTab({
                                         alert('Link Copied!');
                                     }}
                                     className="btn btn-outline"
-                                    style={{ flex: 1, fontSize: '0.75rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)', padding: '0.5rem' }}
+                                    style={{ flex: 1, fontSize: '0.7rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)', padding: '0.3rem' }}
                                 >
                                     🔗 Link
                                 </button>
                                 <button
                                     onClick={() => handleDeleteProduct(prod.id)}
                                     className="btn btn-outline"
-                                    style={{ flex: 0.5, fontSize: '0.75rem', color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', padding: '0.5rem' }}
+                                    style={{ flex: 0.5, fontSize: '0.7rem', color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', padding: '0.3rem' }}
                                     title="Delete Product"
                                 >
                                     🗑️

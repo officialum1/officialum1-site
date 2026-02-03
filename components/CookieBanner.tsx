@@ -1,18 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function CookieBanner() {
-    const [accepted, setAccepted] = useState(true); // Default to true to avoid flashing if already accepted
+    const [accepted, setAccepted] = useState(true);
     const [show, setShow] = useState(false);
+    const pathname = usePathname();
 
     useEffect(() => {
+        // Don't show on admin pages
+        if (pathname?.startsWith('/admin')) {
+            return;
+        }
+
         const consent = localStorage.getItem("cookie_consent");
         if (!consent) {
             setAccepted(false);
             setShow(true);
         }
-    }, []);
+    }, [pathname]);
 
     const acceptCookies = () => {
         localStorage.setItem("cookie_consent", "true");
