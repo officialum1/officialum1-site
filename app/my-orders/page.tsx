@@ -103,8 +103,14 @@ export default function MyOrders() {
                                                 #{order.orderId.substring(6)}
                                             </td>
                                             <td style={{ padding: '1rem', fontWeight: 'bold' }}>
-                                                {/* In a real app, join with products table to get Name */}
-                                                Product #{order.productId} {order.quantity > 1 ? `(x${order.quantity})` : ''}
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                    {order.productImage && <img src={order.productImage} alt="" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain' }} />}
+                                                    <div>
+                                                        <div>{order.productName || `Product #${order.productId}`}</div>
+                                                        {order.productPlatform && <div style={{ fontSize: '0.7rem', color: '#666' }}>{order.productPlatform}</div>}
+                                                    </div>
+                                                </div>
+                                                {order.quantity > 1 ? `(x${order.quantity})` : ''}
                                             </td>
                                             <td style={{ padding: '1rem', color: '#ccc' }}>
                                                 {new Date(order.date).toLocaleDateString()}

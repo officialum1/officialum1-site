@@ -59,7 +59,27 @@ export async function POST(req: Request) {
             }
             amountToCharge = (unitPrice * q).toFixed(2);
         } else {
-            amountToCharge = cartItems.reduce((acc: number, item: any) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0).toFixed(2);
+            // SECURITY: Never trust client-side prices. Re-fetch from DB.
+            let verifiedTotal = 0;
+            const itemIds = cartItems.map((item: any) => item.id);
+            if (itemIds.length === 0) throw new Error("Cart is empty");
+
+            const placeholders = itemIds.map(() => '?').join(',');
+            const dbProducts = await query(`SELECT id, price, sale_price, sale_ends_at FROM products WHERE id IN (${placeholders})`, itemIds) as any[];
+
+            for (const item of cartItems) {
+                const dbProd = dbProducts.find(p => p.id === item.id);
+                if (!dbProd) throw new Error(`Product ${item.name} no longer available.`);
+
+                let currentPrice = parseFloat(dbProd.price);
+                if (dbProd.sale_price && dbProd.sale_ends_at && new Date(dbProd.sale_ends_at) > new Date()) {
+                    currentPrice = parseFloat(dbProd.sale_price);
+                }
+
+                verifiedTotal += currentPrice * (item.quantity || 1);
+            }
+
+            amountToCharge = verifiedTotal.toFixed(2);
             product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple" };
         }
 

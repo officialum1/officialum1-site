@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET() {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const coupons = await query("SELECT * FROM coupons ORDER BY created_at DESC");
         return NextResponse.json(coupons);
@@ -11,6 +13,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { action, id, code, type, value, min_amount, expiry, status } = body;

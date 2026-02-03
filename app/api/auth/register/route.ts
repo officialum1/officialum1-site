@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendAuditReport } from '@/lib/email';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
     try {
@@ -30,9 +31,11 @@ export async function POST(req: Request) {
         }
 
         // 4. Create User (Including Verification Token and is_verified=False)
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         await query(
             "INSERT INTO users (id, email, password, telegram, role, referral_code, referred_by, verification_token, is_verified) VALUES (?, ?, ?, ?, 'buyer', ?, ?, ?, FALSE)",
-            [userId, email, password, telegram || '', newRefCode, referrerId, verificationToken]
+            [userId, email, hashedPassword, telegram || '', newRefCode, referrerId, verificationToken]
         );
 
         // 5. Send Verification Email

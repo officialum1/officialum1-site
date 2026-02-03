@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendAuditReport } from '@/lib/email';
 import { sendTelegramMessage } from '@/lib/telegram';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET() {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         // Fetch Orders + Product Names
         const orders = await query(`
@@ -20,6 +22,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
 

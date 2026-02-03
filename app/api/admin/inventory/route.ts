@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
 import { syncG2GStock } from '@/lib/g2g';
 import { ApiResponse } from '@/lib/api-response';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(request: Request) {
+    if (!await isAuthenticated()) return ApiResponse.unauthorized();
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const role = searchParams.get('role');
@@ -76,6 +79,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    if (!await isAuthenticated()) return ApiResponse.unauthorized();
+
     try {
         const body = await request.json();
         const action = body.action;

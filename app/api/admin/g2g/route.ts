@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { makeG2GRequest } from '@/lib/g2g';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(request: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
     const orderId = searchParams.get('orderId');
@@ -96,6 +98,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await request.json();
         const { action, orderId, delivery_details } = body;
