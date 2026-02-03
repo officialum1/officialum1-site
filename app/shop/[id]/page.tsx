@@ -16,8 +16,9 @@ async function getProduct(id: string) {
     }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-    const product = await getProduct(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const product = await getProduct(id);
     if (!product) {
         return {
             title: 'Product Not Found | OfficialUM1',
@@ -40,8 +41,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     };
 }
 
-export default async function SingleProductPage({ params }: { params: { id: string } }) {
-    const product = await getProduct(params.id);
+export default async function SingleProductPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const product = await getProduct(id);
 
     if (!product) {
         return (
