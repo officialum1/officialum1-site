@@ -19,17 +19,19 @@ export async function GET(request: Request) {
     const codeQuery = searchParams.get('code');
     const codes = await getCodes();
 
-    // 1. Validate a single code (Public/Checkout use)
     if (codeQuery) {
         const promo = codes.find((c: any) => c.code.toLowerCase() === codeQuery.toLowerCase());
         if (promo) {
+            // Check Expiration
+            if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
+                return NextResponse.json({ success: false, error: 'Promo Code Expired' });
+            }
             return NextResponse.json({ success: true, discount: promo.discount });
         } else {
             return NextResponse.json({ success: false, error: 'Invalid Code' });
         }
     }
 
-    // 2. Return all codes (Admin use)
     return NextResponse.json(codes);
 }
 
@@ -46,7 +48,9 @@ export async function POST(request: Request) {
         const newCode = {
             id: Date.now(),
             code: body.code.toUpperCase(),
-            discount: parseInt(body.discount) // Percentage (e.g. 20 for 20%)
+            discount: parseInt(body.discount),
+            expiresAt: body.expiresAt || null,
+            createdAt: new Date()
         };
 
         codes.push(newCode);

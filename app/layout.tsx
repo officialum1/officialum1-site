@@ -11,7 +11,6 @@ import { WishlistProvider } from "./context/WishlistContext";
 import { CompareProvider } from "./context/CompareContext";
 import CartSidebar from "@/components/CartSidebar";
 import CompareFloatingBar from "@/components/CompareFloatingBar";
-import GlobalAnnouncement from "@/components/GlobalAnnouncement";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
 import { Toaster } from "sonner";
 
@@ -159,7 +158,6 @@ export default function RootLayout({
         <CartProvider>
           <WishlistProvider>
             <CompareProvider>
-              <GlobalAnnouncement />
               <CartSidebar />
               <CompareFloatingBar />
               <CookieBanner />

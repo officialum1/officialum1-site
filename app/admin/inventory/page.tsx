@@ -187,7 +187,7 @@ function AdminDashboard() {
     const [serviceForm, setServiceForm] = useState({ title: '', desc: '', icon: '' });
     const [projectForm, setProjectForm] = useState({ title: '', category: '', description: '', image: '' });
     const [rentalForm, setRentalForm] = useState({ domain: '', niche: '', price: '', traffic: '', status: 'Available', image: '' });
-    const [promoForm, setPromoForm] = useState({ code: '', discount: '' });
+    const [promoForm, setPromoForm] = useState({ code: '', discount: '', expiresAt: '' });
     const [reviewForm, setReviewForm] = useState({ name: '', role: '', review: '', rating: 5 });
     const [bundleForm, setBundleForm] = useState({ name: '', price: '', items: [] as number[], image: '', platform: 'Netflix' });
 
@@ -466,15 +466,16 @@ function AdminDashboard() {
                     const usersRes = await fetch('/api/admin/users');
                     setUsers(await safeData(usersRes));
                     break;
+                case 'promos':
                 case 'marketing':
                     const [postsRes, msgRes, promoRes] = await Promise.all([
                         fetch('/api/social'),
                         fetch('/api/messages'),
                         fetch('/api/promocodes')
                     ]);
-                    setPosts(await postsRes.json());
-                    setMessages(await msgRes.json());
-                    setPromoCodes(await promoRes.json());
+                    setPosts(await safeData(postsRes));
+                    setMessages(await safeData(msgRes));
+                    setPromoCodes(await safeData(promoRes));
                     break;
             }
         } catch (error) {
@@ -1212,7 +1213,11 @@ function AdminDashboard() {
         e.preventDefault();
         try {
             const res = await fetch('/api/promocodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(promoForm) });
-            if (res.ok) { setPromoForm({ code: '', discount: '' }); fetchData(); alert('Promo Created'); }
+            if (res.ok) {
+                setPromoForm({ code: '', discount: '', expiresAt: '' });
+                fetchTabContent('marketing'); // Refresh the tab
+                alert('Promo Created');
+            }
         } catch { }
     };
     const handleDeletePromo = async (id: any) => {

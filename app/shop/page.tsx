@@ -104,10 +104,7 @@ export default function ShopPage() {
                 </motion.div>
 
                 {/* PREMIUM PROMO BANNER */}
-                <motion.div
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
+                <div
                     className="glass"
                     style={{
                         background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 195, 255, 0.1))',
@@ -132,7 +129,7 @@ export default function ShopPage() {
                     <Link href="/bundles" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem', boxShadow: '0 0 20px rgba(0, 255, 136, 0.4)' }}>
                         Start Saving Now
                     </Link>
-                </motion.div>
+                </div>
 
                 {/* Search & Sort Bar */}
                 <motion.div
