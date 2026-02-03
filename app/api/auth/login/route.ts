@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
     try {
@@ -9,13 +10,22 @@ export async function POST(req: Request) {
 
         if (results.length > 0) {
             const user = results[0];
-            // Allow login for admin, seller, or anyone if we want them to have a dashboard
+            const cookieStore = await cookies();
+
+            // Set HttpOnly Cookie for session persistence
+            cookieStore.set('admin_token', 'authenticated_session_v1', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/',
+                maxAge: 60 * 60 * 24 * 7 // 1 week
+            });
+
             return NextResponse.json({
                 success: true,
                 user: {
                     id: user.id,
                     email: user.email,
-                    telegram: user.telegram,
                     role: user.role,
                     permissions: user.permissions
                 }

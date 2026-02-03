@@ -29,6 +29,26 @@ export async function getConnection() {
     return await pool.getConnection();
 }
 
+/**
+ * Executes a callback within a database transaction.
+ * @param callback A function that receives an object with a 'query' function to use within the transaction.
+ */
+export async function withTransaction<T>(callback: (connection: mysql.PoolConnection) => Promise<T>): Promise<T> {
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+    try {
+        const result = await callback(connection);
+        await connection.commit();
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        console.error('Transaction Rollback Error:', error);
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
 
 // 1. Initialize Tables (Run this once or check on startup)
 export async function initDB() {
@@ -173,7 +193,7 @@ export async function initDB() {
 
     // --- NEW ADMIN TABLES ---
 
-    // 1. Inventory
+    // 1. Inventory (Optimized for Search)
     await query(`
         CREATE TABLE IF NOT EXISTS inventory (
             id VARCHAR(50) PRIMARY KEY,
@@ -182,9 +202,23 @@ export async function initDB() {
             purchasePrice DECIMAL(10,2),
             status VARCHAR(50) DEFAULT 'In Stock',
             purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            accountDetails LONGTEXT
+            accountDetails LONGTEXT,
+            account_email VARCHAR(255),
+            account_username VARCHAR(255),
+            account_password VARCHAR(255),
+            account_region VARCHAR(50),
+            account_level VARCHAR(50),
+            account_meta JSON -- For any extra field-specific data
         )
     `);
+
+    // Migration: Add searchable columns if missing
+    try { await query("ALTER TABLE inventory ADD COLUMN account_email VARCHAR(255)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN account_username VARCHAR(255)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN account_password VARCHAR(255)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN account_region VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN account_level VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN account_meta JSON"); } catch (e) { }
 
     // 2. Transactions (Balance History)
     await query(`
@@ -451,4 +485,10 @@ export async function initDB() {
     try { await query("CREATE INDEX idx_users_email ON users(email)"); } catch (e) { }
     try { await query("CREATE INDEX idx_users_role ON users(role)"); } catch (e) { }
     try { await query("CREATE INDEX idx_users_referral_code ON users(referral_code)"); } catch (e) { }
+
+    // Inventory indexes for fast search
+    try { await query("CREATE INDEX idx_inventory_email ON inventory(account_email)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_inventory_username ON inventory(account_username)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_inventory_platform ON inventory(platform)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_inventory_status ON inventory(status)"); } catch (e) { }
 }

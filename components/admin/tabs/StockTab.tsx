@@ -14,6 +14,8 @@ interface StockTabProps {
     setBulkData: (data: string) => void;
     handleAddInventory: (e?: any) => Promise<void>;
     handleBulkImport: (e?: any) => Promise<void>;
+    searchQuery: string;
+    setSearchQuery: (q: string) => void;
 }
 
 export default function StockTab({
@@ -29,8 +31,20 @@ export default function StockTab({
     bulkData,
     setBulkData,
     handleAddInventory,
-    handleBulkImport
+    handleBulkImport,
+    searchQuery,
+    setSearchQuery
 }: StockTabProps) {
+    const filteredInventory = inventory.filter(i => {
+        const q = searchQuery.toLowerCase();
+        return (
+            i.name?.toLowerCase().includes(q) ||
+            i.account_email?.toLowerCase().includes(q) ||
+            i.account_username?.toLowerCase().includes(q) ||
+            i.platform?.toLowerCase().includes(q)
+        );
+    });
+
     return (
         <div className="FadeIn">
             <div style={{ marginBottom: '2rem' }}>
@@ -45,6 +59,21 @@ export default function StockTab({
                     </div>
                 </div>
 
+                {/* SEARCH BAR */}
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                        <input
+                            type="text"
+                            placeholder="Search by Email, Username, or Product Name..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input-field"
+                            style={{ width: '100%', paddingLeft: '2.5rem' }}
+                        />
+                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+                    </div>
+                </div>
+
                 {/* STOCK VIEW TOGGLE */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
                     <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
@@ -56,8 +85,8 @@ export default function StockTab({
                 {/* Stock Display */}
                 {viewMode === 'summary' ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                        {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
-                            const items = inventory.filter(i => i.name === name);
+                        {Array.from(new Set(filteredInventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
+                            const items = filteredInventory.filter(i => i.name === name);
                             const activeItems = items.filter(i => i.status === 'In Stock');
                             const inStock = activeItems.length;
                             const platform = activeItems[0]?.platform || 'Unknown';
@@ -79,7 +108,7 @@ export default function StockTab({
                                 </div>
                             );
                         })}
-                        {inventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
+                        {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
                     </div>
                 ) : (
                     <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
@@ -93,44 +122,36 @@ export default function StockTab({
                                 </tr>
                             </thead>
                             <tbody>
-                                {inventory.filter(i => i.status === 'In Stock').map((item: any) => (
+                                {filteredInventory.filter(i => i.status === 'In Stock').map((item: any) => (
                                     <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <td style={{ padding: '1rem' }}>{item.name}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <div>{item.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>{item.account_email || item.account_username}</div>
+                                        </td>
                                         <td style={{ padding: '1rem' }}>{item.platform}</td>
                                         <td style={{ padding: '1rem', color: '#ccc' }}>{item.purchasePrice ? `$${item.purchasePrice}` : '***'}</td>
                                         <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
                                     </tr>
                                 ))}
-                                {inventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items in inventory.</td></tr>}
+                                {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items found.</td></tr>}
                             </tbody>
                         </table>
                     </div>
                 )}
 
-                {/* Forms for RESTORED Features */}
+                {/* Forms */}
                 {showAddInv && (
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', marginTop: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3 style={{ margin: 0 }}>Add Inventory Stock</h3>
-                        </div>
-
+                        <h3 style={{ marginBottom: '1.5rem' }}>Add Inventory Stock</h3>
                         <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
-                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
-                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Inventory Tag (Optional)</label><input type="text" className="input-field" value={newItem.tag || ''} onChange={e => setNewItem({ ...newItem, tag: e.target.value })} placeholder="#tag" style={{ width: '100%', borderColor: '#00ff88' }} /></div>
-                            <div style={{ gridColumn: 'span 2' }}><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
-
+                            <div><label>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
+                            <div><label>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
+                            <div><label>Inventory Tag</label><input type="text" className="input-field" value={newItem.tag || ''} onChange={e => setNewItem({ ...newItem, tag: e.target.value })} placeholder="#tag" style={{ width: '100%' }} /></div>
+                            <div><label>Purchase Price</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Account Credentials (Paste Full)</label>
-                                <textarea
-                                    className="input-field"
-                                    value={newItem.credentials || ''}
-                                    onChange={e => setNewItem({ ...newItem, credentials: e.target.value })}
-                                    style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
-                                    placeholder="Paste detail here (e.g. user:pass:email or just user:pass)"
-                                />
+                                <label>Account Credentials</label>
+                                <textarea className="input-field" value={newItem.credentials || ''} onChange={e => setNewItem({ ...newItem, credentials: e.target.value })} style={{ width: '100%', height: '100px' }} placeholder="user:pass:email" />
                             </div>
-
                             <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                 <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
                                 <button type="submit" className="btn btn-primary">Add Item</button>
@@ -142,38 +163,12 @@ export default function StockTab({
                 {showBulk && (
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #06b6d4', marginTop: '2rem' }}>
                         <h3 style={{ marginBottom: '1rem' }}>Bulk Import Inventory</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label>
-                                <select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
-                                    <option value="Z2U">Z2U</option>
-                                    <option value="PlayerUp">PlayerUp</option>
-                                    <option value="G2G">G2G</option>
-                                    <option value="Direct">Direct Sale</option>
-                                    <option value="Reddit">Reddit</option>
-                                    <option value="Instagram">Instagram</option>
-                                    <option value="Discord">Discord</option>
-                                    <option value="TikTok">TikTok</option>
-                                    <option value="Twitter">Twitter/X</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Product Name</label>
-                                <input type="text" className="input-field" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} style={{ width: '100%' }} placeholder="e.g. 1 Year Old Account" />
-                            </div>
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Cost Per Item ($)</label>
-                                <input type="number" className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} placeholder="0.00" />
-                            </div>
-                        </div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Paste from Excel/Sheets (Columns: User | Pass | Email | Tag)</label>
                         <textarea
-                            placeholder={`Paste directly from Excel (Cells A, B, C, D...)\n\nExample:\nuser1\tpass1\temail1\t#netflix-4k\nuser2\tpass2\temail2\t#spotify-prem`}
+                            placeholder="Paste directly from Excel (User\tPass\tEmail\tTag)"
                             value={bulkData}
                             onChange={e => setBulkData(e.target.value)}
                             className="input-field"
-                            style={{ width: '100%', height: '200px', fontFamily: 'monospace', fontSize: '0.8rem', marginBottom: '1rem', whiteSpace: 'pre' }}
+                            style={{ width: '100%', height: '200px', marginBottom: '1rem' }}
                         />
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                             <button onClick={handleBulkImport} className="btn btn-primary">Process Import</button>

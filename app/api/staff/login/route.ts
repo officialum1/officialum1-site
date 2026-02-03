@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
     try {
@@ -42,6 +43,17 @@ export async function POST(request: Request) {
 
         if (isValid) {
             const { password: _, ...rest } = employee;
+            const cookieStore = await cookies();
+
+            // Set HttpOnly Cookie for session persistence
+            cookieStore.set('admin_token', 'authenticated_session_v1', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                path: '/',
+                maxAge: 60 * 60 * 24 * 7 // 1 week
+            });
+
             const userWithParsedFields = {
                 ...rest,
                 allowedPlatforms: rest.allowedPlatforms ? JSON.parse(rest.allowedPlatforms) : [],

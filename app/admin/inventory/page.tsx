@@ -4,27 +4,28 @@ import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getPlatformIcon } from '@/lib/icons';
-import LeadsTab from '@/components/admin/tabs/LeadsTab';
-import OrdersTab from '@/components/admin/tabs/OrdersTab';
-import StockTab from '@/components/admin/tabs/StockTab';
-import CatalogTab from '@/components/admin/tabs/CatalogTab';
-import BundleTab from '@/components/admin/tabs/BundleTab';
-import SellTab from '@/components/admin/tabs/SellTab';
-import G2GTab from '@/components/admin/tabs/G2GTab';
-import FinanceTab from '@/components/admin/tabs/FinanceTab';
-import PromosTab from '@/components/admin/tabs/PromosTab';
-import WebsiteTab from '@/components/admin/tabs/WebsiteTab';
-import IntelTab from '@/components/admin/tabs/IntelTab';
-import PaymentsTab from '@/components/admin/tabs/PaymentsTab';
-import UsersTab from '@/components/admin/tabs/UsersTab';
-import HRTab from '@/components/admin/tabs/HRTab';
-import KBTab from '@/components/admin/tabs/KBTab';
-import MarketingTab from '@/components/admin/tabs/MarketingTab';
-import ToolsTab from '@/components/admin/tabs/ToolsTab';
-import LogsTab from '@/components/admin/tabs/LogsTab';
-import SupportTab from '@/components/admin/tabs/SupportTab';
-import SettingsTab from '@/components/admin/tabs/SettingsTab';
-import CatalogGenerator from '@/components/admin/tabs/CatalogGenerator';
+import dynamic from 'next/dynamic';
+const LeadsTab = dynamic(() => import('@/components/admin/tabs/LeadsTab'), { ssr: false });
+const OrdersTab = dynamic(() => import('@/components/admin/tabs/OrdersTab'), { ssr: false });
+const StockTab = dynamic(() => import('@/components/admin/tabs/StockTab'), { ssr: false });
+const CatalogTab = dynamic(() => import('@/components/admin/tabs/CatalogTab'), { ssr: false });
+const BundleTab = dynamic(() => import('@/components/admin/tabs/BundleTab'), { ssr: false });
+const SellTab = dynamic(() => import('@/components/admin/tabs/SellTab'), { ssr: false });
+const G2GTab = dynamic(() => import('@/components/admin/tabs/G2GTab'), { ssr: false });
+const FinanceTab = dynamic(() => import('@/components/admin/tabs/FinanceTab'), { ssr: false });
+const PromosTab = dynamic(() => import('@/components/admin/tabs/PromosTab'), { ssr: false });
+const WebsiteTab = dynamic(() => import('@/components/admin/tabs/WebsiteTab'), { ssr: false });
+const IntelTab = dynamic(() => import('@/components/admin/tabs/IntelTab'), { ssr: false });
+const PaymentsTab = dynamic(() => import('@/components/admin/tabs/PaymentsTab'), { ssr: false });
+const UsersTab = dynamic(() => import('@/components/admin/tabs/UsersTab'), { ssr: false });
+const HRTab = dynamic(() => import('@/components/admin/tabs/HRTab'), { ssr: false });
+const KBTab = dynamic(() => import('@/components/admin/tabs/KBTab'), { ssr: false });
+const MarketingTab = dynamic(() => import('@/components/admin/tabs/MarketingTab'), { ssr: false });
+const ToolsTab = dynamic(() => import('@/components/admin/tabs/ToolsTab'), { ssr: false });
+const LogsTab = dynamic(() => import('@/components/admin/tabs/LogsTab'), { ssr: false });
+const SupportTab = dynamic(() => import('@/components/admin/tabs/SupportTab'), { ssr: false });
+const SettingsTab = dynamic(() => import('@/components/admin/tabs/SettingsTab'), { ssr: false });
+const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGenerator'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 export default function AdminDashboardPage() {
@@ -48,9 +49,10 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     // UI State
-    const [activeTab, setActiveTab] = useState('inventory'); // 'inventory', 'leads', 'marketing', 'bundle'
+    const [activeTab, setActiveTab] = useState('catalog'); // Default to Catalog as requested
     const [showAddInv, setShowAddInv] = useState(false);
     const [showBulk, setShowBulk] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Filter Stats
     const [stats, setStats] = useState({
@@ -254,25 +256,24 @@ function AdminDashboard() {
         if (activeTab === 'g2g_center') {
             interval = setInterval(async () => {
                 try {
+                    // Optimized: Only fetch tracked orders, which is now handled server-side for efficiency
                     const res = await fetch('/api/admin/g2g?action=get_tracked_orders');
                     if (res.ok) {
                         const data = await res.json();
                         const newOrders = Array.isArray(data) ? data : [];
 
-                        // If count increased, play sound
                         if (newOrders.length > trackedG2GOrders.length && trackedG2GOrders.length > 0) {
                             playBeep();
                         }
 
-                        // Auto-select latest if none chosen
                         if (newOrders.length > 0 && !g2gOrderId) {
                             setG2GOrderId(newOrders[0].order_id);
                         }
 
                         setTrackedG2GOrders(newOrders);
                     }
-                } catch (e) { console.error("G2G Polling Error", e); }
-            }, 5000); // Poll every 5 seconds
+                } catch (e) { }
+            }, 30000); // Poll every 30 seconds instead of 5 to reduce browser load
         }
         return () => { if (interval) clearInterval(interval); };
     }, [activeTab, trackedG2GOrders.length, g2gOrderId]);
@@ -338,116 +339,134 @@ function AdminDashboard() {
     };
 
     const fetchData = async (userCtx?: any) => {
+        // Only fetch generic/essential data on load
         try {
             const u = userCtx || currentUser;
             const role = (u?.role || '').toLowerCase();
             const email = u?.email || '';
 
-            const [invRes, balRes, leadsRes, postsRes, settingsRes, empRes, logsRes, catRes, ordersRes,
-                blogsRes, pagesRes, servRes, projRes, revRes, rentRes, msgRes, promoRes, usersRes,
-                categRes, tRes, kbRes, g2Res, g2StatsRes, g2OffersRes, intelRes
-            ] = await Promise.all([
-                fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`),
-                fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`),
-                fetch('/api/leads'),
-                fetch('/api/social'),
+            // Fetch only basic settings and user info initially
+            const [settingsRes, logsRes, catRes] = await Promise.all([
                 fetch('/api/admin/settings'),
-                fetch('/api/hr/employees'),
                 fetch('/api/admin/logs'),
-                fetch('/api/products'),
-                fetch('/api/admin/orders'),
-                // Restored Fetches
-                fetch('/api/blogs'),
-                fetch('/api/pages'),
-                fetch('/api/services'),
-                fetch('/api/projects'),
-                fetch('/api/testimonials?all=true'),
-                fetch('/api/rentals'),
-                fetch('/api/messages'),
-                fetch('/api/promocodes'),
-                fetch('/api/admin/users'),
-                fetch('/api/admin/categories'),
-                fetch('/api/tickets'),
-                fetch('/api/kb?admin=true'),
-                fetch('/api/admin/g2g?action=get_tracked_orders'),
-                fetch('/api/admin/g2g?action=get_stats'),
-                fetch('/api/admin/g2g?action=get_tracked_offers'),
-                fetch('/api/market')
+                fetch('/api/products')
             ]);
 
-            const invData = await invRes.json();
-            const balData = await balRes.json();
-            const leadsData = await leadsRes.json();
-            const postsData = await postsRes.json();
             const settingsData = await settingsRes.json();
-            const empData = await empRes.json();
             const logsData = await logsRes.json();
             const catData = await catRes.json();
-            const ordersData = await ordersRes.json();
 
-            setInventory(invData);
-            setBalanceHistory(balData);
-            setLeads(leadsData);
-            setPosts(postsData);
             setSettings(settingsData);
-            setEmployees(empData);
             setLogs(logsData);
             setCatalog(catData);
-            setOrders(ordersData);
 
-            // Handle Sub-fetches
-            try {
-                const catJson = await categRes.json();
-                setCategories(Array.isArray(catJson) ? catJson : []);
-            } catch { setCategories([]); }
+            // Trigger first tab fetch
+            fetchTabContent(activeTab, u);
 
-            try {
-                const ticketData = await tRes.json();
-                setTickets(Array.isArray(ticketData) ? ticketData : []);
-            } catch { setTickets([]); }
-
-            try {
-                const kbData = await kbRes.json();
-                setKbArticles(Array.isArray(kbData) ? kbData : []);
-            } catch { setKbArticles([]); }
-
-            try {
-                const trackedData = await g2Res.json();
-                setTrackedG2GOrders(Array.isArray(trackedData) ? trackedData : []);
-            } catch { setTrackedG2GOrders([]); }
-
-            try {
-                const statsData = await g2StatsRes.json();
-                if (statsData) setG2GStats(statsData);
-            } catch { setG2GStats({ totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false }); }
-
-            try {
-                const offersData = await g2OffersRes.json();
-                setTrackedG2GOffers(Array.isArray(offersData) ? offersData : []);
-            } catch { setTrackedG2GOffers([]); }
-
-
-            // Set Restored Data with Array Validation
-            try { const b = await blogsRes.json(); setManualBlogs(Array.isArray(b) ? b : []); } catch { setManualBlogs([]); }
-            try { setPages(await pagesRes.json()); } catch { setPages({}); }
-            try { const s = await servRes.json(); setServices(Array.isArray(s) ? s : []); } catch { setServices([]); }
-            try { const p = await projRes.json(); setProjects(Array.isArray(p) ? p : []); } catch { setProjects([]); }
-            try { const r = await revRes.json(); setReviews(Array.isArray(r) ? r : []); } catch { setReviews([]); }
-            try { const rt = await rentRes.json(); setRentals(Array.isArray(rt) ? rt : []); } catch { setRentals([]); }
-            try { const m = await msgRes.json(); setMessages(Array.isArray(m) ? m : []); } catch { setMessages([]); }
-            try { const pc = await promoRes.json(); setPromoCodes(Array.isArray(pc) ? pc : []); } catch { setPromoCodes([]); }
-            try { const u = await usersRes.json(); setUsers(Array.isArray(u) ? u : []); } catch { setUsers([]); }
-
-            // Set Market Intel
-            try { const intl = await intelRes.json(); setMarketIntel(Array.isArray(intl) ? intl : []); } catch { setMarketIntel([]); }
-
-            calculateStats(balData, empData, invData);
         } catch (e) {
-            console.error("Failed to load admin data", e);
+            console.error("Initial load failed", e);
         } finally {
             setLoading(false);
         }
     };
+
+    const fetchTabContent = async (tab: string, userCtx?: any) => {
+        const u = userCtx || currentUser;
+        const role = (u?.role || '').toLowerCase();
+        const email = u?.email || '';
+
+        try {
+            switch (tab) {
+                case 'stock':
+                    if (inventory.length > 0) return;
+                    const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
+                    const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
+                    const invData = await invRes.json();
+                    const balData = await balRes.json();
+                    setInventory(invData);
+                    setBalanceHistory(balData);
+                    calculateStats(balData, employees, invData);
+                    break;
+                case 'catalog':
+                    // Refresh catalog if needed
+                    const catRefresh = await fetch('/api/products');
+                    setCatalog(await catRefresh.json());
+                    break;
+                case 'leads':
+                    if (leads.length > 0) return;
+                    const leadsRes = await fetch('/api/leads');
+                    setLeads(await leadsRes.json());
+                    break;
+                case 'orders':
+                    if (orders.length > 0) return;
+                    const ordersRes = await fetch('/api/admin/orders');
+                    setOrders(await ordersRes.json());
+                    break;
+                case 'g2g_center':
+                    // Fetch only once, tracking is now server-side or less frequent
+                    const g2Res = await fetch('/api/admin/g2g?action=get_tracked_orders');
+                    const g2StatsRes = await fetch('/api/admin/g2g?action=get_stats');
+                    setTrackedG2GOrders(await g2Res.json());
+                    setG2GStats(await g2StatsRes.json());
+                    break;
+                case 'hr':
+                    if (employees.length > 0) return;
+                    const empRes = await fetch('/api/hr/employees');
+                    setEmployees(await empRes.json());
+                    break;
+                case 'support':
+                    if (tickets.length > 0) return;
+                    const tRes = await fetch('/api/tickets');
+                    setTickets(await tRes.json());
+                    break;
+                case 'website':
+                    const [blogsRes, servRes, projRes, revRes, rentRes, categRes] = await Promise.all([
+                        fetch('/api/blogs'),
+                        fetch('/api/services'),
+                        fetch('/api/projects'),
+                        fetch('/api/testimonials?all=true'),
+                        fetch('/api/rentals'),
+                        fetch('/api/admin/categories')
+                    ]);
+                    setManualBlogs(await blogsRes.json());
+                    setServices(await servRes.json());
+                    setProjects(await projRes.json());
+                    setReviews(await revRes.json());
+                    setRentals(await rentRes.json());
+                    setCategories(await categRes.json());
+                    break;
+                case 'kb_management':
+                    const kbRes = await fetch('/api/kb?admin=true');
+                    setKbArticles(await kbRes.json());
+                    break;
+                case 'intel':
+                    const intelRes = await fetch('/api/market');
+                    setMarketIntel(await intelRes.json());
+                    break;
+                case 'users':
+                    const usersRes = await fetch('/api/admin/users');
+                    setUsers(await usersRes.json());
+                    break;
+                case 'marketing':
+                    const [postsRes, msgRes, promoRes] = await Promise.all([
+                        fetch('/api/social'),
+                        fetch('/api/messages'),
+                        fetch('/api/promocodes')
+                    ]);
+                    setPosts(await postsRes.json());
+                    setMessages(await msgRes.json());
+                    setPromoCodes(await promoRes.json());
+                    break;
+            }
+        } catch (error) {
+            console.error(`Error fetching data for tab: ${tab}`, error);
+        }
+    };
+
+    // Trigger fetch on tab change
+    useEffect(() => {
+        if (!loading) fetchTabContent(activeTab);
+    }, [activeTab, loading]);
 
 
 
@@ -1310,9 +1329,9 @@ function AdminDashboard() {
                             <div style={{ fontSize: '0.7rem', color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>Store Operations</div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                                 {[
-                                    { id: 'inventory', label: '📦 Orders', perm: 'orders' },
-                                    { id: 'stock', label: '📊 Stock', perm: 'inventory' },
                                     { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
+                                    { id: 'stock', label: '📊 Stock', perm: 'inventory' },
+                                    { id: 'orders', label: '📦 Orders', perm: 'orders' },
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
                                     { id: 'g2g_hub', label: '🎮 G2G Center', perm: 'orders', onClick: () => router.push('/admin/g2g') },
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
@@ -1465,7 +1484,7 @@ function AdminDashboard() {
                         </button>
                     </div>
 
-                    {activeTab === 'inventory' && (
+                    {activeTab === 'orders' && (
                         <OrdersTab
                             orders={orders}
                             showFulfill={showFulfill}
@@ -1494,6 +1513,8 @@ function AdminDashboard() {
                             setBulkData={setBulkData}
                             handleAddInventory={handleAddInventory}
                             handleBulkImport={handleBulkImport}
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
                         />
                     )}
 
