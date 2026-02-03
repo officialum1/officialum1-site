@@ -9,7 +9,7 @@ import Link from 'next/link';
 // Fetch product helper
 async function getProduct(id: string) {
     try {
-        const rows: any[] = await query("SELECT * FROM products WHERE id = ?", [id]);
+        const rows = await query("SELECT * FROM products WHERE id = ?", [id]) as any[];
         return rows[0] || null;
     } catch (e) {
         return null;
@@ -32,11 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             title: product.name,
             description: product.description,
             images: [product.image || '/logo.jpg'],
-            type: 'website',
-            price: {
-                amount: product.price,
-                currency: 'USD'
-            }
+            type: 'website'
         }
     };
 }
