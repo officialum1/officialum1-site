@@ -2,11 +2,11 @@
 
 interface SupportTabProps {
     tickets: any[];
-    activeTicketId: string | null;
-    setActiveTicketId: (id: string | null) => void;
+    activeTicketId: number | null;
+    setActiveTicketId: (id: number | null) => void;
     replyMsg: string;
     setReplyMsg: (msg: string) => void;
-    handleReplyTicket: (id: string) => Promise<void>;
+    handleReplyTicket: (id: number) => Promise<void>;
 }
 
 export default function SupportTab({

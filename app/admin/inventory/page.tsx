@@ -103,7 +103,7 @@ function AdminDashboard() {
     const [sellMode, setSellMode] = useState<'single' | 'bulk'>('single');
     const [deliveryLink, setDeliveryLink] = useState('');
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
-    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [copiedId, setCopiedId] = useState<any>(null);
     const [showAddFunds, setShowAddFunds] = useState(false);
     const [fundForm, setFundForm] = useState({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
 
@@ -445,6 +445,21 @@ function AdminDashboard() {
             console.error("Failed to load admin data", e);
         } finally {
             setLoading(false);
+        }
+    };
+
+
+
+    const handleSettingsSave = async () => {
+        try {
+            await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+            alert('Settings saved successfully!');
+        } catch (error) {
+            alert('Failed to save settings.');
         }
     };
 
@@ -1686,270 +1701,270 @@ function AdminDashboard() {
                             handleReplyTicket={handleReplyTicket}
                         />
                     )}
-            {activeTab === 'marketing' && (
-                <MarketingTab
-                    marketingTab={marketingTab}
-                    setMarketingTab={setMarketingTab}
-                    showAddPost={showAddPost}
-                    setShowAddPost={setShowAddPost}
-                    posts={posts}
-                    newPost={newPost}
-                    setNewPost={setNewPost}
-                    handleAddPost={handleAddPost}
-                />
-            )}
-
-
-            {/* TOOLS TAB (New) */}
-            {
-                activeTab === 'tools' && (
-                    <ToolsTab
-                        handleBacklinkCheck={handleBacklinkCheck}
-                        toolUrl={toolUrl}
-                        setToolUrl={setToolUrl}
-                        toolLoading={toolLoading}
-                        toolMetrics={toolMetrics}
-                        handleGenerateBlog={handleGenerateBlog}
-                        blogTopic={blogTopic}
-                        setBlogTopic={setBlogTopic}
-                        blogLoading={blogLoading}
-                    />
-                )
-            }
-
-
-
-            {/* HR TAB */}
-            {
-                activeTab === 'hr' && (
-                    <HRTab
-                        showAddStaff={showAddStaff}
-                        setShowAddStaff={setShowAddStaff}
-                        editingEmp={editingEmp}
-                        setEditingEmp={setEditingEmp}
-                        newEmp={newEmp}
-                        setNewEmp={setNewEmp}
-                        handleAddEmployee={handleAddEmployee}
-                        employees={employees}
-                        handleDeleteEmployee={async (id) => {
-                            if (confirm('Terminate and delete staff account? This cannot be undone.')) {
-                                await fetch(`/api/hr/employees?id=${id}`, { method: 'DELETE' });
-                                fetchData();
-                            }
-                        }}
-                        users={users}
-                        setSelectedUser={setSelectedUser}
-                        setUserForm={setUserForm}
-                        setShowUserEdit={setShowUserEdit}
-                    />
-                )
-            }
-
-            {/* KB TAB */}
-            {
-                activeTab === 'kb' && (
-                    <KBTab
-                        showAddKb={showAddKb}
-                        setShowAddKb={setShowAddKb}
-                        kbForm={kbForm}
-                        setKbForm={setKbForm}
-                        isGeneratingKb={isGeneratingKb}
-                        setIsGeneratingKb={setIsGeneratingKb}
-                        handleKbSubmit={async (e) => {
-                            e.preventDefault();
-                            await fetch('/api/kb', { method: 'POST', body: JSON.stringify({ ...kbForm, action: 'create' }) });
-                            setShowAddKb(false);
-                            fetchData();
-                        }}
-                        kbArticles={kbArticles}
-                        handleDeleteKb={async (id) => {
-                            if (confirm('Delete?')) {
-                                await fetch('/api/kb', { method: 'DELETE', body: JSON.stringify({ id }) });
-                                fetchData();
-                            }
-                        }}
-                    />
-                )
-            }
-
-            {/* LOGS TAB */}
-            {
-                activeTab === 'logs' && (
-                    <LogsTab logs={logs} />
-                )
-            }
-
-            {/* SETTINGS TAB */}
-            {
-                activeTab === 'settings' && (
-                    <SettingsTab
-                        settings={settings}
-                        setSettings={setSettings}
-                        handleSaveSettings={handleSaveSettings}
-                        handleUpdateAdminProfile={handleUpdateAdminProfile}
-                    />
-                )
-            }
-        </div >
-        </div >
-
-    {
-        showBulkUpdateModal && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-                <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
-                    <button onClick={() => setShowBulkUpdateModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <h3 style={{ margin: 0, color: '#00ff88' }}>📝 Bulk Editor</h3>
-                        <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>Update Price, Stock, and Category in bulk.</p>
-                    </div>
-
-                    <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
-                        <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>🚀 Quick Set Tools</label>
-                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                            <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Set all stocks to:</span>
-                            <button onClick={() => handleQuickSetStock('100')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>100</button>
-                            <button onClick={() => handleQuickSetStock('50')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>50</button>
-                            <button onClick={() => handleQuickSetStock('10')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>10</button>
-                            <button onClick={() => {
-                                const val = prompt("Enter stock value for all:");
-                                if (val) handleQuickSetStock(val);
-                            }} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>Custom Value</button>
-                        </div>
-                    </div>
-
-                    <div style={{ marginBottom: '2rem' }}>
-                        <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Update Data (Format: ID, PRICE, STOCK, CATEGORY)</label>
-                        <textarea
-                            className="input-field"
-                            value={bulkUpdateText}
-                            onChange={(e) => setBulkUpdateText(e.target.value)}
-                            style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.5)', fontSize: '0.9rem', lineHeight: '1.5' }}
-                            placeholder="Example:\n23,66,100,Reddit\n22,77,100,Reddit"
+                    {activeTab === 'marketing' && (
+                        <MarketingTab
+                            marketingTab={marketingTab}
+                            setMarketingTab={setMarketingTab}
+                            showAddPost={showAddPost}
+                            setShowAddPost={setShowAddPost}
+                            posts={posts}
+                            newPost={newPost}
+                            setNewPost={setNewPost}
+                            handleAddPost={handleAddPost}
                         />
-                    </div>
+                    )}
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                        <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
-                        <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
-                            ✅ Save All Updates
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-}
 
-{
-    showDeleteModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-            <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #ff4444', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
-                <h2 style={{ margin: '0 0 1rem 0', color: '#ff4444' }}>Admin Verification</h2>
-                <p style={{ color: '#aaa', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                    You are about to delete a transaction and restore stock. Please enter your 4-digit security PIN to confirm.
-                </p>
+                    {/* TOOLS TAB (New) */}
+                    {
+                        activeTab === 'tools' && (
+                            <ToolsTab
+                                handleBacklinkCheck={handleBacklinkCheck}
+                                toolUrl={toolUrl}
+                                setToolUrl={setToolUrl}
+                                toolLoading={toolLoading}
+                                toolMetrics={toolMetrics}
+                                handleGenerateBlog={handleGenerateBlog}
+                                blogTopic={blogTopic}
+                                setBlogTopic={setBlogTopic}
+                                blogLoading={blogLoading}
+                            />
+                        )
+                    }
 
-                <div style={{ marginBottom: '2rem' }}>
-                    <input
-                        type="password"
-                        placeholder="Enter Security PIN"
-                        value={confirmPin}
-                        onChange={(e) => setConfirmPin(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '1.2rem',
-                            borderRadius: '12px',
-                            border: '2px solid rgba(255, 68, 68, 0.2)',
-                            background: 'rgba(0,0,0,0.3)',
-                            color: '#fff',
-                            fontSize: '1.5rem',
-                            textAlign: 'center',
-                            letterSpacing: '1rem'
-                        }}
-                        maxLength={4}
-                    />
-                    {deleteError && <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '1rem' }}>{deleteError}</p>}
-                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <button onClick={() => { setShowDeleteModal(false); setConfirmPin(''); setDeleteError(''); }} className="btn btn-outline" style={{ borderRadius: '12px' }}>Cancel</button>
-                    <button
-                        onClick={handleDeleteSale}
-                        disabled={isDeleting}
-                        className="btn"
-                        style={{ background: '#ff4444', color: '#fff', borderRadius: '12px', fontWeight: 'bold' }}
-                    >
-                        {isDeleting ? 'Deleting...' : 'Delete Sale'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
-{
-    showAddCategory && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
-            <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
-                <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-                <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
 
-                <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
-                    <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
-                    <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
-                    <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
-                    <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
-                </form>
+                    {/* HR TAB */}
+                    {
+                        activeTab === 'hr' && (
+                            <HRTab
+                                showAddStaff={showAddStaff}
+                                setShowAddStaff={setShowAddStaff}
+                                editingEmp={editingEmp}
+                                setEditingEmp={setEditingEmp}
+                                newEmp={newEmp}
+                                setNewEmp={setNewEmp}
+                                handleAddEmployee={handleAddEmployee}
+                                employees={employees}
+                                handleDeleteEmployee={async (id) => {
+                                    if (confirm('Terminate and delete staff account? This cannot be undone.')) {
+                                        await fetch(`/api/hr/employees?id=${id}`, { method: 'DELETE' });
+                                        fetchData();
+                                    }
+                                }}
+                                users={users}
+                                setSelectedUser={setSelectedUser}
+                                setUserForm={setUserForm}
+                                setShowUserEdit={setShowUserEdit}
+                            />
+                        )
+                    }
 
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {categories.map((cat: any) => (
-                        <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
-                                <div>
-                                    <div style={{ fontWeight: '600' }}>{cat.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
+                    {/* KB TAB */}
+                    {
+                        activeTab === 'kb' && (
+                            <KBTab
+                                showAddKb={showAddKb}
+                                setShowAddKb={setShowAddKb}
+                                kbForm={kbForm}
+                                setKbForm={setKbForm}
+                                isGeneratingKb={isGeneratingKb}
+                                setIsGeneratingKb={setIsGeneratingKb}
+                                handleKbSubmit={async (e) => {
+                                    e.preventDefault();
+                                    await fetch('/api/kb', { method: 'POST', body: JSON.stringify({ ...kbForm, action: 'create' }) });
+                                    setShowAddKb(false);
+                                    fetchData();
+                                }}
+                                kbArticles={kbArticles}
+                                handleDeleteKb={async (id) => {
+                                    if (confirm('Delete?')) {
+                                        await fetch('/api/kb', { method: 'DELETE', body: JSON.stringify({ id }) });
+                                        fetchData();
+                                    }
+                                }}
+                            />
+                        )
+                    }
+
+                    {/* LOGS TAB */}
+                    {
+                        activeTab === 'logs' && (
+                            <LogsTab logs={logs} />
+                        )
+                    }
+
+                    {/* SETTINGS TAB */}
+                    {
+                        activeTab === 'settings' && (
+                            <SettingsTab
+                                settings={settings}
+                                setSettings={setSettings}
+                                handleSaveSettings={handleSaveSettings}
+                                handleUpdateAdminProfile={handleUpdateAdminProfile}
+                            />
+                        )
+                    }
+                </div >
+            </div >
+
+            {
+                showBulkUpdateModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '800px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ff88', maxHeight: '90vh', overflowY: 'auto' }}>
+                            <button onClick={() => setShowBulkUpdateModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <h3 style={{ margin: 0, color: '#00ff88' }}>📝 Bulk Editor</h3>
+                                <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>Update Price, Stock, and Category in bulk.</p>
+                            </div>
+
+                            <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 'bold' }}>🚀 Quick Set Tools</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Set all stocks to:</span>
+                                    <button onClick={() => handleQuickSetStock('100')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>100</button>
+                                    <button onClick={() => handleQuickSetStock('50')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>50</button>
+                                    <button onClick={() => handleQuickSetStock('10')} className="btn btn-outline" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>10</button>
+                                    <button onClick={() => {
+                                        const val = prompt("Enter stock value for all:");
+                                        if (val) handleQuickSetStock(val);
+                                    }} className="btn btn-primary" style={{ padding: '0.3rem 1rem', fontSize: '0.8rem' }}>Custom Value</button>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888' }}>
-                                    {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Sale'}
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ color: '#ccc', fontSize: '0.8rem', display: 'block', marginBottom: '0.5rem' }}>Update Data (Format: ID, PRICE, STOCK, CATEGORY)</label>
+                                <textarea
+                                    className="input-field"
+                                    value={bulkUpdateText}
+                                    onChange={(e) => setBulkUpdateText(e.target.value)}
+                                    style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.5)', fontSize: '0.9rem', lineHeight: '1.5' }}
+                                    placeholder="Example:\n23,66,100,Reddit\n22,77,100,Reddit"
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                                <button onClick={() => setShowBulkUpdateModal(false)} className="btn btn-outline">Cancel</button>
+                                <button onClick={handleCommitBulkUpdate} className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>
+                                    ✅ Save All Updates
                                 </button>
-                                <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: '#ff4d4d', borderColor: '#ff4d4d33' }}>Delete</button>
                             </div>
                         </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    )
-}
+                    </div>
+                )
+            }
 
-{
-    showCategorySale && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(15px)' }}>
-            <div className="glass" style={{ width: '400px', padding: '2rem', borderRadius: '24px', border: '1px solid #ff4d4d' }}>
-                <h4 style={{ marginBottom: '1rem', color: '#ff4d4d' }}>🔥 Flash Sale: {showCategorySale.name}</h4>
-                <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>This will apply a discount to all products in this category.</p>
+            {
+                showDeleteModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #ff4444', textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🛡️</div>
+                            <h2 style={{ margin: '0 0 1rem 0', color: '#ff4444' }}>Admin Verification</h2>
+                            <p style={{ color: '#aaa', marginBottom: '2rem', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                                You are about to delete a transaction and restore stock. Please enter your 4-digit security PIN to confirm.
+                            </p>
 
-                <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Discount Percentage (%)</label>
-                    <input type="number" className="input-field" value={categorySaleForm.discount} onChange={e => setCategorySaleForm({ ...categorySaleForm, discount: e.target.value })} placeholder="e.g. 10" style={{ width: '100%' }} />
-                </div>
+                            <div style={{ marginBottom: '2rem' }}>
+                                <input
+                                    type="password"
+                                    placeholder="Enter Security PIN"
+                                    value={confirmPin}
+                                    onChange={(e) => setConfirmPin(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '1.2rem',
+                                        borderRadius: '12px',
+                                        border: '2px solid rgba(255, 68, 68, 0.2)',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        color: '#fff',
+                                        fontSize: '1.5rem',
+                                        textAlign: 'center',
+                                        letterSpacing: '1rem'
+                                    }}
+                                    maxLength={4}
+                                />
+                                {deleteError && <p style={{ color: '#ff4444', fontSize: '0.85rem', marginTop: '1rem' }}>{deleteError}</p>}
+                            </div>
 
-                <div style={{ marginBottom: '2rem' }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Sale Ends At</label>
-                    <input type="datetime-local" className="input-field" value={categorySaleForm.expiry} onChange={e => setCategorySaleForm({ ...categorySaleForm, expiry: e.target.value })} style={{ width: '100%' }} />
-                </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <button onClick={() => { setShowDeleteModal(false); setConfirmPin(''); setDeleteError(''); }} className="btn btn-outline" style={{ borderRadius: '12px' }}>Cancel</button>
+                                <button
+                                    onClick={handleDeleteSale}
+                                    disabled={isDeleting}
+                                    className="btn"
+                                    style={{ background: '#ff4444', color: '#fff', borderRadius: '12px', fontWeight: 'bold' }}
+                                >
+                                    {isDeleting ? 'Deleting...' : 'Delete Sale'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                showAddCategory && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
+                        <div className="glass" style={{ width: '100%', maxWidth: '600px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
+                            <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                            <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={() => setShowCategorySale(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
-                    <button onClick={handleSetCategorySale} className="btn btn-primary" style={{ flex: 1, background: '#ff4d4d', color: '#fff' }}>Apply Sale</button>
-                </div>
-            </div>
-        </div>
-    )
-}
+                            <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.8rem', marginBottom: '2rem' }}>
+                                <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center' }} />
+                                <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required />
+                                <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required />
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0 1.2rem' }}>Add</button>
+                            </form>
+
+                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                {categories.map((cat: any) => (
+                                    <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <span style={{ fontSize: '1.5rem' }}>{cat.icon}</span>
+                                            <div>
+                                                <div style={{ fontWeight: '600' }}>{cat.name}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888' }}>
+                                                {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Sale'}
+                                            </button>
+                                            <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: '#ff4d4d', borderColor: '#ff4d4d33' }}>Delete</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                showCategorySale && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 10000, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(15px)' }}>
+                        <div className="glass" style={{ width: '400px', padding: '2rem', borderRadius: '24px', border: '1px solid #ff4d4d' }}>
+                            <h4 style={{ marginBottom: '1rem', color: '#ff4d4d' }}>🔥 Flash Sale: {showCategorySale.name}</h4>
+                            <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>This will apply a discount to all products in this category.</p>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Discount Percentage (%)</label>
+                                <input type="number" className="input-field" value={categorySaleForm.discount} onChange={e => setCategorySaleForm({ ...categorySaleForm, discount: e.target.value })} placeholder="e.g. 10" style={{ width: '100%' }} />
+                            </div>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.4rem' }}>Sale Ends At</label>
+                                <input type="datetime-local" className="input-field" value={categorySaleForm.expiry} onChange={e => setCategorySaleForm({ ...categorySaleForm, expiry: e.target.value })} style={{ width: '100%' }} />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setShowCategorySale(null)} className="btn btn-outline" style={{ flex: 1 }}>Cancel</button>
+                                <button onClick={handleSetCategorySale} className="btn btn-primary" style={{ flex: 1, background: '#ff4d4d', color: '#fff' }}>Apply Sale</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             <CatalogGenerator
                 showGenerator={showGenerator}
@@ -1957,7 +1972,7 @@ function AdminDashboard() {
                 fetchData={fetchData}
                 categories={categories}
             />
-<Footer />
+            <Footer />
         </main >
     );
 }
