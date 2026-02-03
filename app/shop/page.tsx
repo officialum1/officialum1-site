@@ -97,12 +97,40 @@ export default function ShopPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    style={{ textAlign: 'center', marginBottom: '4rem' }}
+                    style={{ textAlign: 'center', marginBottom: '3rem' }}
                 >
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
-                    <p style={{ color: '#aaa', fontSize: '1.2rem', marginBottom: '1.5rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
-                    <Link href="/bundles" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#00ff88', borderColor: '#00ff88' }}>
-                        🎁 Create a Bundle & Save 15%
+                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
+                </motion.div>
+
+                {/* PREMIUM PROMO BANNER */}
+                <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="glass"
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 195, 255, 0.1))',
+                        border: '1px solid rgba(0, 255, 136, 0.3)',
+                        padding: '2rem',
+                        borderRadius: '24px',
+                        marginBottom: '3rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '1.5rem',
+                        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+                    }}
+                >
+                    <div style={{ flex: '1', minWidth: '280px' }}>
+                        <h2 style={{ color: '#00ff88', fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>🎁 Exclusive Bundle Offer</h2>
+                        <p style={{ color: '#eee', fontSize: '1rem', lineHeight: '1.4' }}>
+                            Combine any 2+ accounts and get an **instant 15% discount** applied at checkout.
+                        </p>
+                    </div>
+                    <Link href="/bundles" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem', boxShadow: '0 0 20px rgba(0, 255, 136, 0.4)' }}>
+                        Start Saving Now
                     </Link>
                 </motion.div>
 

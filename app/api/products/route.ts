@@ -5,70 +5,19 @@ import { isAuthenticated } from '@/lib/auth';
 
 export async function GET() {
     try {
-        // Ensure products table exists (Self-healing)
-        await query(`
-            CREATE TABLE IF NOT EXISTS products (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                price VARCHAR(50) NOT NULL,
-                image TEXT,
-                platform VARCHAR(100),
-                description TEXT,
-                type VARCHAR(50),
-                creds TEXT,
-                stock INT DEFAULT 1,
-                category_id INT,
-                sale_price VARCHAR(50),
-                sale_ends_at TIMESTAMP NULL,
-                bundle_items TEXT,
-                g2g_listing_id VARCHAR(100),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        // Ensure inventory table exists
-        await query(`
-            CREATE TABLE IF NOT EXISTS inventory (
-                id VARCHAR(50) PRIMARY KEY,
-                name VARCHAR(255),
-                platform VARCHAR(50),
-                purchasePrice DECIMAL(10,2),
-                status VARCHAR(50) DEFAULT 'In Stock',
-                purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                accountDetails LONGTEXT
-            )
-        `);
-
-        // Ensure categories table exists
-        await query(`
-            CREATE TABLE IF NOT EXISTS categories (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100) NOT NULL UNIQUE,
-                slug VARCHAR(100) NOT NULL UNIQUE,
-                icon VARCHAR(50),
-                discount_percent DECIMAL(5,2) DEFAULT 0.00,
-                is_vip_only BOOLEAN DEFAULT FALSE,
-                sale_ends_at TIMESTAMP NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        // Migration: Add missing columns if table already existed (Safe Alter)
-        try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
-        try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
-        try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
-        try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { }
-        try { await query("ALTER TABLE products ADD COLUMN g2g_listing_id VARCHAR(100)"); } catch (e) { }
-        try { await query("ALTER TABLE categories ADD COLUMN is_vip_only BOOLEAN DEFAULT FALSE"); } catch (e) { }
-
-        // Fetch products with their manual stock AND live inventory count
+        // Optimized Fetch: Compute inventory stock in a single join/group
         const products = await query(`
             SELECT p.*, 
             c.name as categoryName, c.icon as categoryIcon, c.discount_percent as categoryDiscount, c.is_vip_only as isVipOnly,
-            (SELECT COUNT(*) FROM inventory i 
-             WHERE (i.platform = p.platform OR i.name = p.name) AND i.status = 'In Stock') as inventoryStock
+            IFNULL(i_counts.stock_count, 0) as inventoryStock
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN (
+                SELECT platform, name, COUNT(*) as stock_count 
+                FROM inventory 
+                WHERE status = 'In Stock' 
+                GROUP BY platform, name
+            ) i_counts ON (i_counts.platform = p.platform OR i_counts.name = p.name)
             ORDER BY p.id DESC
         `);
 

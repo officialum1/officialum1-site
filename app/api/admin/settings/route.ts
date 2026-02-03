@@ -2,9 +2,19 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
-export async function GET() {
-    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const key = searchParams.get('key');
+    const isPublic = key === 'announcement_banner';
+
+    if (!isPublic && !await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     try {
+        if (isPublic) {
+            const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [key]);
+            return NextResponse.json({ value: rows[0]?.setting_value });
+        }
+
         const settingsRes: any = await query("SELECT * FROM settings");
         const settings: any = {};
         settingsRes.forEach((s: any) => settings[s.setting_key] = s.setting_value);
