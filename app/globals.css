@@ -145,11 +145,13 @@ p {
 }
 
 .navbar-content {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   justify-content: space-between;
   align-items: center;
   width: 95%;
-  max-width: 1600px;
+  max-width: 1700px;
   margin: 0 auto;
 }
 
@@ -171,20 +173,23 @@ p {
 }
 
 .nav-menu {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center;
-  gap: 2.5rem;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .nav-links {
   display: flex;
-  gap: 2rem;
+  gap: 0.8rem;
   list-style: none;
   align-items: center;
 }
 
 .nav-link {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
@@ -318,8 +323,9 @@ p {
 .nav-search-wrapper {
   position: relative;
   flex: 1;
-  max-width: 300px;
-  margin: 0 2rem;
+  max-width: 180px;
+  margin: 0 1rem;
+  flex-shrink: 1;
 }
 
 .nav-search-input {
@@ -339,9 +345,12 @@ p {
 }
 
 .auth-buttons {
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .nav-icon-wrapper {
