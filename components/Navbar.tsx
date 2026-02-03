@@ -124,25 +124,35 @@ export default function Navbar() {
                             </div>
                         )}
 
-                        <Link href="/wishlist" className="nav-icon-wrapper" style={{ textDecoration: 'none' }}>
-                            <span style={{ fontSize: '1.4rem' }}>❤️</span>
+                        <Link href="/wishlist" className="nav-icon-wrapper" title="Wishlist">
+                            <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 0 5px rgba(255,0,0,0.3))' }}>❤️</span>
                             {wishlist.length > 0 && <span className="nav-badge badge-red">{wishlist.length}</span>}
                         </Link>
 
-                        <button onClick={toggleCart} className="nav-icon-wrapper nav-icon-btn">
-                            <span style={{ fontSize: '1.5rem' }}>🛒</span>
+                        <button onClick={toggleCart} className="nav-icon-wrapper nav-icon-btn" title="Cart">
+                            <span style={{ fontSize: '1.2rem', filter: 'drop-shadow(0 0 5px rgba(0,255,136,0.3))' }}>🛒</span>
                             {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
                         </button>
 
-                        <div className="auth-divider" style={{ width: '1px', height: '24px', background: 'var(--glass-border)' }}></div>
+                        <div className="auth-divider" style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.1)', margin: '0 0.5rem' }}></div>
 
                         {user ? (
-                            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                                 <Link href="/dashboard" className="nav-link" onClick={() => setIsOpen(false)}>Dashboard</Link>
-                                <button onClick={handleLogout} className="logout-btn">Logout</button>
+                                <button onClick={handleLogout} className="btn-logout" style={{
+                                    background: 'rgba(255,77,77,0.1)',
+                                    color: '#ff4d4d',
+                                    border: '1px solid rgba(255,77,77,0.2)',
+                                    padding: '0.4rem 1rem',
+                                    borderRadius: '8px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}>Logout</button>
                             </div>
                         ) : (
-                            <div className="guest-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
                                 <Link href="/login" className="nav-link" onClick={() => setIsOpen(false)}>Login</Link>
                                 <Link href="/register" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }} onClick={() => setIsOpen(false)}>Sign Up</Link>
                             </div>
