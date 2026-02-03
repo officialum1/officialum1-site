@@ -8,6 +8,7 @@ import { getPlatformIcon } from '@/lib/icons';
 import { useCart } from '@/app/context/CartContext';
 import { useWishlist } from '@/app/context/WishlistContext';
 import { useCompare } from '@/app/context/CompareContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
@@ -92,16 +93,26 @@ export default function ShopPage() {
         <main>
             <Navbar />
             <div className="container page-header" style={{ paddingTop: '150px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    style={{ textAlign: 'center', marginBottom: '4rem' }}
+                >
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
                     <p style={{ color: '#aaa', fontSize: '1.2rem', marginBottom: '1.5rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
                     <Link href="/bundles" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#00ff88', borderColor: '#00ff88' }}>
                         🎁 Create a Bundle & Save 15%
                     </Link>
-                </div>
+                </motion.div>
 
                 {/* Search & Sort Bar */}
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}
+                >
                     <input
                         type="text"
                         placeholder="🔍 Search accounts..."
@@ -120,7 +131,7 @@ export default function ShopPage() {
                         <option value="price-asc">💰 Price: Low to High</option>
                         <option value="price-desc">💎 Price: High to Low</option>
                     </select>
-                </div>
+                </motion.div>
 
                 {/* Filter Tabs */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
@@ -144,137 +155,161 @@ export default function ShopPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid-3">
-                            {filtered.map(item => {
-                                const isSale = item.sale_price && new Date(item.sale_ends_at) > new Date();
-                                const finalPrice = isSale ? item.sale_price : item.price;
-                                const isBundle = !!item.bundle_items;
-                                const totalStock = Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0);
+                        <motion.div
+                            layout
+                            className="grid-3"
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                visible: { transition: { staggerChildren: 0.1 } },
+                                hidden: { transition: { staggerChildren: 0.05 } }
+                            }}
+                        >
+                            <AnimatePresence mode='popLayout'>
+                                {filtered.map(item => {
+                                    const isSale = item.sale_price && new Date(item.sale_ends_at) > new Date();
+                                    const finalPrice = isSale ? item.sale_price : item.price;
+                                    const isBundle = !!item.bundle_items;
+                                    const totalStock = Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0);
 
-                                return (
-                                    <div key={item.id} className="glass" style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                                        {/* Badges */}
-                                        {isSale && (
-                                            <div style={{ position: 'absolute', top: '15px', left: '15px', background: '#ff4d4d', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10 }}>SALE</div>
-                                        )}
-                                        {isBundle && (
-                                            <div style={{ position: 'absolute', top: '15px', left: isSale ? '60px' : '15px', background: '#00c3ff', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10 }}>BUNDLE</div>
-                                        )}
-
-                                        {/* Share Button Overlay */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                navigator.clipboard.writeText(`${window.location.origin}/shop/${item.id}`);
-                                                setShareId(item.id);
-                                                setTimeout(() => setShareId(null), 2000);
-                                            }}
-                                            style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: shareId === item.id ? '#00ff88' : '#fff', cursor: 'pointer', fontSize: '0.9rem' }}
-                                            title="Copy Product Link"
+                                    return (
+                                        <motion.div
+                                            key={item.id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                                            className="glass"
+                                            style={{ borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}
                                         >
-                                            {shareId === item.id ? '✓' : '🔗'}
-                                        </button>
+                                            {/* Badges */}
+                                            {isSale && (
+                                                <div style={{ position: 'absolute', top: '15px', left: '15px', background: '#ff4d4d', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10 }}>SALE</div>
+                                            )}
+                                            {isBundle && (
+                                                <div style={{ position: 'absolute', top: '15px', left: isSale ? '60px' : '15px', background: '#00c3ff', color: '#000', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 'bold', zIndex: 10 }}>BUNDLE</div>
+                                            )}
+                                            {/* Conversion Badge: Featured/Best Seller */}
+                                            {totalStock > 10 && (
+                                                <div style={{ position: 'absolute', bottom: '80px', right: '15px', background: 'linear-gradient(90deg, #ffd700, #ffaa00)', color: '#000', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', zIndex: 10, boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)' }}>🔥 Best Seller</div>
+                                            )}
 
-                                        {/* Wishlist Button Overlay */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                if (isInWishlist(item.id)) {
-                                                    removeFromWishlist(item.id);
-                                                } else {
-                                                    addToWishlist(item);
-                                                }
-                                            }}
-                                            style={{ position: 'absolute', top: '15px', right: '60px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInWishlist(item.id) ? '#ff4d4d' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
-                                            title={isInWishlist(item.id) ? "Remove from Wishlist" : "Add to Wishlist"}
-                                        >
-                                            {isInWishlist(item.id) ? '❤️' : '🤍'}
-                                        </button>
+                                            {/* Share Button Overlay */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    navigator.clipboard.writeText(`${window.location.origin}/shop/${item.id}`);
+                                                    setShareId(item.id);
+                                                    setTimeout(() => setShareId(null), 2000);
+                                                }}
+                                                style={{ position: 'absolute', top: '15px', right: '15px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: shareId === item.id ? '#00ff88' : '#fff', cursor: 'pointer', fontSize: '0.9rem' }}
+                                                title="Copy Product Link"
+                                            >
+                                                {shareId === item.id ? '✓' : '🔗'}
+                                            </button>
 
-                                        {/* Compare Button Overlay */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                addToCompare(item);
-                                            }}
-                                            style={{ position: 'absolute', top: '15px', right: '105px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInCompare(item.id) ? 'var(--accent)' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
-                                            title={isInCompare(item.id) ? "Remove from Compare" : "Add to Compare"}
-                                        >
-                                            {isInCompare(item.id) ? '⚖️' : '⚖️'}
-                                        </button>
+                                            {/* Wishlist Button Overlay */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    if (isInWishlist(item.id)) {
+                                                        removeFromWishlist(item.id);
+                                                    } else {
+                                                        addToWishlist(item);
+                                                    }
+                                                }}
+                                                style={{ position: 'absolute', top: '15px', right: '60px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInWishlist(item.id) ? '#ff4d4d' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
+                                                title={isInWishlist(item.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                                            >
+                                                {isInWishlist(item.id) ? '❤️' : '🤍'}
+                                            </button>
 
-                                        <Link href={`/shop/${item.id}`} style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>
-                                            <img src={getPlatformIcon(item.platform, item.image)} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
-                                        </Link>
-                                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                                                {item.platform}
-                                            </div>
-                                            <Link href={`/shop/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                                <h3 style={{ marginBottom: '0.5rem', cursor: 'pointer' }}>{item.name}</h3>
+                                            {/* Compare Button Overlay */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    addToCompare(item);
+                                                }}
+                                                style={{ position: 'absolute', top: '15px', right: '105px', zIndex: 10, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isInCompare(item.id) ? 'var(--accent)' : '#888', cursor: 'pointer', fontSize: '1.2rem', transition: 'all 0.3s ease' }}
+                                                title={isInCompare(item.id) ? "Remove from Compare" : "Add to Compare"}
+                                            >
+                                                {isInCompare(item.id) ? '⚖️' : '⚖️'}
+                                            </button>
+
+                                            <Link href={`/shop/${item.id}`} style={{ padding: '2rem', display: 'flex', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer' }}>
+                                                <img src={getPlatformIcon(item.platform, item.image)} alt={item.platform} style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
                                             </Link>
-                                            <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
-
-                                            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    {isSale ? (
-                                                        <div>
-                                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff4d4d' }}>${finalPrice}</div>
-                                                            <div style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: '#666' }}>${item.price}</div>
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
-                                                    )}
-
-                                                    {totalStock > 0 ? (
-                                                        <div style={{ fontSize: '0.75rem', color: totalStock < 5 ? '#ff4d4d' : '#888', fontWeight: totalStock < 5 ? 'bold' : 'normal' }}>
-                                                            {totalStock < 10 && '🔥 '} {totalStock} in stock
-                                                        </div>
-                                                    ) : (
-                                                        <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
-                                                    )}
+                                            <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                    {item.platform}
                                                 </div>
+                                                <Link href={`/shop/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                                    <h3 style={{ marginBottom: '0.5rem', cursor: 'pointer' }}>{item.name}</h3>
+                                                </Link>
+                                                <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
 
-                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                                    <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>⚡ Instant</div>
-                                                    <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
-                                                </div>
+                                                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        {isSale ? (
+                                                            <div>
+                                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff4d4d' }}>${finalPrice}</div>
+                                                                <div style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: '#666' }}>${item.price}</div>
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
+                                                        )}
 
-                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                    {totalStock > 0 ? (
-                                                        <>
-                                                            <Link
-                                                                href={`/checkout?id=${item.id}`}
-                                                                className="btn btn-outline"
-                                                                style={{ fontSize: '0.8rem', flex: 1, textAlign: 'center', padding: '0.6rem' }}
-                                                            >
-                                                                Buy Now
-                                                            </Link>
+                                                        {totalStock > 0 ? (
+                                                            <div style={{ fontSize: '0.75rem', color: totalStock < 5 ? '#ff4d4d' : '#888', fontWeight: totalStock < 5 ? 'bold' : 'normal' }}>
+                                                                {totalStock < 10 && '🔥 '} {totalStock} in stock
+                                                            </div>
+                                                        ) : (
+                                                            <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
+                                                        )}
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                        <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>⚡ Instant</div>
+                                                        <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
+                                                    </div>
+
+                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                        {totalStock > 0 ? (
+                                                            <>
+                                                                <Link
+                                                                    href={`/checkout?id=${item.id}`}
+                                                                    className="btn btn-outline"
+                                                                    style={{ fontSize: '0.8rem', flex: 1, textAlign: 'center', padding: '0.6rem' }}
+                                                                >
+                                                                    Buy Now
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() => addToCart(item)}
+                                                                    className="btn btn-primary"
+                                                                    style={{ fontSize: '0.8rem', width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                    title="Add to Cart"
+                                                                >
+                                                                    🛒
+                                                                </button>
+                                                            </>
+                                                        ) : (
                                                             <button
-                                                                onClick={() => addToCart(item)}
-                                                                className="btn btn-primary"
-                                                                style={{ fontSize: '0.8rem', width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                title="Add to Cart"
+                                                                onClick={() => { setNotifyProduct(item); setShowNotifyModal(true); }}
+                                                                className="btn btn-outline"
+                                                                style={{ fontSize: '0.8rem', width: '100%', borderColor: '#ff4d4d', color: '#ff4d4d' }}
                                                             >
-                                                                🛒
+                                                                🔔 Notify Me
                                                             </button>
-                                                        </>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => { setNotifyProduct(item); setShowNotifyModal(true); }}
-                                                            className="btn btn-outline"
-                                                            style={{ fontSize: '0.8rem', width: '100%', borderColor: '#ff4d4d', color: '#ff4d4d' }}
-                                                        >
-                                                            🔔 Notify Me
-                                                        </button>
-                                                    )}
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </motion.div>
 
                         {filtered.length === 0 && (
                             <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
