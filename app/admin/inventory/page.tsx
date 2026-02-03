@@ -338,12 +338,35 @@ function AdminDashboard() {
         return permissions.includes('all') || permissions.includes(perm);
     };
 
+    const safeData = async (res: Response, fallback: any = []) => {
+        if (res.status === 401) {
+            router.push('/login?redirect=/admin/inventory');
+            return fallback;
+        }
+        try {
+            const data = await res.json();
+            if (data && typeof data === 'object' && data.success === false) {
+                console.error("API Error:", data.error);
+                return fallback;
+            }
+            return data || fallback;
+        } catch (e) {
+            return fallback;
+        }
+    };
+
     const fetchData = async (userCtx?: any) => {
         // Only fetch generic/essential data on load
         try {
             const u = userCtx || currentUser;
             const role = (u?.role || '').toLowerCase();
             const email = u?.email || '';
+
+            // Security: If no user or role is buyer, redirect early
+            if (!u || role === 'buyer') {
+                router.push('/login?error=unauthorized');
+                return;
+            }
 
             // Fetch only basic settings and user info initially
             const [settingsRes, logsRes, catRes] = await Promise.all([
@@ -352,13 +375,9 @@ function AdminDashboard() {
                 fetch('/api/products')
             ]);
 
-            const settingsData = await settingsRes.json();
-            const logsData = await logsRes.json();
-            const catData = await catRes.json();
-
-            setSettings(settingsData);
-            setLogs(logsData);
-            setCatalog(catData);
+            setSettings(await safeData(settingsRes, {}));
+            setLogs(await safeData(logsRes));
+            setCatalog(await safeData(catRes));
 
             // Trigger first tab fetch
             fetchTabContent(activeTab, u);
@@ -381,43 +400,43 @@ function AdminDashboard() {
                     if (inventory.length > 0) return;
                     const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
                     const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
-                    const invData = await invRes.json();
-                    const balData = await balRes.json();
+
+                    const invData = await safeData(invRes);
+                    const balData = await safeData(balRes);
+
                     setInventory(invData);
                     setBalanceHistory(balData);
                     calculateStats(balData, employees, invData);
                     break;
                 case 'catalog':
-                    // Refresh catalog if needed
                     const catRefresh = await fetch('/api/products');
-                    setCatalog(await catRefresh.json());
+                    setCatalog(await safeData(catRefresh));
                     break;
                 case 'leads':
                     if (leads.length > 0) return;
                     const leadsRes = await fetch('/api/leads');
-                    setLeads(await leadsRes.json());
+                    setLeads(await safeData(leadsRes));
                     break;
                 case 'orders':
                     if (orders.length > 0) return;
                     const ordersRes = await fetch('/api/admin/orders');
-                    setOrders(await ordersRes.json());
+                    setOrders(await safeData(ordersRes));
                     break;
                 case 'g2g_center':
-                    // Fetch only once, tracking is now server-side or less frequent
                     const g2Res = await fetch('/api/admin/g2g?action=get_tracked_orders');
                     const g2StatsRes = await fetch('/api/admin/g2g?action=get_stats');
-                    setTrackedG2GOrders(await g2Res.json());
-                    setG2GStats(await g2StatsRes.json());
+                    setTrackedG2GOrders(await safeData(g2Res));
+                    setG2GStats(await safeData(g2StatsRes, { totalRevenue: 0, totalProfit: 0, totalOrders: 0, autoPilot: false }));
                     break;
                 case 'hr':
                     if (employees.length > 0) return;
                     const empRes = await fetch('/api/hr/employees');
-                    setEmployees(await empRes.json());
+                    setEmployees(await safeData(empRes));
                     break;
                 case 'support':
                     if (tickets.length > 0) return;
                     const tRes = await fetch('/api/tickets');
-                    setTickets(await tRes.json());
+                    setTickets(await safeData(tRes));
                     break;
                 case 'website':
                     const [blogsRes, servRes, projRes, revRes, rentRes, categRes] = await Promise.all([
@@ -428,24 +447,24 @@ function AdminDashboard() {
                         fetch('/api/rentals'),
                         fetch('/api/admin/categories')
                     ]);
-                    setManualBlogs(await blogsRes.json());
-                    setServices(await servRes.json());
-                    setProjects(await projRes.json());
-                    setReviews(await revRes.json());
-                    setRentals(await rentRes.json());
-                    setCategories(await categRes.json());
+                    setManualBlogs(await safeData(blogsRes));
+                    setServices(await safeData(servRes));
+                    setProjects(await safeData(projRes));
+                    setReviews(await safeData(revRes));
+                    setRentals(await safeData(rentRes));
+                    setCategories(await safeData(categRes));
                     break;
                 case 'kb_management':
                     const kbRes = await fetch('/api/kb?admin=true');
-                    setKbArticles(await kbRes.json());
+                    setKbArticles(await safeData(kbRes));
                     break;
                 case 'intel':
                     const intelRes = await fetch('/api/market');
-                    setMarketIntel(await intelRes.json());
+                    setMarketIntel(await safeData(intelRes));
                     break;
                 case 'users':
                     const usersRes = await fetch('/api/admin/users');
-                    setUsers(await usersRes.json());
+                    setUsers(await safeData(usersRes));
                     break;
                 case 'marketing':
                     const [postsRes, msgRes, promoRes] = await Promise.all([
