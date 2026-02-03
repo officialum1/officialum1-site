@@ -64,7 +64,8 @@ function AdminDashboard() {
         stockValue: 0,
         deptBreakdown: {} as any,
         monthlyProfit: {} as any,
-        productProfit: {} as any
+        productProfit: {} as any,
+        productVolume: {} as any
     });
     const [settings, setSettings] = useState<any>({}); // API Keys
     const [employees, setEmployees] = useState<any[]>([]);
@@ -467,7 +468,7 @@ function AdminDashboard() {
         const newStats = {
             z2u: 0, playerup: 0, direct: 0, g2g: 0, total: 0, profit: 0, margin: 0,
             stockValue: 0, deptBreakdown: {} as any,
-            monthlyProfit: {} as any, productProfit: {} as any
+            monthlyProfit: {} as any, productProfit: {} as any, productVolume: {} as any
         };
 
         // Calculate Stock Assets
@@ -511,6 +512,10 @@ function AdminDashboard() {
             // Product breakdown
             if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
             newStats.productProfit[productName] += profit;
+
+            // Product Volume
+            if (!newStats.productVolume[productName]) newStats.productVolume[productName] = 0;
+            newStats.productVolume[productName] += 1;
 
             // Department Stats
             const staff = staffList.find(e => e.name === t.processedBy);

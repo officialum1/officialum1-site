@@ -117,6 +117,7 @@ export default function StockTab({
                         <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
                             <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
+                            <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#00ff88' }}>Inventory Tag (Optional)</label><input type="text" className="input-field" value={newItem.tag || ''} onChange={e => setNewItem({ ...newItem, tag: e.target.value })} placeholder="#tag" style={{ width: '100%', borderColor: '#00ff88' }} /></div>
                             <div style={{ gridColumn: 'span 2' }}><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Purchase Price ($)</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
 
                             <div style={{ gridColumn: 'span 2' }}>
@@ -166,9 +167,9 @@ export default function StockTab({
                                 <input type="number" className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} placeholder="0.00" />
                             </div>
                         </div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Paste from Excel/Sheets (Columns: User | Pass | Email | Extra)</label>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Paste from Excel/Sheets (Columns: User | Pass | Email | Tag)</label>
                         <textarea
-                            placeholder={`Paste directly from Excel (Cells A, B, C...)\n\nExample:\nuser1\tpass1\temail1\nuser2\tpass2\temail2`}
+                            placeholder={`Paste directly from Excel (Cells A, B, C, D...)\n\nExample:\nuser1\tpass1\temail1\t#netflix-4k\nuser2\tpass2\temail2\t#spotify-prem`}
                             value={bulkData}
                             onChange={e => setBulkData(e.target.value)}
                             className="input-field"

@@ -71,15 +71,23 @@ export default function PaymentsTab({
                             <div style={{ display: 'grid', gap: '2rem' }}>
                                 {/* Binance Pay */}
                                 <div style={{ background: 'rgba(255,215,0,0.05)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,215,0,0.1)' }}>
-                                    <h3 style={{ color: '#f0b90b', display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ width: '40px', height: '40px', background: '#f0b90b', borderRadius: '10px' }} />
-                                        Binance Pay Merchant
-                                    </h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ color: '#f0b90b', display: 'flex', alignItems: 'center', gap: '0.8rem', margin: 0 }}>
+                                            <div style={{ width: '40px', height: '40px', background: '#f0b90b', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' }}>B</div>
+                                            Binance Pay Merchant
+                                        </h3>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                            <div style={{ position: 'relative', width: '44px', height: '24px', background: settings.enable_binance === 'true' ? '#f0b90b' : '#333', borderRadius: '12px', transition: '0.3s' }}>
+                                                <div style={{ position: 'absolute', top: '2px', left: settings.enable_binance === 'true' ? '22px' : '2px', width: '20px', height: '20px', background: '#fff', borderRadius: '50%', transition: '0.3s', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }} />
+                                            </div>
+                                            <input type="checkbox" checked={settings.enable_binance === 'true'} onChange={e => setSettings({ ...settings, enable_binance: e.target.checked ? 'true' : 'false' })} style={{ display: 'none' }} />
+                                        </label>
+                                    </div>
                                     <div style={{ display: 'grid', gap: '1.2rem' }}>
                                         <input
                                             className="input-field"
                                             placeholder="Binance API Key"
-                                            value={settings.binanceKey}
+                                            value={settings.binanceKey || ''}
                                             onChange={e => setSettings({ ...settings, binanceKey: e.target.value })}
                                             style={{ background: 'rgba(0,0,0,0.3)' }}
                                         />
@@ -87,7 +95,7 @@ export default function PaymentsTab({
                                             className="input-field"
                                             type="password"
                                             placeholder="Binance Secret"
-                                            value={settings.binanceSecret}
+                                            value={settings.binanceSecret || ''}
                                             onChange={e => setSettings({ ...settings, binanceSecret: e.target.value })}
                                             style={{ background: 'rgba(0,0,0,0.3)' }}
                                         />
@@ -96,17 +104,58 @@ export default function PaymentsTab({
 
                                 {/* Stripe */}
                                 <div style={{ background: 'rgba(99,102,241,0.05)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(99,102,241,0.1)' }}>
-                                    <h3 style={{ color: '#6366f1', display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.5rem' }}>
-                                        <div style={{ width: '40px', height: '40px', background: '#6366f1', borderRadius: '10px' }} />
-                                        Stripe Infrastructure
-                                    </h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ color: '#6366f1', display: 'flex', alignItems: 'center', gap: '0.8rem', margin: 0 }}>
+                                            <div style={{ width: '40px', height: '40px', background: '#6366f1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold' }}>S</div>
+                                            Stripe Infrastructure
+                                        </h3>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                            <div style={{ position: 'relative', width: '44px', height: '24px', background: settings.enable_stripe === 'true' ? '#6366f1' : '#333', borderRadius: '12px', transition: '0.3s' }}>
+                                                <div style={{ position: 'absolute', top: '2px', left: settings.enable_stripe === 'true' ? '22px' : '2px', width: '20px', height: '20px', background: '#fff', borderRadius: '50%', transition: '0.3s', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }} />
+                                            </div>
+                                            <input type="checkbox" checked={settings.enable_stripe === 'true'} onChange={e => setSettings({ ...settings, enable_stripe: e.target.checked ? 'true' : 'false' })} style={{ display: 'none' }} />
+                                        </label>
+                                    </div>
                                     <input
                                         className="input-field"
                                         placeholder="Stripe Secret Key (sk_live_...)"
-                                        value={settings.stripeSecret}
+                                        value={settings.stripeSecret || ''}
                                         onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })}
-                                        style={{ background: 'rgba(0,0,0,0.3)' }}
+                                        style={{ background: 'rgba(0,0,0,0.3)', width: '100%' }}
                                     />
+                                </div>
+
+                                {/* Cryptomus */}
+                                <div style={{ background: 'rgba(255,123,0,0.05)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,123,0,0.1)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <h3 style={{ color: '#ff7b00', display: 'flex', alignItems: 'center', gap: '0.8rem', margin: 0 }}>
+                                            <div style={{ width: '40px', height: '40px', background: '#ff7b00', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold' }}>C</div>
+                                            Cryptomus Gateway
+                                        </h3>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                            <div style={{ position: 'relative', width: '44px', height: '24px', background: settings.enable_cryptomus === 'true' ? '#ff7b00' : '#333', borderRadius: '12px', transition: '0.3s' }}>
+                                                <div style={{ position: 'absolute', top: '2px', left: settings.enable_cryptomus === 'true' ? '22px' : '2px', width: '20px', height: '20px', background: '#fff', borderRadius: '50%', transition: '0.3s', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }} />
+                                            </div>
+                                            <input type="checkbox" checked={settings.enable_cryptomus === 'true'} onChange={e => setSettings({ ...settings, enable_cryptomus: e.target.checked ? 'true' : 'false' })} style={{ display: 'none' }} />
+                                        </label>
+                                    </div>
+                                    <div style={{ display: 'grid', gap: '1.2rem' }}>
+                                        <input
+                                            className="input-field"
+                                            placeholder="Merchant ID"
+                                            value={settings.cryptomusId || ''}
+                                            onChange={e => setSettings({ ...settings, cryptomusId: e.target.value })}
+                                            style={{ background: 'rgba(0,0,0,0.3)' }}
+                                        />
+                                        <input
+                                            className="input-field"
+                                            type="password"
+                                            placeholder="Payment API Key"
+                                            value={settings.cryptomusKey || ''}
+                                            onChange={e => setSettings({ ...settings, cryptomusKey: e.target.value })}
+                                            style={{ background: 'rgba(0,0,0,0.3)' }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>

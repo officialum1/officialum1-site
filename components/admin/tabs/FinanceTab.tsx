@@ -98,6 +98,20 @@ export default function FinanceTab({
                         {Object.keys(stats.productProfit).length === 0 && <p style={{ color: '#666' }}>No data yet.</p>}
                     </div>
                 </div>
+
+                {/* Top Selling Volume */}
+                <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>
+                    <h3 style={{ color: '#ff4d4d', marginBottom: '1.5rem' }}>🔥 Top Selling (Volume)</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        {Object.entries(stats.productVolume || {}).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5).map(([name, val]: [string, any]) => (
+                            <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                                <span style={{ color: '#ddd', fontSize: '0.9rem', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                                <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>{Number(val).toLocaleString()} Sold</span>
+                            </div>
+                        ))}
+                        {(Object.keys(stats.productVolume || {}).length === 0) && <p style={{ color: '#666' }}>No data yet.</p>}
+                    </div>
+                </div>
             </div>
 
             <div className="glass" style={{ padding: '2rem', borderRadius: '16px' }}>

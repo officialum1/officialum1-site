@@ -95,7 +95,8 @@ export async function POST(request: Request) {
                     username: body.username || '',
                     password: body.password || '',
                     email: body.email || '',
-                    extraInfo: body.extraInfo || ''
+                    extraInfo: body.extraInfo || '',
+                    tag: body.tag || ''
                 })
             };
 
@@ -270,6 +271,7 @@ export async function POST(request: Request) {
                 let password = '';
                 let email = '';
                 let extra = '';
+                let tag = '';
 
                 // SMART PARSING
                 // 1. Check for basic Excel Paste (Tab Separated)
@@ -278,19 +280,36 @@ export async function POST(request: Request) {
                     username = parts[0]?.trim();
                     password = parts[1]?.trim();
                     email = parts[2]?.trim() || '';
-                    extra = parts.length > 3 ? parts.slice(3).join(' | ').trim() : '';
+                    const part4 = parts[3]?.trim();
+                    const part5 = parts[4]?.trim();
+
+                    if (part4 && part4.startsWith('#')) {
+                        tag = part4;
+                        extra = part5 || '';
+                    } else {
+                        extra = part4 || '';
+                        if (part5 && part5.startsWith('#')) tag = part5;
+                    }
                 }
-                // 2. Check for Standard Combolist (User:Pass:Email or User:Pass)
+                // 2. Check for Standard Combolist (User:Pass:Email:Tag or User:Pass:Email:Extra)
                 else if (line.includes(':')) {
                     const parts = line.trim().split(':');
                     username = parts[0]?.trim();
                     password = parts[1]?.trim();
-                    // If 3 parts, 3rd is email. If more, join defaults to extra.
-                    if (parts.length === 3) {
-                        email = parts[2]?.trim();
-                    } else if (parts.length > 3) {
-                        email = parts[2]?.trim();
-                        extra = parts.slice(3).join(':').trim();
+                    // If 3 parts, 3rd is email.
+                    if (parts.length >= 3) email = parts[2]?.trim();
+
+                    if (parts.length > 3) {
+                        // Check remaining parts for tags
+                        const remaining = parts.slice(3);
+                        const tagIndex = remaining.findIndex((p: string) => p.trim().startsWith('#'));
+                        if (tagIndex !== -1) {
+                            tag = remaining[tagIndex].trim();
+                            // Everything else is extra
+                            extra = remaining.filter((_: string, i: number) => i !== tagIndex).join(':').trim();
+                        } else {
+                            extra = remaining.join(':').trim();
+                        }
                     }
                 }
                 // 3. Last Resort (Comma separated)
@@ -313,7 +332,8 @@ export async function POST(request: Request) {
                         username,
                         password,
                         email,
-                        extraInfo: extra
+                        extraInfo: extra,
+                        tag: tag
                     })
                 };
 

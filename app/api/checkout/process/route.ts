@@ -437,10 +437,32 @@ export async function POST(req: Request) {
                         }
                     }
                 }
-            } else if (p.type === 'service') {
-                itemCreds += `⚡ **${p.name}:** Processing shortly.\n`;
             } else {
-                const stockRows: any = await query("SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' LIMIT ?", [p.name, p.platform, currentQuantity]);
+                let stockRows: any = [];
+
+                // 1. Tag-Based Matching (Highest Priority)
+                if (p.inventory_tag) {
+                    stockRows = await query("SELECT * FROM inventory WHERE accountDetails LIKE ? AND status = 'In Stock' LIMIT ?", [`%${p.inventory_tag}%`, currentQuantity]);
+                }
+
+                // 2. Name-Based Matching (Fallback if no tag or insufficient tag stock)
+                if (stockRows.length < currentQuantity) {
+                    const remainingNeeded = currentQuantity - stockRows.length;
+                    const excludedIds = stockRows.length > 0 ? stockRows.map((r: any) => r.id) : [-1];
+
+                    // Only fall back to Name/Platform if strictly allowed or if no tag was defined
+                    // If a tag WAS defined but stock is empty, we arguably SHOULD NOT match generic name to avoid bad delivery.
+                    // But for now, let's keep it flexible: Tag -> Name -> Platform
+
+                    if (!p.inventory_tag) {
+                        const fallbackRows: any = await query(
+                            `SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' AND id NOT IN (${excludedIds.join(',')}) LIMIT ?`,
+                            [p.name, p.platform, remainingNeeded]
+                        );
+                        stockRows = [...stockRows, ...fallbackRows];
+                    }
+                }
+
                 if (stockRows.length >= currentQuantity) {
                     itemCreds += `✅ **${p.name}:**\n`;
                     for (const stockItem of stockRows) {

@@ -157,7 +157,8 @@ export default function CatalogTab({
                                             bundleItems: prod.bundle_items || '',
                                             stock: prod.stock || '1',
                                             category_id: prod.category_id || '',
-                                            g2g_listing_id: prod.g2g_listing_id || ''
+                                            g2g_listing_id: prod.g2g_listing_id || '',
+                                            inventoryTag: prod.inventory_tag || ''
                                         });
                                         setShowAddProduct(true);
                                         setImportMode('manual');
@@ -226,6 +227,17 @@ export default function CatalogTab({
                                 <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                                     <div><label style={{ color: '#ccc' }}>Product Name</label><input className="input-field" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required style={{ width: '100%' }} /></div>
                                     <div>
+                                        <label style={{ color: '#00ff88' }}>🔗 Inventory Tag (Optional)</label>
+                                        <input
+                                            className="input-field"
+                                            value={newProduct.inventoryTag || ''}
+                                            onChange={e => setNewProduct({ ...newProduct, inventoryTag: e.target.value })}
+                                            placeholder="#netflix-4k"
+                                            style={{ width: '100%', borderColor: '#00ff88' }}
+                                        />
+                                        <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>Matches items with this tag in inventory. Overrides name matching.</p>
+                                    </div>
+                                    <div>
                                         <label style={{ color: '#ccc' }}>Category</label>
                                         <select className="input-field" value={newProduct.category_id} onChange={e => setNewProduct({ ...newProduct, category_id: e.target.value })} style={{ width: '100%' }}>
                                             <option value="">No Category</option>
@@ -247,8 +259,8 @@ export default function CatalogTab({
                                     </div>
                                     <div>
                                         <label style={{ color: '#ccc' }}>Stock Level (Manual)</label>
-                                        <input type="number" className="input-field" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} style={{ width: '100%' }} placeholder="Enter manual stock count" />
-                                        <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>Overrides inventory system if set.</p>
+                                        <input type="number" className="input-field" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} style={{ width: '100%' }} placeholder="Auto-calculated if tag used" />
+                                        <p style={{ fontSize: '0.7rem', color: '#666', marginTop: '0.3rem' }}>Leave empty to count inventory automatically.</p>
                                     </div>
                                     <div><label style={{ color: '#ccc' }}>Image URL (Optional)</label><input className="input-field" value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} style={{ width: '100%' }} placeholder="https://..." /></div>
                                     <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#ccc' }}>Description</label><textarea className="input-field" value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} style={{ width: '100%', height: '80px' }} /></div>
@@ -290,7 +302,7 @@ export default function CatalogTab({
                                     </div>
 
                                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '' }); }} className="btn btn-outline">Cancel</button>
+                                        <button type="button" onClick={() => { setShowAddProduct(false); setEditingProduct(null); setNewProduct({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '', inventoryTag: '' }); }} className="btn btn-outline">Cancel</button>
                                         <button type="submit" className="btn btn-primary">{editingProduct ? 'Save Changes' : 'Create Product'}</button>
                                     </div>
                                 </form>
