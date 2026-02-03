@@ -38,12 +38,27 @@ export async function GET() {
             )
         `);
 
+        // Ensure categories table exists
+        await query(`
+            CREATE TABLE IF NOT EXISTS categories (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                slug VARCHAR(100) NOT NULL UNIQUE,
+                icon VARCHAR(50),
+                discount_percent DECIMAL(5,2) DEFAULT 0.00,
+                is_vip_only BOOLEAN DEFAULT FALSE,
+                sale_ends_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Migration: Add missing columns if table already existed (Safe Alter)
         try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { }
         try { await query("ALTER TABLE products ADD COLUMN g2g_listing_id VARCHAR(100)"); } catch (e) { }
+        try { await query("ALTER TABLE categories ADD COLUMN is_vip_only BOOLEAN DEFAULT FALSE"); } catch (e) { }
 
         // Fetch products with their manual stock AND live inventory count
         const products = await query(`
@@ -55,6 +70,8 @@ export async function GET() {
             LEFT JOIN categories c ON p.category_id = c.id
             ORDER BY p.id DESC
         `);
+
+        console.log(`[Shop API] Found ${Array.isArray(products) ? products.length : 0} products`);
         return NextResponse.json(products);
     } catch (e: unknown) {
         console.error("Shop API Error:", e instanceof Error ? e.message : String(e));
