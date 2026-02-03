@@ -124,7 +124,7 @@ export default function HRTab({
                         {/* Internal Admins from Users Table */}
                         {users.filter((u: any) => u.role === 'admin').map((u: any) => (
                             <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,255,136,0.02)' }}>
-                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>System Admin</div><div style={{ fontSize: '0.85rem', color: '#888' }}>{u.email}</div></td>
+                                <td style={{ padding: '1.5rem' }}><div style={{ fontWeight: 'bold' }}>{u.username || 'System Admin'}</div><div style={{ fontSize: '0.8rem', color: '#666' }}>ID: {u.id.slice(0, 6)}</div></td>
                                 <td style={{ padding: '1.5rem' }}>Management / Owner</td>
                                 <td style={{ padding: '1.5rem' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', background: 'rgba(0,180,100,0.1)', color: '#00ff88' }}>Core Admin</span></td>
                                 <td style={{ padding: '1.5rem' }}><span style={{ color: '#00ff88' }}>• ACTIVE</span></td>
@@ -154,7 +154,7 @@ export default function HRTab({
                                         </div>
                                         <div>
                                             <div style={{ fontWeight: 'bold', color: '#fff' }}>{emp.name}</div>
-                                            <div style={{ fontSize: '0.82rem', color: '#666' }}>{emp.email}</div>
+                                            <div style={{ fontSize: '0.82rem', color: '#666' }}>{emp.position || 'Staff'}</div>
                                         </div>
                                     </div>
                                 </td>

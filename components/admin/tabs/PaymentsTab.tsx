@@ -52,7 +52,7 @@ export default function PaymentsTab({
                             <span style={{ fontSize: '1.2rem' }}>
                                 {t === 'gateways' ? '🔌' : t === 'wallets' ? '👛' : t === 'payouts' ? '💸' : '📜'}
                             </span>
-                            {t}
+                            {t === 'payouts' ? 'Affiliates' : t}
                         </button>
                     ))}
                 </aside>
@@ -186,19 +186,29 @@ export default function PaymentsTab({
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                                     <select className="input-field" value={fundForm.platform} onChange={e => setFundForm({ ...fundForm, platform: e.target.value })}>
-                                        <option value="Meezan">Meezan Bank</option>
-                                        <option value="UBL">UBL Account</option>
-                                        <option value="Z2U">Z2U Merchant</option>
-                                        <option value="G2G">G2G Merchant</option>
+                                        <option value="Meezan" style={{ color: 'black' }}>Meezan Bank</option>
+                                        <option value="UBL" style={{ color: 'black' }}>UBL Account</option>
+                                        <option value="Z2U" style={{ color: 'black' }}>Z2U Merchant</option>
+                                        <option value="G2G" style={{ color: 'black' }}>G2G Merchant</option>
                                     </select>
                                     <input className="input-field" placeholder="Amount" type="number" value={fundForm.amount} onChange={e => setFundForm({ ...fundForm, amount: e.target.value })} />
                                     <select className="input-field" value={fundForm.currency} onChange={e => setFundForm({ ...fundForm, currency: e.target.value })}>
-                                        <option value="PKR">PKR</option>
-                                        <option value="USD">USD</option>
+                                        <option value="PKR" style={{ color: 'black' }}>PKR</option>
+                                        <option value="USD" style={{ color: 'black' }}>USD</option>
                                     </select>
                                 </div>
                                 <input className="input-field" placeholder="Funding Reason" value={fundForm.description} onChange={e => setFundForm({ ...fundForm, description: e.target.value })} style={{ marginBottom: '1.5rem' }} />
                                 <button className="btn btn-primary" style={{ width: '100%' }}>Inject Capital</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {settings.activePaymentTab === 'payouts' && (
+                        <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', textAlign: 'center' }}>
+                            <h2 style={{ marginBottom: '1rem', color: '#fff' }}>Affiliate Payouts</h2>
+                            <p style={{ color: '#888', marginBottom: '2rem' }}>Manage and process affiliate withdrawal requests here.</p>
+                            <div style={{ padding: '3rem', border: '1px dashed #333', borderRadius: '16px', color: '#666' }}>
+                                No pending payout requests.
                             </div>
                         </div>
                     )}

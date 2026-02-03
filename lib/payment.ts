@@ -97,7 +97,27 @@ export async function fulfillOrder(orderId: string) {
             } else if (p.type === 'service') {
                 itemCreds += `⚡ **${p.name}:** Processing shortly.\n`;
             } else {
-                const stockRows: any = await query("SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' LIMIT ?", [p.name, p.platform, currentQuantity]);
+                let stockRows: any = [];
+
+                // 1. Tag-Based Matching (Highest Priority)
+                if (p.inventory_tag) {
+                    stockRows = await query("SELECT * FROM inventory WHERE accountDetails LIKE ? AND status = 'In Stock' LIMIT ?", [`%${p.inventory_tag}%`, currentQuantity]);
+                }
+
+                // 2. Name-Based Matching (Fallback)
+                if (stockRows.length < currentQuantity) {
+                    const remainingNeeded = currentQuantity - stockRows.length;
+                    const excludedIds = stockRows.length > 0 ? stockRows.map((r: any) => r.id) : [-1];
+
+                    if (!p.inventory_tag) {
+                        const fallbackRows: any = await query(
+                            `SELECT * FROM inventory WHERE (name = ? OR platform = ?) AND status = 'In Stock' AND id NOT IN (${excludedIds.join(',')}) LIMIT ?`,
+                            [p.name, p.platform, remainingNeeded]
+                        );
+                        stockRows = [...stockRows, ...fallbackRows];
+                    }
+                }
+
                 if (stockRows.length >= currentQuantity) {
                     itemCreds += `✅ **${p.name}:**\n`;
                     for (const stockItem of stockRows) {
@@ -113,6 +133,11 @@ export async function fulfillOrder(orderId: string) {
             }
             combinedEmailBody += itemCreds + "\n---\n";
         }
+
+        // --- UPDATE ORDER STATUS ---
+        const needsManual = combinedEmailBody.includes("Pending manual fulfillment");
+        const finalStatus = needsManual ? 'processing' : 'completed';
+        await query("UPDATE orders SET status = ? WHERE orderId = ?", [finalStatus, orderId]);
 
         // Send Email
         const userRows: any = await query("SELECT email FROM users WHERE id = ?", [order.userId]);

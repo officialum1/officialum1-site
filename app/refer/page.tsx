@@ -57,6 +57,22 @@ export default function ReferPage() {
                                 View Earnings
                             </a>
                         </div>
+
+                        <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', textAlign: 'left' }}>
+                            <h4 style={{ color: '#fff', marginBottom: '1rem' }}>📢 Copy & Paste Promotion</h4>
+                            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '12px' }}>
+                                <p style={{ fontSize: '0.9rem', color: '#aaa', fontStyle: 'italic', marginBottom: '0.5rem' }}>"Best place to get Cheap Netflix & Spotify! 🎵🍿 Instant delivery & Warranty. Check it out: {typeof window !== 'undefined' ? window.location.origin : ''}/register?ref={user.referral_code}"</p>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`Best place to get Cheap Netflix & Spotify! 🎵🍿 Instant delivery & Warranty. Check it out: ${window.location.origin}/register?ref=${user.referral_code}`);
+                                        alert('Text Copied!');
+                                    }}
+                                    style={{ fontSize: '0.8rem', color: '#00ff88', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                                >
+                                    Copy Text
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>

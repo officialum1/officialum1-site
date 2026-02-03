@@ -111,12 +111,12 @@ export default function OrdersTab({
                             <div style={{ textAlign: 'right' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.2rem' }}>STATUS</div>
                                 <div style={{
-                                    color: order.status === 'completed' ? '#00ff88' : '#ffa500',
+                                    color: order.status === 'completed' ? '#00ff88' : (order.status === 'processing' ? '#ff4d4d' : '#ffa500'),
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase',
                                     fontSize: '0.9rem'
                                 }}>
-                                    {order.status || 'PENDING'}
+                                    {order.status === 'processing' ? 'ACTION REQUIRED' : (order.status === 'completed' ? 'COMPLETED' : order.status || 'PENDING')}
                                 </div>
                             </div>
 

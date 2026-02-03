@@ -480,6 +480,15 @@ export async function POST(req: Request) {
             combinedTelegramBody += itemCreds + "\n";
         }
 
+        // --- UPDATE ORDER STATUS BASED ON FULFILLMENT ---
+        // If any item required manual fulfillment, set status to 'processing' (Action Required).
+        // If all items were auto-delivered, set status to 'completed' (Done).
+        const needsManual = combinedEmailBody.includes("Pending manual fulfillment");
+        const finalStatus = needsManual ? 'processing' : 'completed';
+
+        // Update DB
+        await query("UPDATE orders SET status = ? WHERE orderId = ?", [finalStatus, newOrder.orderId]);
+
         // A. Email Delivery to User
         if (user.email) {
             await sendAuditReport(user.email, "Order #" + newOrder.orderId, {
