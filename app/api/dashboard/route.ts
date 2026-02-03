@@ -20,7 +20,16 @@ export async function GET(request: Request) {
 
         const notifications = await query("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5", [userId || email]);
 
-        return NextResponse.json({ orders, notifications });
+        let wallet = { balance: 0, affiliate_earnings: 0 };
+        if (userId) {
+            const userRows: any = await query("SELECT wallet_balance, total_affiliate_earnings FROM users WHERE id = ?", [userId]);
+            if (userRows.length > 0) {
+                wallet.balance = parseFloat(userRows[0].wallet_balance || 0);
+                wallet.affiliate_earnings = parseFloat(userRows[0].total_affiliate_earnings || 0);
+            }
+        }
+
+        return NextResponse.json({ orders, notifications, wallet });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

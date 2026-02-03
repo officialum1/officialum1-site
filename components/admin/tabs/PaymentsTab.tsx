@@ -52,7 +52,7 @@ export default function PaymentsTab({
                             <span style={{ fontSize: '1.2rem' }}>
                                 {t === 'gateways' ? '🔌' : t === 'wallets' ? '👛' : t === 'payouts' ? '💸' : '📜'}
                             </span>
-                            {t === 'payouts' ? 'Affiliates' : t}
+                            {t === 'payouts' ? 'Affiliate Logs' : t}
                         </button>
                     ))}
                 </aside>
@@ -205,10 +205,10 @@ export default function PaymentsTab({
 
                     {settings.activePaymentTab === 'payouts' && (
                         <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', textAlign: 'center' }}>
-                            <h2 style={{ marginBottom: '1rem', color: '#fff' }}>Affiliate Payouts</h2>
-                            <p style={{ color: '#888', marginBottom: '2rem' }}>Manage and process affiliate withdrawal requests here.</p>
+                            <h2 style={{ marginBottom: '1rem', color: '#fff' }}>Affiliate Credit Logs</h2>
+                            <p style={{ color: '#888', marginBottom: '2rem' }}>All affiliate earnings are now automatically credited to user wallets as Store Credit.</p>
                             <div style={{ padding: '3rem', border: '1px dashed #333', borderRadius: '16px', color: '#666' }}>
-                                No pending payout requests.
+                                View recent credit transactions in the "Financial Ledger" tab.
                             </div>
                         </div>
                     )}

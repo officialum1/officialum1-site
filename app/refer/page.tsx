@@ -19,7 +19,7 @@ export default function ReferPage() {
     const steps = [
         { title: "1. Join", desc: "Sign up for free and get your unique referral link instantly.", icon: "📝" },
         { title: "2. Share", desc: "Share your link on social media, Discord, or with friends needing accounts.", icon: "📢" },
-        { title: "3. Earn", desc: "Earn 5% commission on every purchase they make, forever!", icon: "💸" }
+        { title: "3. Earn", desc: "Earn 5% Store Credit on every purchase they make! Use it to buy anything.", icon: "💸" }
     ];
 
     return (
@@ -29,7 +29,7 @@ export default function ReferPage() {
             {/* Hero */}
             <section style={{ paddingTop: '150px', paddingBottom: '80px', textAlign: 'center', background: 'radial-gradient(circle at center, rgba(255, 215, 0, 0.1) 0%, rgba(0,0,0,0) 70%)' }}>
                 <h1 style={{ fontSize: '3.5rem', marginBottom: '1.5rem', fontFamily: 'var(--font-outfit)' }}>
-                    Refer Friends, <span style={{ color: '#ffd700' }}>Earn Crypto 💰</span>
+                    Refer Friends, <span style={{ color: '#ffd700' }}>Earn Store Credit 💰</span>
                 </h1>
                 <p style={{ color: '#ccc', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
                     Join our Affiliate Program and earn lifetime commissions on every order your referrals make. Fast payouts, real-time tracking.
@@ -101,7 +101,7 @@ export default function ReferPage() {
                 <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'left' }}>
                     <div className="glass" style={{ padding: '1.5rem', marginBottom: '1rem', borderRadius: '12px' }}>
                         <h4>⚡ When do I get paid?</h4>
-                        <p style={{ color: '#888', marginTop: '0.5rem' }}>You can convert your earnings to your wallet balance instantly or request a crypto payout once you reach $50.</p>
+                        <p style={{ color: '#888', marginTop: '0.5rem' }}>Earnings are automatically credited to your Wallet Balance instantly. Use them to purchase any product on our store!</p>
                     </div>
                     <div className="glass" style={{ padding: '1.5rem', marginBottom: '1rem', borderRadius: '12px' }}>
                         <h4>🕒 How long do cookies last?</h4>

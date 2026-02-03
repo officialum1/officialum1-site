@@ -9,6 +9,7 @@ export default function ClientDashboard() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
+    const [wallet, setWallet] = useState({ balance: 0, affiliate_earnings: 0 });
 
     useEffect(() => {
         const storedUser = localStorage.getItem('buyer_user');
@@ -28,6 +29,7 @@ export default function ClientDashboard() {
                 const data = await res.json();
                 setOrders(data.orders || []);
                 setNotifications(data.notifications || []);
+                if (data.wallet) setWallet(data.wallet);
             }
         } catch (e) {
             console.error("Dashboard Fetch Error", e);
@@ -128,6 +130,17 @@ export default function ClientDashboard() {
 
                     {/* Notifications & Support */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+                        {/* Custom Wallet Card */}
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.1), transparent)', border: '1px solid rgba(255,215,0,0.3)' }}>
+                            <h4 style={{ marginBottom: '0.5rem', color: '#ffd700', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>💰 Wallet Balance</h4>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>${wallet.balance.toFixed(2)}</div>
+                            <p style={{ color: '#ccc', fontSize: '0.85rem', marginTop: '0.5rem', lineHeight: '1.4' }}>
+                                Available Store Credit.<br />
+                                <span style={{ color: '#00ff88', fontSize: '0.8rem' }}>Lifetime Earnings: ${wallet.affiliate_earnings.toFixed(2)}</span>
+                            </p>
+                            <a href="/shop" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem', background: '#ffd700', color: '#000', fontWeight: 'bold', textAlign: 'center', display: 'block' }}>Shop Now</a>
+                        </div>
 
                         <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
                             <h4 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>🔔 Notifications</h4>
