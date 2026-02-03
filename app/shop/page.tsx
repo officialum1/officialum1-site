@@ -78,7 +78,7 @@ export default function ShopPage() {
     return (
         <main>
             <Navbar />
-            <div className="container page-header">
+            <div className="container page-header" style={{ paddingTop: '150px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Premium <span className="text-gradient">Social Accounts</span></h1>
                     <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Buy aged, verified, and high-quality accounts instantly.</p>
