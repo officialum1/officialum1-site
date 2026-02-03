@@ -180,7 +180,8 @@ export default function FinanceTab({
                     justifyContent: 'center',
                     zIndex: 10000,
                     backdropFilter: 'blur(10px)',
-                    padding: '20px'
+                    padding: '20px',
+                    animation: 'fadeIn 0.2s ease-out'
                 }}>
                     <div className="glass" style={{
                         padding: '2.5rem',
@@ -190,7 +191,7 @@ export default function FinanceTab({
                         maxWidth: '500px',
                         boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
                         position: 'relative',
-                        animation: 'modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                        animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                             <div>
@@ -286,9 +287,10 @@ export default function FinanceTab({
                     </div>
 
                     <style jsx>{`
+                    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                     @keyframes modalSlideUp {
-                        from { transform: translateY(30px); opacity: 0; }
-                        to { transform: translateY(0); opacity: 1; }
+                        from { transform: translateY(30px) scale(0.95); opacity: 0; }
+                        to { transform: translateY(0) scale(1); opacity: 1; }
                     }
                 `}</style>
                 </div>
