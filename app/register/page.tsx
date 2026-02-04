@@ -1,10 +1,10 @@
-"use client";
-
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useSearchParams } from 'next/navigation';
 
-export default function RegisterPage() {
+function RegisterForm() {
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [telegram, setTelegram] = useState('');
@@ -12,6 +12,11 @@ export default function RegisterPage() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+
+    useEffect(() => {
+        const ref = searchParams.get('ref');
+        if (ref) setReferralCode(ref);
+    }, [searchParams]);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -164,5 +169,13 @@ export default function RegisterPage() {
             </div>
             <Footer />
         </main>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div style={{ background: '#050505', minHeight: '100vh' }}></div>}>
+            <RegisterForm />
+        </Suspense>
     );
 }

@@ -299,25 +299,45 @@ export async function POST(req: Request) {
                     }
                 }
                 // 3. Bulk Order
-                else {
+                else if (isBulk) {
                     const { sendEmail } = require('@/lib/email');
                     await sendEmail({
                         to: recipientEmail,
-                        subject: `Bulk Order #${orderId} Confirmed`,
+                        subject: `Bulk Order Confirmed: #${orderId}`,
                         html: `
                             <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff;">
                                 <h2>Bulk Order Received</h2>
-                                <p>We have received your payment for ${cartItems.length} items.</p>
-                                <p>Our system is processing the delivery. Please check your dashboard or email in a few minutes.</p>
+                                <p>Thank you for your bulk purchase of <strong>${cartItems.length} items</strong>.</p>
+                                <p>Total Paid: $${amountToCharge}</p>
+                                <p>Your items are being prepared and will be delivered via email shortly.</p>
                             </div>
                         `
                     });
                 }
+
+                // 4. Referral Commission (Automatic Payout)
+                if (user && user.id !== 'guest') {
+                    const refRows: any = await query("SELECT referred_by, email FROM users WHERE id = ?", [user.id]);
+                    if (refRows.length > 0 && refRows[0].referred_by) {
+                        const referrerId = refRows[0].referred_by;
+                        const commission = (parseFloat(amountToCharge) * 0.05).toFixed(2); // 5%
+
+                        if (parseFloat(commission) > 0) {
+                            // Credit Referrer
+                            await query("UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?", [commission, referrerId]);
+                            await query("INSERT INTO wallet_transactions (user_id, amount, type, description) VALUES (?, ?, 'referral', ?)",
+                                [referrerId, commission, `Commission from Order #${orderId}`]);
+
+                            console.log(`💰 Paid $${commission} referral commission to ${referrerId}`);
+                        }
+                    }
+                }
+
             } catch (err) {
                 console.error("Fulfillment Error:", err);
+                // Do not fail the request, just log it. The order is paid.
             }
         }
-
         return NextResponse.json({ success: true, paymentUrl, orderId });
 
     } catch (e: any) {
