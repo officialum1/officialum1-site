@@ -1,44 +1,56 @@
-
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
 export async function GET() {
     try {
-        // Fetch last 5 orders
+        // Fetch last 10 paid orders
+        // Use LEFT JOIN to get product name. If product ID is 0 (Bulk), we handle it.
         const orders: any = await query(`
             SELECT 
-                o.orderId as id, 
-                p.name as productName, 
-                o.date,
-                o.guestEmail,
-                u.email as userEmail
+                o.orderId, 
+                o.amount, 
+                o.date, 
+                p.name as productName,
+                p.image as productImage
             FROM orders o
-            INNER JOIN products p ON o.productId = p.id
-            LEFT JOIN users u ON o.userId = u.id
-            WHERE o.status = 'paid' OR o.status = 'completed'
-            ORDER BY o.date DESC 
-            LIMIT 5
+            LEFT JOIN products p ON o.productId = p.id
+            WHERE o.status IN ('paid', 'completed')
+            ORDER BY o.date DESC
+            LIMIT 10
         `);
 
-        // Format data for popup
-        const formatted = orders.map((o: any) => {
-            const timeDiff = Date.now() - new Date(o.date).getTime();
-            const minsAgo = Math.floor(timeDiff / 60000);
+        // Format for frontend
+        const sales = orders.map((order: any) => {
+            const date = new Date(order.date);
+            const now = new Date();
+            const diffMs = now.getTime() - date.getTime();
+            const diffMins = Math.floor(diffMs / 60000);
 
-            // Generate a random country for "social proof" effect (since we don't store IP geo yet)
-            const countries = ['🇺🇸 USA', '🇬🇧 UK', '🇨🇦 CA', '🇦🇺 AU', '🇩🇪 DE', '🇫🇷 FR'];
-            const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+            let timeAgo = `${diffMins} mins ago`;
+            if (diffMins < 1) timeAgo = "Just now";
+            else if (diffMins > 60) timeAgo = `${Math.floor(diffMins / 60)} hours ago`;
+
+            // Handle Bulk or Deleted Products
+            let name = order.productName;
+            if (!name) {
+                if (order.productId == '0') name = "Bulk Cart Bundle";
+                else name = "Premium Account";
+            }
 
             return {
-                id: o.id,
-                product: o.productName || 'Premium Account',
-                location: randomCountry,
-                timeAgo: minsAgo < 1 ? 'Just now' : `${minsAgo} mins ago`
+                id: order.orderId,
+                name: name,
+                image: order.productImage,
+                price: order.amount,
+                time: timeAgo,
+                rawTime: date.getTime()
             };
         });
 
-        return NextResponse.json(formatted);
-    } catch (e) {
+        return NextResponse.json(sales);
+
+    } catch (e: any) {
+        console.error("Sales Feed Error:", e);
         return NextResponse.json({ error: "Failed to fetch sales" }, { status: 500 });
     }
 }
