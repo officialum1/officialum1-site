@@ -189,21 +189,21 @@ export default function ModernUIOverlay() {
                 .modal-overlay {
                     position: absolute;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    backdrop-filter: blur(8px);
+                    background: rgba(0, 0, 0, 0.85);
+                    backdrop-filter: blur(12px);
                 }
 
                 .modern-modal-card {
-                    background: rgba(15, 15, 20, 0.9);
-                    backdrop-filter: blur(25px);
-                    border: 1px solid rgba(0, 255, 136, 0.2);
-                    border-radius: 24px;
-                    padding: 32px;
+                    background: rgba(10, 10, 15, 0.98);
+                    backdrop-filter: blur(40px);
+                    border: 1px solid rgba(0, 255, 136, 0.4);
+                    border-radius: 28px;
+                    padding: 40px;
                     width: 100%;
-                    maxWidth: 450px;
+                    maxWidth: 500px;
                     position: relative;
-                    box-shadow: 0 30px 60px rgba(0,0,0,0.8), 
-                                0 0 40px rgba(0,255,136,0.05);
+                    box-shadow: 0 40px 80px rgba(0,0,0,0.9), 
+                                0 0 60px rgba(0,255,136,0.1);
                     overflow: hidden;
                 }
 
@@ -213,105 +213,114 @@ export default function ModernUIOverlay() {
                     left: -50%;
                     width: 200%;
                     height: 200%;
-                    background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 70%);
+                    background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
                     pointer-events: none;
                 }
 
                 .modal-header {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    margin-bottom: 20px;
+                    gap: 16px;
+                    margin-bottom: 24px;
                 }
 
                 .modal-type-icon {
-                    width: 36px;
-                    height: 36px;
-                    background: rgba(0, 255, 136, 0.1);
-                    border-radius: 10px;
+                    width: 44px;
+                    height: 44px;
+                    background: rgba(0, 255, 136, 0.15);
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.2rem;
+                    font-size: 1.4rem;
+                    border: 1px solid rgba(0, 255, 136, 0.2);
                 }
 
                 .modal-header h3 {
                     margin: 0;
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                     font-weight: 900;
-                    letter-spacing: 2px;
+                    letter-spacing: 3px;
                     color: #00ff88;
                     text-transform: uppercase;
+                    opacity: 0.9;
                 }
 
                 .modal-body p {
-                    color: #fff;
-                    font-size: 1.1rem;
-                    line-height: 1.5;
-                    margin: 0 0 24px 0;
-                    font-weight: 500;
+                    color: #ffffff;
+                    font-size: 1.25rem;
+                    line-height: 1.4;
+                    margin: 0 0 28px 0;
+                    font-weight: 700;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
                 }
 
                 .modal-input {
                     width: 100%;
-                    background: rgba(0,0,0,0.3);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    border-radius: 12px;
-                    padding: 14px 18px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 14px;
+                    padding: 16px 20px;
                     color: #fff;
-                    font-size: 1rem;
+                    font-size: 1.1rem;
                     outline: none;
                     transition: all 0.2s;
                     margin-bottom: 10px;
                 }
 
+                .modal-input::placeholder {
+                    color: rgba(255, 255, 255, 0.4);
+                }
+
                 .modal-input:focus {
                     border-color: #00ff88;
-                    background: rgba(0,255,136,0.05);
-                    box-shadow: 0 0 15px rgba(0,255,136,0.1);
+                    background: rgba(0, 255, 136, 0.08);
+                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
                 }
 
                 .modal-footer {
                     display: flex;
-                    gap: 12px;
+                    gap: 14px;
                     justify-content: flex-end;
-                    margin-top: 32px;
+                    margin-top: 36px;
                 }
 
                 .modal-btn-primary {
                     background: #00ff88;
                     color: #000;
                     border: none;
-                    padding: 12px 28px;
-                    border-radius: 12px;
+                    padding: 14px 32px;
+                    border-radius: 14px;
                     font-weight: 900;
-                    font-size: 0.85rem;
+                    font-size: 0.9rem;
                     cursor: pointer;
                     transition: all 0.2s;
                     letter-spacing: 1px;
+                    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
                 }
 
                 .modal-btn-primary:hover {
-                    background: #00cc6e;
+                    background: #00e67a;
                     transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(0,255,136,0.3);
+                    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
                 }
 
                 .modal-btn-secondary {
-                    background: transparent;
-                    color: #888;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    padding: 12px 28px;
-                    border-radius: 12px;
-                    font-weight: bold;
-                    font-size: 0.85rem;
+                    background: rgba(255, 255, 255, 0.03);
+                    color: #aaa;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    padding: 14px 32px;
+                    border-radius: 14px;
+                    font-weight: 700;
+                    font-size: 0.9rem;
                     cursor: pointer;
                     transition: all 0.2s;
                 }
 
                 .modal-btn-secondary:hover {
-                    background: rgba(255,255,255,0.05);
+                    background: rgba(255, 255, 255, 0.08);
                     color: #fff;
+                    border-color: rgba(255, 255, 255, 0.3);
                 }
 
                 /* TOAST STYLES */
