@@ -61,6 +61,15 @@ export default function HRTab({
                         </div>
 
                         <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>System Role</label>
+                            <select className="input-field" value={newEmp.role || 'seller'} onChange={e => setNewEmp({ ...newEmp, role: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
+                                <option value="seller">Staff (Seller)</option>
+                                <option value="admin">Admin</option>
+                                <option value="buyer">Buyer</option>
+                            </select>
+                        </div>
+
+                        <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Compensation Type</label>
                             <select className="input-field" value={newEmp.compensationType} onChange={e => setNewEmp({ ...newEmp, compensationType: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333' }}>
                                 <option value="Fixed">Fixed Salary</option>
@@ -185,7 +194,17 @@ export default function HRTab({
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                         <button onClick={() => {
                                             setEditingEmp(emp);
-                                            setNewEmp({ name: emp.name, username: emp.username, email: emp.email, position: emp.position, department: emp.department, permissions: emp.permissions, password: '', compensationType: emp.compensationType || 'Fixed' });
+                                            setNewEmp({
+                                                name: emp.name,
+                                                username: emp.username,
+                                                email: emp.email,
+                                                position: emp.position,
+                                                department: emp.department,
+                                                permissions: emp.permissions,
+                                                password: '',
+                                                compensationType: emp.compensationType || 'Fixed',
+                                                role: emp.role || 'seller'
+                                            });
                                             setShowAddStaff(true);
                                         }} className="btn btn-outline" style={{ padding: '5px 12px', fontSize: '0.8rem' }}>Edit</button>
                                         <button onClick={() => handleDeleteEmployee(emp.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>

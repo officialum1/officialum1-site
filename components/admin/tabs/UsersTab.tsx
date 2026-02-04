@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
 interface UsersTabProps {
     users: any[];
@@ -146,7 +147,7 @@ export default function UsersTab({
                                         )}
                                         <button
                                             onClick={async () => {
-                                                const amount = prompt(`Adjustment amount for ${u.email} (Positive to add, Negative to subtract):`);
+                                                const amount = await modernPrompt(`Adjustment amount for ${u.email} (Positive to add, Negative to subtract):`);
                                                 if (amount && !isNaN(parseFloat(amount))) {
                                                     const res = await fetch('/api/user/wallet', {
                                                         method: 'POST',
@@ -154,10 +155,10 @@ export default function UsersTab({
                                                         body: JSON.stringify({ userId: u.id, amount: parseFloat(amount), source: 'Admin Adjustment' })
                                                     });
                                                     if (res.ok) {
-                                                        alert('Wallet Updated');
+                                                        modernAlert('Wallet Updated');
                                                         fetchData();
                                                     } else {
-                                                        alert('Failed to update wallet');
+                                                        modernAlert('Failed to update wallet');
                                                     }
                                                 }
                                             }}
@@ -167,7 +168,7 @@ export default function UsersTab({
                                         </button>
                                         <button
                                             onClick={async () => {
-                                                if (confirm(`Delete buyer ${u.email}? This cannot be undone.`)) {
+                                                if (await modernConfirm(`Delete buyer ${u.email}? This cannot be undone.`)) {
                                                     await fetch(`/api/admin/users?id=${u.id}`, { method: 'DELETE' });
                                                     fetchData();
                                                 }
@@ -205,7 +206,7 @@ export default function UsersTab({
                                     setIsProcessing(true);
                                     try {
                                         const emails = importText.split('\n').map(e => e.trim()).filter(e => e.includes('@'));
-                                        if (emails.length === 0) return alert('No valid emails found');
+                                        if (emails.length === 0) return modernAlert('No valid emails found');
                                         const res = await fetch('/api/admin/users', {
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
@@ -213,12 +214,12 @@ export default function UsersTab({
                                         });
                                         const data = await res.json();
                                         if (data.success) {
-                                            alert(`Successfully imported ${data.count} new users!`);
+                                            modernAlert(`Successfully imported ${data.count} new users!`);
                                             setImportText('');
                                             setShowImport(false);
                                             fetchData();
                                         }
-                                    } catch (e) { alert('Import failed'); }
+                                    } catch (e) { modernAlert('Import failed'); }
                                     setIsProcessing(false);
                                 }}
                                 className="btn btn-primary"
@@ -273,11 +274,11 @@ export default function UsersTab({
                                         });
                                         const data = await res.json();
                                         if (data.success) {
-                                            alert(`Email sent to ${data.count} users!`);
+                                            modernAlert(`Email sent to ${data.count} users!`);
                                             setEmailForm({ subject: '', content: '' });
                                             setShowEmail(false);
                                         }
-                                    } catch (e) { alert('Sending failed'); }
+                                    } catch (e) { modernAlert('Sending failed'); }
                                     setIsProcessing(false);
                                 }}
                                 className="btn btn-primary"
@@ -291,54 +292,7 @@ export default function UsersTab({
                 </div>
             )}
 
-            {/* USER EDIT MODAL */}
-            {showUserEdit && selectedUser && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)', animation: 'fadeIn 0.2s ease-out' }}>
-                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.3)', animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                            <h3 style={{ color: '#00ff88', margin: 0 }}>Edit User Profile</h3>
-                            <button onClick={() => setShowUserEdit(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.5rem' }}>✕</button>
-                        </div>
-                        <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Email Address</label>
-                                <input className="input-field" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} required />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>New Password (Optional)</label>
-                                <input className="input-field" type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} placeholder="Leave blank to keep current" />
-                            </div>
-                            <div>
-                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Telegram / Discord</label>
-                                <input className="input-field" value={userForm.telegram} onChange={e => setUserForm({ ...userForm, telegram: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Role</label>
-                                    <select className="input-field" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })} style={{ width: '100%', padding: '0.8rem', background: '#0a0a0a', color: '#fff' }}>
-                                        <option value="buyer">Buyer</option>
-                                        <option value="seller">Seller</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>VIP Tier</label>
-                                    <select className="input-field" value={selectedUser.membership || 'none'} onChange={e => setSelectedUser({ ...selectedUser, membership: e.target.value })} style={{ width: '100%', padding: '0.8rem', background: '#0a0a0a', color: '#fff' }}>
-                                        <option value="none">Standard</option>
-                                        <option value="silver">Silver</option>
-                                        <option value="gold">Gold</option>
-                                        <option value="diamond">Diamond</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
-                                <button type="button" onClick={() => setShowUserEdit(false)} className="btn btn-outline" style={{ padding: '0.8rem' }}>Cancel</button>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem', fontWeight: 'bold' }}>Save Changes</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+
             <style jsx>{`
                 .hover-row:hover { background: rgba(255,255,255,0.05) !important; }
                 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

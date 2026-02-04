@@ -1,5 +1,7 @@
 "use client";
 
+import { modernAlert, modernConfirm } from '@/components/ModernUIOverlay';
+
 interface WebsiteTabProps {
     websiteTab: string;
     setWebsiteTab: (tab: string) => void;
@@ -124,16 +126,16 @@ export default function WebsiteTab({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📝</span> Publish New Blog Post</div>
                             <button
                                 onClick={async () => {
-                                    if (!confirm('Auto-generate a new blog post using AI template?')) return;
+                                    if (!(await modernConfirm('Auto-generate a new blog post using AI template?'))) return;
                                     try {
                                         const res = await fetch('/api/admin/generate-blog');
                                         const data = await res.json();
                                         if (data.success) {
-                                            alert(`Generated: ${data.title}\nRefresh the page to see it.`);
+                                            modernAlert(`Generated: ${data.title}\nRefresh the page to see it.`);
                                         } else {
-                                            alert(data.message || 'Error generating');
+                                            modernAlert(data.message || 'Error generating');
                                         }
-                                    } catch (e) { alert('Failed to generate'); }
+                                    } catch (e) { modernAlert('Failed to generate'); }
                                 }}
                                 style={{
                                     fontSize: '0.85rem',

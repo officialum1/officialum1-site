@@ -27,6 +27,7 @@ const SupportTab = dynamic(() => import('@/components/admin/tabs/SupportTab'), {
 const SettingsTab = dynamic(() => import('@/components/admin/tabs/SettingsTab'), { ssr: false });
 const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGenerator'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
 export default function AdminDashboardPage() {
     return (
@@ -75,6 +76,7 @@ function AdminDashboard() {
     const [showAddStaff, setShowAddStaff] = useState(false);
     const [newEmp, setNewEmp] = useState({
         name: '',
+        username: '',
         password: '',
         email: '',
         position: '',
@@ -82,6 +84,7 @@ function AdminDashboard() {
         salary: '',
         commissionRate: '',
         compensationType: 'Fixed', // 'Fixed' or 'Commission'
+        role: 'seller', // Default to Staff
         allowedPlatforms: [] as string[],
         permissions: ['inventory', 'orders', 'support'] // Defaults
     });
@@ -641,11 +644,11 @@ function AdminDashboard() {
                 })
             });
             if (res.ok) {
-                alert('User updated successfully');
+                modernAlert('User updated successfully');
                 setShowUserEdit(false);
                 fetchData();
             }
-        } catch (e) { alert('Update failed'); }
+        } catch (e) { modernAlert('Update failed'); }
     };
 
     const handleResendUserEmail = async (userId: string, email: string, action: string) => {
@@ -679,15 +682,28 @@ function AdminDashboard() {
                 alert(editingEmp ? 'Staff Updated Successfully' : 'Staff Added Successfully');
                 setShowAddStaff(false);
                 setEditingEmp(null);
-                setNewEmp({ name: '', email: '', password: '', position: '', department: '', salary: '', commissionRate: '', compensationType: 'Fixed', allowedPlatforms: [], permissions: ['inventory', 'orders', 'support'] });
+                setNewEmp({
+                    name: '',
+                    username: '',
+                    email: '',
+                    password: '',
+                    position: '',
+                    department: '',
+                    salary: '',
+                    commissionRate: '',
+                    compensationType: 'Fixed',
+                    role: 'seller',
+                    allowedPlatforms: [],
+                    permissions: ['inventory', 'orders', 'support']
+                });
                 fetchData();
             } else {
                 const err = await res.json();
-                alert(`Failed to process request: ${err.error || 'Unknown Error'}`);
+                modernAlert(`Failed to process request: ${err.error || 'Unknown Error'}`);
             }
         } catch (error) {
             console.error(error);
-            alert('Error processing staff');
+            modernAlert('Error processing staff');
         }
     };
 
@@ -700,9 +716,9 @@ function AdminDashboard() {
                 body: JSON.stringify({ action: 'reply', ticketId, message: replyMsg, sender: 'admin' })
             });
             setReplyMsg('');
-            alert('Reply Sent');
+            modernAlert('Reply Sent');
             fetchData();
-        } catch { alert('Failed to send reply'); }
+        } catch { modernAlert('Failed to send reply'); }
     };
 
     const handleUpdateAdminProfile = async (e: React.FormEvent) => {
@@ -720,14 +736,14 @@ function AdminDashboard() {
                 body: JSON.stringify({ email, password })
             });
             if (res.ok) {
-                alert('Admin Profile Updated!');
+                modernAlert('Admin Profile Updated!');
                 (e.target as HTMLFormElement).reset();
             } else {
-                alert('Failed to update profile');
+                modernAlert('Failed to update profile');
             }
         } catch (e) {
             console.error(e);
-            alert('Error updating profile');
+            modernAlert('Error updating profile');
         }
     };
 
@@ -755,9 +771,9 @@ function AdminDashboard() {
                 body: JSON.stringify({ topic: blogTopic })
             });
             const data = await res.json();
-            if (data.success) alert(`Blog Published: ${data.title}`);
-            else alert('Failed: ' + data.error);
-        } catch { alert('Analysis failed'); }
+            if (data.success) modernAlert(`Blog Published: ${data.title}`);
+            else modernAlert('Failed: ' + data.error);
+        } catch { modernAlert('Analysis failed'); }
         finally { setBlogLoading(false); }
     };
 
@@ -781,13 +797,13 @@ function AdminDashboard() {
                 body: JSON.stringify(settings)
             });
             if (res.ok) {
-                alert('Configuration Saved Securely!');
+                modernAlert('Configuration Saved Securely!');
             } else {
                 const err = await res.json();
-                alert('Failed to save settings: ' + (err.error || 'Unknown Error'));
+                modernAlert('Failed to save settings: ' + (err.error || 'Unknown Error'));
             }
         } catch (error) {
-            alert('Failed to save settings. Please try again.');
+            modernAlert('Failed to save settings. Please try again.');
         }
     };
 
@@ -815,18 +831,18 @@ function AdminDashboard() {
             });
             const data = await res.json();
             if (data.success) {
-                alert('Order Fulfilled Successfully! Email sent to customer.');
+                modernAlert('Order Fulfilled Successfully! Email sent to customer.');
                 setShowFulfill(false);
                 setFulfillDetails('');
                 fetchData();
             } else {
-                alert('Fulfillment Error: ' + data.error);
+                modernAlert('Fulfillment Error: ' + data.error);
             }
-        } catch (e) { alert('Network Error'); }
+        } catch (e) { modernAlert('Network Error'); }
     };
 
     const handleCleanupDescriptions = async () => {
-        if (!confirm('This will remove "Imported from Z2U store" from all products and replace it with a professional description. Proceed?')) return;
+        if (!(await modernConfirm('This will remove "Imported from Z2U store" from all products and replace it with a professional description. Proceed?'))) return;
         try {
             await fetch('/api/products', {
                 method: 'POST',
@@ -834,12 +850,12 @@ function AdminDashboard() {
                 body: JSON.stringify({ action: 'cleanup_descriptions' })
             });
             fetchData();
-            alert('Descriptions Cleaned!');
-        } catch { alert('Failed to clean descriptions'); }
+            modernAlert('Descriptions Cleaned!');
+        } catch { modernAlert('Failed to clean descriptions'); }
     };
 
     const handleDeleteProduct = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this product from the shop?')) return;
+        if (!(await modernConfirm('Are you sure you want to delete this product from the shop?'))) return;
         try {
             await fetch('/api/products', {
                 method: 'POST',
@@ -1025,7 +1041,7 @@ function AdminDashboard() {
     };
 
     const handleDeleteCategory = async (id: number) => {
-        if (!confirm('Are you sure? Products in this category will be uncategorized.')) return;
+        if (!(await modernConfirm('Are you sure? Products in this category will be uncategorized.'))) return;
         await fetch('/api/admin/categories', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1296,7 +1312,7 @@ function AdminDashboard() {
     };
 
     const handleDeleteBlog = async (id: any) => {
-        if (!confirm('Delete blog post?')) return;
+        if (!(await modernConfirm('Delete blog post?'))) return;
         await fetch('/api/blogs', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
         fetchData();
     };
@@ -1347,7 +1363,7 @@ function AdminDashboard() {
                 productName: newSale.productName // For bulk
             })
         });
-        alert("Sale recorded successfully!");
+        modernAlert("Sale recorded successfully!");
         setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
         fetchData();
     };
@@ -1862,7 +1878,7 @@ function AdminDashboard() {
                                 handleAddEmployee={handleAddEmployee}
                                 employees={employees}
                                 handleDeleteEmployee={async (id) => {
-                                    if (confirm('Terminate and delete staff account? This cannot be undone.')) {
+                                    if (await modernConfirm('Terminate and delete staff account? This cannot be undone.')) {
                                         await fetch(`/api/hr/employees?id=${id}`, { method: 'DELETE' });
                                         fetchData();
                                     }
@@ -1893,7 +1909,7 @@ function AdminDashboard() {
                                 }}
                                 kbArticles={kbArticles}
                                 handleDeleteKb={async (id) => {
-                                    if (confirm('Delete?')) {
+                                    if (await modernConfirm('Delete?')) {
                                         await fetch('/api/kb', { method: 'DELETE', body: JSON.stringify({ id }) });
                                         fetchData();
                                     }
@@ -2093,6 +2109,60 @@ function AdminDashboard() {
                 fetchData={fetchData}
                 categories={categories}
             />
+
+            {/* GLOBAL USER EDIT MODAL */}
+            {showUserEdit && selectedUser && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', backdropFilter: 'blur(5px)', animation: 'fadeIn 0.2s ease-out' }}>
+                    <div className="glass" style={{ width: '100%', maxWidth: '500px', padding: '2.5rem', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.3)', animation: 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                            <h3 style={{ color: '#00ff88', margin: 0 }}>Edit User Profile</h3>
+                            <button onClick={() => setShowUserEdit(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '1.5rem' }}>✕</button>
+                        </div>
+                        <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div>
+                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Email Address</label>
+                                <input className="input-field" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} required />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>New Password (Optional)</label>
+                                <input className="input-field" type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} placeholder="Leave blank to keep current" />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Telegram / Discord</label>
+                                <input className="input-field" value={userForm.telegram} onChange={e => setUserForm({ ...userForm, telegram: e.target.value })} style={{ width: '100%', padding: '0.8rem' }} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>Role</label>
+                                    <select className="input-field" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })} style={{ width: '100%', padding: '0.8rem', background: '#0a0a0a', color: '#fff' }}>
+                                        <option value="buyer">Buyer</option>
+                                        <option value="seller">Seller</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', display: 'block' }}>VIP Tier</label>
+                                    <select className="input-field" value={selectedUser.membership || 'none'} onChange={e => setSelectedUser({ ...selectedUser, membership: e.target.value })} style={{ width: '100%', padding: '0.8rem', background: '#0a0a0a', color: '#fff' }}>
+                                        <option value="none">Standard</option>
+                                        <option value="silver">Silver</option>
+                                        <option value="gold">Gold</option>
+                                        <option value="diamond">Diamond</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+                                <button type="button" onClick={() => setShowUserEdit(false)} className="btn btn-outline" style={{ padding: '0.8rem' }}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem', fontWeight: 'bold' }}>Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            <style jsx>{`
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes modalSlideUp { from { transform: translateY(40px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+            `}</style>
+            <ModernUIOverlay />
             <Footer />
         </main >
     );

@@ -1,6 +1,7 @@
 "use client";
 
 import { getPlatformIcon } from '@/lib/icons';
+import { modernAlert } from '@/components/ModernUIOverlay';
 
 interface CatalogTabProps {
     catalog: any[];
@@ -176,7 +177,7 @@ export default function CatalogTab({
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(`${window.location.origin}/shop/${prod.id}`);
-                                        alert('Link Copied!');
+                                        modernAlert('Link Copied!');
                                     }}
                                     className="btn btn-outline"
                                     style={{ flex: 1, fontSize: '0.7rem', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)', padding: '0.3rem' }}

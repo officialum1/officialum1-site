@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { modernAlert } from '@/components/ModernUIOverlay';
 
 interface CatalogGeneratorProps {
     showGenerator: boolean;
@@ -145,12 +146,12 @@ export default function CatalogGenerator({
             if (res.ok) {
                 setShowGenerator(false);
                 await fetchData();
-                alert(`✅ Successfully Generated ${productsCount} Products!`);
+                modernAlert(`✅ Successfully Generated ${productsCount} Products!`);
             } else {
                 const err = await res.json();
-                alert(`Error: ${err.error || 'Failed to import products'}`);
+                modernAlert(`Error: ${err.error || 'Failed to import products'}`);
             }
-        } catch { alert('Generation failed'); }
+        } catch { modernAlert('Generation failed'); }
     };
 
     if (!showGenerator) return null;

@@ -1,5 +1,7 @@
 "use client";
 
+import { modernAlert, modernPrompt } from '@/components/ModernUIOverlay';
+
 interface KBTabProps {
     showAddKb: boolean;
     setShowAddKb: (show: boolean) => void;
@@ -38,7 +40,7 @@ export default function KBTab({
                             type="button"
                             disabled={isGeneratingKb}
                             onClick={async () => {
-                                const topic = prompt("What is the Help Article about? (e.g. 'How to buy Netflix')");
+                                const topic = await modernPrompt("What is the Help Article about? (e.g. 'How to buy Netflix')");
                                 if (!topic) return;
                                 setIsGeneratingKb(true);
                                 try {
@@ -49,9 +51,9 @@ export default function KBTab({
                                     if (data.success) {
                                         setKbForm((prev: any) => ({ ...prev, ...data.data, is_published: true }));
                                     } else {
-                                        alert("AI Error: " + data.error);
+                                        modernAlert("AI Error: " + data.error);
                                     }
-                                } catch (e) { alert("Generation failed"); }
+                                } catch (e) { modernAlert("Generation failed"); }
                                 setIsGeneratingKb(false);
                             }}
                             className="btn btn-outline"

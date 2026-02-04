@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
 interface OrdersTabProps {
     orders: any[];
@@ -135,9 +136,9 @@ export default function OrdersTab({
                                 )}
                                 <button
                                     onClick={async () => {
-                                        const prog = prompt(`Update progress % (0-100) for ${order.orderId}:`, order.progress_percent || '0');
+                                        const prog = await modernPrompt(`Update progress % (0-100) for ${order.orderId}:`, order.progress_percent || '0');
                                         if (prog === null) return;
-                                        const link = prompt(`Delivery Report / Progress Link (Optional):`, order.report_link || '');
+                                        const link = await modernPrompt(`Delivery Report / Progress Link (Optional):`, order.report_link || '');
                                         if (link === null) return;
 
                                         await fetch('/api/admin/orders', {
@@ -160,7 +161,7 @@ export default function OrdersTab({
                                 {order.status !== 'cancelled' && order.status !== 'completed' && (
                                     <button
                                         onClick={async () => {
-                                            if (!confirm('Are you sure you want to CANCEL this order? This cannot be undone.')) return;
+                                            if (!(await modernConfirm('Are you sure you want to CANCEL this order? This cannot be undone.'))) return;
                                             await fetch('/api/admin/orders', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
