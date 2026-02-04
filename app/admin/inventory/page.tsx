@@ -67,7 +67,8 @@ function AdminDashboard() {
         deptBreakdown: {} as any,
         monthlyProfit: {} as any,
         productProfit: {} as any,
-        productVolume: {} as any
+        productVolume: {} as any,
+        wallets: { z2u: 0, g2g: 0, meezan: 0, ubl: 0 } as any
     });
     const [settings, setSettings] = useState<any>({}); // API Keys
     const [employees, setEmployees] = useState<any[]>([]);
@@ -517,7 +518,8 @@ function AdminDashboard() {
         const newStats = {
             z2u: 0, playerup: 0, direct: 0, g2g: 0, total: 0, profit: 0, margin: 0,
             stockValue: 0, deptBreakdown: {} as any,
-            monthlyProfit: {} as any, productProfit: {} as any, productVolume: {} as any
+            monthlyProfit: {} as any, productProfit: {} as any, productVolume: {} as any,
+            wallets: { z2u: 0, g2g: 0, meezan: 0, ubl: 0 } as any
         };
 
         // Calculate Stock Assets
@@ -540,6 +542,14 @@ function AdminDashboard() {
             else if (t.platform === 'Direct') newStats.direct += amount;
             else if (t.platform === 'G2G') newStats.g2g += amount;
             newStats.total += amount;
+
+            // Wallets Breakdown
+            if (!newStats.wallets) newStats.wallets = { z2u: 0, g2g: 0, meezan: 0, ubl: 0 };
+
+            if (t.platform === 'Z2U') newStats.wallets.z2u += amount;
+            else if (['G2G', 'PlayerUp'].includes(t.platform)) newStats.wallets.g2g += amount;
+            else if (t.platform === 'Meezan') newStats.wallets.meezan += amount;
+            else if (t.platform === 'UBL' || t.platform === 'Direct') newStats.wallets.ubl += amount; // Group Direct with UBL/Other for now or separate? FinanceTab groups UBL/Other.
 
             // Profit Calculation
             let cost = 0;
@@ -1380,7 +1390,7 @@ function AdminDashboard() {
                                             background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                             borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
                                             color: activeTab === tab.id ? '#00ff88' : '#888',
-                                            border: 'none',
+                                            borderTop: 'none', borderRight: 'none', borderBottom: 'none',
                                             fontWeight: activeTab === tab.id ? 'bold' : 'normal',
                                             cursor: 'pointer',
                                             fontSize: '0.95rem',
@@ -1414,7 +1424,7 @@ function AdminDashboard() {
                                             background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                             borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
                                             color: activeTab === tab.id ? '#00ff88' : '#888',
-                                            border: 'none',
+                                            borderTop: 'none', borderRight: 'none', borderBottom: 'none',
                                             fontWeight: activeTab === tab.id ? 'bold' : 'normal',
                                             cursor: 'pointer',
                                             fontSize: '0.95rem',
@@ -1449,7 +1459,7 @@ function AdminDashboard() {
                                             background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                             borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
                                             color: activeTab === tab.id ? '#00ff88' : '#888',
-                                            border: 'none',
+                                            borderTop: 'none', borderRight: 'none', borderBottom: 'none',
                                             fontWeight: activeTab === tab.id ? 'bold' : 'normal',
                                             cursor: 'pointer',
                                             fontSize: '0.95rem',
@@ -1484,7 +1494,7 @@ function AdminDashboard() {
                                             background: activeTab === tab.id ? 'linear-gradient(90deg, rgba(0,255,136,0.1), transparent)' : 'transparent',
                                             borderLeft: activeTab === tab.id ? '3px solid #00ff88' : '3px solid transparent',
                                             color: activeTab === tab.id ? '#00ff88' : '#888',
-                                            border: 'none',
+                                            borderTop: 'none', borderRight: 'none', borderBottom: 'none',
                                             fontWeight: activeTab === tab.id ? 'bold' : 'normal',
                                             cursor: 'pointer',
                                             fontSize: '0.95rem',

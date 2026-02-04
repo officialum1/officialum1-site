@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { sendAuditReport } from '@/lib/email';
+import { sendAuditReport, sendVerificationEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
@@ -42,12 +42,12 @@ export async function POST(req: Request) {
         const origin = req.headers.get('origin') || 'https://officialum1.com';
         const verifyLink = `${origin}/verify-email?token=${verificationToken}`;
 
-        await sendAuditReport(email, "Verify Your Account - OfficialUM1", {
-            da: "ACTION REQUIRED",
-            pa: "Verify Email",
-            links: 0,
-            details: `Thanks for signing up! Please verify your email to unlock all features.\n\n<a href="${verifyLink}" style="display:inline-block;padding:10px 20px;background:#4f46e5;color:white;text-decoration:none;border-radius:5px;">Verify Account</a>\n\nOr click here: ${verifyLink}`
-        }, {});
+        try {
+            await sendVerificationEmail(email, verifyLink);
+        } catch (emailError) {
+            console.error("Failed to send verification email:", emailError);
+            // Don't block registration, but log it
+        }
 
         return NextResponse.json({
             success: true,

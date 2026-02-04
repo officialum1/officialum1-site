@@ -31,6 +31,7 @@ export async function POST(request: Request) {
             id: `emp_${Date.now()}`,
             name: body.name,
             email: body.email,
+            username: body.username || null,
             password: hashedPassword,
             position: body.position,
             department: body.department,
@@ -44,8 +45,8 @@ export async function POST(request: Request) {
 
         // 1. Insert into employees
         await query(
-            "INSERT INTO employees (id, name, email, password, position, department, salary, commissionRate, compensationType, allowedPlatforms, status, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [newEmp.id, newEmp.name, newEmp.email, newEmp.password, newEmp.position, newEmp.department, newEmp.salary, newEmp.commissionRate, newEmp.compensationType, newEmp.allowedPlatforms, newEmp.status, newEmp.permissions]
+            "INSERT INTO employees (id, name, username, email, password, position, department, salary, commissionRate, compensationType, allowedPlatforms, status, permissions) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [newEmp.id, newEmp.name, newEmp.username, newEmp.email, newEmp.password, newEmp.position, newEmp.department, newEmp.salary, newEmp.commissionRate, newEmp.compensationType, newEmp.allowedPlatforms, newEmp.status, newEmp.permissions]
         );
 
         // 2. Synchronize with users table for login
@@ -53,14 +54,14 @@ export async function POST(request: Request) {
         const existing: any = await query("SELECT id FROM users WHERE email = ?", [newEmp.email]);
         if (existing.length === 0) {
             await query(
-                "INSERT INTO users (id, email, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?)",
-                [newEmp.id, newEmp.email, plainPassword, 'seller', true, newEmp.permissions]
+                "INSERT INTO users (id, email, username, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [newEmp.id, newEmp.email, newEmp.username, plainPassword, 'seller', true, newEmp.permissions]
             );
         } else {
             // Update existing user to staff
             await query(
-                "UPDATE users SET role = 'seller', permissions = ?, password = ? WHERE email = ?",
-                [newEmp.permissions, plainPassword, newEmp.email]
+                "UPDATE users SET role = 'seller', permissions = ?, password = ?, username = ? WHERE email = ?",
+                [newEmp.permissions, plainPassword, newEmp.username, newEmp.email]
             );
         }
 
@@ -99,6 +100,7 @@ export async function PATCH(request: Request) {
             await query(
                 `UPDATE employees SET 
                     name = ?, 
+                    username = ?,
                     position = ?, 
                     department = ?, 
                     salary = ?, 
@@ -107,29 +109,30 @@ export async function PATCH(request: Request) {
                     allowedPlatforms = ?, 
                     permissions = ? 
                 WHERE id = ?`,
-                [name, position, department, Number(salary || 0), Number(commissionRate || 0), compensationType, JSON.stringify(allowedPlatforms || []), JSON.stringify(permissions || []), id]
+                [name, body.username || null, position, department, Number(salary || 0), Number(commissionRate || 0), compensationType, JSON.stringify(allowedPlatforms || []), JSON.stringify(permissions || []), id]
             );
 
             // Update or Create user for login synchronization
-            const empRows: any = await query("SELECT email FROM employees WHERE id = ?", [id]);
+            const empRows: any = await query("SELECT email, username FROM employees WHERE id = ?", [id]);
             if (empRows.length > 0) {
                 const userEmail = empRows[0].email;
+                const userUsername = empRows[0].username;
                 const existingUser: any = await query("SELECT id FROM users WHERE email = ?", [userEmail]);
 
                 if (existingUser.length > 0) {
-                    const updateParams: any[] = [JSON.stringify(permissions || []), userEmail];
-                    let updateQuery = "UPDATE users SET role = 'seller', permissions = ? WHERE email = ?";
+                    const updateParams: any[] = [JSON.stringify(permissions || []), userUsername, userEmail];
+                    let updateQuery = "UPDATE users SET role = 'seller', permissions = ?, username = ? WHERE email = ?";
 
                     if (password) {
-                        updateQuery = "UPDATE users SET role = 'seller', permissions = ?, password = ? WHERE email = ?";
-                        updateParams.splice(1, 0, password); // Note: Project uses plaintext in users table for auth/login
+                        updateQuery = "UPDATE users SET role = 'seller', permissions = ?, username = ?, password = ? WHERE email = ?";
+                        updateParams.splice(2, 0, password); // Insert password before email, after username
                     }
                     await query(updateQuery, updateParams);
                 } else {
                     // Create missing user entry
                     await query(
-                        "INSERT INTO users (id, email, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?)",
-                        [id, userEmail, password || 'default123', 'seller', true, JSON.stringify(permissions || [])]
+                        "INSERT INTO users (id, email, username, password, role, is_verified, permissions) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                        [id, userEmail, userUsername, password || 'default123', 'seller', true, JSON.stringify(permissions || [])]
                     );
                 }
             }

@@ -33,7 +33,7 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
 
         // 3. Send Email
         await transporter.sendMail({
-            from: `"OfficialUM1 Support" <${settings.smtpUser}>`,
+            from: `"OfficialUM1 Support" <no-reply@officialum1.com>`,
             to,
             subject,
             text,
@@ -197,4 +197,33 @@ export async function sendTicketReplyEmail(to: string, ticketSubject: string, me
         </div>
     `;
     return await sendEmail({ to, subject: `New Support Reply: ${ticketSubject}`, html });
+}
+
+export async function sendVerificationEmail(to: string, link: string) {
+    const html = `
+        <div style="font-family: 'Inter', sans-serif; background-color: #0d1117; color: #ffffff; padding: 40px 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #161b22; border-radius: 20px; overflow: hidden; border: 1px solid #30363d;">
+                <div style="background: #4f46e5; height: 5px;"></div>
+                <div style="padding: 40px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 28px; color: #ffffff;">Verify Your Account</h1>
+                    <p style="margin: 15px 0 25px; color: #8b949e; font-size: 16px; line-height: 1.5;">
+                        Welcome to OfficialUM1! Please confirm your email address to unlock full access to your account and secure your profile.
+                    </p>
+                    
+                    <a href="${link}" style="display: inline-block; padding: 16px 40px; background: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);">
+                        Verify Email Address
+                    </a>
+
+                    <p style="margin-top: 30px; font-size: 13px; color: #484f58;">
+                        Or copy this link: <br/>
+                        <a href="${link}" style="color: #4f46e5;">${link}</a>
+                    </p>
+                </div>
+                <div style="padding: 20px; text-align: center; background: #0d1117; border-top: 1px solid #30363d;">
+                    <p style="margin: 0; font-size: 12px; color: #484f58;">If you didn't create an account, you can safely ignore this email.</p>
+                </div>
+            </div>
+        </div>
+    `;
+    return await sendEmail({ to, subject: "Action Required: Verify your OfficialUM1 Account", html });
 }

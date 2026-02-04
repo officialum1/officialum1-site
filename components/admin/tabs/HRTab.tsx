@@ -43,6 +43,7 @@ export default function HRTab({
                     <h3 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>{editingEmp ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
                     <form onSubmit={handleAddEmployee} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Full Name</label><input type="text" required className="input-field" value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} style={{ width: '100%' }} /></div>
+                        <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Username (Optional)</label><input type="text" className="input-field" value={newEmp.username || ''} onChange={e => setNewEmp({ ...newEmp, username: e.target.value })} style={{ width: '100%' }} placeholder="For login" /></div>
                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Email Address</label><input type="email" required disabled={!!editingEmp} className="input-field" value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} style={{ width: '100%', opacity: editingEmp ? 0.6 : 1 }} /></div>
                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Password {editingEmp && '(Leave empty to keep current)'}</label><input type="text" required={!editingEmp} className="input-field" value={newEmp.password} onChange={e => setNewEmp({ ...newEmp, password: e.target.value })} style={{ width: '100%' }} /></div>
                         <div><label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc' }}>Position</label><input type="text" required className="input-field" value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} style={{ width: '100%' }} /></div>
@@ -154,6 +155,7 @@ export default function HRTab({
                                         </div>
                                         <div>
                                             <div style={{ fontWeight: 'bold', color: '#fff' }}>{emp.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#00ff88' }}>@{emp.username || emp.email.split('@')[0]}</div>
                                             <div style={{ fontSize: '0.82rem', color: '#666' }}>{emp.position || 'Staff'}</div>
                                         </div>
                                     </div>
@@ -183,7 +185,7 @@ export default function HRTab({
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                                         <button onClick={() => {
                                             setEditingEmp(emp);
-                                            setNewEmp({ name: emp.name, email: emp.email, position: emp.position, department: emp.department, permissions: emp.permissions, password: '', compensationType: emp.compensationType || 'Fixed' });
+                                            setNewEmp({ name: emp.name, username: emp.username, email: emp.email, position: emp.position, department: emp.department, permissions: emp.permissions, password: '', compensationType: emp.compensationType || 'Fixed' });
                                             setShowAddStaff(true);
                                         }} className="btn btn-outline" style={{ padding: '5px 12px', fontSize: '0.8rem' }}>Edit</button>
                                         <button onClick={() => handleDeleteEmployee(emp.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>

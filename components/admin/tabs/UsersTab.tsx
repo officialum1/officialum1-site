@@ -40,7 +40,8 @@ export default function UsersTab({
             {/* Top Spenders Highlight */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
                 {topSpenders.map((user, index) => (
-                    <div key={user.id} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: index === 0 ? 'linear-gradient(135deg, rgba(255,215,0,0.1) 0%, transparent 100%)' : 'rgba(255,255,255,0.02)', border: index === 0 ? '1px solid rgba(255,215,0,0.3)' : '1px solid rgba(255,255,255,0.05)' }}>
+                    <div key={`${user.id}-${index}`} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', background: index === 0 ? 'linear-gradient(135deg, rgba(255,215,0,0.1) 0%, transparent 100%)' : 'rgba(255,255,255,0.02)', border: index === 0 ? '1px solid rgba(255,215,0,0.3)' : '1px solid rgba(255,255,255,0.05)' }}>
+
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: index === 0 ? '#ffd700' : '#333', color: index === 0 ? '#000' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                 {index + 1}
@@ -83,8 +84,8 @@ export default function UsersTab({
                     <tbody>
                         {buyers.length === 0 ? (
                             <tr><td colSpan={6} style={{ padding: '4rem', textAlign: 'center', color: '#555' }}>No buyers found yet.</td></tr>
-                        ) : buyers.map((u: any) => (
-                            <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s', cursor: 'default' }} className="hover-row">
+                        ) : buyers.map((u: any, index: number) => (
+                            <tr key={`${u.id}-${index}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s', cursor: 'default' }} className="hover-row">
                                 <td style={{ padding: '1.2rem 2rem' }}>
                                     <div style={{ fontWeight: 'bold', color: '#fff' }}>{u.email}</div>
                                     <div style={{ fontSize: '0.75rem', color: '#555', fontFamily: 'monospace', marginTop: '2px' }}>ID: {u.id.slice(0, 8)}...</div>

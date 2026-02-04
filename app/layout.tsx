@@ -132,8 +132,8 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
         <Toaster position="top-right" expand={false} richColors />
         <Script
           id="json-ld"

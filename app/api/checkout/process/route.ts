@@ -35,12 +35,13 @@ export async function POST(req: Request) {
         let amountToCharge = "0";
         let safeQuantity = quantity;
 
+        const PLANS: any = {
+            silver: { name: 'Silver VIP Membership', price: '9.99', platform: 'VIP', id: 'm1' },
+            gold: { name: 'Gold VIP Membership', price: '24.99', platform: 'VIP', id: 'm2' },
+            diamond: { name: 'Diamond VIP Membership', price: '49.99', platform: 'VIP', id: 'm3' }
+        };
+
         if (membershipPlan) {
-            const PLANS: any = {
-                silver: { name: 'Silver VIP Membership', price: '9.99', platform: 'VIP', id: 'm1' },
-                gold: { name: 'Gold VIP Membership', price: '24.99', platform: 'VIP', id: 'm2' },
-                diamond: { name: 'Diamond VIP Membership', price: '49.99', platform: 'VIP', id: 'm3' }
-            };
             product = PLANS[membershipPlan];
             if (!product) throw new Error("Invalid membership plan.");
             amountToCharge = product.price;
@@ -232,8 +233,89 @@ export async function POST(req: Request) {
 
         // Handle Fulfillment if paid
         if (orderStatus === 'paid') {
-            // fulfillment logic... (truncated for brevity but ideally calls a helper)
-            // For now, return success and let webhook/manual process it if needed
+            try {
+                const recipientEmail = user.email || guestEmail;
+
+                // 1. VIP Membership
+                if (membershipPlan) {
+                    const planName = PLANS[membershipPlan]?.name || "VIP Membership";
+                    await sendAuditReport(recipientEmail, "VIP Access Activated!", {
+                        pa: planName,
+                        details: `Welcome to the elite! Your ${planName} is now active. Refresh your dashboard to see your new pricing.`
+                    }, settings);
+                }
+                // 2. Single Product (Most Common)
+                else if (!isBulk) {
+                    const pRows: any = await query("SELECT name FROM products WHERE id = ?", [productId]);
+                    const pName = pRows[0]?.name;
+
+                    if (pName) {
+                        // Check Stock
+                        const stockRows: any = await query("SELECT * FROM inventory WHERE name = ? AND status = 'In Stock' LIMIT ?", [pName, safeQuantity]);
+
+                        // Full Fulfillment
+                        if (stockRows.length >= safeQuantity) {
+                            let combinedCreds = "";
+                            const soldIds = [];
+
+                            for (const stock of stockRows) {
+                                await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stock.id]);
+                                const creds = JSON.parse(stock.accountDetails || '{}');
+                                // Format: user:pass:email (if available)
+                                const line = `${creds.email || creds.username}:${creds.password}${creds.extraInfo ? ` (${creds.extraInfo})` : ''}`;
+                                combinedCreds += line + "\n";
+                                soldIds.push(stock.id);
+                            }
+
+                            // Create Delivery Token
+                            const token = Math.random().toString(36).substring(2, 10);
+                            await query("INSERT INTO deliveries (token, orderId, itemName, details) VALUES (?, ?, ?, ?)",
+                                [token, orderId, pName, JSON.stringify({ accounts: combinedCreds, inventoryIds: soldIds })]);
+
+                            // Mark Complete
+                            await query("UPDATE orders SET status = 'completed', delivery_details = ? WHERE orderId = ?", [combinedCreds, orderId]);
+
+                            // Send Email
+                            await sendAuditReport(recipientEmail, `Order Delivered: ${pName}`, {
+                                pa: pName,
+                                details: combinedCreds
+                            }, settings);
+                        } else {
+                            // Partial/No Stock - Send Receipt
+                            const { sendEmail } = require('@/lib/email'); // Lazy import helper
+                            await sendEmail({
+                                to: recipientEmail,
+                                subject: `Order Received: ${pName}`,
+                                html: `
+                                    <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff;">
+                                        <h2>Order Confirmed</h2>
+                                        <p>Thank you for purchasing <strong>${pName}</strong>.</p>
+                                        <p>We are currently establishing the secure connection to deliver your goods. You will receive a separate email with your credentials shortly.</p>
+                                        <p>Order ID: ${orderId}</p>
+                                    </div>
+                                `
+                            });
+                        }
+                    }
+                }
+                // 3. Bulk Order
+                else {
+                    const { sendEmail } = require('@/lib/email');
+                    await sendEmail({
+                        to: recipientEmail,
+                        subject: `Bulk Order #${orderId} Confirmed`,
+                        html: `
+                            <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff;">
+                                <h2>Bulk Order Received</h2>
+                                <p>We have received your payment for ${cartItems.length} items.</p>
+                                <p>Our system is processing the delivery. Please check your dashboard or email in a few minutes.</p>
+                            </div>
+                        `
+                    });
+                }
+            } catch (err) {
+                console.error("Fulfillment Error:", err);
+            }
         }
 
         return NextResponse.json({ success: true, paymentUrl, orderId });

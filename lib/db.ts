@@ -50,8 +50,13 @@ export async function withTransaction<T>(callback: (connection: mysql.PoolConnec
 }
 
 
+// Global Init Flag
+let isInitialized = false;
+
 // 1. Initialize Tables (Run this once or check on startup)
 export async function initDB() {
+    if (isInitialized) return;
+
     // Users Table
     await query(`
         CREATE TABLE IF NOT EXISTS users (
@@ -442,6 +447,10 @@ export async function initDB() {
     try { await query("ALTER TABLE leads ADD COLUMN personalized_pitch TEXT"); } catch (e) { }
     try { await query("ALTER TABLE leads ADD COLUMN website_url VARCHAR(255)"); } catch (e) { }
 
+    // 3. Admin/Staff Username Login Support
+    try { await query("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE"); } catch (e) { }
+    try { await query("ALTER TABLE employees ADD COLUMN username VARCHAR(50) UNIQUE"); } catch (e) { }
+
     // 2. Orders Enhancements (Progress Tracking)
     try { await query("ALTER TABLE orders ADD COLUMN progress_percent INT DEFAULT 0"); } catch (e) { }
     try { await query("ALTER TABLE orders ADD COLUMN report_link TEXT"); } catch (e) { }
@@ -491,4 +500,6 @@ export async function initDB() {
     try { await query("CREATE INDEX idx_inventory_username ON inventory(account_username)"); } catch (e) { }
     try { await query("CREATE INDEX idx_inventory_platform ON inventory(platform)"); } catch (e) { }
     try { await query("CREATE INDEX idx_inventory_status ON inventory(status)"); } catch (e) { }
+
+    isInitialized = true;
 }

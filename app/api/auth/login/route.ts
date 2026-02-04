@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     try {
         const { email, password } = await req.json();
 
-        const results: any = await query("SELECT * FROM users WHERE email = ?", [email]);
+        const results: any = await query("SELECT * FROM users WHERE email = ? OR username = ?", [email, email]);
 
         if (results.length > 0) {
             const user = results[0];
