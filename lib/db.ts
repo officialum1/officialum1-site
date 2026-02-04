@@ -62,6 +62,7 @@ export async function initDB() {
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(50) PRIMARY KEY,
             email VARCHAR(255) UNIQUE NOT NULL,
+            username VARCHAR(100) UNIQUE, -- Added for Staff/Public Profiles
             password VARCHAR(255),
             telegram VARCHAR(255),
             role VARCHAR(50) DEFAULT 'buyer', -- 'admin', 'buyer', or 'seller'
@@ -78,6 +79,9 @@ export async function initDB() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Migration: Add username if missing
+    try { await query("ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE"); } catch (e) { }
 
     // Products Table
     await query(`
@@ -300,9 +304,13 @@ export async function initDB() {
             compensationType VARCHAR(50),
             allowedPlatforms TEXT,
             status VARCHAR(50),
+            username VARCHAR(100),
             joinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Migration: Add username to employees
+    try { await query("ALTER TABLE employees ADD COLUMN username VARCHAR(100)"); } catch (e) { }
 
     // 5. Deliveries
     await query(`

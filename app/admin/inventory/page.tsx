@@ -210,6 +210,23 @@ function AdminDashboard() {
     const [permissions, setPermissions] = useState<string[]>([]);
 
     useEffect(() => {
+        // Attempt to load cached data for speed
+        const cachedData = localStorage.getItem('admin_dashboard_cache');
+        if (cachedData) {
+            try {
+                const parsed = JSON.parse(cachedData);
+                setCatalog(parsed.catalog || []);
+                setOrders(parsed.orders || []);
+                setLeads(parsed.leads || []);
+                setLogs(parsed.logs || []);
+                setUsers(parsed.users || []);
+                setEmployees(parsed.employees || []);
+                setLoading(false); // Show UI immediately with cached data
+            } catch (e) {
+                console.error("Cache corrupted", e);
+            }
+        }
+
         const storedUser = localStorage.getItem('buyer_user');
         if (storedUser) {
             const user = JSON.parse(storedUser);
@@ -224,11 +241,27 @@ function AdminDashboard() {
             } catch (e) {
                 setPermissions((user.role || '').toLowerCase() === 'admin' ? ['all'] : []);
             }
-            fetchData(user); // Fetch data with user context
+            fetchData(user); // Fetch fresh data
         } else {
-            fetchData(); // Fallback for no user (will likely redirect or show guest)
+            fetchData(); // Fallback for no user
         }
     }, []);
+
+    // Helper to update cache
+    useEffect(() => {
+        if (!loading) {
+            const cache = {
+                catalog,
+                orders,
+                leads,
+                logs,
+                users,
+                employees,
+                lastUpdated: Date.now()
+            };
+            localStorage.setItem('admin_dashboard_cache', JSON.stringify(cache));
+        }
+    }, [catalog, orders, leads, logs, users, employees, loading]);
 
     // Sync tab with URL
     useEffect(() => {

@@ -32,6 +32,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true });
         }
 
+        if (body.action === 'cancel_order') {
+            const { orderId } = body;
+            await query("UPDATE orders SET status = 'cancelled' WHERE orderId = ?", [orderId]);
+            // Optional: Log cancellation
+            console.log(`Order #${orderId} was cancelled by admin`);
+            return NextResponse.json({ success: true });
+        }
+
         const { orderId, credentials } = body;
         // 1. Get Order Details
         const orderRows = await query("SELECT * FROM orders WHERE orderId = ?", [orderId]) as any[];

@@ -111,12 +111,12 @@ export default function OrdersTab({
                             <div style={{ textAlign: 'right' }}>
                                 <div style={{ fontSize: '0.75rem', color: '#888', marginBottom: '0.2rem' }}>STATUS</div>
                                 <div style={{
-                                    color: order.status === 'completed' ? '#00ff88' : (order.status === 'processing' ? '#ff4d4d' : '#ffa500'),
+                                    color: order.status === 'completed' ? '#00ff88' : (order.status === 'cancelled' ? '#ff4444' : (order.status === 'processing' ? '#ff4d4d' : '#ffa500')),
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase',
                                     fontSize: '0.9rem'
                                 }}>
-                                    {order.status === 'processing' ? 'ACTION REQUIRED' : (order.status === 'completed' ? 'COMPLETED' : order.status || 'PENDING')}
+                                    {order.status === 'processing' ? 'ACTION REQUIRED' : (order.status === 'completed' ? 'COMPLETED' : (order.status === 'cancelled' ? 'CANCELLED' : order.status || 'PENDING'))}
                                 </div>
                             </div>
 
@@ -157,6 +157,26 @@ export default function OrdersTab({
                                 >
                                     Update Progress
                                 </button>
+                                {order.status !== 'cancelled' && order.status !== 'completed' && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!confirm('Are you sure you want to CANCEL this order? This cannot be undone.')) return;
+                                            await fetch('/api/admin/orders', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    action: 'cancel_order',
+                                                    orderId: order.orderId
+                                                })
+                                            });
+                                            fetchData();
+                                        }}
+                                        className="btn btn-outline"
+                                        style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', color: '#ff4444', borderColor: '#ff444433' }}
+                                    >
+                                        Cancel Order
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
