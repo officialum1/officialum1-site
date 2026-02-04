@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 const TOPICS = [
     {
@@ -56,28 +57,126 @@ const TOPICS = [
 ];
 
 export async function GET() {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
-        // Pick a random topic
-        // In a real AI system, you'd call OpenAI here with a prompt.
         const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
         const slug = topic.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-        // Check if exists
         const exists: any = await query("SELECT id FROM blogs WHERE slug = ?", [slug]);
-        if (exists.length > 0) {
-            return NextResponse.json({ message: "Content already exists, skipping." });
-        }
+        if (exists.length > 0) return NextResponse.json({ message: "Exists" });
 
-        const image = "https://images.unsplash.com/photo-1499750310159-5254f4cc1529?auto=format&fit=crop&w=800&q=80"; // Generic Tech Image
-
+        const image = "https://images.unsplash.com/photo-1499750310159-5254f4cc1529?auto=format&fit=crop&w=800&q=80";
         await query(
             "INSERT INTO blogs (title, slug, category, image, excerpt, content, author) VALUES (?, ?, ?, ?, ?, ?, ?)",
             [topic.title, slug, topic.category, image, topic.template.substring(0, 100) + '...', topic.template, 'AI Editor']
         );
-
         return NextResponse.json({ success: true, title: topic.title });
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+export async function POST(request: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    try {
+        const body = await request.json();
+        const { topic } = body;
+
+        if (!topic) return NextResponse.json({ error: "Topic is required" }, { status: 400 });
+
+        // Get API Keys from settings
+        const settingsRes: any = await query("SELECT * FROM settings WHERE setting_key IN ('openaiKey', 'geminiKey')");
+        const settings: any = {};
+        settingsRes.forEach((s: any) => settings[s.setting_key] = s.setting_value);
+
+        const openaiKey = settings.openaiKey || process.env.OPENAI_API_KEY;
+        const geminiKey = settings.geminiKey || process.env.GEMINI_API_KEY;
+
+        if (!openaiKey && !geminiKey) {
+            return NextResponse.json({ error: "No AI API Keys configured (OpenAI or Gemini). Please check Settings." }, { status: 400 });
+        }
+
+        let title, category, excerpt, content;
+
+        if (openaiKey) {
+            // Use OpenAI (ChatGPT)
+            const prompt = `Write a professional, SEO-optimized blog post about "${topic}". 
+            Include a catchy title, a category (one word), a short excerpt (max 100 chars), and the full content in Markdown format. 
+            Format your response strictly as a JSON object with keys: title, category, excerpt, content.
+            Do not include any other text in your response.`;
+
+            const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openaiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: [{ role: "user", content: prompt }],
+                    response_format: { type: "json_object" }
+                })
+            });
+
+            if (!aiRes.ok) {
+                const error = await aiRes.json();
+                return NextResponse.json({ error: `OpenAI Error: ${error.error?.message || 'Unknown error'}` }, { status: 500 });
+            }
+
+            const aiData = await aiRes.json();
+            const generated = JSON.parse(aiData.choices[0].message.content);
+            title = generated.title;
+            category = generated.category;
+            excerpt = generated.excerpt;
+            content = generated.content;
+        } else {
+            // Use Google Gemini (Fallback)
+            const prompt = `Write a professional, SEO-optimized blog post about "${topic}". 
+            Include a catchy title, a category (one word), a short excerpt (max 100 chars), and the full content in Markdown format. 
+            Format your response strictly as a JSON object with keys: title, category, excerpt, content.
+            Return ONLY the valid JSON block.`;
+
+            const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!aiRes.ok) {
+                const error = await aiRes.json();
+                return NextResponse.json({ error: `Gemini Error: ${error.error?.message || 'Unknown error'}` }, { status: 500 });
+            }
+
+            const aiData = await aiRes.json();
+            const text = aiData.candidates[0].content.parts[0].text;
+            const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            const generated = JSON.parse(cleaned);
+            title = generated.title;
+            category = generated.category;
+            excerpt = generated.excerpt;
+            content = generated.content;
+        }
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+        // Check if exists
+        const exists: any = await query("SELECT id FROM blogs WHERE slug = ?", [slug]);
+        if (exists.length > 0) {
+            return NextResponse.json({ success: false, error: "A blog with this title already exists." });
+        }
+
+        const image = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=800&q=80"; // Tech/Blog image
+
+        await query(
+            "INSERT INTO blogs (title, slug, category, image, excerpt, content, author) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [title, slug, category, image, excerpt, content, 'AI Content Writer']
+        );
+
+        return NextResponse.json({ success: true, title });
 
     } catch (e: any) {
+        console.error("AI Blog Error:", e);
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

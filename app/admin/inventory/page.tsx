@@ -771,10 +771,15 @@ function AdminDashboard() {
                 body: JSON.stringify({ topic: blogTopic })
             });
             const data = await res.json();
-            if (data.success) modernAlert(`Blog Published: ${data.title}`);
-            else modernAlert('Failed: ' + data.error);
-        } catch { modernAlert('Analysis failed'); }
-        finally { setBlogLoading(false); }
+            if (res.ok && data.success) {
+                modernAlert(`Blog Published: ${data.title}`);
+            } else {
+                modernAlert('Failed: ' + (data.error || 'Unknown server error'));
+            }
+        } catch (e) {
+            console.error(e);
+            modernAlert('Network Error: Could not connect to generator');
+        } finally { setBlogLoading(false); }
     };
 
     const toggleGateway = (method: string) => {
