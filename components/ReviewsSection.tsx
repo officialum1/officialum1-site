@@ -88,7 +88,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                         <div key={r.id} style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <div style={{ fontWeight: 'bold' }}>{r.email?.split('@')[0]}***</div>
+                                    <div style={{ fontWeight: 'bold' }}>{r.email ? `${r.email.split('@')[0]}***` : 'Verified Buyer'}</div>
                                     {r.has_purchased > 0 && (
                                         <span style={{ fontSize: '0.6rem', background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0, 255, 136, 0.2)', display: 'flex', alignItems: 'center', gap: '2px' }}>
                                             ✓ Verified Purchase

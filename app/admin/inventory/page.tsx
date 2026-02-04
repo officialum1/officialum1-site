@@ -782,6 +782,30 @@ function AdminDashboard() {
         } finally { setBlogLoading(false); }
     };
 
+    const handleBulkGenerateReviews = async (ids?: number[]) => {
+        const targetIds = ids || selectedShopProducts;
+        if (targetIds.length === 0) return modernAlert('Select at least one product');
+
+        const count = await modernPrompt('How many reviews per product? (Default: 5)');
+        if (count === null) return;
+
+        try {
+            const res = await fetch('/api/admin/bulk-generate-product-reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productIds: targetIds, count: parseInt(count) || 5 })
+            });
+            const data = await res.json();
+            if (data.success) {
+                modernAlert(`✅ ${data.message}`);
+            } else {
+                modernAlert('Error: ' + data.error);
+            }
+        } catch (e) {
+            modernAlert('Failed to generate reviews');
+        }
+    };
+
     const toggleGateway = (method: string) => {
         let current: any = {};
         try {
@@ -1657,6 +1681,7 @@ function AdminDashboard() {
                             bulkProductData={bulkProductData}
                             setBulkProductData={setBulkProductData}
                             handleDeleteProduct={handleDeleteProduct}
+                            handleBulkGenerateReviews={handleBulkGenerateReviews}
                         />
                     )}
 

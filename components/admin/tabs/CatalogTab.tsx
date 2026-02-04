@@ -30,6 +30,7 @@ interface CatalogTabProps {
     bulkProductData: string;
     setBulkProductData: (data: string) => void;
     handleDeleteProduct: (id: number) => Promise<void>;
+    handleBulkGenerateReviews: (ids?: number[]) => Promise<void>;
 }
 
 export default function CatalogTab({
@@ -58,7 +59,8 @@ export default function CatalogTab({
     handlePlayerUpMagicSync,
     bulkProductData,
     setBulkProductData,
-    handleDeleteProduct
+    handleDeleteProduct,
+    handleBulkGenerateReviews
 }: CatalogTabProps) {
     return (
         <div className="FadeIn">
@@ -80,9 +82,14 @@ export default function CatalogTab({
                         </div>
                     )}
                     {selectedShopProducts.length > 0 && (
-                        <button onClick={handleBulkDeleteProducts} className="btn btn-outline" style={{ color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', background: 'rgba(255,77,77,0.05)' }}>
-                            🗑️ Delete ({selectedShopProducts.length})
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button onClick={handleBulkDeleteProducts} className="btn btn-outline" style={{ color: '#ff4d4d', borderColor: 'rgba(255,77,77,0.3)', background: 'rgba(255,77,77,0.05)' }}>
+                                🗑️ Delete ({selectedShopProducts.length})
+                            </button>
+                            <button onClick={() => handleBulkGenerateReviews()} className="btn btn-outline" style={{ color: '#ffd700', borderColor: 'rgba(255,215,0,0.3)', background: 'rgba(255,215,0,0.05)' }}>
+                                ⭐ Gen Reviews
+                            </button>
+                        </div>
                     )}
                     <button onClick={handleCleanupDescriptions} className="btn btn-outline" style={{ borderStyle: 'dashed', opacity: 0.7 }}>🧹 Clean Descriptions</button>
                     <button onClick={() => {
@@ -191,6 +198,14 @@ export default function CatalogTab({
                                     title="Delete Product"
                                 >
                                     🗑️
+                                </button>
+                                <button
+                                    onClick={() => handleBulkGenerateReviews([prod.id])}
+                                    className="btn btn-outline"
+                                    style={{ flex: 0.8, fontSize: '0.7rem', color: '#ffd700', borderColor: 'rgba(255,215,0,0.3)', padding: '0.3rem' }}
+                                    title="Add Reviews"
+                                >
+                                    ⭐ Reviews
                                 </button>
                             </div>
                         </div>
