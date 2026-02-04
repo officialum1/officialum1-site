@@ -76,27 +76,33 @@ export default function WebsiteTab({
     return (
         <div style={{ display: 'grid', gap: '2rem' }}>
             {/* Website Sub-Navigation */}
+            {/* Website Sub-Navigation */}
             <div style={{
                 display: 'flex',
-                gap: '0.5rem',
-                borderBottom: '1px solid #333',
-                paddingBottom: '1rem',
+                gap: '1rem',
+                background: 'rgba(0,0,0,0.2)',
+                padding: '1rem 1.5rem',
+                borderRadius: '20px',
                 overflowX: 'auto',
-                marginBottom: '1rem'
+                marginBottom: '2rem',
+                border: '1px solid rgba(255,255,255,0.05)',
+                alignItems: 'center'
             }}>
                 {['blogs', 'pages', 'services', 'projects', 'rentals', 'reviews', 'messages'].map(t => (
                     <button
                         key={t}
                         onClick={() => setWebsiteTab(t)}
                         style={{
-                            padding: '0.5rem 1rem',
-                            background: websiteTab === t ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                            padding: '0.8rem 1.5rem',
+                            background: websiteTab === t ? '#00ff88' : 'transparent',
                             color: websiteTab === t ? '#000' : '#888',
-                            borderRadius: '6px',
-                            border: 'none',
+                            borderRadius: '12px',
+                            border: websiteTab === t ? 'none' : '1px solid rgba(255,255,255,0.1)',
                             fontWeight: 'bold',
                             cursor: 'pointer',
-                            textTransform: 'capitalize'
+                            textTransform: 'capitalize',
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s'
                         }}
                     >
                         {t === 'blogs' ? '📝 Blogs' :
@@ -117,29 +123,29 @@ export default function WebsiteTab({
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span>📝</span> Publish New Blog Post
                         </h2>
-                        <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Blog Title</label>
-                                <input placeholder="Enter catchy title..." value={blogForm.title} onChange={e => setBlogForm({ ...blogForm, title: e.target.value })} className="input-field" required />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Blog Title</label>
+                                <input placeholder="Enter catchy title..." value={blogForm.title} onChange={e => setBlogForm({ ...blogForm, title: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Category</label>
-                                <input placeholder="e.g. Technology, Lifestyle" value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })} className="input-field" />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Category</label>
+                                <input placeholder="e.g. Technology, Lifestyle" value={blogForm.category} onChange={e => setBlogForm({ ...blogForm, category: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} />
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Feature Image URL</label>
-                                <input placeholder="https://..." value={blogForm.image} onChange={e => setBlogForm({ ...blogForm, image: e.target.value })} className="input-field" />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Feature Image URL</label>
+                                <input placeholder="https://..." value={blogForm.image} onChange={e => setBlogForm({ ...blogForm, image: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} />
                             </div>
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Excerpt</label>
-                                <textarea placeholder="Brief summary of the post..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Short Excerpt</label>
+                                <textarea placeholder="Brief summary of the post..." value={blogForm.excerpt} onChange={e => setBlogForm({ ...blogForm, excerpt: e.target.value })} className="input-field" style={{ width: '100%', height: '100px', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff', resize: 'vertical' }} />
                             </div>
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Full Content (Markdown)</label>
-                                <textarea placeholder="Write your post content here..." value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} className="input-field" style={{ height: '250px' }} required />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Full Content (Markdown)</label>
+                                <textarea placeholder="Write your post content here..." value={blogForm.content} onChange={e => setBlogForm({ ...blogForm, content: e.target.value })} className="input-field" style={{ width: '100%', height: '300px', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff', fontFamily: 'monospace' }} required />
                             </div>
                             <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Publish Post</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', borderRadius: '12px', fontWeight: 'bold' }}>Publish Post</button>
                             </div>
                         </form>
                     </div>
@@ -212,23 +218,23 @@ export default function WebsiteTab({
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span>🛠️</span> Add New Service
                         </h2>
-                        <form onSubmit={handleServiceSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1rem' }}>
+                        <form onSubmit={handleServiceSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Service Name</label>
-                                    <input placeholder="e.g. Modern Web Design" value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} className="input-field" required />
+                                    <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Service Name</label>
+                                    <input placeholder="e.g. Modern Web Design" value={serviceForm.title} onChange={e => setServiceForm({ ...serviceForm, title: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                                 </div>
                                 <div>
-                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Icon</label>
-                                    <input placeholder="Emoji" value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })} className="input-field" maxLength={2} />
+                                    <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Icon</label>
+                                    <input placeholder="emoji" value={serviceForm.icon} onChange={e => setServiceForm({ ...serviceForm, icon: e.target.value })} className="input-field" maxLength={2} style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff', textAlign: 'center' }} />
                                 </div>
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Short Description</label>
-                                <textarea placeholder="Tell clients what this service covers..." value={serviceForm.desc} onChange={e => setServiceForm({ ...serviceForm, desc: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Short Description</label>
+                                <textarea placeholder="Tell clients what this service covers..." value={serviceForm.desc} onChange={e => setServiceForm({ ...serviceForm, desc: e.target.value })} className="input-field" style={{ width: '100%', height: '100px', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} />
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem' }}>Add Service</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', borderRadius: '12px', fontWeight: 'bold' }}>Add Service</button>
                             </div>
                         </form>
                     </div>
@@ -250,17 +256,17 @@ export default function WebsiteTab({
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🚀 Add Portfolio Project</h2>
-                        <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
+                        <form onSubmit={handleProjectSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Project Name</label>
-                                <input placeholder="Project Name" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} className="input-field" required />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Project Name</label>
+                                <input placeholder="Project Name" value={projectForm.title} onChange={e => setProjectForm({ ...projectForm, title: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Description / URL</label>
-                                <textarea placeholder="Give some context or a live link..." value={projectForm.description} onChange={e => setProjectForm({ ...projectForm, description: e.target.value })} className="input-field" style={{ height: '80px' }} />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Description / URL</label>
+                                <textarea placeholder="Give some context or a live link..." value={projectForm.description} onChange={e => setProjectForm({ ...projectForm, description: e.target.value })} className="input-field" style={{ width: '100%', height: '100px', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} />
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <button type="submit" className="btn btn-primary">Add Project</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', borderRadius: '12px', fontWeight: 'bold' }}>Add Project</button>
                             </div>
                         </form>
                     </div>
@@ -295,17 +301,17 @@ export default function WebsiteTab({
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>🏘️ Add Rental Asset</h2>
-                        <form onSubmit={handleRentalSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                        <form onSubmit={handleRentalSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Domain / Name</label>
-                                <input placeholder="example.com" value={rentalForm.domain} onChange={e => setRentalForm({ ...rentalForm, domain: e.target.value })} className="input-field" required />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Domain / Name</label>
+                                <input placeholder="example.com" value={rentalForm.domain} onChange={e => setRentalForm({ ...rentalForm, domain: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Monthly Rent Price</label>
-                                <input placeholder="$99/mo" value={rentalForm.price} onChange={e => setRentalForm({ ...rentalForm, price: e.target.value })} className="input-field" />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Monthly Rent Price</label>
+                                <input placeholder="$99/mo" value={rentalForm.price} onChange={e => setRentalForm({ ...rentalForm, price: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} />
                             </div>
                             <div style={{ gridColumn: 'span 2', textAlign: 'right' }}>
-                                <button type="submit" className="btn btn-primary">Add Asset</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', borderRadius: '12px', fontWeight: 'bold' }}>Add Asset</button>
                             </div>
                         </form>
                     </div>
@@ -328,30 +334,30 @@ export default function WebsiteTab({
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px' }}>
                         <h2 style={{ color: '#00ff88', marginBottom: '1.5rem' }}>⭐ Add Client Feedback</h2>
-                        <form onSubmit={handleReviewSubmit} style={{ display: 'grid', gap: '1.2rem' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1rem' }}>
+                        <form onSubmit={handleReviewSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 200px', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Client Name</label>
-                                    <input placeholder="e.g. John Doe" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} className="input-field" required />
+                                    <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Client Name</label>
+                                    <input placeholder="e.g. John Doe" value={reviewForm.name} onChange={e => setReviewForm({ ...reviewForm, name: e.target.value })} className="input-field" style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                                 </div>
                                 <div>
-                                    <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Rating</label>
+                                    <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Rating</label>
                                     <select
                                         value={reviewForm.rating}
                                         onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
                                         className="input-field"
-                                        style={{ color: '#00ff88', fontWeight: 'bold' }}
+                                        style={{ width: '100%', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#00ff88', fontWeight: 'bold' }}
                                     >
                                         {[5, 4, 3, 2, 1].map(num => <option key={num} value={num}>{num} Stars</option>)}
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <label style={{ color: '#888', fontSize: '0.8rem', marginBottom: '0.5rem', display: 'block' }}>Review Content</label>
-                                <textarea placeholder="What did they say about your work?" value={reviewForm.review} onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })} className="input-field" style={{ height: '100px' }} required />
+                                <label style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'block', fontWeight: '500' }}>Review Content</label>
+                                <textarea placeholder="What did they say about your work?" value={reviewForm.review} onChange={e => setReviewForm({ ...reviewForm, review: e.target.value })} className="input-field" style={{ width: '100%', height: '100px', padding: '1rem', background: '#0a0a0a', border: '1px solid #333', borderRadius: '12px', color: '#fff' }} required />
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 3rem' }}>Add Review</button>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2.5rem', borderRadius: '12px', fontWeight: 'bold' }}>Add Review</button>
                             </div>
                         </form>
                     </div>
