@@ -6,10 +6,13 @@ import { query } from '@/lib/db';
 import BlogProductCard from '@/components/BlogProductCard';
 
 async function getPost(id: string) {
-    const filePath = path.join(process.cwd(), 'data', 'posts.json');
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const posts = JSON.parse(fileContents);
-    return posts.find((p: any) => p.id.toString() === id);
+    try {
+        const rows: any = await query("SELECT * FROM blogs WHERE id = ? OR slug = ?", [id, id]);
+        if (rows.length > 0) return rows[0];
+        return null;
+    } catch (e) {
+        return null;
+    }
 }
 
 // ... duplicate getPost removed above for cleanliness in actual tool call
@@ -45,8 +48,25 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
     const products = await query("SELECT * FROM products WHERE platform LIKE ? OR name LIKE ? ORDER BY RAND() LIMIT 1", [`%${post.category}%`, `%${post.category}%`]) as any[];
     const featuredProduct = products[0];
 
-    // Split content to insert banner in the middle (after first <h2> or first 4 paragraphs)
-    const contentParts = post.content.split('</h2>');
+    // Simple Markdown Parser
+    const parseMarkdown = (text: string) => {
+        if (!text) return '';
+        let html = text
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" style="color:#00ff88">$1</a>')
+            .replace(/\n\n/gim, '<br/><br/>'); // Paragraphs
+
+        // Wrap lists (basic)
+        html = html.replace(/- (.*$)/gim, '<li>$1</li>');
+        return html;
+    };
+
+    // Use parsed content
+    const htmlContent = parseMarkdown(post.content);
+    const contentParts = htmlContent.split('</h2>');
     const hasH2 = contentParts.length > 1;
 
     return (
@@ -81,7 +101,7 @@ export default async function BlogPost({ params }: { params: Promise<{ id: strin
                             <div dangerouslySetInnerHTML={{ __html: contentParts.slice(1).join('</h2>') }} />
                         </>
                     ) : (
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
                     )}
                 </div>
 

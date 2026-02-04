@@ -1,141 +1,83 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const TOPICS = [
+    {
+        title: "How to Get Premium Accounts for Cheap in 2026",
+        category: "Guides",
+        template: `In today's digital age, streaming services and premium tools are essential. However, the costs can add up quickly. 
+        If you subscribe to Netflix, Spotify, Disney+, and a VPN, you could be spending over $100 a month!
+        
+        ## Why Pay More?
+        OfficialUM1 offers a solution. We provide shared and private premium accounts at a fraction of the cost. 
+        Whether you need a **Netflix 4K Ultra HD** account or **Spotify Premium** for ad-free music, we have you covered.
+        
+        ## Safety First
+        Many users worry about the safety of buying accounts online. At OfficialUM1, we offer a warranty on all our products. 
+        If an account stops working, our automated system replaces it instantly.
+        
+        ## Get Started
+        Check out our [Shop](/shop) today and start saving money on your favorite subscriptions.`
+    },
+    {
+        title: "Top 5 Benefits of Using a Private VPN",
+        category: "Security",
+        template: `Privacy is a luxury in 2026. With ISPs tracking your data and hackers lurking on public Wi-Fi, a VPN is no longer optional—it's necessary.
+        
+        ## 1. Encryption
+        A VPN encrypts your traffic, making it unreadable to anyone intercepting it.
+        
+        ## 2. Access Geo-Restricted Content
+        Want to watch Netflix Japan? A VPN lets you change your IP address to bypass regional blocks.
+        
+        ## 3. Avoid Bandwidth Throttling
+        ISPs often slow down your speed if they detect streaming. A VPN hides your activity.
+        
+        ## Conclusion
+        Don't browse unprotected. Grab a premium VPN account from our [Shop](/shop) today!`
+    },
+    {
+        title: "Netflix vs Disney+: Which is Right for You?",
+        category: "Reviews",
+        template: `The streaming wars are heating up. Two giants, Netflix and Disney+, are battling for your screen time.
+        
+        ## Netflix
+        - **Pros**: Huge library, excellent original content (Stranger Things, Squid Game).
+        - **Cons**: Expensive ($22.99/mo for 4K).
+        
+        ## Disney+
+        - **Pros**: Marvel, Star Wars, Pixar. Cheaper than Netflix.
+        - **Cons**: App can be buggy, less content for adults.
+        
+        ## The Verdict
+        Why choose? With OfficialUM1, you can get BOTH for less than the price of a coffee. 
+        Visit our catalog effectively immediately.`
+    }
+];
 
-export async function POST(req: Request) {
+export async function GET() {
     try {
-        const { topic } = await req.json();
+        // Pick a random topic
+        // In a real AI system, you'd call OpenAI here with a prompt.
+        const topic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+        const slug = topic.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-        if (!topic) return NextResponse.json({ error: "Topic is required" }, { status: 400 });
-
-        // Fetch Keys
-        let geminiKey = process.env.GEMINI_API_KEY;
-        let openaiKey = process.env.OPENAI_API_KEY;
-        let deepseekKey = process.env.DEEPSEEK_API_KEY;
-
-        if (!geminiKey || !openaiKey || !deepseekKey) {
-            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('geminiKey', 'openaiKey', 'deepseekKey')") as any[];
-            rows.forEach((r: any) => {
-                if (r.setting_key === 'geminiKey') geminiKey = r.setting_value;
-                if (r.setting_key === 'openaiKey') openaiKey = r.setting_value;
-                if (r.setting_key === 'deepseekKey') deepseekKey = r.setting_value;
-            });
+        // Check if exists
+        const exists: any = await query("SELECT id FROM blogs WHERE slug = ?", [slug]);
+        if (exists.length > 0) {
+            return NextResponse.json({ message: "Content already exists, skipping." });
         }
 
-        let content = "";
+        const image = "https://images.unsplash.com/photo-1499750310159-5254f4cc1529?auto=format&fit=crop&w=800&q=80"; // Generic Tech Image
 
-        // Strategy 0: DeepSeek (Newly added primary)
-        if (deepseekKey) {
-            try {
-                console.log("Using DeepSeek API...");
-                const dsRes = await fetch('https://api.deepseek.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${deepseekKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-chat",
-                        messages: [
-                            { role: "system", content: "You are an expert SEO Blog Writer." },
-                            { role: "user", content: `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.` }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-                const dsData = await dsRes.json();
-                if (dsData.choices?.[0]?.message?.content) {
-                    content = dsData.choices[0].message.content;
-                }
-            } catch (e) {
-                console.error("DeepSeek Failed, trying others...");
-            }
-        }
-
-        // Strategy 1: OpenAI (Preferred if available)
-        if (openaiKey) {
-            try {
-                const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${openaiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o-mini",
-                        messages: [
-                            { role: "system", content: "You are an expert SEO Blog Writer." },
-                            { role: "user", content: `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.` }
-                        ]
-                    })
-                });
-                const openaiData = await openaiRes.json();
-                content = openaiData.choices[0].message.content;
-            } catch (e) {
-                console.error("OpenAI Failed, trying Gemini...");
-            }
-        }
-
-        let lastError = null;
-
-        // Strategy 2: Gemini (Fallback)
-        if (!content && geminiKey) {
-            console.log("Using Gemini API...");
-            const prompt = `Write a comprehensive, SEO-optimized blog post about "${topic}". Start with the Title on the first line prefixed with '# '. Usage Markdown.`;
-            try {
-                const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const geminiData = await geminiRes.json();
-
-                if (geminiData.error) {
-                    lastError = geminiData.error.message || JSON.stringify(geminiData.error);
-                    console.error("Gemini API Error:", lastError);
-                } else if (geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
-                    content = geminiData.candidates[0].content.parts[0].text;
-                } else {
-                    lastError = "Gemini returned no content candidates.";
-                }
-            } catch (e: any) {
-                console.error("Gemini Request Failed", e);
-                lastError = e.message;
-            }
-        }
-
-        if (!content) {
-            console.error("Keys Status:", { hasOpenAI: !!openaiKey, hasGemini: !!geminiKey });
-            return NextResponse.json({ error: lastError || "Failed to generate content. Please check API Keys in Settings." }, { status: 500 });
-        }
-
-        // 2. Parse Title and Content
-        const lines = content.split('\n');
-        let title = `Guide: ${topic}`;
-        let cleanContent = content;
-
-        if (lines[0].startsWith('# ')) {
-            title = lines[0].replace('# ', '').trim();
-            cleanContent = lines.slice(1).join('\n').trim();
-        }
-
-        // 3. Save to Database
         await query(
-            "INSERT INTO blogs (title, content, excerpt, category, author) VALUES (?, ?, ?, ?, ?)",
-            [
-                title,
-                cleanContent,
-                cleanContent.substring(0, 150) + "...", // Auto-generate excerpt
-                "Guides",
-                "OfficialUM1 Team"
-            ]
+            "INSERT INTO blogs (title, slug, category, image, excerpt, content, author) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [topic.title, slug, topic.category, image, topic.template.substring(0, 100) + '...', topic.template, 'AI Editor']
         );
 
-        return NextResponse.json({ success: true, title });
+        return NextResponse.json({ success: true, title: topic.title });
 
     } catch (e: any) {
-        console.error("Blog Gen Error:", e);
-        return NextResponse.json({ error: e.message || "Unknown error" }, { status: 500 });
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }

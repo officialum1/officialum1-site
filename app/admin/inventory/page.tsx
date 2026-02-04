@@ -1522,8 +1522,12 @@ function AdminDashboard() {
                 <div style={{ flex: 1, padding: '2rem 3rem', maxWidth: '1600px', overflowX: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '2rem' }}>
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 setLoading(true);
+                                try {
+                                    await fetch('/api/admin/sync-db');
+                                    alert('System Tables Synchronized!');
+                                } catch (e) { alert('Sync Failed'); }
                                 fetchData();
                             }}
                             className="btn btn-outline"

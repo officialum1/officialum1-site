@@ -452,6 +452,23 @@ export async function initDB() {
         )
     `);
 
+    // 17. Blogs Table (SEO)
+    await query(`
+        CREATE TABLE IF NOT EXISTS blogs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255),
+            category VARCHAR(100),
+            image LONGTEXT,
+            excerpt TEXT,
+            content LONGTEXT,
+            author VARCHAR(100) DEFAULT 'OfficialUM1 Team',
+            views INT DEFAULT 0,
+            read_time VARCHAR(20) DEFAULT '5 min',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     // Add SEO Columns
     try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
     try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }

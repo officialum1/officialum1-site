@@ -120,8 +120,35 @@ export default function WebsiteTab({
             {websiteTab === 'blogs' && (
                 <div style={{ display: 'grid', gap: '2rem' }}>
                     <div className="glass" style={{ padding: '2.5rem', borderRadius: '20px', border: '1px solid rgba(0,255,136,0.1)' }}>
-                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span>📝</span> Publish New Blog Post
+                        <h2 style={{ color: '#00ff88', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><span>📝</span> Publish New Blog Post</div>
+                            <button
+                                onClick={async () => {
+                                    if (!confirm('Auto-generate a new blog post using AI template?')) return;
+                                    try {
+                                        const res = await fetch('/api/admin/generate-blog');
+                                        const data = await res.json();
+                                        if (data.success) {
+                                            alert(`Generated: ${data.title}\nRefresh the page to see it.`);
+                                        } else {
+                                            alert(data.message || 'Error generating');
+                                        }
+                                    } catch (e) { alert('Failed to generate'); }
+                                }}
+                                style={{
+                                    fontSize: '0.85rem',
+                                    background: 'linear-gradient(45deg, #00c3ff, #00ff88)',
+                                    color: '#000',
+                                    border: 'none',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '20px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 15px rgba(0,255,136,0.3)'
+                                }}
+                            >
+                                🤖 AI Auto-Write
+                            </button>
                         </h2>
                         <form onSubmit={handleBlogSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                             <div style={{ gridColumn: 'span 2' }}>
