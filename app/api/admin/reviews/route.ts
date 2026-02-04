@@ -1,37 +1,52 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
-// GET: Fetch all reviews (with product info)
-export async function GET() {
+export async function GET(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     try {
-        const sql = `
-            SELECT r.*, p.name as product_name, u.email as user_email 
+        const reviews = await query(`
+            SELECT r.*, u.email, p.name as product_name
             FROM reviews r
-            LEFT JOIN products p ON r.product_id = p.id
             LEFT JOIN users u ON r.user_id = u.id
+            LEFT JOIN products p ON r.product_id = p.id
             ORDER BY r.created_at DESC
-        `;
-        const reviews = await query(sql);
+        `);
+
         return NextResponse.json(reviews);
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
 
-// POST: Moderate Action (Approve, Reject, Delete)
 export async function POST(req: Request) {
-    try {
-        const { reviewId, action } = await req.json();
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-        if (action === 'approve') {
-            await query("UPDATE reviews SET status = 'approved' WHERE id = ?", [reviewId]);
-        } else if (action === 'reject') {
-            await query("UPDATE reviews SET status = 'rejected' WHERE id = ?", [reviewId]);
-        } else if (action === 'delete') {
-            await query("DELETE FROM reviews WHERE id = ?", [reviewId]);
-        } else {
-            return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    try {
+        const { action, id, userId, productId, rating, comment, status } = await req.json();
+
+        if (action === 'delete') {
+            await query("DELETE FROM reviews WHERE id = ?", [id]);
+            return NextResponse.json({ success: true });
         }
+
+        if (action === 'update_status') {
+            await query("UPDATE reviews SET status = ? WHERE id = ?", [status, id]);
+            return NextResponse.json({ success: true });
+        }
+
+        // Add Manual Review
+        if (!productId || !rating || !comment) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        const finalUserId = userId || `admin_gen_${Math.random().toString(36).substring(7)}`;
+
+        await query(
+            "INSERT INTO reviews (product_id, user_id, rating, comment, status) VALUES (?, ?, ?, ?, 'approved')",
+            [productId, finalUserId, rating, comment]
+        );
 
         return NextResponse.json({ success: true });
     } catch (e: any) {

@@ -26,6 +26,7 @@ const LogsTab = dynamic(() => import('@/components/admin/tabs/LogsTab'), { ssr: 
 const SupportTab = dynamic(() => import('@/components/admin/tabs/SupportTab'), { ssr: false });
 const SettingsTab = dynamic(() => import('@/components/admin/tabs/SettingsTab'), { ssr: false });
 const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGenerator'), { ssr: false });
+const ReviewsTab = dynamic(() => import('@/components/admin/tabs/ReviewsTab'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -1460,6 +1461,7 @@ function AdminDashboard() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                                 {[
                                     { id: 'catalog', label: '🛍️ Catalog', perm: 'inventory' },
+                                    { id: 'reviews_hub', label: '⭐ Reviews Center', perm: 'inventory' },
                                     { id: 'stock', label: '📊 Stock', perm: 'inventory' },
                                     { id: 'orders', label: '📦 Orders', perm: 'orders' },
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
@@ -1683,6 +1685,10 @@ function AdminDashboard() {
                             handleDeleteProduct={handleDeleteProduct}
                             handleBulkGenerateReviews={handleBulkGenerateReviews}
                         />
+                    )}
+
+                    {activeTab === 'reviews_hub' && (
+                        <ReviewsTab catalog={catalog} />
                     )}
 
 

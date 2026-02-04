@@ -407,6 +407,9 @@ export async function initDB() {
         )
     `);
 
+    // Migration for Reviews
+    try { await query("ALTER TABLE reviews ADD COLUMN product_id INT NOT NULL"); } catch (e) { }
+
     // 13. Notifications Table
     await query(`
         CREATE TABLE IF NOT EXISTS notifications(
