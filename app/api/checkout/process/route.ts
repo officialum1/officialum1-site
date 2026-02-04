@@ -40,28 +40,55 @@ export async function POST(req: Request) {
             gold: { name: 'Gold VIP Membership', price: '24.99', platform: 'VIP', id: 'm2' },
             diamond: { name: 'Diamond VIP Membership', price: '49.99', platform: 'VIP', id: 'm3' }
         };
+        // Check Membership Discount
+        let discountMultiplier = 1;
+        let membershipName = null;
 
+        if (userId !== 'guest') {
+            const userRows: any = await query("SELECT membership FROM users WHERE id = ?", [userId]);
+            if (userRows.length > 0) {
+                const plan = (userRows[0].membership || '').toLowerCase();
+                if (plan === 'silver') { discountMultiplier = 0.95; membershipName = 'Silver VIP'; }
+                else if (plan === 'gold') { discountMultiplier = 0.90; membershipName = 'Gold VIP'; }
+                else if (plan === 'diamond') { discountMultiplier = 0.85; membershipName = 'Diamond VIP'; }
+            }
+        }
+
+        // 1. Membership Purchase (No Discount on Membership itself)
         if (membershipPlan) {
-            product = PLANS[membershipPlan];
-            if (!product) throw new Error("Invalid membership plan.");
-            amountToCharge = product.price;
-            safeQuantity = 1;
-        } else if (!isBulk) {
-            const productRows = await query("SELECT * FROM products WHERE id = ?", [productId]) as any[];
-            product = productRows[0];
-            if (!product) return NextResponse.json({ error: "Product not found" }, { status: 400 });
+            const plan = PLANS[membershipPlan];
+            if (!plan) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+            amountToCharge = plan.price.toString();
+            product = { name: `${plan.name} Plan`, id: 0, platform: "Membership" };
+            safeQuantity = 1; // Membership is always quantity 1
+        }
+        // 2. Single Product Purchase
+        else if (!isBulk) {
+            const rows: any = await query("SELECT * FROM products WHERE id = ?", [productId]);
+            if (rows.length === 0) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+            product = rows[0];
 
             const q = parseInt(quantity as string, 10) || 1;
             safeQuantity = q;
+
             let unitPrice = parseFloat(product.price);
             if (product.sale_price && product.sale_ends_at) {
                 const saleEnd = new Date(product.sale_ends_at);
                 if (saleEnd > new Date()) unitPrice = parseFloat(product.sale_price);
             }
-            amountToCharge = (unitPrice * q).toFixed(2);
-        } else {
-            // SECURITY: Never trust client-side prices. Re-fetch from DB.
-            let verifiedTotal = 0;
+
+            // Apply Discount
+            if (discountMultiplier < 1) {
+                unitPrice = unitPrice * discountMultiplier;
+            }
+
+            amountToCharge = (unitPrice * safeQuantity).toFixed(2);
+            product.price = unitPrice.toFixed(2); // Update product obj with discounted price for metadata
+        }
+        // 3. Bulk/Cart Purchase
+        else {
+            if (!cartItems || cartItems.length === 0) return NextResponse.json({ error: "Cart empty" }, { status: 400 });
+            let total = 0;
             const itemIds = cartItems.map((item: any) => item.id);
             if (itemIds.length === 0) throw new Error("Cart is empty");
 
@@ -77,10 +104,15 @@ export async function POST(req: Request) {
                     currentPrice = parseFloat(dbProd.sale_price);
                 }
 
-                verifiedTotal += currentPrice * (item.quantity || 1);
+                // Apply VIP Discount
+                if (discountMultiplier < 1) {
+                    currentPrice = currentPrice * discountMultiplier;
+                }
+
+                total += currentPrice * (item.quantity || 1);
             }
 
-            amountToCharge = verifiedTotal.toFixed(2);
+            amountToCharge = total.toFixed(2);
             product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple", price: amountToCharge };
         }
 

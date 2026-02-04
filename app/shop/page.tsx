@@ -202,7 +202,26 @@ export default function ShopPage() {
                             <AnimatePresence mode='popLayout'>
                                 {filtered.map(item => {
                                     const isSale = item.sale_price && new Date(item.sale_ends_at) > new Date();
-                                    const finalPrice = isSale ? item.sale_price : item.price;
+
+                                    // Base Price
+                                    let currentPrice = parseFloat(isSale ? item.sale_price : item.price);
+                                    let oldPrice = isSale ? item.price : null;
+                                    let badgeLabel = isSale ? 'SALE' : null;
+
+                                    // VIP Check
+                                    const userPlan = (user?.membership || '').toLowerCase();
+                                    let vipDiscount = 0;
+                                    if (userPlan === 'silver') vipDiscount = 0.05;
+                                    else if (userPlan === 'gold') vipDiscount = 0.10;
+                                    else if (userPlan === 'diamond') vipDiscount = 0.15;
+
+                                    if (vipDiscount > 0) {
+                                        oldPrice = currentPrice.toFixed(2); // Previous "final" is now old
+                                        currentPrice = currentPrice * (1 - vipDiscount);
+                                        badgeLabel = isSale ? 'SALE + VIP' : `${(vipDiscount * 100).toFixed(0)}% OFF`;
+                                    }
+
+                                    const finalPrice = currentPrice.toFixed(2);
                                     const isBundle = !!item.bundle_items;
                                     const totalStock = Math.max(0, Number(item.stock || 0)) + Number(item.inventoryStock || 0);
 
@@ -284,59 +303,58 @@ export default function ShopPage() {
                                                 <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{item.description}</p>
 
                                                 <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                        {isSale ? (
-                                                            <div>
-                                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff4d4d' }}>${finalPrice}</div>
-                                                                <div style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: '#666' }}>${item.price}</div>
-                                                            </div>
-                                                        ) : (
-                                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${item.price}</div>
-                                                        )}
+                                                    {oldPrice ? (
+                                                        <div>
+                                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: badgeLabel?.includes('VIP') ? '#ffd700' : '#ff4d4d' }}>${finalPrice}</div>
+                                                            <div style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: '#666' }}>${oldPrice}</div>
+                                                            {badgeLabel && <div style={{ fontSize: '0.7rem', color: badgeLabel.includes('VIP') ? '#ffd700' : '#ff4d4d', fontWeight: 'bold' }}>{badgeLabel}</div>}
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${finalPrice}</div>
+                                                    )}
 
-                                                        {totalStock > 0 ? (
-                                                            <div style={{ fontSize: '0.75rem', color: totalStock < 5 ? '#ff4d4d' : '#888', fontWeight: totalStock < 5 ? 'bold' : 'normal' }}>
-                                                                {totalStock < 10 && '🔥 '} {totalStock} in stock
-                                                            </div>
-                                                        ) : (
-                                                            <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
-                                                        )}
-                                                    </div>
+                                                    {totalStock > 0 ? (
+                                                        <div style={{ fontSize: '0.75rem', color: totalStock < 5 ? '#ff4d4d' : '#888', fontWeight: totalStock < 5 ? 'bold' : 'normal' }}>
+                                                            {totalStock < 10 && '🔥 '} {totalStock} in stock
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ fontSize: '0.75rem', color: '#ff4d4d' }}>Out of Stock</div>
+                                                    )}
+                                                </div>
 
-                                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                                        <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>⚡ Instant</div>
-                                                        <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
-                                                    </div>
+                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                    <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>⚡ Instant</div>
+                                                    <div style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)', color: '#888' }}>🛡️ Warranty</div>
+                                                </div>
 
-                                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                        {totalStock > 0 ? (
-                                                            <>
-                                                                <Link
-                                                                    href={`/checkout?id=${item.id}`}
-                                                                    className="btn btn-outline"
-                                                                    style={{ fontSize: '0.8rem', flex: 1, textAlign: 'center', padding: '0.6rem' }}
-                                                                >
-                                                                    Buy Now
-                                                                </Link>
-                                                                <button
-                                                                    onClick={() => addToCart(item)}
-                                                                    className="btn btn-primary"
-                                                                    style={{ fontSize: '0.8rem', width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                                    title="Add to Cart"
-                                                                >
-                                                                    🛒
-                                                                </button>
-                                                            </>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => { setNotifyProduct(item); setShowNotifyModal(true); }}
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    {totalStock > 0 ? (
+                                                        <>
+                                                            <Link
+                                                                href={`/checkout?id=${item.id}`}
                                                                 className="btn btn-outline"
-                                                                style={{ fontSize: '0.8rem', width: '100%', borderColor: '#ff4d4d', color: '#ff4d4d' }}
+                                                                style={{ fontSize: '0.8rem', flex: 1, textAlign: 'center', padding: '0.6rem' }}
                                                             >
-                                                                🔔 Notify Me
+                                                                Buy Now
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => addToCart(item)}
+                                                                className="btn btn-primary"
+                                                                style={{ fontSize: '0.8rem', width: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                                title="Add to Cart"
+                                                            >
+                                                                🛒
                                                             </button>
-                                                        )}
-                                                    </div>
+                                                        </>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => { setNotifyProduct(item); setShowNotifyModal(true); }}
+                                                            className="btn btn-outline"
+                                                            style={{ fontSize: '0.8rem', width: '100%', borderColor: '#ff4d4d', color: '#ff4d4d' }}
+                                                        >
+                                                            🔔 Notify Me
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -344,13 +362,13 @@ export default function ShopPage() {
                                 })}
                             </AnimatePresence>
                         </motion.div>
-
-                        {filtered.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
-                                No accounts match your search.
-                            </div>
-                        )}
                     </>
+                )}
+
+                {filtered.length === 0 && !loading && (
+                    <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+                        No accounts match your search.
+                    </div>
                 )}
             </div>
 
