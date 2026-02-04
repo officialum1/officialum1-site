@@ -248,10 +248,44 @@ export async function initDB() {
             budget DECIMAL(10,2),
             status VARCHAR(50),
             notes TEXT,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
+    // 4. Shopping Cart Tables (Missing Sync Fix)
+    await query(`
+        CREATE TABLE IF NOT EXISTS carts (
+            id VARCHAR(50) PRIMARY KEY,
+            guest_email VARCHAR(255),
+            status VARCHAR(50) DEFAULT 'active',
+            last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    await query(`
+        CREATE TABLE IF NOT EXISTS cart_items (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            cart_id VARCHAR(50),
+            product_id INT,
+            quantity INT DEFAULT 1,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE
+        )
+    `);
+
+    // 5. Wishlists (Migration to MySQL)
+    await query(`
+        CREATE TABLE IF NOT EXISTS wishlists (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50), -- Can be email or user ID
+            product_id INT,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_wishlist (user_id, product_id)
+        )
+    `);
+
+    isInitialized = true;
     // 4. Employees (HR)
     await query(`
         CREATE TABLE IF NOT EXISTS employees (

@@ -81,7 +81,7 @@ export async function POST(req: Request) {
             }
 
             amountToCharge = verifiedTotal.toFixed(2);
-            product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple" };
+            product = { name: "Bulk Cart Purchase", id: 0, platform: "Multiple", price: amountToCharge };
         }
 
         // Coupon Validation
@@ -213,7 +213,7 @@ export async function POST(req: Request) {
                 await conn.execute(`
                     INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', ?)
-                `, [orderId, userId, user.email, isBulk ? 0 : product.id, amountToCharge, product.price, promoCode || null, method, isBulk ? cartItems.length : safeQuantity]);
+                `, [orderId, userId, user.email, isBulk ? 0 : product.id, amountToCharge, product.price || amountToCharge, promoCode || null, method, isBulk ? cartItems.length : safeQuantity]);
             });
             orderStatus = 'paid';
         }
@@ -228,7 +228,7 @@ export async function POST(req: Request) {
             await query(`
                 INSERT INTO orders (orderId, userId, guestEmail, productId, amount, originalPrice, promoCode, method, status, quantity)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `, [orderId, userId, user.email || guestEmail, isBulk ? 0 : product.id, amountToCharge, product.price, promoCode || null, method, orderStatus, isBulk ? cartItems.length : safeQuantity]);
+            `, [orderId, userId, user.email || guestEmail, isBulk ? 0 : product.id, amountToCharge, product.price || amountToCharge, promoCode || null, method, orderStatus, isBulk ? cartItems.length : safeQuantity]);
         }
 
         // Handle Fulfillment if paid

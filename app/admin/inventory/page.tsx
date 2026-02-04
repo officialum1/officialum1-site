@@ -494,9 +494,17 @@ function AdminDashboard() {
         }
     };
 
-    // Trigger fetch on tab change
+    // Trigger fetch on tab change AND Poll every 30s for Real-Time Data
     useEffect(() => {
-        if (!loading) fetchTabContent(activeTab);
+        if (loading) return;
+
+        fetchTabContent(activeTab); // Immediate Fetch
+
+        const interval = setInterval(() => {
+            fetchTabContent(activeTab);
+        }, 5000); // 5s "Instant" Poll
+
+        return () => clearInterval(interval);
     }, [activeTab, loading]);
 
 

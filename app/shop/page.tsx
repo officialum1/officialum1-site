@@ -29,18 +29,27 @@ export default function ShopPage() {
     const { addToCompare, isInCompare } = useCompare();
 
     useEffect(() => {
-        fetch('/api/products')
-            .then(res => res.json())
-            .then(data => {
-                setProducts(data);
-                setLoading(false);
-            })
-            .catch(e => setLoading(false));
+        const fetchProducts = () => {
+            fetch('/api/products', { cache: 'no-store' })
+                .then(res => res.json())
+                .then(data => {
+                    setProducts(data);
+                    setLoading(false);
+                })
+                .catch(e => setLoading(false));
+        };
+
+        fetchProducts(); // Initial Fetch
+
+        // Real-Time Polling (every 30s)
+        const interval = setInterval(fetchProducts, 30000);
 
         if (typeof window !== 'undefined') {
             const stored = localStorage.getItem('buyer_user');
             if (stored) setUser(JSON.parse(stored));
         }
+
+        return () => clearInterval(interval);
     }, []);
 
     const handleNotifySubmit = async (e: React.FormEvent) => {
