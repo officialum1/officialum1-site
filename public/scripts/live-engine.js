@@ -9,9 +9,20 @@ window.OfficialUM1_LiveStats = {
     listeners: [],
 
     async init() {
+        // Load from cache for "Instant Alive" feel
+        const cached = localStorage.getItem('officialum1_live_cache');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                this.data = parsed.stats;
+                this.feed = parsed.feed;
+                this.notify();
+            } catch (e) { }
+        }
+
         await this.sync();
-        // 3 Second Heartbeat for Ultra-Live Feed
-        setInterval(() => this.sync(), 3000);
+        // 2 Second Heartbeat for Ultra-Live Feed
+        setInterval(() => this.sync(), 2000);
     },
 
     async sync() {
@@ -22,6 +33,13 @@ window.OfficialUM1_LiveStats = {
             // Handle nested stats structure
             this.data = result.stats || result;
             this.feed = result.feed || {};
+
+            // Save to cache
+            localStorage.setItem('officialum1_live_cache', JSON.stringify({
+                stats: this.data,
+                feed: this.feed,
+                updated: Date.now()
+            }));
 
             this.notify();
         } catch (e) {
