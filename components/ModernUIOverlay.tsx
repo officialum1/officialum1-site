@@ -189,21 +189,20 @@ export default function ModernUIOverlay() {
                 .modal-overlay {
                     position: absolute;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.85);
-                    backdrop-filter: blur(12px);
+                    background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.98) 100%);
+                    backdrop-filter: blur(25px);
                 }
 
                 .modern-modal-card {
-                    background: rgba(10, 10, 15, 0.98);
-                    backdrop-filter: blur(40px);
-                    border: 1px solid rgba(0, 255, 136, 0.4);
-                    border-radius: 28px;
-                    padding: 40px;
+                    background: #050508;
+                    border: 1px solid rgba(0, 255, 136, 0.5);
+                    border-radius: 32px;
+                    padding: 48px;
                     width: 100%;
-                    maxWidth: 500px;
+                    max-width: 550px;
                     position: relative;
-                    box-shadow: 0 40px 80px rgba(0,0,0,0.9), 
-                                0 0 60px rgba(0,255,136,0.1);
+                    box-shadow: 0 50px 100px rgba(0,0,0,0.95), 
+                                0 0 80px rgba(0,255,136,0.15);
                     overflow: hidden;
                 }
 
@@ -213,46 +212,47 @@ export default function ModernUIOverlay() {
                     left: -50%;
                     width: 200%;
                     height: 200%;
-                    background: radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+                    background: radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 60%);
                     pointer-events: none;
                 }
 
                 .modal-header {
                     display: flex;
                     align-items: center;
-                    gap: 16px;
-                    margin-bottom: 24px;
+                    gap: 20px;
+                    margin-bottom: 30px;
                 }
 
                 .modal-type-icon {
-                    width: 44px;
-                    height: 44px;
-                    background: rgba(0, 255, 136, 0.15);
-                    border-radius: 12px;
+                    width: 52px;
+                    height: 52px;
+                    background: rgba(0, 255, 136, 0.2);
+                    border-radius: 16px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.4rem;
-                    border: 1px solid rgba(0, 255, 136, 0.2);
+                    font-size: 1.6rem;
+                    border: 1px solid rgba(0, 255, 136, 0.3);
+                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
                 }
 
                 .modal-header h3 {
                     margin: 0;
-                    font-size: 0.8rem;
+                    font-size: 0.85rem;
                     font-weight: 900;
-                    letter-spacing: 3px;
+                    letter-spacing: 4px;
                     color: #00ff88;
                     text-transform: uppercase;
-                    opacity: 0.9;
+                    opacity: 1;
                 }
 
                 .modal-body p {
                     color: #ffffff;
-                    font-size: 1.25rem;
-                    line-height: 1.4;
-                    margin: 0 0 28px 0;
-                    font-weight: 700;
-                    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    font-size: 1.35rem;
+                    line-height: 1.5;
+                    margin: 0 0 32px 0;
+                    font-weight: 800;
+                    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
                 }
 
                 .modal-input {
