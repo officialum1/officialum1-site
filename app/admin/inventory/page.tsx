@@ -444,8 +444,8 @@ function AdminDashboard() {
 
         try {
             switch (tab) {
+                case 'stock':
                 case 'finance':
-                    if (inventory.length > 0) return;
                     const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
                     const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
 
@@ -1299,20 +1299,30 @@ function AdminDashboard() {
 
     const handleBulkImport = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch('/api/admin/inventory', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'bulk_import',
-                bulkData,
-                platform: newItem.platform,
-                purchasePrice: newItem.purchasePrice,
-                namePrefix: newItem.name
-            })
-        });
-        setShowAddInv(false);
-        setBulkData('');
-        fetchData();
+        try {
+            const res = await fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'bulk_import',
+                    bulkData,
+                    platform: newItem.platform,
+                    purchasePrice: newItem.purchasePrice,
+                    namePrefix: newItem.name
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                modernAlert(`✅ Successfully imported ${data.count} accounts!`);
+                setShowBulk(false);
+                setBulkData('');
+                fetchTabContent('stock');
+            } else {
+                modernAlert('❌ Import failed: ' + data.error);
+            }
+        } catch (e) {
+            modernAlert('❌ Network error during bulk import');
+        }
     };
 
     /* --- RESTORED HANDLERS --- */

@@ -162,9 +162,31 @@ export default function StockTab({
 
                 {showBulk && (
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #06b6d4', marginTop: '2rem' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Bulk Import Inventory</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>Bulk Import Inventory</h3>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>
+                                <select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>
+                                    <option value="Z2U">Z2U</option>
+                                    <option value="PlayerUp">PlayerUp</option>
+                                    <option value="G2G">G2G</option>
+                                    <option value="Direct">Direct Sale</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Item Name Prefix</label>
+                                <input type="text" className="input-field" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="e.g. Netflix Premium" style={{ width: '100%' }} />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Purchase Price (Each)</label>
+                                <input type="number" className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} placeholder="0.00" style={{ width: '100%' }} />
+                            </div>
+                        </div>
+
+                        <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Account Data (One per line)</label>
                         <textarea
-                            placeholder="Paste directly from Excel (User\tPass\tEmail\tTag)"
+                            placeholder="Paste directly from Excel (User\tPass\tEmail\tTag) or use User:Pass:Email"
                             value={bulkData}
                             onChange={e => setBulkData(e.target.value)}
                             className="input-field"

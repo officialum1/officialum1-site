@@ -289,50 +289,49 @@ export async function POST(request: Request) {
                 let tag = '';
 
                 // SMART PARSING
-                // 1. Check for basic Excel Paste (Tab Separated)
+                // 1. Check for Tab Separated (Excel)
                 if (line.includes('\t')) {
                     const parts = line.split('\t');
-                    username = parts[0]?.trim();
-                    password = parts[1]?.trim();
-                    email = parts[2]?.trim() || '';
-                    const part4 = parts[3]?.trim();
-                    const part5 = parts[4]?.trim();
+                    username = parts[0]?.trim() || '';
+                    password = parts[1]?.trim() || '';
 
-                    if (part4 && part4.startsWith('#')) {
-                        tag = part4;
-                        extra = part5 || '';
-                    } else {
-                        extra = part4 || '';
-                        if (part5 && part5.startsWith('#')) tag = part5;
+                    // Intelligent assignment based on content
+                    for (let i = 2; i < parts.length; i++) {
+                        const p = parts[i]?.trim();
+                        if (!p) continue;
+                        if (p.includes('@')) email = p;
+                        else if (p.startsWith('#')) tag = p;
+                        else if (!extra) extra = p; // First unknown part is extra
+                        else extra += ' ' + p;
                     }
                 }
-                // 2. Check for Standard Combolist (User:Pass:Email:Tag or User:Pass:Email:Extra)
+                // 2. Check for Colon Separated (Standard Combolist)
                 else if (line.includes(':')) {
                     const parts = line.trim().split(':');
-                    username = parts[0]?.trim();
-                    password = parts[1]?.trim();
-                    // If 3 parts, 3rd is email.
-                    if (parts.length >= 3) email = parts[2]?.trim();
+                    username = parts[0]?.trim() || '';
+                    password = parts[1]?.trim() || '';
 
-                    if (parts.length > 3) {
-                        // Check remaining parts for tags
-                        const remaining = parts.slice(3);
-                        const tagIndex = remaining.findIndex((p: string) => p.trim().startsWith('#'));
-                        if (tagIndex !== -1) {
-                            tag = remaining[tagIndex].trim();
-                            // Everything else is extra
-                            extra = remaining.filter((_: string, i: number) => i !== tagIndex).join(':').trim();
-                        } else {
-                            extra = remaining.join(':').trim();
-                        }
+                    for (let i = 2; i < parts.length; i++) {
+                        const p = parts[i]?.trim();
+                        if (!p) continue;
+                        if (p.includes('@')) email = p;
+                        else if (p.startsWith('#')) tag = p;
+                        else if (!extra) extra = p;
+                        else extra += ':' + p;
                     }
                 }
                 // 3. Last Resort (Comma separated)
                 else if (line.includes(',')) {
                     const parts = line.split(',');
-                    username = parts[0]?.trim();
-                    password = parts[1]?.trim();
-                    email = parts[2]?.trim() || '';
+                    username = parts[0]?.trim() || '';
+                    password = parts[1]?.trim() || '';
+                    if (parts[2]?.includes('@')) email = parts[2].trim();
+                    else extra = parts.slice(2).join(',').trim();
+                }
+                // 4. Single line / No delimiter (Assume username)
+                else {
+                    username = line.trim();
+                    password = 'PASSWORD_REQUIRED';
                 }
 
                 if (!username || !password) continue;
