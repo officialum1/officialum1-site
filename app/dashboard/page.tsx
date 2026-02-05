@@ -10,6 +10,7 @@ export default function ClientDashboard() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
     const [wallet, setWallet] = useState({ balance: 0, affiliate_earnings: 0 });
+    const [verification, setVerification] = useState({ status: 'none' });
 
     useEffect(() => {
         const storedUser = localStorage.getItem('buyer_user');
@@ -30,6 +31,7 @@ export default function ClientDashboard() {
                 setOrders(data.orders || []);
                 setNotifications(data.notifications || []);
                 if (data.wallet) setWallet(data.wallet);
+                if (data.verification) setVerification(data.verification);
             }
         } catch (e) {
             console.error("Dashboard Fetch Error", e);
@@ -167,16 +169,30 @@ export default function ClientDashboard() {
                             </div>
                         </div>
 
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0, 195, 255, 0.2)' }}>
+                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', border: verification.status === 'approved' ? '1px solid #00ff88' : (verification.status === 'pending' ? '1px solid #ffd700' : '1px solid rgba(0, 195, 255, 0.2)') }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                 <h4 style={{ fontSize: '1.1rem' }}>🛡️ Trust Score</h4>
-                                <span style={{ fontSize: '0.8rem', color: '#888' }}>Level 1</span>
+                                <span style={{ fontSize: '0.8rem', color: '#888' }}>{verification.status === 'approved' ? 'Verified Pro' : (verification.status === 'pending' ? 'Pending Review' : 'Level 1')}</span>
                             </div>
                             <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', marginBottom: '1.5rem' }}>
-                                <div style={{ width: '30%', height: '100%', background: '#00c3ff' }}></div>
+                                <div style={{ width: verification.status === 'approved' ? '100%' : (verification.status === 'pending' ? '60%' : '30%'), height: '100%', background: verification.status === 'approved' ? '#00ff88' : (verification.status === 'pending' ? '#ffd700' : '#00c3ff') }}></div>
                             </div>
-                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>Verify your identity to increase limits and unlock "Pro" account features.</p>
-                            <a href="/dashboard/verification" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,195,255,0.1)', color: '#00c3ff', border: '1px solid #00c3ff' }}>Verify Identity</a>
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>
+                                {verification.status === 'approved'
+                                    ? "Your identity is verified. You have full access to all features."
+                                    : (verification.status === 'pending'
+                                        ? "Your verification is under review. This usually takes 2-6 hours."
+                                        : "Verify your identity to increase limits and unlock 'Pro' account features.")}
+                            </p>
+                            {verification.status === 'none' && (
+                                <a href="/dashboard/verification" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,195,255,0.1)', color: '#00c3ff', border: '1px solid #00c3ff' }}>Verify Identity</a>
+                            )}
+                            {verification.status === 'pending' && (
+                                <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(255,215,0,0.1)', color: '#ffd700', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>Review in Progress</div>
+                            )}
+                            {verification.status === 'approved' && (
+                                <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>✓ Fully Verified</div>
+                            )}
                         </div>
 
                         <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(0,255,136,0.05), transparent)' }}>

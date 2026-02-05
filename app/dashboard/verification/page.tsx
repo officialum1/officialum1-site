@@ -9,20 +9,92 @@ export default function VerificationPage() {
     const [user, setUser] = useState<any>(null);
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [verifStatus, setVerifStatus] = useState<string>('none');
+
+    // Document States
+    const [docImage, setDocImage] = useState<string | null>(null);
+    const [selfieImage, setSelfieImage] = useState<string | null>(null);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         const stored = localStorage.getItem('buyer_user');
-        if (stored) setUser(JSON.parse(stored));
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            setUser(parsed);
+            checkVerifStatus(parsed.id);
+        }
     }, []);
 
-    const handleVerify = () => {
+    const checkVerifStatus = async (userId: string) => {
+        try {
+            const res = await fetch(`/api/user/verify-identity?userId=${userId}`);
+            const data = await res.json();
+            if (data.status) {
+                setVerifStatus(data.status);
+                if (data.status === 'pending') setStep(3);
+                if (data.status === 'approved') setStep(3);
+            }
+        } catch (e) { }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'doc' | 'selfie') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (type === 'doc') setDocImage(data.url);
+                else setSelfieImage(data.url);
+                toast.success(`${type === 'doc' ? 'ID' : 'Selfie'} uploaded successfully!`);
+            } else {
+                toast.error("Upload failed");
+            }
+        } catch (error) {
+            toast.error("Error uploading file");
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleVerify = async () => {
+        if (!docImage || !selfieImage) {
+            toast.error("Please upload both ID and Selfie documents.");
+            return;
+        }
+
         setLoading(true);
-        // Simulate Verification Process
-        setTimeout(() => {
+        try {
+            const res = await fetch('/api/user/verify-identity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: user.id,
+                    documentImage: docImage,
+                    selfieImage: selfieImage
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setStep(3);
+                setVerifStatus('pending');
+                toast.success("Identity documents submitted successfully!");
+            } else {
+                toast.error(data.error || "Submission failed");
+            }
+        } catch (e) {
+            toast.error("Connection error");
+        } finally {
             setLoading(false);
-            setStep(3);
-            toast.success("Identity documents submitted successfully!");
-        }, 2000);
+        }
     };
 
     if (!user) return <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff' }}>Please login...</div>;
@@ -77,43 +149,56 @@ export default function VerificationPage() {
                         <div>
                             <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Identity Documents</h2>
                             <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
-                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+
+                                {/* Govt ID Upload */}
+                                <label className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: docImage ? '1px solid #00ff88' : '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', display: 'block' }}>
+                                    <input type="file" hidden accept="image/*" onChange={(e) => handleFileUpload(e, 'doc')} />
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{ fontSize: '1.5rem' }}>🪪</div>
+                                        <div style={{ fontSize: '1.5rem' }}>{docImage ? '✅' : '🪪'}</div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontWeight: 'bold' }}>Government ID / Passport</div>
                                             <div style={{ fontSize: '0.8rem', color: '#666' }}>Securely upload an image of your valid identity card.</div>
                                         </div>
-                                        <div style={{ color: 'var(--accent)' }}>Upload</div>
+                                        <div style={{ color: docImage ? '#00ff88' : 'var(--accent)' }}>{docImage ? 'Uploaded' : 'Upload'}</div>
                                     </div>
-                                </div>
-                                <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                                    {docImage && <img src={docImage} alt="Preview" style={{ marginTop: '1rem', width: '100px', borderRadius: '8px' }} />}
+                                </label>
+
+                                {/* Selfie Upload */}
+                                <label className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: selfieImage ? '1px solid #00ff88' : '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', display: 'block' }}>
+                                    <input type="file" hidden accept="image/*" onChange={(e) => handleFileUpload(e, 'selfie')} />
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{ fontSize: '1.5rem' }}>📸</div>
+                                        <div style={{ fontSize: '1.5rem' }}>{selfieImage ? '✅' : '📸'}</div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontWeight: 'bold' }}>Selfie Verification</div>
                                             <div style={{ fontSize: '0.8rem', color: '#666' }}>A quick photo to match your ID documents.</div>
                                         </div>
-                                        <div style={{ color: 'var(--accent)' }}>Verify</div>
+                                        <div style={{ color: selfieImage ? '#00ff88' : 'var(--accent)' }}>{selfieImage ? 'Uploaded' : 'Verify'}</div>
                                     </div>
-                                </div>
+                                    {selfieImage && <img src={selfieImage} alt="Preview" style={{ marginTop: '1rem', width: '100px', borderRadius: '8px' }} />}
+                                </label>
                             </div>
+
                             <button
                                 onClick={handleVerify}
-                                disabled={loading}
+                                disabled={loading || uploading}
                                 className="btn btn-primary"
                                 style={{ width: '100%', padding: '1.2rem' }}
                             >
-                                {loading ? 'Submitting Documents...' : 'Submit for Review'}
+                                {loading ? 'Submitting Documents...' : (uploading ? 'Uploading Files...' : 'Submit for Review')}
                             </button>
                         </div>
                     )}
 
                     {step === 3 && (
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎉</div>
-                            <h2 style={{ marginBottom: '1rem' }}>Verification Submitted!</h2>
-                            <p style={{ color: '#888', marginBottom: '2.5rem' }}>Your documents are being reviewed by our compliance team. This usually takes 2-6 hours. You'll receive a notification once your "Verified Pro" status is active.</p>
+                            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>{verifStatus === 'approved' ? '🎖️' : '🎉'}</div>
+                            <h2 style={{ marginBottom: '1rem' }}>{verifStatus === 'approved' ? 'Verified Pro Active!' : 'Verification Submitted!'}</h2>
+                            <p style={{ color: '#888', marginBottom: '2.5rem' }}>
+                                {verifStatus === 'approved'
+                                    ? 'Congratulations! You are now a Verified Pro user. Higher limits and instant deliveries are unlocked.'
+                                    : 'Your documents are being reviewed by our compliance team. This usually takes 2-6 hours. You\'ll receive a notification once your "Verified Pro" status is active.'}
+                            </p>
                             <a href="/dashboard" className="btn btn-outline">Return to Dashboard</a>
                         </div>
                     )}

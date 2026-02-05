@@ -29,7 +29,13 @@ export async function GET(request: Request) {
             }
         }
 
-        return NextResponse.json({ orders, notifications, wallet });
+        let verification = { status: 'none' };
+        if (userId) {
+            const verifRows: any = await query("SELECT status FROM verification_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", [userId]);
+            if (verifRows.length > 0) verification.status = verifRows[0].status;
+        }
+
+        return NextResponse.json({ orders, notifications, wallet, verification });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });
     }

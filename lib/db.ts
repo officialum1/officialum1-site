@@ -601,5 +601,21 @@ export async function initDB(force = false) {
     try { await query("CREATE INDEX idx_inventory_platform ON inventory(platform)"); } catch (e) { }
     try { await query("CREATE INDEX idx_inventory_status ON inventory(status)"); } catch (e) { }
 
+    // 18. Verification Requests
+    await query(`
+        CREATE TABLE IF NOT EXISTS verification_requests (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50) NOT NULL,
+            type VARCHAR(50) DEFAULT 'identity',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            document_image TEXT,
+            selfie_image TEXT,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
     isInitialized = true;
 }
