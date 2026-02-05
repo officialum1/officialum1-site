@@ -288,7 +288,7 @@ export default function DeliveryPage() {
                                                                 <div style={{ color: '#fff', fontFamily: 'monospace', fontSize: '1rem' }}>{acc.user || acc.raw}</div>
                                                             </td>
                                                             <td style={{ padding: '1.2rem 1.5rem' }}>
-                                                                <div style={{ color: '#888', fontFamily: 'monospace' }}>••••••••</div>
+                                                                <div style={{ color: '#fff', fontFamily: 'monospace' }}>{acc.pass || '---'}</div>
                                                             </td>
                                                             <td style={{ padding: '1.2rem 1.5rem', textAlign: 'right' }}>
                                                                 <button
