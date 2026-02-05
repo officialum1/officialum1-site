@@ -189,58 +189,66 @@ export default function ModernUIOverlay() {
                 .modal-overlay {
                     position: absolute;
                     inset: 0;
-                    background: radial-gradient(circle at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.98) 100%);
-                    backdrop-filter: blur(25px);
+                    background: #000000;
+                    background-image: 
+                        radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 80%),
+                        url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+                    backdrop-filter: blur(80px);
+                    opacity: 1;
                 }
 
                 .modern-modal-card {
-                    background: #050508;
-                    border: 1px solid rgba(0, 255, 136, 0.5);
-                    border-radius: 32px;
-                    padding: 48px;
+                    background: #08080c;
+                    border: 1px solid rgba(0, 255, 136, 0.3);
+                    border-radius: 40px;
+                    padding: 60px;
                     width: 100%;
-                    max-width: 550px;
+                    max-width: 600px;
                     position: relative;
-                    box-shadow: 0 50px 100px rgba(0,0,0,0.95), 
-                                0 0 80px rgba(0,255,136,0.15);
+                    box-shadow: 0 0 100px rgba(0,0,0,1), 
+                                0 0 40px rgba(0,255,136,0.1),
+                                inset 0 0 20px rgba(255,255,255,0.02);
                     overflow: hidden;
+                    z-index: 10001;
                 }
 
                 .modal-glow {
                     position: absolute;
-                    top: -50%;
-                    left: -50%;
-                    width: 200%;
-                    height: 200%;
-                    background: radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 60%);
+                    top: -20%;
+                    right: -20%;
+                    width: 300px;
+                    height: 300px;
+                    background: radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%);
                     pointer-events: none;
                 }
 
                 .modal-header {
                     display: flex;
+                    flex-direction: column;
                     align-items: center;
-                    gap: 20px;
-                    margin-bottom: 30px;
+                    text-align: center;
+                    gap: 24px;
+                    margin-bottom: 40px;
                 }
 
                 .modal-type-icon {
-                    width: 52px;
-                    height: 52px;
-                    background: rgba(0, 255, 136, 0.2);
-                    border-radius: 16px;
+                    width: 64px;
+                    height: 64px;
+                    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 255, 0.1) 100%);
+                    border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1.6rem;
-                    border: 1px solid rgba(0, 255, 136, 0.3);
-                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+                    font-size: 1.8rem;
+                    border: 1px solid rgba(0, 255, 136, 0.4);
+                    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
                 }
 
                 .modal-header h3 {
                     margin: 0;
-                    font-size: 0.85rem;
+                    font-size: 0.9rem;
                     font-weight: 900;
-                    letter-spacing: 4px;
+                    letter-spacing: 6px;
                     color: #00ff88;
                     text-transform: uppercase;
                     opacity: 1;
@@ -248,11 +256,12 @@ export default function ModernUIOverlay() {
 
                 .modal-body p {
                     color: #ffffff;
-                    font-size: 1.35rem;
-                    line-height: 1.5;
-                    margin: 0 0 32px 0;
+                    font-size: 1.5rem;
+                    line-height: 1.6;
+                    margin: 0 0 40px 0;
                     font-weight: 800;
-                    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+                    text-align: center;
+                    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
                 }
 
                 .modal-input {

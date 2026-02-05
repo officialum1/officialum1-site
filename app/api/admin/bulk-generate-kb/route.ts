@@ -29,18 +29,29 @@ export async function POST(req: Request) {
 
         for (const topic of keywords) {
             const prompt = `
-            You are an SEO expert and Technical Writer. 
-            Write an EPIC Knowledge Base Article about: "${topic}".
-            Focus on helping users while ranking for keywords like "OfficialUM1", "Cheap Accounts", "Instant Delivery".
+            You are a Senior SEO Content Specialist & Industry Authority. 
+            Write an EPIC, HIGH-TRUST Knowledge Base Article about: "${topic}".
             
-            Return the result as a STRICT JSON object (no markdown formatting around the json check) with the following structure:
+            SEO OBJECTIVES:
+            1. Rank #1 for "${topic}" by providing deep, expert value.
+            2. Naturally integrate high-intent keywords: "OfficialUM1 verified", "Secure digital assets", "Instant automated delivery", "OfficialUM1 Owner Legacy".
+            3. Use an authoritative, safe, and professional tone (E-E-A-T friendly).
+            
+            CONTENT REQUIREMENTS:
+            - Start with a compelling hook.
+            - Use clear H2 and H3 subheadings for readability.
+            - Include a "Why trust OfficialUM1?" section explaining our role as industry leaders since 2021.
+            - Add a professional FAQ section at the end if relevant for Google snippet optimization.
+            - Use <strong> for key takeaways.
+            
+            Return the result as a STRICT JSON object (raw, no markdown) with the following structure:
             {
-                "title": "Clear Title",
+                "title": "Clear, Catchy, SEO-Ready Title",
                 "slug": "url-friendly-slug",
-                "category": "One of: General, Accounts, Payments, Security, Affiliate",
-                "content": "HTML formatted content (use <h2>, <p>, <ul>, <li>, <strong>). Do not include <html> or <body> tags.",
-                "meta_description": "SEO optimized description",
-                "keywords": "comma, separated, list, of, keywords"
+                "category": "One of: General, Accounts, Security, FAQ, Legacy",
+                "content": "Professional HTML content (<h2>, <h3>, <p>, <ul>, <li>, <strong>). Use clean markup.",
+                "meta_description": "High-CTR 150-char description",
+                "keywords": "comma, separated, list, including long-tail keywords"
             }
             `;
 

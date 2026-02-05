@@ -3,29 +3,29 @@
 @tailwind utilities;
 
 :root {
-  /* Premium Dark Palette */
-  --background: #030305;
+  /* Premium Deep Space Palette */
+  --background: #020204;
   --foreground: #ffffff;
-  --card-bg: #0a0a0c;
-  --primary: #6366f1;
-  --primary-glow: rgba(99, 102, 241, 0.4);
-  --secondary: #a855f7;
-  --accent: #06b6d4;
+  --card-bg: #060608;
+  --primary: #00ff88;
+  --primary-glow: rgba(0, 255, 136, 0.3);
+  --secondary: #00c3ff;
+  --accent: #00ff88;
   --success: #00ff88;
   --error: #ff4d4d;
-  --text-muted: #94a3b8;
+  --text-muted: #888888;
 
-  /* Glassmorphism System */
-  --glass-bg: rgba(15, 15, 20, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(16px);
+  /* Glassmorphism System - More Solid & Focused */
+  --glass-bg: rgba(8, 8, 12, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(24px);
 
   /* Typography */
   --font-heading: var(--font-outfit), sans-serif;
   --font-body: var(--font-inter), sans-serif;
 
-  /* Shadows */
-  --shadow-premium: 0 20px 50px rgba(0, 0, 0, 0.5);
+  /* Shadows - Deeper & Softer */
+  --shadow-premium: 0 30px 60px rgba(0, 0, 0, 0.8);
 }
 
 * {
@@ -37,10 +37,14 @@
 
 body {
   background: var(--background);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(0, 255, 136, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(0, 195, 255, 0.03) 0px, transparent 50%);
   color: var(--foreground);
   font-family: var(--font-body);
   line-height: 1.6;
   overflow-x: hidden;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 

@@ -23,7 +23,7 @@ export default async function KBIndexPage() {
     });
 
     return (
-        <main style={{ background: '#030305', minHeight: '100vh', color: '#fff' }}>
+        <main style={{ background: 'var(--background)', minHeight: '100vh', color: '#fff' }}>
             <Navbar />
 
             <div style={{ paddingTop: '150px', paddingBottom: '100px' }}>

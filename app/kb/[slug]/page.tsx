@@ -74,7 +74,7 @@ export default async function KBArticlePage({ params }: Props) {
     };
 
     return (
-        <main style={{ background: '#030305', minHeight: '100vh', color: '#fff' }}>
+        <main style={{ background: 'var(--background)', minHeight: '100vh', color: '#fff' }}>
             <Navbar />
 
             <Script
