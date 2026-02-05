@@ -54,8 +54,8 @@ export async function withTransaction<T>(callback: (connection: mysql.PoolConnec
 let isInitialized = false;
 
 // 1. Initialize Tables (Run this once or check on startup)
-export async function initDB() {
-    if (isInitialized) return;
+export async function initDB(force = false) {
+    if (isInitialized && !force) return;
 
     // Users Table
     await query(`

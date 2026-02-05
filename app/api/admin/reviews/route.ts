@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, initDB } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(req: Request) {
     if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    await initDB();
 
     try {
         const reviews = await query(`
@@ -22,6 +23,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    await initDB();
 
     try {
         const { action, id, userId, productId, rating, comment, status } = await req.json();
