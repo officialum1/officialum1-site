@@ -116,14 +116,14 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
                             <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Select Product</label>
                             <select
                                 className="input-field"
-                                style={{ width: '100%' }}
+                                style={{ width: '100%', background: '#111', color: '#fff' }}
                                 value={reviewForm.productId}
                                 onChange={e => setReviewForm({ ...reviewForm, productId: e.target.value })}
                                 required
                             >
-                                <option value="">Choose a product...</option>
+                                <option value="" style={{ background: '#111', color: '#fff' }}>Choose a product...</option>
                                 {catalog.map(p => (
-                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                    <option key={p.id} value={p.id} style={{ background: '#111', color: '#fff' }}>{p.name}</option>
                                 ))}
                             </select>
                         </div>

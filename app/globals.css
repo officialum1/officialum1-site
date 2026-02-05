@@ -322,6 +322,11 @@ p {
   outline: none;
 }
 
+select.input-field option {
+  background-color: #0a0a0c;
+  color: white;
+}
+
 .nav-search-wrapper {
   position: relative;
   flex: 1;
