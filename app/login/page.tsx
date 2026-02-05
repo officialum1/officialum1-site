@@ -150,6 +150,12 @@ export default function LoginPage() {
                 </div>
             </div>
             <Footer />
+            <style jsx>{`
+                @media (max-width: 768px) {
+                    .glass { padding: 2rem !important; margin: 1rem !important; }
+                    h1 { font-size: 2rem !important; }
+                }
+            `}</style>
         </main>
     );
 }

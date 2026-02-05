@@ -136,7 +136,7 @@ export default function ProductClient({ product: initialProduct, bundleContents 
 
     return (
         <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px' }}>
-            <div className="glass" style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem', borderRadius: '30px', display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="glass main-card" style={{ maxWidth: '900px', margin: '0 auto', padding: '3rem', borderRadius: '30px', display: 'flex', gap: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
 
                 {/* SALE TIMER BANNER */}
                 {isSale && (
@@ -156,7 +156,7 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                         {product.platform}
                     </div>
                     <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem', lineHeight: '1.2' }}>{product.name}</h1>
-                    <p style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: '1.6' }}>
+                    <p className="product-desc" style={{ color: '#aaa', fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: '1.6' }}>
                         {product.description || "Premium quality social media account verified and ready for use. Instant delivery after purchase."}
                     </p>
 
@@ -201,7 +201,7 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                         </div>
                     )}
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '3rem' }}>
+                    <div className="price-stock" style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '3rem' }}>
                         <div>
                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: isSale ? '#ff4d4d' : '#00ff88' }}>
                                 ${finalPrice}
@@ -232,7 +232,7 @@ export default function ProductClient({ product: initialProduct, bundleContents 
 
                     <BulkPricing basePrice={parseFloat(finalPrice)} platform={product.platform} />
 
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
+                    <div className="action-btns" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' }}>
                         {totalStock > 0 ? (
                             <>
                                 <Link href={`/checkout?id=${product.id}`} className="btn btn-primary" style={{ flex: 1, textAlign: 'center', padding: '1.2rem' }}>
@@ -280,7 +280,7 @@ export default function ProductClient({ product: initialProduct, bundleContents 
                     </div>
 
                     <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                        <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(0,255,136,0.05)', padding: '1.2rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.1)' }}>
                                 <div style={{ fontSize: '1.5rem' }}>🛡️</div>
                                 <div>
@@ -365,9 +365,13 @@ export default function ProductClient({ product: initialProduct, bundleContents 
 
             <style jsx>{`
                 @media (max-width: 768px) {
-                    .sticky-bar {
-                        display: flex !important;
-                    }
+                    .sticky-bar { display: flex !important; }
+                    .main-card { padding: 1.5rem !important; flex-direction: column !important; gap: 2rem !important; }
+                    h1 { font-size: 2rem !important; text-align: center; }
+                    .product-desc { text-align: center; font-size: 0.95rem !important; }
+                    .price-stock { justify-content: center !important; flex-direction: column; gap: 1rem; text-align: center; }
+                    .action-btns { flex-direction: column !important; width: 100%; }
+                    .footer-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
 

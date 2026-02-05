@@ -12,6 +12,7 @@ import { CompareProvider } from "./context/CompareContext";
 import CartSidebar from "@/components/CartSidebar";
 import CompareFloatingBar from "@/components/CompareFloatingBar";
 import LoyaltyBanner from "@/components/LoyaltyBanner";
+import StickyMobileCTA from "@/components/StickyMobileCTA";
 import { Toaster } from "sonner";
 
 const inter = Inter({
@@ -168,6 +169,7 @@ export default function RootLayout({
               <LoyaltyBanner />
               <ScrollProgress />
               <DynamicSalesPulse />
+              <StickyMobileCTA />
               {children}
             </CompareProvider>
           </WishlistProvider>

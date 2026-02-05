@@ -38,7 +38,18 @@ export default function ClientDashboard() {
         }
     };
 
-    if (loading) return <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff' }}>Loading Your Dashboard...</div>;
+    if (loading) return (
+        <div style={{ background: '#050505', minHeight: '100vh', padding: '120px 20px' }}>
+            <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                <div className="skeleton" style={{ width: '300px', height: '40px', marginBottom: '1rem' }}></div>
+                <div className="skeleton" style={{ width: '500px', height: '20px', marginBottom: '3rem' }}></div>
+                <div className="grid-2">
+                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px' }}></div>
+                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px' }}></div>
+                </div>
+            </div>
+        </div>
+    );
 
     if (!user) return (
         <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', flexDirection: 'column' }}>
@@ -50,7 +61,7 @@ export default function ClientDashboard() {
     return (
         <main style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
             <Navbar />
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '120px 20px 60px' }}>
+            <div className="container-main" style={{ maxWidth: '1200px', margin: '0 auto', padding: '120px 20px 60px' }}>
 
                 {/* Header Section */}
                 <div style={{ marginBottom: '3rem', borderLeft: '4px solid #00ff88', paddingLeft: '1.5rem' }}>
@@ -58,7 +69,7 @@ export default function ClientDashboard() {
                     <p style={{ color: '#888', marginTop: '0.5rem' }}>Track your project progress and view recent updates in real-time.</p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
+                <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
 
                     {/* Active Projects */}
                     <div>
@@ -134,7 +145,7 @@ export default function ClientDashboard() {
                         {/* Custom Wallet Card */}
                         <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.1), transparent)', border: '1px solid rgba(255,215,0,0.3)' }}>
                             <h4 style={{ marginBottom: '0.5rem', color: '#ffd700', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>💰 Wallet Balance</h4>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>${wallet.balance.toFixed(2)}</div>
+                            <div className="wallet-amt" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>${wallet.balance.toFixed(2)}</div>
                             <p style={{ color: '#ccc', fontSize: '0.85rem', marginTop: '0.5rem', lineHeight: '1.4' }}>
                                 Available Store Credit.<br />
                                 <span style={{ color: '#00ff88', fontSize: '0.8rem' }}>Lifetime Earnings: ${wallet.affiliate_earnings.toFixed(2)}</span>
@@ -178,6 +189,19 @@ export default function ClientDashboard() {
                 </div>
             </div>
             <Footer />
+            <style jsx>{`
+                @media (max-width: 968px) {
+                    .container-main { padding-top: 100px !important; }
+                    .dashboard-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+                    h1 { font-size: 1.8rem !important; }
+                    .glass { padding: 1.5rem !important; }
+                }
+                @media (max-width: 480px) {
+                    h1 { font-size: 1.5rem !important; }
+                    .wallet-amt { font-size: 2rem !important; }
+                    .btn { padding: 0.8rem !important; font-size: 0.85rem !important; }
+                }
+            `}</style>
         </main>
     );
 }
