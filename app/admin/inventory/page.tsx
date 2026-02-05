@@ -120,7 +120,7 @@ function AdminDashboard() {
     const [logs, setLogs] = useState<any[]>([]);
     const [kbArticles, setKbArticles] = useState<any[]>([]);
     const [showAddKb, setShowAddKb] = useState(false);
-    const [kbForm, setKbForm] = useState({ title: '', slug: '', content: '', category: 'General', is_published: true, meta_description: '', keywords: '' });
+    const [kbForm, setKbForm] = useState<any>({ title: '', slug: '', content: '', category: 'General', is_published: true, meta_description: '', keywords: '' });
     const [isGeneratingKb, setIsGeneratingKb] = useState(false);
 
     // View Mode for Inventory

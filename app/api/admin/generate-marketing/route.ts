@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import OpenAI from 'openai';
 
 export async function POST(req: Request) {
     try {
@@ -44,18 +42,30 @@ export async function POST(req: Request) {
         let content = "";
 
         if (model === 'gemini') {
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-            const result = await geminiModel.generateContent(prompt);
-            content = result.response.text();
-        } else {
-            const openai = new OpenAI({ apiKey });
-            const completion = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
-                messages: [{ role: "user", content: prompt }],
+            const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-            content = completion.choices[0].message.content || "";
+            const data = await geminiRes.json();
+            content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        } else {
+            const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [{ role: "user", content: prompt }],
+                })
+            });
+            const data = await openaiRes.json();
+            content = data.choices?.[0]?.message?.content || "";
         }
+
+        if (!content) throw new Error("AI failed to generate content.");
 
         return NextResponse.json({ content: content.trim() });
 
