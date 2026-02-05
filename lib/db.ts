@@ -475,17 +475,28 @@ export async function initDB(force = false) {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    // 16. Knowledge Base Table
     await query(`
         CREATE TABLE IF NOT EXISTS knowledge_base(
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
-            slug VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
             content LONGTEXT NOT NULL,
             category VARCHAR(100) DEFAULT 'General',
             views INT DEFAULT 0,
             is_published BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 17. KB History Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS kb_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            kb_id INT NOT NULL,
+            old_title VARCHAR(255),
+            old_content LONGTEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (kb_id) REFERENCES knowledge_base(id) ON DELETE CASCADE
         )
     `);
 

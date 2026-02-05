@@ -94,9 +94,16 @@ export async function POST(req: Request) {
             }
 
             if (article) {
+                // Slug Collision Protection
+                let finalSlug = article.slug;
+                const existing = await query("SELECT id FROM knowledge_base WHERE slug = ?", [finalSlug]) as any[];
+                if (existing.length > 0) {
+                    finalSlug = `${finalSlug}-${Math.random().toString(36).substring(2, 7)}`;
+                }
+
                 await query(
                     "INSERT INTO knowledge_base (title, slug, content, category, is_published, meta_description, keywords) VALUES (?, ?, ?, ?, 1, ?, ?)",
-                    [article.title, article.slug, article.content, article.category, article.meta_description, article.keywords]
+                    [article.title, finalSlug, article.content, article.category, article.meta_description, article.keywords]
                 );
                 results.push(article.title);
             }

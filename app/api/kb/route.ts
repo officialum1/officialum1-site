@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const slug = searchParams.get('slug');
-        const admin = searchParams.get('admin'); // Simple check if admin fetching
+        const admin = searchParams.get('admin');
 
         if (slug) {
             const article = await query("SELECT * FROM knowledge_base WHERE slug = ?", [slug]) as any[];
             if (article.length === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
-            // Increment view count if public
             if (!admin) {
                 await query("UPDATE knowledge_base SET views = views + 1 WHERE id = ?", [article[0].id]);
             }
             return NextResponse.json(article[0]);
         }
 
-        const shuffle = searchParams.get('mixed'); // "get mixed" for SEO freshness
-
+        const shuffle = searchParams.get('mixed');
         const sql = admin
             ? "SELECT * FROM knowledge_base ORDER BY created_at DESC"
             : shuffle
@@ -33,16 +32,21 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         let { title, slug, content, category, is_published, meta_description, keywords } = body;
 
-        // Basic validation
         if (!title || !content) return NextResponse.json({ error: "Title and Content are required" }, { status: 400 });
 
-        // Auto-generate slug if missing
         if (!slug) {
             slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
+
+        // Slug Collision Protection
+        const existing = await query("SELECT id FROM knowledge_base WHERE slug = ?", [slug]) as any[];
+        if (existing.length > 0) {
+            slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
         }
 
         await query(
@@ -56,17 +60,24 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { id, title, slug, content, category, is_published, meta_description, keywords } = body;
 
-        // 1. "Make sure we know what was there" - Backup before overwrite
-        const [old] = await query("SELECT title, content FROM knowledge_base WHERE id = ?", [id]) as any[];
-        if (old) {
-            await query(
-                "INSERT INTO kb_history (kb_id, old_title, old_content) VALUES (?, ?, ?)",
-                [id, old.title, old.content]
-            );
+        if (!id) return NextResponse.json({ error: "Missing ID" }, { status: 400 });
+
+        // 1. Version History
+        try {
+            const [old] = await query("SELECT title, content FROM knowledge_base WHERE id = ?", [id]) as any[];
+            if (old) {
+                await query(
+                    "INSERT INTO kb_history (kb_id, old_title, old_content) VALUES (?, ?, ?)",
+                    [id, old.title, old.content]
+                );
+            }
+        } catch (e) {
+            console.error("History logging failed", e); // Don't crash the whole update if history fails
         }
 
         // 2. Perform Update
@@ -81,6 +92,7 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
