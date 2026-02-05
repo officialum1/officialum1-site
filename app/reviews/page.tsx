@@ -6,25 +6,41 @@ import Footer from '@/components/Footer';
 
 export default function ReviewsPage() {
     const [reviews, setReviews] = useState<any[]>([]);
+    const [stats, setStats] = useState({ totalReviews: 2450, avgRating: 4.9, totalOrders: 2400 });
     const [name, setName] = useState('');
     const [service, setService] = useState('Reddit Account');
     const [review, setReview] = useState('');
     const [rating, setRating] = useState(5);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const fetchReviews = async () => {
+    const fetchGlobalData = async () => {
         try {
-            const res = await fetch('/api/testimonials');
+            const res = await fetch('/api/reviews/global');
             const data = await res.json();
-            setReviews(Array.isArray(data) ? data : []);
+            if (data.reviews) setReviews(data.reviews);
+            if (data.stats) setStats(data.stats);
         } catch (e) {
-            console.error("Failed to fetch reviews", e);
+            console.error("Failed to fetch live reviews", e);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchReviews();
+        fetchGlobalData();
+        // 2 Second Polling for Live Data
+        const interval = setInterval(fetchGlobalData, 2000);
+        return () => clearInterval(interval);
     }, []);
+
+    const anonymize = (val: string) => {
+        if (!val) return 'Verified Buyer';
+        // Handle IDs like 'gen_xxx' or emails
+        const namePart = val.includes('@') ? val.split('@')[0] : val.replace('gen_', '').replace('admin_gen_', '');
+        if (namePart.length <= 3) return namePart + "**";
+        return namePart.substring(0, 3) + "**";
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,7 +61,7 @@ export default function ReviewsPage() {
                 setName('');
                 setReview('');
                 setRating(5);
-                fetchReviews();
+                fetchGlobalData();
             } else {
                 alert('Failed to submit review');
             }
@@ -62,16 +78,16 @@ export default function ReviewsPage() {
             <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Customer <span className="text-gradient">Reviews</span></h1>
-                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Join <span style={{ color: '#00ff88', fontWeight: 'bold' }}>2,450+</span> happy clients who trusted us.</p>
+                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Join <span style={{ color: '#00ff88', fontWeight: 'bold' }}>{stats.totalReviews.toLocaleString()}+</span> happy clients who trusted us.</p>
 
                     <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-                        <div className="glass" style={{ padding: '1rem 2rem', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>4.9/5</div>
-                            <div style={{ fontSize: '0.9rem', color: '#aaa' }}>Average Rating</div>
+                        <div className="glass" style={{ padding: '1.5rem 2.5rem', borderRadius: '20px', border: '1px solid rgba(0, 255, 136, 0.2)', boxShadow: '0 0 20px rgba(0, 255, 136, 0.1)' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00ff88' }}>{stats.avgRating}/5</div>
+                            <div style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>Average Rating</div>
                         </div>
-                        <div className="glass" style={{ padding: '1rem 2rem', borderRadius: '12px' }}>
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>2.4k+</div>
-                            <div style={{ fontSize: '0.9rem', color: '#aaa' }}>Orders Completed</div>
+                        <div className="glass" style={{ padding: '1.5rem 2.5rem', borderRadius: '20px', border: '1px solid rgba(0, 195, 255, 0.2)', boxShadow: '0 0 20px rgba(0, 195, 255, 0.1)' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00c3ff' }}>{(stats.totalOrders / 1000).toFixed(1)}k+</div>
+                            <div style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>Orders Completed</div>
                         </div>
                     </div>
                 </div>
@@ -80,6 +96,7 @@ export default function ReviewsPage() {
                 <div style={{ maxWidth: '600px', margin: '0 auto 4rem auto' }} className="glass p-8 rounded-xl shadow-2xl">
                     <h3 className="text-2xl font-bold mb-6 text-center">Share Your Experience</h3>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* Form Fields ... */}
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Full Name</label>
                             <input
@@ -147,26 +164,40 @@ export default function ReviewsPage() {
                     </form>
                 </div>
 
-                {reviews.length === 0 ? (
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '4rem' }}>
+                        <div className="loader" style={{ margin: '0 auto' }}></div>
+                        <p style={{ marginTop: '1rem', color: '#888' }}>Fetching live experience feed...</p>
+                    </div>
+                ) : reviews.length === 0 ? (
                     <div style={{ textAlign: 'center', color: '#666', padding: '4rem' }}>
-                        No reviews yet. Be the first to share your experience!
+                        No live reviews found in the feed. Be the first!
                     </div>
                 ) : (
                     <div className="grid-3">
-                        {reviews.map((item, i) => (
-                            <div key={i} className="glass card-hover" style={{ padding: '2rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>{item.name}</div>
-                                    <div style={{ color: '#00ff88' }}>
-                                        {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                        {reviews.map((item, i) => {
+                            const isNew = new Date(item.created_at).getTime() > Date.now() - 60000;
+                            return (
+                                <div key={i} className="glass card-hover" style={{ padding: '2rem', borderRadius: '24px', display: 'flex', flexDirection: 'column', height: '100%', border: isNew ? '1px solid #00ff88' : '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
+                                    {isNew && <div style={{ position: 'absolute', top: '10px', right: '10px', background: '#00ff88', color: '#000', fontSize: '0.6rem', padding: '2px 8px', borderRadius: '20px', fontWeight: 'bold' }}>JUST NOW</div>}
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'center' }}>
+                                        <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '1.1rem' }}>{anonymize(item.name)}</div>
+                                        <div style={{ color: '#ffd700', fontSize: '0.9rem' }}>
+                                            {'★'.repeat(item.rating)}{'☆'.repeat(5 - item.rating)}
+                                        </div>
+                                    </div>
+                                    <p style={{ color: '#ccc', fontStyle: 'italic', marginBottom: '1.5rem', flex: 1, lineHeight: '1.6' }}>"{item.review}"</p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                                        <div style={{ fontSize: '0.7rem', color: '#00ff88', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                                            ✓ {item.role || 'Verified Buyer'}
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#555' }}>
+                                            {isNew ? 'New Feed' : new Date(item.created_at).toLocaleDateString()}
+                                        </div>
                                     </div>
                                 </div>
-                                <p style={{ color: '#ccc', fontStyle: 'italic', marginBottom: '1.5rem', flex: 1 }}>"{item.review}"</p>
-                                <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 'bold' }}>
-                                    {item.role}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

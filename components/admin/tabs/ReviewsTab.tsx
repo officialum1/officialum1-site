@@ -18,6 +18,10 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
     useEffect(() => {
         fetchReviews();
         fetchUsers();
+
+        // 5 Second Live Polling for Admin
+        const interval = setInterval(fetchReviews, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchReviews = async () => {

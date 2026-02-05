@@ -14,6 +14,10 @@ export default function ReviewsSection({ productId }: { productId: string }) {
         const stored = localStorage.getItem('buyer_user');
         if (stored) setUser(JSON.parse(stored));
         fetchReviews(1);
+
+        // 5 Second live polling for this product's reviews
+        const interval = setInterval(() => fetchReviews(1), 5000);
+        return () => clearInterval(interval);
     }, [productId]);
 
     const fetchReviews = async (p: number) => {
