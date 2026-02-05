@@ -446,6 +446,8 @@ function AdminDashboard() {
             switch (tab) {
                 case 'stock':
                 case 'finance':
+                case 'sell':
+                case 'payments':
                     const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
                     const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
 
@@ -457,6 +459,8 @@ function AdminDashboard() {
                     calculateStats(balData, employees, invData);
                     break;
                 case 'catalog':
+                case 'reviews_hub':
+                case 'bundle':
                     const catRefresh = await fetch('/api/products');
                     setCatalog(await safeData(catRefresh));
                     break;

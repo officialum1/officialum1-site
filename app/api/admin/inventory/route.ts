@@ -13,11 +13,25 @@ export async function GET(request: Request) {
 
     try {
         if (type === 'balance') {
-            if (role === 'staff') return ApiResponse.success([]);
+            let transactions: any[] = [];
+            const email = searchParams.get('email');
 
-            const transactions: any = await query("SELECT * FROM transactions ORDER BY date DESC");
+            if (role === 'staff') {
+                if (!email) return ApiResponse.success([]);
+                // Staff only sees their own transactions
+                const staffInfo: any = await query("SELECT name FROM employees WHERE email = ?", [email]);
+                const staffName = staffInfo.length > 0 ? staffInfo[0].name : null;
+
+                transactions = (await query(
+                    "SELECT * FROM transactions WHERE processedBy = ? OR (processedBy = ? AND ? IS NOT NULL) ORDER BY date DESC",
+                    [email, staffName, staffName]
+                )) as any[];
+            } else {
+                transactions = (await query("SELECT * FROM transactions ORDER BY date DESC")) as any[];
+            }
+
             // Fetch deliveries to map tokens
-            const deliveries: any = await query("SELECT orderId, token, views FROM deliveries");
+            const deliveries = (await query("SELECT orderId, token, views FROM deliveries")) as any[];
 
             // Merge
             const merged = transactions.map((t: any) => {
