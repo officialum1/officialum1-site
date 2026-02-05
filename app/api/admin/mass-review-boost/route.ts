@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, initDB } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 const firstNames = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles", "Sarah", "Karen", "Nancy", "Lisa", "Betty", "Margaret", "Sandra", "Ashley", "Kimberly", "Emily", "Nicole", "Jessica", "Amanda", "Mark", "Steven", "Paul", "Kevin", "Brian", "Eric"];
@@ -30,6 +30,7 @@ const positiveReviews = [
 
 export async function POST(request: Request) {
     if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    await initDB();
 
     try {
         const body = await request.json();

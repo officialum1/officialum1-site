@@ -407,8 +407,13 @@ export async function initDB(force = false) {
         )
     `);
 
-    // Migration for Reviews
+    // Migration for Reviews (Exhaustive)
     try { await query("ALTER TABLE reviews ADD COLUMN product_id INT NOT NULL"); } catch (e) { }
+    try { await query("ALTER TABLE reviews ADD COLUMN user_id VARCHAR(50) NOT NULL"); } catch (e) { }
+    try { await query("ALTER TABLE reviews ADD COLUMN rating INT NOT NULL DEFAULT 5"); } catch (e) { }
+    try { await query("ALTER TABLE reviews ADD COLUMN comment TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE reviews ADD COLUMN status VARCHAR(20) DEFAULT 'approved'"); } catch (e) { }
+    try { await query("ALTER TABLE reviews ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"); } catch (e) { }
 
     // 13. Notifications Table
     await query(`
