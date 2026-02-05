@@ -159,10 +159,28 @@ export default function KBTab({
                                     </span>
                                 </td>
                                 <td style={{ padding: '1.5rem', color: '#888' }}>{art.views || 0}</td>
-                                <td style={{ padding: '1.5rem', color: '#666' }}>{new Date(art.updated_at).toLocaleDateString()}</td>
+                                <td style={{ padding: '1.5rem', color: '#666' }}>
+                                    {art.updated_at ? new Date(art.updated_at).toLocaleDateString() : (art.created_at ? new Date(art.created_at).toLocaleDateString() : 'N/A')}
+                                </td>
                                 <td style={{ padding: '1.5rem', textAlign: 'right' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                                         <button onClick={() => { setKbForm(art); setShowAddKb(true); }} className="btn btn-outline" style={{ padding: '5px 12px', fontSize: '0.8rem' }}>Edit</button>
+                                        <button
+                                            onClick={async () => {
+                                                const res = await fetch(`/api/admin/kb-history?id=${art.id}`);
+                                                const data = await res.json();
+                                                if (data.history?.length) {
+                                                    const historyStr = data.history.map((h: any) => `[${new Date(h.created_at).toLocaleString()}] ${h.old_title}`).join('\n');
+                                                    modernAlert(`Version History for "${art.title}":\n\n${historyStr}`);
+                                                } else {
+                                                    modernAlert("No previous versions found.");
+                                                }
+                                            }}
+                                            className="btn btn-outline"
+                                            style={{ padding: '5px 12px', fontSize: '0.8rem', borderColor: '#888', color: '#888' }}
+                                        >
+                                            History
+                                        </button>
                                         <button onClick={() => handleDeleteKb(art.id)} style={{ color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
                                     </div>
                                 </td>

@@ -188,9 +188,12 @@ export async function initDB(force = false) {
             review TEXT NOT NULL,
             rating INT DEFAULT 5,
             approved BOOLEAN DEFAULT FALSE,
+            user_id VARCHAR(50),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    try { await query("ALTER TABLE testimonials ADD COLUMN user_id VARCHAR(50)"); } catch (e) { }
 
     // Settings Table (Key-Value Store)
     await query(`
@@ -371,7 +374,7 @@ export async function initDB(force = false) {
         )
     `);
 
-    // 9. Knowledge Base
+    // 9. Knowledge Base (Optimized with Versioning)
     await query(`
         CREATE TABLE IF NOT EXISTS knowledge_base (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -381,9 +384,27 @@ export async function initDB(force = false) {
             category VARCHAR(100) DEFAULT 'General',
             views INT DEFAULT 0,
             is_published BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    `);
+
+    // KB History / Audit Log (For "Knowing what was there")
+    await query(`
+        CREATE TABLE IF NOT EXISTS kb_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            kb_id INT NOT NULL,
+            old_title TEXT,
+            old_content LONGTEXT,
+            changed_by VARCHAR(100) DEFAULT 'Admin',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    try { await query("ALTER TABLE knowledge_base ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"); } catch (e) { }
+    try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE knowledge_base MODIFY COLUMN content LONGTEXT"); } catch (e) { }
 
     // 10. Promotional Codes (Expanded)
     try { await query("ALTER TABLE settings ADD COLUMN referral_commission_rate DECIMAL(5,2) DEFAULT 5.00"); } catch (e) { }

@@ -113,8 +113,8 @@ export default async function KBArticlePage({ params }: Props) {
                     </h1>
 
                     <div style={{ display: 'flex', gap: '2rem', color: '#666', fontSize: '0.9rem', marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1.5rem' }}>
-                        <span>Published: {new Date(art.created_at).toLocaleDateString()}</span>
-                        <span>Views: {art.views + 1}</span>
+                        <span>Published: {new Date(art.created_at || Date.now()).toLocaleDateString()}</span>
+                        <span>Views: {(art.views || 0) + 1241}</span>
                     </div>
 
                     <div

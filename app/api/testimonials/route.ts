@@ -31,10 +31,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true });
         } else {
             // Create New
-            const { name, role, review, rating, isAdmin } = body;
+            const { name, role, review, rating, isAdmin, userId } = body;
             await query(
-                "INSERT INTO testimonials (name, role, review, rating, approved) VALUES (?, ?, ?, ?, ?)",
-                [name, role || 'Buyer', review, rating || 5, isAdmin ? true : false]
+                "INSERT INTO testimonials (name, role, review, rating, approved, user_id) VALUES (?, ?, ?, ?, ?, ?)",
+                [name, role || 'Buyer', review, rating || 5, isAdmin ? true : false, userId || null]
             );
             return NextResponse.json({ success: true });
         }

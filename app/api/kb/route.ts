@@ -17,9 +17,13 @@ export async function GET(req: Request) {
             return NextResponse.json(article[0]);
         }
 
+        const shuffle = searchParams.get('mixed'); // "get mixed" for SEO freshness
+
         const sql = admin
             ? "SELECT * FROM knowledge_base ORDER BY created_at DESC"
-            : "SELECT * FROM knowledge_base WHERE is_published = 1 ORDER BY category ASC, created_at DESC";
+            : shuffle
+                ? "SELECT * FROM knowledge_base WHERE is_published = 1 ORDER BY RAND()"
+                : "SELECT * FROM knowledge_base WHERE is_published = 1 ORDER BY category ASC, created_at DESC";
 
         const articles = await query(sql);
         return NextResponse.json(articles);
@@ -51,6 +55,16 @@ export async function PUT(req: Request) {
         const body = await req.json();
         const { id, title, slug, content, category, is_published, meta_description, keywords } = body;
 
+        // 1. "Make sure we know what was there" - Backup before overwrite
+        const [old] = await query("SELECT title, content FROM knowledge_base WHERE id = ?", [id]) as any[];
+        if (old) {
+            await query(
+                "INSERT INTO kb_history (kb_id, old_title, old_content) VALUES (?, ?, ?)",
+                [id, old.title, old.content]
+            );
+        }
+
+        // 2. Perform Update
         await query(
             "UPDATE knowledge_base SET title=?, slug=?, content=?, category=?, is_published=?, meta_description=?, keywords=? WHERE id=?",
             [title, slug, content, category, is_published ? 1 : 0, meta_description || '', keywords || '', id]

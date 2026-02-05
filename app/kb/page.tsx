@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function KBIndexPage() {
-    const articles = await query("SELECT * FROM knowledge_base WHERE is_published = 1 ORDER BY created_at DESC") as any[];
+    // "Get Mixed" - Randomize public list order for SEO freshness and dynamic feel
+    const articles = await query("SELECT * FROM knowledge_base WHERE is_published = 1 ORDER BY RAND()") as any[];
 
     // Group by category
     const categories: { [key: string]: any[] } = {};

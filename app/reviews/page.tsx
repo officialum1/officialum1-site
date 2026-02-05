@@ -16,6 +16,7 @@ export default function ReviewsPage() {
     const [rating, setRating] = useState(5);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<any>(null);
 
     const fetchGlobalData = async () => {
         try {
@@ -31,6 +32,12 @@ export default function ReviewsPage() {
     };
 
     useEffect(() => {
+        const stored = localStorage.getItem('buyer_user');
+        if (stored) {
+            const u = JSON.parse(stored);
+            setUser(u);
+            setName(u.email ? u.email.split('@')[0] : 'Member');
+        }
         fetchGlobalData();
         // 2 Second Polling for Live Data
         const interval = setInterval(fetchGlobalData, 2000);
@@ -53,10 +60,11 @@ export default function ReviewsPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name,
+                    name: name || 'Anonymous',
                     role: 'Buyer - ' + service,
                     review,
-                    rating
+                    rating,
+                    userId: user?.id
                 })
             });
             if (res.ok) {
@@ -102,18 +110,33 @@ export default function ReviewsPage() {
                 </div>
 
                 {/* Submit Review Form */}
-                <div style={{ maxWidth: '600px', margin: '0 auto 4rem auto' }} className="glass p-8 rounded-xl shadow-2xl">
-                    <h3 className="text-2xl font-bold mb-6 text-center">Share Your Experience</h3>
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                        {/* Form Fields ... */}
+                <div className="glass" style={{ padding: '3rem', borderRadius: '24px', maxWidth: '800px', margin: '0 auto', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <h2 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>Share Your Experience</h2>
+
+                    {user ? (
+                        <div style={{ background: 'rgba(0,255,136,0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(0,255,136,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <span style={{ color: '#aaa', fontSize: '0.9rem' }}>Posting as:</span>
+                                <strong style={{ color: '#fff', marginLeft: '10px' }}>{anonymize(user.email)}</strong>
+                            </div>
+                            <span style={{ fontSize: '0.7rem', color: '#00ff88', fontWeight: 'bold' }}>✓ REGISTERED MEMBER</span>
+                        </div>
+                    ) : (
+                        <div style={{ background: 'rgba(255, 195, 0, 0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid rgba(255, 195, 0, 0.1)', textAlign: 'center' }}>
+                            <p style={{ color: '#ffc300', fontSize: '0.85rem' }}>Login to receive a <strong>Verified Purchase</strong> badge on your review!</p>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa', fontSize: '0.9rem' }}>Full Name</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: '#aaa' }}>Full Name</label>
                             <input
-                                required
+                                className="input-field"
                                 value={name}
-                                onChange={e => setName(e.target.value)}
-                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white' }}
+                                onChange={e => !user && setName(e.target.value)}
+                                disabled={!!user}
                                 placeholder="Your name or alias"
+                                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', background: user ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)', border: '1px solid #333', color: 'white', cursor: user ? 'not-allowed' : 'text' }}
                             />
                         </div>
                         <div>
@@ -197,8 +220,15 @@ export default function ReviewsPage() {
                                     </div>
                                     <p style={{ color: '#ccc', fontStyle: 'italic', marginBottom: '1.5rem', flex: 1, lineHeight: '1.6' }}>"{item.review}"</p>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                                        <div style={{ fontSize: '0.7rem', color: '#00ff88', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
-                                            ✓ {item.role || 'Verified Buyer'}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#00ff88', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                                                ✓ {item.role || 'Verified Buyer'}
+                                            </div>
+                                            {item.has_purchased > 0 && (
+                                                <div style={{ fontSize: '0.6rem', color: '#00ff88', background: 'rgba(0,255,136,0.1)', padding: '2px 8px', borderRadius: '4px', width: 'fit-content' }}>
+                                                    Verified Purchase
+                                                </div>
+                                            )}
                                         </div>
                                         <div style={{ fontSize: '0.7rem', color: '#555' }}>
                                             {isNew ? 'New Feed' : new Date(item.created_at).toLocaleDateString()}

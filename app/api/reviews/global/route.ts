@@ -16,10 +16,12 @@ export async function GET() {
         // 2. Get Latest Combined Feed (Last 50)
         // We'll normalize both tables into a common format
         const combinedReviews = await query(`
-            (SELECT id, user_id as name, comment as review, rating, status as approved, created_at, 'Product Review' as role 
+            (SELECT id, user_id as name, comment as review, rating, status as approved, created_at, 'Product Review' as role,
+             (SELECT COUNT(*) FROM orders o WHERE o.userId = reviews.user_id AND o.status IN ('paid', 'completed')) as has_purchased
              FROM reviews WHERE status = 'approved')
             UNION ALL
-            (SELECT id, name, review, rating, approved, created_at, role 
+            (SELECT id, name, review, rating, approved, created_at, role,
+             (SELECT COUNT(*) FROM orders o WHERE o.userId = testimonials.user_id AND o.status IN ('paid', 'completed')) as has_purchased
              FROM testimonials WHERE approved = 1)
             ORDER BY created_at DESC
             LIMIT 50
