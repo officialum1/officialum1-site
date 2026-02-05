@@ -168,8 +168,20 @@ export default function SettingsTab({
                             <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Access ID (SEO)</label><input value={settings.mozId || ''} onChange={e => setSettings({ ...settings, mozId: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
                             <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Moz Secret Key</label><input type="password" value={settings.mozKey || ''} onChange={e => setSettings({ ...settings, mozKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
 
-                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Gemini API Key (AI Blog)</label><input type="password" value={settings.geminiKey || ''} onChange={e => setSettings({ ...settings, geminiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
-                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>OpenAI API Key (AI Blog Backup)</label><input type="password" value={settings.openaiKey || ''} onChange={e => setSettings({ ...settings, openaiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Gemini API Key (AI Blog & Marketing)</label><input type="password" value={settings.geminiKey || ''} onChange={e => setSettings({ ...settings, geminiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                            <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>OpenAI API Key (AI Backup)</label><input type="password" value={settings.openaiKey || ''} onChange={e => setSettings({ ...settings, openaiKey: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
+                            <div>
+                                <label style={{ color: '#aaa', fontSize: '0.8rem' }}>Default Marketing AI Model</label>
+                                <select
+                                    value={settings.marketing_ai_model || 'gemini'}
+                                    onChange={e => setSettings({ ...settings, marketing_ai_model: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%' }}
+                                >
+                                    <option value="gemini">Google Gemini 1.5 Flash (Fast)</option>
+                                    <option value="openai">OpenAI GPT-4o-mini (Professional)</option>
+                                </select>
+                            </div>
 
                             <h4 style={{ color: '#aaa', marginTop: '1rem' }}>SMTP Email Server</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

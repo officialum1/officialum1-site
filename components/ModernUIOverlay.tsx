@@ -27,22 +27,24 @@ let toastTrigger: ((message: string, type: any) => void) | null = null;
  * Global triggers for the modern UI
  * Use these instead of window.alert, window.confirm, window.prompt
  */
-export const modernAlert = (message: string) => {
-    if (toastTrigger) toastTrigger(message, 'info');
-    else console.log("Toast trigger not initialized", message);
+export const modernAlert = (message: string, description?: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const fullMessage = description ? `${message}: ${description}` : message;
+    if (toastTrigger) toastTrigger(fullMessage, type);
+    else console.log(`[${type}]`, fullMessage);
 };
 
-export const modernConfirm = (message: string): Promise<boolean> => {
+export const modernConfirm = (message: string, description?: string): Promise<boolean> => {
     return new Promise((resolve) => {
+        const fullMessage = description ? `${message}\n\n${description}` : message;
         if (modalResolver) {
             modalResolver({
                 id: Math.random().toString(),
                 type: 'confirm',
-                message,
+                message: fullMessage,
                 onResolve: resolve
             });
         } else {
-            resolve(window.confirm(message));
+            resolve(window.confirm(fullMessage));
         }
     });
 };

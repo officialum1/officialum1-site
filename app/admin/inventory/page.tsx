@@ -1939,9 +1939,29 @@ function AdminDashboard() {
                                 setIsGeneratingKb={setIsGeneratingKb}
                                 handleKbSubmit={async (e) => {
                                     e.preventDefault();
-                                    await fetch('/api/kb', { method: 'POST', body: JSON.stringify({ ...kbForm, action: 'create' }) });
-                                    setShowAddKb(false);
-                                    fetchData();
+                                    const method = kbForm.id ? 'PUT' : 'POST';
+
+                                    // Auto-slug if missing
+                                    const finalForm = { ...kbForm };
+                                    if (!finalForm.slug && finalForm.title) {
+                                        finalForm.slug = finalForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                                    }
+
+                                    const res = await fetch('/api/kb', {
+                                        method,
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(finalForm)
+                                    });
+
+                                    if (res.ok) {
+                                        modernAlert(kbForm.id ? "Article Updated" : "Article Created", "", "success");
+                                        setShowAddKb(false);
+                                        setKbForm({ title: '', slug: '', content: '', category: 'General', is_published: true, meta_description: '', keywords: '' });
+                                        fetchData();
+                                    } else {
+                                        const err = await res.json();
+                                        modernAlert("Save Failed", err.error || "Unknown error", "error");
+                                    }
                                 }}
                                 kbArticles={kbArticles}
                                 handleDeleteKb={async (id) => {

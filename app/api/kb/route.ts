@@ -35,10 +35,15 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { title, slug, content, category, is_published, meta_description, keywords } = body;
+        let { title, slug, content, category, is_published, meta_description, keywords } = body;
 
         // Basic validation
-        if (!title || !slug || !content) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+        if (!title || !content) return NextResponse.json({ error: "Title and Content are required" }, { status: 400 });
+
+        // Auto-generate slug if missing
+        if (!slug) {
+            slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        }
 
         await query(
             "INSERT INTO knowledge_base (title, slug, content, category, is_published, meta_description, keywords) VALUES (?, ?, ?, ?, ?, ?, ?)",
