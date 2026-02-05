@@ -202,7 +202,7 @@ export default function ModernUIOverlay() {
                     border: 1px solid rgba(0, 255, 136, 0.3);
                     border-radius: 40px;
                     padding: 60px;
-                    width: 100%;
+                    width: 95%;
                     max-width: 600px;
                     position: relative;
                     box-shadow: 0 0 100px rgba(0,0,0,1), 
@@ -210,6 +210,23 @@ export default function ModernUIOverlay() {
                                 inset 0 0 20px rgba(255,255,255,0.02);
                     overflow: hidden;
                     z-index: 10001;
+                    transition: all 0.3s ease;
+                }
+
+                @media (max-width: 768px) {
+                    .modern-modal-card {
+                        padding: 30px 20px;
+                        border-radius: 24px;
+                    }
+                    .modal-body p {
+                        font-size: 1.1rem;
+                        margin-bottom: 30px;
+                    }
+                    .modal-type-icon {
+                        width: 50px;
+                        height: 50px;
+                        font-size: 1.4rem;
+                    }
                 }
 
                 .modal-glow {

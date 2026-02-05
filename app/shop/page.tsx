@@ -142,10 +142,10 @@ export default function ShopPage() {
 
                 {/* Search & Sort Bar */}
                 <motion.div
+                    className="shop-controls"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
-                    style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}
                 >
                     <input
                         type="text"

@@ -286,32 +286,49 @@ p {
 
 /* GRID SYSTEM */
 .container {
-  width: 92%;
+  width: 100%;
   max-width: 1600px;
   margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
 .grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
 }
 
 @media (max-width: 1100px) {
   .grid-3 {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
   }
 }
 
 @media (max-width: 768px) {
   .grid-3 {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .navbar-content {
-    width: 95%;
+    width: 100%;
     padding: 0 1rem;
   }
+
+  h1 {
+    font-size: 2.5rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+  }
+}
+
+/* RESPONSIVE IMAGES */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 /* INPUTS */
@@ -564,16 +581,18 @@ select.input-field option {
     position: fixed;
     inset: 0;
     height: 100vh;
-    background: rgba(3, 3, 5, 0.98);
-    backdrop-filter: blur(20px);
+    background: rgba(2, 2, 4, 0.98);
+    backdrop-filter: blur(40px);
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding: 100px 20px 60px;
     align-items: center;
-    gap: 3rem;
+    gap: 2rem;
     transform: translateX(100%);
     transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1050;
     display: flex;
+    overflow-y: auto;
   }
 
   .nav-menu.active {
@@ -583,17 +602,53 @@ select.input-field option {
   .nav-links {
     flex-direction: column;
     text-align: center;
-    gap: 2.5rem;
+    gap: 1.5rem;
+    width: 100%;
+    margin-bottom: 2rem;
   }
 
   .nav-link {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
+    display: block;
+    width: 100%;
   }
 
   .auth-buttons {
     border: none;
-    padding: 0;
+    padding: 1rem 0;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 1.5rem;
+    width: 100%;
+  }
+}
+
+/* SHOP RESPONSIVE UTILITIES */
+.shop-controls {
+  display: flex !important;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .shop-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .shop-controls>* {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+.mobile-hide {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .mobile-hide {
+    display: inherit !important;
   }
 }

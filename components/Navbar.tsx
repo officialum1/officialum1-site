@@ -87,7 +87,7 @@ export default function Navbar() {
                     <span className={`bar ${isOpen ? 'open' : ''}`}></span>
                 </button>
 
-                <div className="nav-search-wrapper">
+                <div className="nav-search-wrapper mobile-hide">
                     <input
                         type="text"
                         placeholder="Search products..."
