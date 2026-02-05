@@ -130,7 +130,7 @@ function AdminDashboard() {
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [showAddCategory, setShowAddCategory] = useState(false);
     const [newProduct, setNewProduct] = useState({ name: '', platform: 'Z2U', price: '', description: '', image: '', salePrice: '', saleEndsAt: '', bundleItems: '', stock: '100', category_id: '', g2g_listing_id: '' });
-    const [newCategory, setNewCategory] = useState({ name: '', slug: '', icon: '📁' });
+    const [newCategory, setNewCategory] = useState({ name: '', slug: '', icon: '📁', image: '' });
     const [showCategorySale, setShowCategorySale] = useState<any>(null); // Category object for sale modal
     const [categorySaleForm, setCategorySaleForm] = useState({ discount: '', expiry: '' });
 
@@ -1062,7 +1062,7 @@ function AdminDashboard() {
                 return;
             }
             setShowAddCategory(false);
-            setNewCategory({ name: '', slug: '', icon: '📁' });
+            setNewCategory({ name: '', slug: '', icon: '📁', image: '' });
             fetchData();
             alert("Category Created Successfully!");
         } catch (err) {
@@ -2074,36 +2074,58 @@ function AdminDashboard() {
                     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(10px)', padding: '2rem' }}>
                         <div className="glass" style={{ width: '100%', maxWidth: '750px', padding: '2.5rem', borderRadius: '24px', position: 'relative', border: '1px solid #00ccff' }}>
                             <button onClick={() => setShowAddCategory(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-                            <h3 style={{ marginBottom: '1.5rem', color: '#00ccff' }}>📁 Manage Store Categories</h3>
+                            <h3 style={{ marginBottom: '1.5rem', color: '#00ccff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '1.5rem' }}>📁</span> Manage Store Categories
+                            </h3>
 
-                            <form onSubmit={handleAddCategory} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 1fr auto', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
-                                <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="Icon" style={{ padding: '0.5rem', textAlign: 'center', height: '46px', borderRadius: '12px' }} />
-                                <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="Category Name" required style={{ height: '46px', borderRadius: '12px' }} />
-                                <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="slug" required style={{ height: '46px', borderRadius: '12px' }} />
-                                <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', height: '46px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Add</button>
+                            <form onSubmit={handleAddCategory} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Display Name</label>
+                                        <input className="input-field" value={newCategory.name} onChange={e => setNewCategory({ ...newCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="e.g. Netflix Premium" required style={{ width: '100%', height: '46px', borderRadius: '12px' }} />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '0.4rem', textTransform: 'uppercase' }}>URL Slug</label>
+                                        <input className="input-field" value={newCategory.slug} onChange={e => setNewCategory({ ...newCategory, slug: e.target.value })} placeholder="netflix-premium" required style={{ width: '100%', height: '46px', borderRadius: '12px' }} />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 1fr auto', gap: '1rem', alignItems: 'flex-end' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Icon/Emoji</label>
+                                        <input className="input-field" value={newCategory.icon} onChange={e => setNewCategory({ ...newCategory, icon: e.target.value })} placeholder="📁" style={{ width: '100%', padding: '0.5rem', textAlign: 'center', height: '46px', borderRadius: '12px' }} />
+                                    </div>
+                                    <div style={{ flex: 2 }}>
+                                        <label style={{ display: 'block', fontSize: '0.7rem', color: '#666', marginBottom: '0.4rem', textTransform: 'uppercase' }}>Category Banner/Image (Optional URL)</label>
+                                        <input className="input-field" value={newCategory.image} onChange={e => setNewCategory({ ...newCategory, image: e.target.value })} placeholder="https://example.com/banner.jpg" style={{ width: '100%', height: '46px', borderRadius: '12px' }} />
+                                    </div>
+                                    <button type="submit" className="btn btn-primary" style={{ padding: '0 2rem', height: '46px', borderRadius: '12px', fontWeight: 'bold' }}>Create Category</button>
+                                </div>
                             </form>
 
-                            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                            <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '5px' }}>
                                 {categories.map((cat: any) => (
-                                    <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                            <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                {cat.icon && (cat.icon.startsWith('/') || cat.icon.startsWith('http')) ? (
+                                    <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', marginBottom: '0.8rem', border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.2s' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+                                            <div style={{ width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', overflow: 'hidden' }}>
+                                                {cat.image ? (
+                                                    <img src={cat.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : cat.icon && (cat.icon.startsWith('/') || cat.icon.startsWith('http')) ? (
                                                     <img src={cat.icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                 ) : (
-                                                    <span style={{ fontSize: '1.5rem' }}>{cat.icon || '📁'}</span>
+                                                    <span style={{ fontSize: '1.8rem' }}>{cat.icon || '📁'}</span>
                                                 )}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: '600' }}>{cat.name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#666' }}>/{cat.slug}</div>
+                                                <div style={{ fontWeight: '700', fontSize: '1.05rem', color: '#fff' }}>{cat.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#555', fontFamily: 'monospace' }}>/{cat.slug}</div>
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                            <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888' }}>
-                                                {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Sale'}
+                                        <div style={{ display: 'flex', gap: '0.7rem' }}>
+                                            <button onClick={() => { setShowCategorySale(cat); setCategorySaleForm({ discount: (cat.discount_percent !== undefined && cat.discount_percent !== null) ? cat.discount_percent.toString() : '', expiry: cat.sale_ends_at ? new Date(cat.sale_ends_at).toISOString().slice(0, 16) : '' }); }} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '5px', borderRadius: '10px', fontSize: '0.75rem', padding: '0.5rem 0.8rem', color: cat.discount_percent > 0 ? '#ff4d4d' : '#888', borderColor: cat.discount_percent > 0 ? '#ff4d4d44' : 'rgba(255,255,255,0.1)' }}>
+                                                {cat.discount_percent > 0 ? `🔥 ${cat.discount_percent}% Off` : '🏷️ Flash Sale'}
                                             </button>
-                                            <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', color: '#ff4d4d', borderColor: '#ff4d4d33' }}>Delete</button>
+                                            <button onClick={() => handleDeleteCategory(cat.id)} className="btn btn-outline" style={{ borderRadius: '10px', fontSize: '0.75rem', padding: '0.5rem 0.8rem', color: '#ff4444', borderColor: '#ff444433' }}>Delete</button>
                                         </div>
                                     </div>
                                 ))}

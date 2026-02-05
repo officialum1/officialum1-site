@@ -506,6 +506,7 @@ export async function initDB(force = false) {
     try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
     try { await query("ALTER TABLE products ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL"); } catch (e) { }
     try { await query("ALTER TABLE categories ADD COLUMN is_vip_only BOOLEAN DEFAULT FALSE"); } catch (e) { }
+    try { await query("ALTER TABLE categories ADD COLUMN image TEXT NULL"); } catch (e) { }
 
     // --- NEW REVENUE ENGINE MIGRATIONS ---
 
