@@ -27,7 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.8,
         }));
 
-        return [...routes, ...productUrls];
+        // Fetch KB Articles
+        const articles = await query("SELECT slug, created_at FROM knowledge_base WHERE is_published = 1") as any[];
+        const kbUrls = articles.map((art) => ({
+            url: `${baseUrl}/kb/${art.slug}`,
+            lastModified: new Date(art.created_at || new Date()),
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+        }));
+
+        return [...routes, ...productUrls, ...kbUrls];
     } catch (error) {
         console.error("Sitemap Generation Error:", error);
         return routes;

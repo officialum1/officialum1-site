@@ -78,10 +78,41 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
 
     return (
         <div className="FadeIn">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: 'bold' }}>⭐ Manage Product Reviews</h2>
-                <div style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', padding: '0.5rem 1rem', borderRadius: '12px', fontSize: '0.9rem' }}>
-                    {reviews.length} Total Reviews
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <button
+                        onClick={async () => {
+                            if (!await modernConfirm("This will add 10 reviews to EVERY product in your store to look like a busy site. Proceed?")) return;
+                            setLoading(true);
+                            try {
+                                const res = await fetch('/api/admin/mass-review-boost', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ reviewsPerProduct: 10 })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    modernAlert(`✅ Store boosted! ${data.message}`);
+                                    fetchReviews();
+                                } else {
+                                    modernAlert("Error: " + data.error);
+                                }
+                            } catch (e) {
+                                modernAlert("Failed to boost store");
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        className="btn btn-outline"
+                        style={{ color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)', background: 'rgba(0,255,136,0.05)' }}
+                        disabled={loading}
+                    >
+                        🚀 Mass AI Boost (All Prods)
+                    </button>
+                    <div style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', padding: '0.5rem 1rem', borderRadius: '12px', fontSize: '0.9rem' }}>
+                        {reviews.length} Total Reviews
+                    </div>
                 </div>
             </div>
 

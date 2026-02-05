@@ -29,7 +29,35 @@ export default function KBTab({
         <div className="FadeIn">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h2 style={{ color: '#00ff88' }}>📚 Knowledge Base & FAQ</h2>
-                <button onClick={() => setShowAddKb(!showAddKb)} className="btn btn-primary">{showAddKb ? 'Cancel' : '+ Add Article'}</button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        onClick={async () => {
+                            const topicsStr = await modernPrompt("Enter topics separated by commas (e.g. 'How to buy Netflix, Best Reddit accounts, Snapchat guide')");
+                            if (!topicsStr) return;
+                            const keywords = topicsStr.split(',').map(s => s.trim()).filter(s => s);
+                            setIsGeneratingKb(true);
+                            try {
+                                const res = await fetch('/api/admin/bulk-generate-kb', {
+                                    method: 'POST', body: JSON.stringify({ keywords })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    modernAlert(`✅ Successfully generated ${data.titles.length} articles!`);
+                                    window.location.reload();
+                                } else {
+                                    modernAlert("Error: " + data.error);
+                                }
+                            } catch (e) { modernAlert("Bulk generation failed"); }
+                            setIsGeneratingKb(false);
+                        }}
+                        className="btn btn-outline"
+                        style={{ borderColor: '#00ff88', color: '#00ff88' }}
+                        disabled={isGeneratingKb}
+                    >
+                        {isGeneratingKb ? ' ✨ Writing Massive Content...' : '📦 Bulk AI Generate'}
+                    </button>
+                    <button onClick={() => setShowAddKb(!showAddKb)} className="btn btn-primary">{showAddKb ? 'Cancel' : '+ Add Article'}</button>
+                </div>
             </div>
 
             {showAddKb && (

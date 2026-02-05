@@ -174,6 +174,11 @@ export default function FAQPage() {
                                         paddingTop: '1.5rem'
                                     }}>
                                         <div dangerouslySetInnerHTML={{ __html: item.content }} />
+                                        <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+                                            <Link href={`/kb/${item.slug}`} style={{ color: '#00ff88', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                📖 View Full SEO Page →
+                                            </Link>
+                                        </div>
                                     </div>
                                 )}
                             </div>
