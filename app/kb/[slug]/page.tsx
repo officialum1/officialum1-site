@@ -5,11 +5,12 @@ import Footer from "@/components/Footer";
 import { Metadata } from "next";
 
 interface Props {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const articles = await query("SELECT title, meta_description, keywords FROM knowledge_base WHERE slug = ?", [params.slug]) as any[];
+    const { slug } = await params;
+    const articles = await query("SELECT title, meta_description, keywords FROM knowledge_base WHERE slug = ?", [slug]) as any[];
     if (articles.length === 0) return { title: 'Article Not Found' };
 
     const art = articles[0];
@@ -26,7 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function KBArticlePage({ params }: Props) {
-    const articles = await query("SELECT * FROM knowledge_base WHERE slug = ?", [params.slug]) as any[];
+    const { slug } = await params;
+    const articles = await query("SELECT * FROM knowledge_base WHERE slug = ?", [slug]) as any[];
     if (articles.length === 0) notFound();
 
     const art = articles[0];
