@@ -16,13 +16,33 @@ export async function GET() {
         const baseProjects = 250;
         const baseUptime = 4.9;
 
+        // 3. Get Latest Activity Feed
+        const latestOrders = await query(`
+            SELECT productId, amount, date FROM orders 
+            WHERE status IN ('paid', 'completed') 
+            ORDER BY date DESC LIMIT 5
+        `) as any[];
+
+        const latestReviews = await query(`
+            (SELECT comment as review, rating, created_at FROM reviews WHERE status = 'approved')
+            UNION ALL
+            (SELECT review, rating, created_at FROM testimonials WHERE approved = 1)
+            ORDER BY created_at DESC LIMIT 5
+        `) as any[];
+
         return NextResponse.json({
-            orders: (orderCount?.count || 0) + baseOrders,
-            reviews: (reviewCount?.count || 0) + (testiCount?.count || 0) + baseReviews,
-            projects: (orderCount?.count || 0) + baseProjects,
-            satisfaction: 4.8 + (Math.random() * 0.15), // Realistic 4.8 - 4.95 range
-            activeUsers: (userCount?.count || 0) + 120, // 120 base real-time users
-            kbEngagement: (kbViews?.total || 0) + 12000
+            stats: {
+                orders: (orderCount?.count || 0) + baseOrders,
+                reviews: (reviewCount?.count || 0) + (testiCount?.count || 0) + baseReviews,
+                projects: (orderCount?.count || 0) + baseProjects,
+                satisfaction: Number((4.85 + (Math.random() * 0.1)).toFixed(2)),
+                activeUsers: (userCount?.count || 0) + 142 + Math.floor(Math.random() * 10),
+                kbEngagement: (kbViews?.total || 0) + 12000
+            },
+            feed: {
+                latestOrders,
+                latestReviews
+            }
         });
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 });

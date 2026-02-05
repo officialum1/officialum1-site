@@ -19,8 +19,8 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
         fetchReviews();
         fetchUsers();
 
-        // 5 Second Live Polling for Admin
-        const interval = setInterval(fetchReviews, 5000);
+        // 3 Second Ultra-Live Polling for Admin Feed
+        const interval = setInterval(fetchReviews, 3000);
         return () => clearInterval(interval);
     }, []);
 

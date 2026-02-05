@@ -25,8 +25,9 @@ export default function LiveCount({ metric, suffix = "", prefix = "", decimals =
         try {
             const res = await fetch('/api/stats/live');
             const data = await res.json();
-            if (data[metric] !== undefined) {
-                setCount(data[metric]);
+            const stats = data.stats || data;
+            if (stats[metric] !== undefined) {
+                setCount(stats[metric]);
             }
         } catch (e) {
             console.error("Live fetch error:", e);
@@ -34,6 +35,19 @@ export default function LiveCount({ metric, suffix = "", prefix = "", decimals =
     };
 
     useEffect(() => {
+        // Try to hook into the global live engine first (more efficient)
+        const engine = (window as any).OfficialUM1_LiveStats;
+        if (engine && typeof engine.onChange === 'function') {
+            engine.onChange((data: any) => {
+                const stats = data.stats || data;
+                if (stats[metric] !== undefined) {
+                    setCount(stats[metric]);
+                }
+            });
+            return;
+        }
+
+        // Fallback to local polling if engine isn't ready
         fetchStat();
         const timer = setInterval(fetchStat, interval);
         return () => clearInterval(timer);

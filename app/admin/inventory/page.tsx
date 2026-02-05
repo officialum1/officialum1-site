@@ -539,7 +539,7 @@ function AdminDashboard() {
 
         const interval = setInterval(() => {
             fetchTabContent(activeTab);
-        }, 5000); // 5s "Instant" Poll
+        }, 3000); // 3s "Ultra-Live" Pulse requested by user
 
         return () => clearInterval(interval);
     }, [activeTab, loading]);
