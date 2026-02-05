@@ -1,5 +1,8 @@
 "use client";
 
+import Link from 'next/link';
+import LiveCount from '@/components/LiveCount';
+
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -78,15 +81,21 @@ export default function ReviewsPage() {
             <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                     <h1 className="text-4xl font-bold mb-4">Customer <span className="text-gradient">Reviews</span></h1>
-                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Join <span style={{ color: '#00ff88', fontWeight: 'bold' }}>{stats.totalReviews.toLocaleString()}+</span> happy clients who trusted us.</p>
+                    <p style={{ color: '#aaa', fontSize: '1.2rem' }}>Join <span style={{ color: '#00ff88', fontWeight: 'bold' }}>
+                        <LiveCount metric="reviews" suffix="+" />
+                    </span> happy clients who trusted us.</p>
 
                     <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
                         <div className="glass" style={{ padding: '1.5rem 2.5rem', borderRadius: '20px', border: '1px solid rgba(0, 255, 136, 0.2)', boxShadow: '0 0 20px rgba(0, 255, 136, 0.1)' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00ff88' }}>{stats.avgRating}/5</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00ff88' }}>
+                                <LiveCount metric="satisfaction" suffix="/5" decimals={1} />
+                            </div>
                             <div style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>Average Rating</div>
                         </div>
                         <div className="glass" style={{ padding: '1.5rem 2.5rem', borderRadius: '20px', border: '1px solid rgba(0, 195, 255, 0.2)', boxShadow: '0 0 20px rgba(0, 195, 255, 0.1)' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00c3ff' }}>{(stats.totalOrders / 1000).toFixed(1)}k+</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#00c3ff' }}>
+                                <LiveCount metric="orders" suffix="+" short={true} />
+                            </div>
                             <div style={{ fontSize: '0.9rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>Orders Completed</div>
                         </div>
                     </div>

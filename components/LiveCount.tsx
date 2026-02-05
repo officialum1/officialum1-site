@@ -1,0 +1,51 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+
+interface LiveCountProps {
+    metric: 'orders' | 'reviews' | 'projects' | 'satisfaction' | 'activeUsers' | 'kbEngagement';
+    suffix?: string;
+    prefix?: string;
+    decimals?: number;
+    interval?: number;
+    short?: boolean;
+}
+
+export default function LiveCount({ metric, suffix = "", prefix = "", decimals = 0, interval = 10000, short = false }: LiveCountProps) {
+    const [count, setCount] = useState<number | null>(null);
+
+    const formatNumber = (num: number) => {
+        if (short && num >= 1000) {
+            return (num / 1000).toFixed(1) + 'k';
+        }
+        return decimals > 0 ? num.toFixed(decimals) : Math.floor(num).toLocaleString();
+    };
+
+    const fetchStat = async () => {
+        try {
+            const res = await fetch('/api/stats/live');
+            const data = await res.json();
+            if (data[metric] !== undefined) {
+                setCount(data[metric]);
+            }
+        } catch (e) {
+            console.error("Live fetch error:", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchStat();
+        const timer = setInterval(fetchStat, interval);
+        return () => clearInterval(timer);
+    }, [metric, interval]);
+
+    if (count === null) return <span className="animate-pulse">...</span>;
+
+    return (
+        <span>
+            {prefix}
+            {formatNumber(count)}
+            {suffix}
+        </span>
+    );
+}

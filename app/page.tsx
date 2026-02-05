@@ -10,6 +10,7 @@ import FAQSection from "@/components/FAQSection";
 import PricingSection from "@/components/PricingSection";
 import FeaturedProductsSection from "@/components/FeaturedProductsSection";
 import SalesFOMOPopup from "@/components/SalesFOMOPopup";
+import LiveCount from "@/components/LiveCount";
 
 export default function Home() {
   return (
@@ -81,10 +82,14 @@ export default function Home() {
             <div style={{ flex: 1, minWidth: '300px' }}>
               <div className="glass" style={{ padding: '3rem', borderRadius: '20px', position: 'relative' }}>
                 <div style={{ position: 'absolute', top: -10, left: -10, width: '100px', height: '100px', borderTop: '2px solid var(--secondary)', borderLeft: '2px solid var(--secondary)', borderRadius: '20px 0 0 0' }}></div>
-                <h3 style={{ fontSize: '3rem', color: 'white' }}>100+</h3>
+                <h3 style={{ fontSize: '3rem', color: 'white' }}>
+                  <LiveCount metric="projects" suffix="+" />
+                </h3>
                 <p>Projects Delivered</p>
                 <div style={{ margin: '2rem 0', height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
-                <h3 style={{ fontSize: '3rem', color: 'white' }}>98%</h3>
+                <h3 style={{ fontSize: '3rem', color: 'white' }}>
+                  <LiveCount metric="satisfaction" suffix="%" decimals={1} />
+                </h3>
                 <p>Client Satisfaction</p>
               </div>
             </div>

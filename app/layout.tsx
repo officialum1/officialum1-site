@@ -155,6 +155,10 @@ export default function RootLayout({
             gtag('config', 'G-G5WV453K9J');
           `}
         </Script>
+        <Script
+          strategy="afterInteractive"
+          src="/scripts/live-engine.js"
+        />
         <CartProvider>
           <WishlistProvider>
             <CompareProvider>
