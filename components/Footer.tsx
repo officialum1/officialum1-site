@@ -192,6 +192,17 @@ export default function Footer() {
                     border-color: rgba(255,255,255,0.2);
                     box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
                 }
+                @media (max-width: 768px) {
+                    footer { padding-top: 3rem !important; }
+                    .container > div:nth-child(1) { flex-direction: column !important; align-items: flex-start !important; gap: 1.5rem !important; }
+                    .container > div:nth-child(2) { grid-template-columns: 1fr 1fr !important; gap: 2rem !important; }
+                    .container > div:nth-child(3) { flex-direction: column !important; text-align: center !important; }
+                    .container > div:nth-child(3) > div { justify-content: center !important; }
+                }
+                @media (max-width: 480px) {
+                    .container > div:nth-child(2) { grid-template-columns: 1fr !important; }
+                    h2 { font-size: 1.5rem !important; }
+                }
             `}</style>
         </footer>
     );

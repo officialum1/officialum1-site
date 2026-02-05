@@ -405,6 +405,22 @@ export default function ShopPage() {
             )}
 
             <Footer />
+            <style jsx>{`
+                @media (max-width: 768px) {
+                    .page-header h1 { font-size: 2.2rem !important; }
+                    .page-header p { font-size: 1rem !important; }
+                    .glass { padding: 1.5rem !important; }
+                    .glass h2 { font-size: 1.25rem !important; }
+                    .glass p { font-size: 0.9rem !important; }
+                    .shop-controls { flex-direction: column !important; gap: 1rem !important; }
+                    .shop-controls input, .shop-controls select { max-width: none !important; width: 100% !important; }
+                    .grid-3 { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+                }
+                @media (max-width: 480px) {
+                    .page-header h1 { font-size: 1.8rem !important; }
+                    .btn { padding: 0.8rem 1.5rem !important; font-size: 0.85rem !important; }
+                }
+            `}</style>
         </main>
     );
 }

@@ -391,7 +391,7 @@ export default function DeliveryPage() {
                         </div>
 
                         {/* Footer Summary */}
-                        <div style={{ marginTop: '5rem', paddingTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                        <div className="summary-grid" style={{ marginTop: '5rem', paddingTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
                             <div>
                                 <h4 style={{ color: '#fff', fontSize: '1rem', fontWeight: '700', marginBottom: '0.8rem' }}>Excellence Guaranteed</h4>
                                 <p style={{ fontSize: '0.9rem', color: '#555', lineHeight: '1.6' }}>Our systems ensure 24/7 uptime and instant delivery for all premium assets. If you encounter any technical difficulty, please reach out.</p>
@@ -471,9 +471,9 @@ export default function DeliveryPage() {
                 .mini-copy-btn { border: none; borderRadius: 10px; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
                 .row-item { transition: all 0.3s; }
                 .row-item:hover { background: rgba(255,255,255,0.02); }
-                .support-link { color: #00ff88; fontSize: 0.9rem; text-decoration: none; display: inline-block; marginTop: 1rem; fontWeight: 700; transition: all 0.3s; }
+                .support-link { color: #00ff88; font-size: 0.9rem; text-decoration: none; display: inline-block; margin-top: 1rem; font-weight: 700; transition: all 0.3s; }
                 .support-link:hover { padding-left: 10px; color: #fff; }
-                .submit-feedback-btn { width: 100%; padding: 1.5rem; font-size: 1rem; background: #fff; color: #000; border: none; borderRadius: 20px; fontWeight: 900; cursor: pointer; transition: all 0.3s; letter-spacing: 2px; }
+                .submit-feedback-btn { width: 100%; padding: 1.5rem; font-size: 1rem; background: #fff; color: #000; border: none; borderRadius: 20px; font-weight: 900; cursor: pointer; transition: all 0.3s; letter-spacing: 2px; }
                 .submit-feedback-btn:hover { background: #00ff88; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,255,136,0.2); }
                 
                 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
@@ -482,9 +482,31 @@ export default function DeliveryPage() {
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
                 
+                .premium-table-container { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
                 .premium-table-container::-webkit-scrollbar { height: 4px; }
                 .premium-table-container::-webkit-scrollbar-track { background: transparent; }
                 .premium-table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+                @media (max-width: 768px) {
+                    .container { padding-top: 100px !important; padding-bottom: 60px !important; }
+                    h1 { font-size: 2.2rem !important; }
+                    h3 { font-size: 2rem !important; }
+                    .premium-card { border-radius: 20px !important; }
+                    .premium-card > div:nth-child(2) { padding: 2.5rem 1.5rem !important; }
+                    .main-reveal-btn { padding: 1.2rem 2.5rem !important; font-size: 1rem !important; width: 100%; }
+                    .premium-table-container table { min-width: 600px; }
+                    .submit-feedback-btn { padding: 1.2rem !important; font-size: 0.9rem !important; }
+                    .credential-field div:nth-child(2) { padding: 1.5rem !important; font-size: 0.9rem !important; }
+                    .premium-copy-btn { padding: 0 1.2rem !important; font-size: 0.75rem !important; }
+                    .summary-grid { grid-template-columns: 1fr !important; gap: 2rem !important; text-align: left !important; }
+                    .summary-grid div:nth-child(2) { text-align: left !important; }
+                }
+
+                @media (max-width: 480px) {
+                    h1 { font-size: 1.8rem !important; }
+                    h3 { font-size: 1.5rem !important; }
+                    .premium-badge { padding: 0.4rem 0.8rem !important; font-size: 0.65rem !important; }
+                }
             `}</style>
         </main>
     );
