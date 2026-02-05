@@ -76,6 +76,13 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
         setReviewForm(prev => ({ ...prev, userId: randomUser.id }));
     };
 
+    const anonymize = (val: string) => {
+        if (!val) return 'Verified Buyer';
+        const name = val.includes('@') ? val.split('@')[0] : val;
+        if (name.length <= 3) return name + "**";
+        return name.substring(0, 3) + "**";
+    };
+
     return (
         <div className="FadeIn">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem', flexWrap: 'wrap' }}>
@@ -129,7 +136,7 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
                                     </div>
                                     <p style={{ color: '#ccc', fontSize: '0.95rem', margin: '0.5rem 0', lineHeight: '1.5' }}>{r.comment}</p>
                                     <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: '#666' }}>
-                                        <span>👤 {r.email || r.user_id}</span>
+                                        <span>👤 {anonymize(r.email || r.user_id)}</span>
                                         <span>📅 {new Date(r.created_at).toLocaleDateString()}</span>
                                     </div>
                                 </div>
