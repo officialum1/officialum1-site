@@ -168,7 +168,35 @@ export default function ReviewsTab({ catalog }: { catalog: any[] }) {
                         </div>
 
                         <div>
-                            <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Review Comment</label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <label style={{ fontSize: '0.8rem', color: '#888' }}>Review Comment</label>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const comments = [
+                                            "Absolutely amazing! Exactly what I was looking for.",
+                                            "Fast delivery and the quality is top-notch. Highly recommend.",
+                                            "Best service ever. I've been a customer for months and never disappointed.",
+                                            "Works perfectly. No issues at all.",
+                                            "Surpassed my expectations. Great value for money.",
+                                            "The support team was so helpful with my questions.",
+                                            "Instant delivery and reliable accounts. 5 stars!",
+                                            "OfficialUM1 is the only place I trust for these services.",
+                                            "Very smooth transaction. Will definitely buy again.",
+                                            "High quality and very affordable. Thank you!",
+                                            "Everything was as described. Very happy with the purchase.",
+                                            "Great communication and fast results.",
+                                            "Legit and safe. Don't hesitate to buy.",
+                                            "Saved me so much time and effort. Excellent!",
+                                            "Simple, fast, and secure. Best in the business."
+                                        ];
+                                        setReviewForm(prev => ({ ...prev, comment: comments[Math.floor(Math.random() * comments.length)] }));
+                                    }}
+                                    style={{ fontSize: '0.7rem', color: '#00ff88', background: 'none', border: 'none', cursor: 'pointer' }}
+                                >
+                                    🎲 Random Comment
+                                </button>
+                            </div>
                             <textarea
                                 className="input-field"
                                 style={{ width: '100%', height: '100px' }}
