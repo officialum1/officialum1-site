@@ -348,6 +348,11 @@ export async function POST(request: Request) {
                     password = 'PASSWORD_REQUIRED';
                 }
 
+                // POST-PROCESSING: If username is an email but email is empty, sync them
+                if (username.includes('@') && !email) {
+                    email = username;
+                }
+
                 if (!username || !password) continue;
 
                 const newItem = {
