@@ -105,16 +105,21 @@ async function seed() {
         const history = readJsonFile(path.join(__dirname, '../data/balance_history.json'));
         if (history.length > 0) {
             console.log(`Processing ${history.length} transactions...`);
+
+            // CRITICAL FIX: Wipe existing Z2U transactions to prevent double counting
+            // Only wipes Z2U to preserve other platform history if any
+            await conn.execute("DELETE FROM transactions WHERE platform = 'Z2U'");
+            console.log('🧹 Cleared old Z2U transactions');
+
             for (const t of history) {
                 // history items might not have 'id' if tailored for JSON view, but let's check
                 const tId = t.id || `trans_${Date.now()}_${Math.random()}`;
-                const [existing] = await conn.execute('SELECT id FROM transactions WHERE id = ?', [tId]);
-                if (existing.length === 0) {
-                    await conn.execute(
-                        `INSERT INTO transactions (id, type, platform, amount, description, processedBy, date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                        [tId, t.type || 'sale', t.platform, t.amount, t.description, t.processedBy, new Date(t.date)]
-                    );
-                }
+
+                // Since we wiped Z2U, we can safely insert
+                await conn.execute(
+                    `INSERT INTO transactions (id, type, platform, amount, description, processedBy, date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [tId, t.type || 'sale', t.platform, t.amount, t.description, t.processedBy, new Date(t.date)]
+                );
             }
             console.log('✅ Transactions seeded');
         }
