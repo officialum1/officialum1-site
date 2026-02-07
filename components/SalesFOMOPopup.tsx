@@ -12,6 +12,9 @@ const SAMPLE_COUNTRIES = ["🇺🇸 USA", "🇬🇧 UK", "🇦🇪 UAE", "🇵�
 const FALLBACK_PRODUCTS = ["Netflix 4K", "Spotify Premium", "YouTube Premium", "NordVPN", "ChatGPT Plus"];
 
 export default function SalesFOMOPopup() {
+    const [visible, setVisible] = useState(false);
+    const [event, setEvent] = useState<any>(null);
+
     // --- REAL FOMO LOGIC ---
     useEffect(() => {
         let lastSeenId = '';
