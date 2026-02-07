@@ -1,79 +1,11 @@
 [
   {
-    "id": "trans_1",
+    "id": "trans_init_z2u_correction",
     "type": "sale",
     "platform": "Z2U",
-    "amount": 45,
-    "description": "Sold Fortnite Account #123",
-    "processedBy": "Staff Name",
-    "date": "2024-01-21"
-  },
-  {
-    "id": "trans_1768977154794",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 50,
-    "description": "Sold TestAcc",
-    "processedBy": "John",
-    "date": "2026-01-21"
-  },
-  {
-    "id": "trans_1769091896275",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 1,
-    "description": "Sold: Fortnite Account Level 100",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22"
-  },
-  {
-    "id": "trans_1769106030719",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 20,
-    "description": "Sold: BrowserTestItem",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22",
-    "inventoryId": "inv_1769105970539"
-  },
-  {
-    "id": "trans_1769108539163",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 0,
-    "description": "Sold: BrowserTestItem",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22",
-    "inventoryId": "inv_1769107210623"
-  },
-  {
-    "id": "trans_1769108905041",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 0,
-    "description": "Sold: BrowserTestItemFinal",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22",
-    "inventoryId": "inv_1769108838021"
-  },
-  {
-    "id": "trans_1769109681876",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 0,
-    "description": "Sold: ItemTest4",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22",
-    "inventoryId": "inv_1769109495154"
-  },
-  {
-    "id": "trans_1769109959253",
-    "type": "sale",
-    "platform": "Z2U",
-    "amount": 0,
-    "description": "Sold: Credential Test Item",
-    "processedBy": "TestStaffPass",
-    "date": "2026-01-22",
-    "inventoryId": "inv_1769093604451"
+    "amount": 97,
+    "description": "Historical Z2U Sales Correction",
+    "processedBy": "Admin",
+    "date": "2026-02-01T12:00:00Z"
   }
 ]
