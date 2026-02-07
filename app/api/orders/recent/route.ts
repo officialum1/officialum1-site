@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const result: any[] = await query(`
+        const result = (await query(`
             SELECT 
                 orders.orderId as id,
                 products.name as productName,
@@ -16,7 +16,7 @@ export async function GET() {
             WHERE orders.status = 'paid' OR orders.status = 'completed'
             ORDER BY orders.date DESC
             LIMIT 5
-        `);
+        `)) as any[];
 
         // Format orders for frontend
         const formatted = result.map((order: any) => ({
