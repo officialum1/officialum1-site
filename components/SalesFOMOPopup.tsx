@@ -12,65 +12,51 @@ const SAMPLE_COUNTRIES = ["🇺🇸 USA", "🇬🇧 UK", "🇦🇪 UAE", "🇵�
 const FALLBACK_PRODUCTS = ["Netflix 4K", "Spotify Premium", "YouTube Premium", "NordVPN", "ChatGPT Plus"];
 
 export default function SalesFOMOPopup() {
-    const [visible, setVisible] = useState(false);
-    const [event, setEvent] = useState<any>(null);
-    const [products, setProducts] = useState<any[]>([]);
-
-    // 1. Fetch real products to make notifications authentic
+    // --- REAL FOMO LOGIC ---
     useEffect(() => {
-        fetch('/api/products')
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) setProducts(data);
-            })
-            .catch(() => { });
+        let lastSeenId = '';
+
+        const fetchRealOrders = async () => {
+            try {
+                const res = await fetch('/api/orders/recent');
+                const orders = await res.json();
+
+                if (Array.isArray(orders) && orders.length > 0) {
+                    const latest = orders[0];
+
+                    // Only trigger if it's a NEW unseen order
+                    if (latest.id !== lastSeenId) {
+                        lastSeenId = latest.id;
+                        setEvent({
+                            user: 'Recent Customer', // Anonymous but real
+                            country: 'Verified Purchase',
+                            product: {
+                                name: latest.productName,
+                                image: latest.image,
+                                link: `/shop` // No direct link to order to protect privacy
+                            },
+                            time: latest.timeAgo
+                        });
+                        setVisible(true);
+
+                        // Hide after 6 seconds
+                        setTimeout(() => setVisible(false), 6000);
+                    }
+                }
+            } catch (e) { console.error('FOMO Fetch Error', e); }
+        };
+
+        // Initial check
+        fetchRealOrders();
+
+        // POLL every 30 seconds for new sales
+        // This is "Real Time" enough without WebSockets overhead
+        const interval = setInterval(fetchRealOrders, 30000);
+
+        return () => clearInterval(interval);
     }, []);
 
-    // 2. Randomly trigger notifications (every 10-30 seconds)
-    useEffect(() => {
-        const triggerNotification = () => {
-            if (Math.random() > 0.7) return; // 30% chance to skip (don't be too annoying)
-
-            const name = SAMPLE_NAMES[Math.floor(Math.random() * SAMPLE_NAMES.length)];
-            // Mask name: "Ahmed" -> "Ahm*d"
-            const maskedName = name.substring(0, 3) + "**";
-            const country = SAMPLE_COUNTRIES[Math.floor(Math.random() * SAMPLE_COUNTRIES.length)];
-
-            // Pick a product
-            let product;
-            if (products.length > 0) {
-                const p = products[Math.floor(Math.random() * products.length)];
-                product = { name: p.name, image: p.image, link: `/shop/${p.id}` };
-            } else {
-                const text = FALLBACK_PRODUCTS[Math.floor(Math.random() * FALLBACK_PRODUCTS.length)];
-                product = { name: text, image: null, link: '/shop' };
-            }
-
-            setEvent({
-                user: maskedName,
-                country,
-                product
-            });
-            setVisible(true);
-
-            // Hide after 5 seconds
-            setTimeout(() => setVisible(false), 5000);
-        };
-
-        // Initial delay
-        const timeout = setTimeout(triggerNotification, 5000);
-
-        // Recurring interval
-        const interval = setInterval(triggerNotification, 15000);
-
-        return () => {
-            clearTimeout(timeout);
-            clearInterval(interval);
-        };
-    }, [products]);
-
-    // Don't render on server/initial load to avoid hydration mismatch
-    if (!event) return null;
+    if (!visible || !event) return null;
 
     return (
         <AnimatePresence>
