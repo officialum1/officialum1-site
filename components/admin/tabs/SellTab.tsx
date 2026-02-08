@@ -68,11 +68,13 @@ export default function SellTab({
                                 required={sellMode === 'single'}
                             >
                                 <option value="">-- Click to Choose Product --</option>
-                                {inventory.filter(i => i.status === 'In Stock').map(i => (
-                                    <option key={i.id} value={i.id}>
-                                        {i.platform} | {i.name} {hasPermission('finance') && i.purchasePrice ? `(Cost: $${i.purchasePrice})` : ''}
-                                    </option>
-                                ))}
+                                {inventory.filter(i => i.status === 'In Stock')
+                                    .filter(i => inventory.filter(other => other.name === i.name && other.status === 'In Stock').length === 1) // Only unique items
+                                    .map(i => (
+                                        <option key={i.id} value={i.id}>
+                                            {i.platform} | {i.name} {hasPermission('finance') && i.purchasePrice ? `(Cost: $${i.purchasePrice})` : ''}
+                                        </option>
+                                    ))}
                             </select>
                         </>
                     )}
@@ -94,10 +96,12 @@ export default function SellTab({
                                     required={sellMode === 'bulk'}
                                 >
                                     <option value="">-- Choose Type --</option>
-                                    {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
-                                        const count = inventory.filter(i => i.name === name && i.status === 'In Stock').length;
-                                        return <option key={name} value={name}>{name} (Stock: {count})</option>;
-                                    })}
+                                    {Array.from(new Set(inventory.filter(i => i.status === 'In Stock').map(i => i.name)))
+                                        .filter(name => inventory.filter(i => i.name === name && i.status === 'In Stock').length > 1) // Only show items with >1 stock
+                                        .map(name => {
+                                            const count = inventory.filter(i => i.name === name && i.status === 'In Stock').length;
+                                            return <option key={name} value={name}>{name} (Stock: {count})</option>;
+                                        })}
                                 </select>
                             </div>
                             <div>
