@@ -27,6 +27,7 @@ const SupportTab = dynamic(() => import('@/components/admin/tabs/SupportTab'), {
 const SettingsTab = dynamic(() => import('@/components/admin/tabs/SettingsTab'), { ssr: false });
 const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGenerator'), { ssr: false });
 const ReviewsTab = dynamic(() => import('@/components/admin/tabs/ReviewsTab'), { ssr: false });
+const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -1581,6 +1582,7 @@ function AdminDashboard() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                                 {[
                                     { id: 'finance', label: '💰 Finance', perm: 'finance' },
+                                    { id: 'documents', label: '📄 Docs', perm: 'support' },
                                     { id: 'payments', label: '💳 Payments', perm: 'settings' },
                                     { id: 'hr', label: '👔 Staff', perm: 'hr' },
                                     { id: 'logs', label: '📜 Logs', perm: 'all' },
@@ -1881,6 +1883,9 @@ function AdminDashboard() {
                             setReplyMsg={setReplyMsg}
                             handleReplyTicket={handleReplyTicket}
                         />
+                    )}
+                    {activeTab === 'documents' && (
+                        <DocumentsTab />
                     )}
                     {activeTab === 'marketing' && (
                         <MarketingTab
