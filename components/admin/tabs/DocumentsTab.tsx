@@ -55,7 +55,7 @@ export default function DocumentsTab() {
                             border-bottom: 5px solid #f0b90b;
                         }
                         .logo-section {
-                            padding: 2rem 3rem;
+                            padding: 1rem 3rem;
                             display: flex;
                             align-items: center;
                             gap: 15px;
@@ -360,55 +360,60 @@ export default function DocumentsTab() {
                             )}
 
                             {/* Signature Section */}
-                            <div style={{ marginTop: '4rem', position: 'relative' }}>
-
-                                <div style={{ fontSize: '1.5rem', fontFamily: 'cursive', color: '#2b4c7e', marginBottom: '5px' }}>umar</div>
-                                <div style={{ width: '250px', borderTop: '1px solid #333', paddingTop: '10px' }}>
-                                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>Muhammad Umar Mumtaz</div>
-                                    <div style={{ color: '#666', fontSize: '0.9rem' }}>Managing Member, OfficialUM1 LLC</div>
-                                    <div style={{ color: '#aaa', fontSize: '0.7rem', marginTop: '5px' }}>Digitally Signed & Stamped</div>
+                            <div style={{ marginTop: '5rem', position: 'relative' }}>
+                                <div style={{ fontSize: '2.5rem', fontFamily: 'cursive', color: '#1a365d', marginBottom: '10px', transform: 'rotate(-5deg)', display: 'inline-block' }}>umar</div>
+                                <div style={{ width: '280px', borderTop: '2px solid #333', paddingTop: '10px' }}>
+                                    <div style={{ fontWeight: '800', fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Muhammad Umar Mumtaz</div>
+                                    <div style={{ color: '#555', fontSize: '0.85rem' }}>Managing Member, OfficialUM1 LLC</div>
+                                    <div style={{ color: '#888', fontSize: '0.7rem', marginTop: '5px', fontStyle: 'italic' }}>Digitally Signed & Verified</div>
                                 </div>
+
+                                {/* Realistic Stamp */}
                                 <div style={{
                                     position: 'absolute',
-                                    bottom: '30px',
-                                    left: '150px',
-                                    border: '3px solid #f0b90b',
-                                    color: '#f0b90b',
-                                    width: '120px',
-                                    height: '120px',
+                                    bottom: '20px',
+                                    left: '220px',
+                                    border: '4px double #d32f2f',
+                                    color: '#d32f2f',
+                                    width: '130px',
+                                    height: '130px',
                                     borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    fontWeight: 'bold',
-                                    fontSize: '0.9rem',
+                                    fontWeight: '900',
+                                    fontSize: '0.8rem',
                                     transform: 'rotate(-15deg)',
-                                    opacity: 0.8,
+                                    opacity: 0.7,
                                     pointerEvents: 'none',
                                     letterSpacing: '1px',
                                     textAlign: 'center',
-                                    padding: '5px'
+                                    padding: '5px',
+                                    boxShadow: 'inset 0 0 10px rgba(211, 47, 47, 0.2)',
+                                    background: 'rgba(211, 47, 47, 0.02)',
+                                    textTransform: 'uppercase',
+                                    lineHeight: '1.4'
                                 }}>
-                                    OFFICIAL<br />SEAL<br />VERIFIED
+                                    <div style={{ border: '1px solid #d32f2f', width: '90%', height: '90%', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        OFFICIAL<br />SEAL<br /><span style={{ fontSize: '0.6rem' }}>VERIFIED</span>
+                                    </div>
                                 </div>
                             </div>
 
                         </div>
 
                         {/* Footer */}
-                        <div style={{ marginTop: 'auto', height: '100px', background: '#2b4c7e', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 3rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                <div style={{ background: 'white', padding: '5px', borderRadius: '4px' }}>
-                                    {/* Placeholder QR */}
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Verified Document by OfficialUM1 LLC\nIssued to: ${formData.recipientName}\nDate: ${formData.date}`)}`} alt="QR" style={{ width: '60px', height: '60px' }} />
+                        <div style={{ marginTop: 'auto', height: '80px', background: '#2b4c7e', color: 'white', display: 'flex', padding: 0 }}>
+                            <div style={{ flex: 3, display: 'flex', alignItems: 'center', gap: '20px', paddingLeft: '3rem' }}>
+                                <div style={{ background: 'white', padding: '4px', borderRadius: '4px', height: '58px', width: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Verified Document by OfficialUM1 LLC\nIssued to: ${formData.recipientName}\nDate: ${formData.date}\nID: ${Date.now()}`)}`} alt="QR" style={{ width: '50px', height: '50px' }} />
                                 </div>
-                                <div style={{ fontSize: '0.8rem', lineHeight: '1.4' }}>
+                                <div style={{ fontSize: '0.75rem', lineHeight: '1.5', letterSpacing: '0.5px' }}>
                                     <b>1001 S. MAIN ST. STE 600 KALISPELL, MT 59901</b><br />
-                                    Email: info@officialm1.com<br />
-                                    Web: www.officialum1.com
+                                    Email: info@officialm1.com &nbsp;|&nbsp; Web: www.officialum1.com
                                 </div>
                             </div>
-                            <div style={{ opacity: 0.5, fontSize: '0.7rem' }}>
+                            <div style={{ flex: 1, background: '#1a365d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>
                                 PAGE 1 OF 1
                             </div>
                         </div>
