@@ -403,18 +403,19 @@ export default function DocumentsTab() {
                         </div>
 
                         {/* Footer */}
-                        <div style={{ marginTop: 'auto', height: '80px', background: '#2b4c7e', color: 'white', display: 'flex', padding: 0 }}>
-                            <div style={{ flex: 3, display: 'flex', alignItems: 'center', gap: '20px', paddingLeft: '3rem' }}>
-                                <div style={{ background: 'white', padding: '4px', borderRadius: '4px', height: '58px', width: '58px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Verified Document by OfficialUM1 LLC\nIssued to: ${formData.recipientName}\nDate: ${formData.date}\nID: ${Date.now()}`)}`} alt="QR" style={{ width: '50px', height: '50px' }} />
+                        <div style={{ marginTop: 'auto', borderTop: '2px solid #f0f0f0', padding: '1.5rem 3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ background: 'white', border: '1px solid #ddd', padding: '4px', borderRadius: '8px' }}>
+                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&amount=${formData.amount}&data=${encodeURIComponent(`https://officialum1.com/verify?doc=${Date.now()}&user=${encodeURIComponent(formData.recipientName)}`)}`} alt="Verification QR" style={{ width: '70px', height: '70px' }} />
                                 </div>
-                                <div style={{ fontSize: '0.75rem', lineHeight: '1.5', letterSpacing: '0.5px' }}>
-                                    <b>1001 S. MAIN ST. STE 600 KALISPELL, MT 59901</b><br />
-                                    Email: info@officialm1.com &nbsp;|&nbsp; Web: www.officialum1.com
+                                <div style={{ color: '#555', fontSize: '0.8rem', lineHeight: '1.6' }}>
+                                    <div style={{ fontWeight: '700', color: '#2b4c7e', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OfficialUM1 LLC</div>
+                                    <div>1001 S. Main St. Ste 600, Kalispell, MT 59901</div>
+                                    <div style={{ color: '#888' }}>info@officialm1.com • www.officialum1.com</div>
                                 </div>
                             </div>
-                            <div style={{ flex: 1, background: '#1a365d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '1px' }}>
-                                PAGE 1 OF 1
+                            <div style={{ textAlign: 'right', opacity: 0.6 }}>
+                                <img src="/logo.jpg" alt="Logo" style={{ width: '30px', filter: 'grayscale(100%)', opacity: 0.5 }} />
                             </div>
                         </div>
                     </div>
