@@ -323,77 +323,140 @@ export default function DocumentsTab() {
                                 <div>
                                     <h1 style={{ color: '#2b4c7e', borderBottom: '2px solid #f0b90b', display: 'inline-block', paddingBottom: '5px', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>INVOICE</h1>
 
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginBottom: '3rem' }}>
-                                        <div>
-                                            <div style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>Bill To:</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{formData.recipientName}</div>
+                                    <style>{`
+                                        .invoice-table th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding: 1rem; }
+                                        .invoice-table td { padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
+                                        .invoice-table tr:last-child td { border-bottom: none; }
+                                        .invoice-card { background: #f8fafc; border-radius: 12px; padding: 1.5rem; }
+                                    `}</style>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+                                        <div className="invoice-card">
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Bill To</div>
+                                            <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1e293b' }}>{formData.recipientName}</div>
+                                            {formData.recipientAddress && <div style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.25rem' }}>{formData.recipientAddress}</div>}
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>Invoice #:</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{formData.documentNumber}</div>
+                                        <div className="invoice-card" style={{ textAlign: 'right', background: 'rgba(240, 185, 11, 0.1)', border: '1px solid rgba(240, 185, 11, 0.2)' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#855a00', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Invoice Details</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#2b4c7e' }}>#{formData.documentNumber}</div>
+                                            <div style={{ color: '#855a00', fontSize: '0.9rem', marginTop: '0.25rem' }}>Issued: {new Date(formData.date).toLocaleDateString()}</div>
                                         </div>
                                     </div>
 
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <table className="invoice-table" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                                         <thead>
-                                            <tr style={{ background: '#f8f9fa' }}>
-                                                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #ddd', color: '#555' }}>Description</th>
-                                                <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid #ddd', color: '#555', width: '80px' }}>Qty</th>
-                                                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #ddd', color: '#555', width: '120px' }}>Unit Price</th>
-                                                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #ddd', color: '#555', width: '120px' }}>Total</th>
+                                            <tr>
+                                                <th style={{ textAlign: 'left' }}>Description</th>
+                                                <th style={{ textAlign: 'center', width: '80px' }}>Qty</th>
+                                                <th style={{ textAlign: 'right', width: '120px' }}>Price</th>
+                                                <th style={{ textAlign: 'right', width: '120px' }}>Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {formData.items.map((item, i) => (
                                                 <tr key={i}>
-                                                    <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{item.description}</td>
-                                                    <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #eee' }}>{item.quantity}</td>
-                                                    <td style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #eee' }}>${Number(item.unitPrice).toFixed(2)}</td>
-                                                    <td style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #eee' }}>${(Number(item.quantity) * Number(item.unitPrice)).toFixed(2)}</td>
+                                                    <td>
+                                                        <div style={{ fontWeight: '500' }}>{item.description}</div>
+                                                    </td>
+                                                    <td style={{ textAlign: 'center' }}>{item.quantity}</td>
+                                                    <td style={{ textAlign: 'right' }}>${Number(item.unitPrice).toFixed(2)}</td>
+                                                    <td style={{ textAlign: 'right', fontWeight: '600' }}>${(Number(item.quantity) * Number(item.unitPrice)).toFixed(2)}</td>
                                                 </tr>
                                             ))}
-                                            <tr>
-                                                <td colSpan={3} style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', fontSize: '1.1rem', borderTop: '2px solid #333' }}>Total Due:</td>
-                                                <td style={{ padding: '15px', textAlign: 'right', fontWeight: 'bold', fontSize: '1.1rem', borderTop: '2px solid #333', color: '#2b4c7e' }}>${calculateTotal().toFixed(2)}</td>
-                                            </tr>
                                         </tbody>
                                     </table>
+
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+                                        <div style={{ width: '250px', background: '#2b4c7e', color: 'white', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 10px 20px -5px rgba(43, 76, 126, 0.3)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', opacity: 0.9 }}>
+                                                <span>Subtotal</span>
+                                                <span>${calculateTotal().toFixed(2)}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', opacity: 0.9 }}>
+                                                <span>Tax (0%)</span>
+                                                <span>$0.00</span>
+                                            </div>
+                                            <div style={{ height: '1px', background: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }}></div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 'bold' }}>
+                                                <span>Total</span>
+                                                <span>${calculateTotal().toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
-                                <div>
-                                    <h1 style={{ color: '#2b4c7e', borderBottom: '2px solid #f0b90b', display: 'inline-block', paddingBottom: '5px', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                <div style={{ fontFamily: "'Times New Roman', serif" }}>
+                                    <h1 style={{
+                                        color: '#0f172a',
+                                        fontSize: '2rem',
+                                        borderBottom: '3px solid #2b4c7e',
+                                        display: 'inline-block',
+                                        paddingBottom: '0.5rem',
+                                        marginBottom: '3rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.1em',
+                                        fontFamily: "'Outfit', sans-serif"
+                                    }}>
                                         {formData.subject || (docType === 'contract' ? 'CONTRACT AGREEMENT' : 'LETTER OF AUTHORIZATION')}
                                     </h1>
 
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3rem', fontFamily: "'Outfit', sans-serif", borderBottom: '1px solid #e2e8f0', paddingBottom: '1.5rem' }}>
                                         <div>
-                                            To: <b>{formData.recipientName}</b>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recipient</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a' }}>{formData.recipientName}</div>
                                         </div>
-                                        <div style={{ textAlign: 'right', fontSize: '0.9rem', color: '#555' }}>
-                                            {docType === 'contract' ? 'Contract #' : 'Ref #'}: <b>{formData.documentNumber}</b>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{docType === 'contract' ? 'Contract #' : 'Ref #'}</div>
+                                            <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0f172a' }}>{formData.documentNumber}</div>
                                         </div>
                                     </div>
 
-                                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.8', fontSize: '1rem', textAlign: 'justify' }}>
-                                        {formData.content || '[Content will appear here...]'}
+                                    <div style={{
+                                        whiteSpace: 'pre-wrap',
+                                        lineHeight: '1.8',
+                                        fontSize: '1.1rem',
+                                        textAlign: 'justify',
+                                        color: '#334155',
+                                    }}>
+                                        {formData.content || <span style={{ color: '#cbd5e1' }}>[Document content will appear here...]</span>}
                                     </div>
                                 </div>
                             )}
 
                             {/* Signature Section */}
-                            <div style={{ marginTop: '5rem', position: 'relative' }}>
-                                <div style={{ fontSize: '2.5rem', fontFamily: 'cursive', color: '#1a365d', marginBottom: '10px', transform: 'rotate(-5deg)', display: 'inline-block' }}>umar</div>
-                                <div style={{ width: '280px', borderTop: '2px solid #333', paddingTop: '10px' }}>
-                                    <div style={{ fontWeight: '800', fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Muhammad Umar Mumtaz</div>
-                                    <div style={{ color: '#555', fontSize: '0.85rem' }}>Managing Member, OfficialUM1 LLC</div>
-                                    <div style={{ color: '#888', fontSize: '0.7rem', marginTop: '5px', fontStyle: 'italic' }}>Digitally Signed & Verified</div>
+                            <div style={{ marginTop: '5rem', position: 'relative', fontFamily: "'Outfit', sans-serif" }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+
+                                    {/* Issuer Signature (Always present) */}
+                                    <div style={{ position: 'relative', zIndex: 2 }}>
+                                        <div style={{ fontSize: '2.5rem', fontFamily: 'cursive', color: '#1a365d', marginBottom: '10px', transform: 'rotate(-5deg)', display: 'inline-block' }}>umar</div>
+                                        <div style={{ width: '250px', borderTop: '2px solid #333', paddingTop: '10px' }}>
+                                            <div style={{ fontWeight: '800', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#0f172a' }}>Muhammad Umar Mumtaz</div>
+                                            <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '500' }}>Managing Member, OfficialUM1 LLC</div>
+                                            <div style={{ color: '#2b4c7e', fontSize: '0.7rem', marginTop: '5px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                ✓ Digitally Signed & Verified
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Recipient Signature (Only for Contracts) */}
+                                    {docType === 'contract' && (
+                                        <div style={{ width: '250px' }}>
+                                            <div style={{ height: '60px' }}></div> {/* Spacing for signature */}
+                                            <div style={{ borderTop: '2px solid #333', paddingTop: '10px' }}>
+                                                <div style={{ fontWeight: '800', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#0f172a' }}>{formData.recipientName}</div>
+                                                <div style={{ color: '#64748b', fontSize: '0.8rem', fontWeight: '500' }}>Client / Recipient</div>
+                                                <div style={{ color: '#94a3b8', fontSize: '0.7rem', marginTop: '5px', fontStyle: 'italic' }}>Sign & Date Above</div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Realistic Stamp */}
+                                {/* Realistic Stamp (Positioned over issuer) */}
                                 <div style={{
                                     position: 'absolute',
-                                    bottom: '20px',
-                                    left: '220px',
+                                    bottom: '30px',
+                                    left: '120px',
                                     border: '4px double #d32f2f',
                                     color: '#d32f2f',
                                     width: '130px',
@@ -405,7 +468,7 @@ export default function DocumentsTab() {
                                     fontWeight: '900',
                                     fontSize: '0.8rem',
                                     transform: 'rotate(-15deg)',
-                                    opacity: 0.7,
+                                    opacity: 0.8,
                                     pointerEvents: 'none',
                                     letterSpacing: '1px',
                                     textAlign: 'center',
@@ -413,10 +476,14 @@ export default function DocumentsTab() {
                                     boxShadow: 'inset 0 0 10px rgba(211, 47, 47, 0.2)',
                                     background: 'rgba(211, 47, 47, 0.02)',
                                     textTransform: 'uppercase',
-                                    lineHeight: '1.4'
+                                    lineHeight: '1.4',
+                                    zIndex: 1,
+                                    mixBlendMode: 'multiply'
                                 }}>
-                                    <div style={{ border: '1px solid #d32f2f', width: '90%', height: '90%', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                        OFFICIAL<br />SEAL<br /><span style={{ fontSize: '0.6rem' }}>VERIFIED</span>
+                                    <div style={{ border: '2px solid #d32f2f', width: '94%', height: '94%', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ fontSize: '1rem', marginBottom: '2px' }}>OFFICIAL</div>
+                                        <div style={{ fontSize: '1.2rem', borderTop: '1px solid #d32f2f', borderBottom: '1px solid #d32f2f', width: '80%', margin: '4px 0' }}>SEAL</div>
+                                        <div style={{ fontSize: '0.7rem' }}>VERIFIED</div>
                                     </div>
                                 </div>
                             </div>
