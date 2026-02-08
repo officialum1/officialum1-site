@@ -200,16 +200,16 @@ export default function ModernUIOverlay() {
                 }
 
                 .modern-modal-card {
-                    background: #08080c;
-                    border: 1px solid rgba(0, 255, 136, 0.3);
+                    background: #0a0b1e;
+                    border: 1px solid rgba(255, 68, 68, 0.4);
                     border-radius: 40px;
                     padding: 60px;
                     width: 95%;
                     max-width: 600px;
                     position: relative;
                     box-shadow: 0 0 100px rgba(0,0,0,1), 
-                                0 0 40px rgba(0,255,136,0.1),
-                                inset 0 0 20px rgba(255,255,255,0.02);
+                                0 0 40px rgba(255, 68, 68, 0.1),
+                                inset 0 0 20px rgba(255, 68, 68, 0.05);
                     overflow: hidden;
                     z-index: 10001;
                     transition: all 0.3s ease;
@@ -237,7 +237,7 @@ export default function ModernUIOverlay() {
                     right: -20%;
                     width: 300px;
                     height: 300px;
-                    background: radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%);
+                    background: radial-gradient(circle, rgba(255, 68, 68, 0.15) 0%, transparent 70%);
                     pointer-events: none;
                 }
 
@@ -253,14 +253,14 @@ export default function ModernUIOverlay() {
                 .modal-type-icon {
                     width: 64px;
                     height: 64px;
-                    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 255, 0.1) 100%);
+                    background: linear-gradient(135deg, rgba(255, 68, 68, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
                     border-radius: 20px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 1.8rem;
-                    border: 1px solid rgba(0, 255, 136, 0.4);
-                    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+                    border: 1px solid rgba(255, 68, 68, 0.4);
+                    box-shadow: 0 10px 30px rgba(255, 68, 68, 0.2);
                 }
 
                 .modal-header h3 {
@@ -268,7 +268,7 @@ export default function ModernUIOverlay() {
                     font-size: 0.9rem;
                     font-weight: 900;
                     letter-spacing: 6px;
-                    color: #00ff88;
+                    color: #ff4444;
                     text-transform: uppercase;
                     opacity: 1;
                 }
@@ -301,9 +301,9 @@ export default function ModernUIOverlay() {
                 }
 
                 .modal-input:focus {
-                    border-color: #00ff88;
-                    background: rgba(0, 255, 136, 0.08);
-                    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+                    border-color: #ff4444;
+                    background: rgba(255, 68, 68, 0.05);
+                    box-shadow: 0 0 20px rgba(255, 68, 68, 0.15);
                 }
 
                 .modal-footer {
@@ -314,8 +314,8 @@ export default function ModernUIOverlay() {
                 }
 
                 .modal-btn-primary {
-                    background: #00ff88;
-                    color: #000;
+                    background: #ff4444;
+                    color: #fff;
                     border: none;
                     padding: 14px 32px;
                     border-radius: 14px;
@@ -324,13 +324,13 @@ export default function ModernUIOverlay() {
                     cursor: pointer;
                     transition: all 0.2s;
                     letter-spacing: 1px;
-                    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+                    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
                 }
 
                 .modal-btn-primary:hover {
-                    background: #00e67a;
+                    background: #ff2222;
                     transform: translateY(-2px);
-                    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+                    box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
                 }
 
                 .modal-btn-secondary {
