@@ -9,47 +9,70 @@ interface EmailOptions {
 }
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions, throwOnError = false) {
+    // 1. Fetch SMTP settings from DB (Optional override)
+    let settings: any = {};
     try {
-        // 1. Fetch SMTP settings from DB (Optional override)
-        let settings: any = {};
+        const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('smtpHost', 'smtpUser', 'smtpPass')") as any[];
+        rows.forEach((r: any) => settings[r.setting_key] = r.setting_value);
+    } catch (e) {
+        console.warn("Failed to fetch SMTP settings from DB, using defaults");
+    }
+
+    // Hardcoded Defaults (Titan Email)
+    const defaultHost = 'smtp.titan.email';
+    const defaultUser = 'no-reply@officialum1.com';
+    const defaultPass = '4f_89yv@.3AWfBP';
+
+    // Prioritize DB settings, fallback to defaults
+    const smtpHost = settings.smtpHost || defaultHost;
+    const smtpUser = settings.smtpUser || defaultUser;
+    const smtpPass = settings.smtpPass || defaultPass;
+
+    const trySend = async (host: string, user: string, pass: string, isFallback = false) => {
         try {
-            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('smtpHost', 'smtpUser', 'smtpPass')") as any[];
-            rows.forEach((r: any) => settings[r.setting_key] = r.setting_value);
-        } catch (e) {
-            console.warn("Failed to fetch SMTP settings from DB, using defaults");
+            console.log(`${isFallback ? '[Fallback]' : '[Primary]'} Sending email to ${to} via ${host} as ${user}...`);
+            const transporter = nodemailer.createTransport({
+                host: host,
+                port: 465, // SSL Port
+                secure: true, // true for 465
+                auth: { user, pass }
+            });
+
+            await transporter.sendMail({
+                from: `"OfficialUM1 Support" <${user}>`,
+                to,
+                subject,
+                text,
+                html
+            });
+            console.log(`${isFallback ? '[Fallback]' : '[Primary]'} Email sent successfully to ${to}`);
+            return true;
+        } catch (e: any) {
+            console.error(`${isFallback ? '[Fallback]' : '[Primary]'} Email Send Error:`, e.message);
+            throw e;
+        }
+    };
+
+    try {
+        // Attempt 1: Configured Settings
+        return await trySend(smtpHost, smtpUser, smtpPass);
+
+    } catch (primaryError: any) {
+        // Check if we should try fallback (only if Primary != Default)
+        const usedCustomSettings = (smtpHost !== defaultHost) || (smtpUser !== defaultUser) || (smtpPass !== defaultPass);
+
+        if (usedCustomSettings) {
+            console.warn("Primary SMTP failed. Attempting fallback to default Titan credentials...");
+            try {
+                return await trySend(defaultHost, defaultUser, defaultPass, true);
+            } catch (fallbackError: any) {
+                if (throwOnError) throw fallbackError;
+                return false;
+            }
         }
 
-        // Default to provided Titan Email settings if not in DB
-        const smtpHost = settings.smtpHost || 'smtp.titan.email';
-        const smtpUser = settings.smtpUser || 'no-reply@officialum1.com';
-        const smtpPass = settings.smtpPass || '4f_89yv@.3AWfBP';
-
-        // 2. Configure Transporter
-        const transporter = nodemailer.createTransport({
-            host: smtpHost,
-            port: 465, // SSL Port
-            secure: true, // true for 465
-            auth: {
-                user: smtpUser,
-                pass: smtpPass
-            }
-        });
-
-        // 3. Send Email
-        await transporter.sendMail({
-            from: `"OfficialUM1 Support" <${smtpUser}>`,
-            to,
-            subject,
-            text,
-            html
-        });
-
-        console.log(`Email sent to ${to}`);
-        return true;
-
-    } catch (e: any) {
-        console.error('Email Send Error:', e.message);
-        if (throwOnError) throw e;
+        // If we used defaults and they failed, or if we don't want to fallback further
+        if (throwOnError) throw primaryError;
         return false;
     }
 }

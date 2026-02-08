@@ -105,7 +105,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: true, message: 'Verification email sent' });
             } else {
                 console.error("Failed to send verification email via SMTP helper");
-                return NextResponse.json({ success: false, error: 'Failed to send email via SMTP' });
+                return NextResponse.json({ success: false, error: 'Failed to send email: Check server logs' });
             }
         } else if (action === 'resend_forgot') {
             const token = crypto.randomBytes(32).toString('hex');
