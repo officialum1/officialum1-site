@@ -13,7 +13,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify?doc=${doc.document_number}&user=${encodeURIComponent(doc.recipient_name)}`;
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://officialum1.com';
+        const verificationLink = `${origin}/verify?doc=${doc.document_number}&user=${encodeURIComponent(doc.recipient_name)}`;
+
+        console.log(`Sending Document Email to ${recipientEmail} for doc ${doc.document_number} with link ${verificationLink}`);
 
         const emailSent = await sendEmail({
             to: recipientEmail,
