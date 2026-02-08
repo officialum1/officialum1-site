@@ -10,30 +10,34 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions) {
     try {
-        // 1. Fetch SMTP settings from DB
-        const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('smtpHost', 'smtpUser', 'smtpPass')") as any[];
-        const settings: any = {};
-        rows.forEach((r: any) => settings[r.setting_key] = r.setting_value);
-
-        if (!settings.smtpHost || !settings.smtpUser || !settings.smtpPass) {
-            console.error('SMTP Settings Missing');
-            return false;
+        // 1. Fetch SMTP settings from DB (Optional override)
+        let settings: any = {};
+        try {
+            const rows = await query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('smtpHost', 'smtpUser', 'smtpPass')") as any[];
+            rows.forEach((r: any) => settings[r.setting_key] = r.setting_value);
+        } catch (e) {
+            console.warn("Failed to fetch SMTP settings from DB, using defaults");
         }
+
+        // Default to provided Titan Email settings if not in DB
+        const smtpHost = settings.smtpHost || 'smtp.titan.email';
+        const smtpUser = settings.smtpUser || 'no-reply@officialum1.com';
+        const smtpPass = settings.smtpPass || '4f_89yv@.3AWfBP';
 
         // 2. Configure Transporter
         const transporter = nodemailer.createTransport({
-            host: settings.smtpHost,
-            port: 465, // Default SSL port
-            secure: true,
+            host: smtpHost,
+            port: 465, // SSL Port
+            secure: true, // true for 465
             auth: {
-                user: settings.smtpUser,
-                pass: settings.smtpPass
+                user: smtpUser,
+                pass: smtpPass
             }
         });
 
         // 3. Send Email
         await transporter.sendMail({
-            from: `"OfficialUM1 Support" <no-reply@officialum1.com>`,
+            from: `"OfficialUM1 Support" <${smtpUser}>`,
             to,
             subject,
             text,
