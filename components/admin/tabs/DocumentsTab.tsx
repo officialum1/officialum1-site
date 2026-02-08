@@ -13,9 +13,27 @@ export default function DocumentsTab() {
         content: '',
         amount: '',
         currency: 'USD',
-        invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
+        documentNumber: `LTR-${new Date().getFullYear()}${new Date().getMonth() + 1}${new Date().getDate()}-${Math.floor(1000 + Math.random() * 9000)}`,
         items: [{ description: '', quantity: 1, unitPrice: 0 }]
     });
+
+    const generateDocNumber = (type: 'invoice' | 'contract' | 'letter') => {
+        const prefix = type === 'invoice' ? 'INV' : type === 'contract' ? 'CNT' : 'LTR';
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const randomStr = Math.floor(1000 + Math.random() * 9000);
+        return `${prefix}-${dateStr}-${randomStr}`;
+    };
+
+    const handleDocTypeChange = (type: 'invoice' | 'contract' | 'letter') => {
+        setDocType(type);
+        setFormData(prev => ({
+            ...prev,
+            documentNumber: generateDocNumber(type),
+            subject: '',
+            content: '',
+            items: [{ description: '', quantity: 1, unitPrice: 0 }]
+        }));
+    };
 
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -196,7 +214,7 @@ export default function DocumentsTab() {
                         ].map(type => (
                             <button
                                 key={type.id}
-                                onClick={() => setDocType(type.id as any)}
+                                onClick={() => handleDocTypeChange(type.id as any)}
                                 className={`btn ${docType === type.id ? 'btn-primary' : 'btn-outline'}`}
                                 style={{ flex: 1, fontSize: '0.9rem', justifyContent: 'center' }}
                             >
@@ -211,12 +229,10 @@ export default function DocumentsTab() {
                             <input className="input-field" value={formData.recipientName} onChange={e => setFormData({ ...formData, recipientName: e.target.value })} style={{ width: '100%' }} placeholder="e.g. John Doe" />
                         </div>
 
-                        {docType === 'invoice' && (
-                            <div>
-                                <label className="label">Invoice Number</label>
-                                <input className="input-field" value={formData.invoiceNumber} onChange={e => setFormData({ ...formData, invoiceNumber: e.target.value })} style={{ width: '100%' }} />
-                            </div>
-                        )}
+                        <div>
+                            <label className="label">{docType === 'invoice' ? 'Invoice Number' : docType === 'contract' ? 'Contract Number' : 'Reference Number'}</label>
+                            <input className="input-field" value={formData.documentNumber} onChange={e => setFormData({ ...formData, documentNumber: e.target.value })} style={{ width: '100%' }} />
+                        </div>
 
                         <div>
                             <label className="label">Date</label>
@@ -314,7 +330,7 @@ export default function DocumentsTab() {
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
                                             <div style={{ fontSize: '0.8rem', color: '#888', textTransform: 'uppercase' }}>Invoice #:</div>
-                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{formData.invoiceNumber}</div>
+                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{formData.documentNumber}</div>
                                         </div>
                                     </div>
 
@@ -349,8 +365,13 @@ export default function DocumentsTab() {
                                         {formData.subject || (docType === 'contract' ? 'CONTRACT AGREEMENT' : 'LETTER OF AUTHORIZATION')}
                                     </h1>
 
-                                    <div style={{ marginBottom: '2rem' }}>
-                                        To: <b>{formData.recipientName}</b>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+                                        <div>
+                                            To: <b>{formData.recipientName}</b>
+                                        </div>
+                                        <div style={{ textAlign: 'right', fontSize: '0.9rem', color: '#555' }}>
+                                            {docType === 'contract' ? 'Contract #' : 'Ref #'}: <b>{formData.documentNumber}</b>
+                                        </div>
                                     </div>
 
                                     <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.8', fontSize: '1rem', textAlign: 'justify' }}>
@@ -406,7 +427,13 @@ export default function DocumentsTab() {
                         <div style={{ marginTop: 'auto', borderTop: '2px solid #f0f0f0', padding: '1.5rem 3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                 <div style={{ background: 'white', border: '1px solid #ddd', padding: '4px', borderRadius: '8px' }}>
-                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&amount=${formData.amount}&data=${encodeURIComponent(`https://officialum1.com/verify?doc=${Date.now()}&user=${encodeURIComponent(formData.recipientName)}`)}`} alt="Verification QR" style={{ width: '70px', height: '70px' }} />
+                                    <img
+                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                                            `${window.location.origin}/verify?doc=${formData.documentNumber}&user=${encodeURIComponent(formData.recipientName)}&date=${formData.date}`
+                                        )}`}
+                                        alt="Verification QR"
+                                        style={{ width: '70px', height: '70px' }}
+                                    />
                                 </div>
                                 <div style={{ color: '#555', fontSize: '0.8rem', lineHeight: '1.6' }}>
                                     <div style={{ fontWeight: '700', color: '#2b4c7e', textTransform: 'uppercase', letterSpacing: '0.5px' }}>OfficialUM1 LLC</div>
