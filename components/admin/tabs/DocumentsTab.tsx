@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { modernAlert } from '@/components/ModernUIOverlay';
+import { modernAlert, modernPrompt } from '@/components/ModernUIOverlay';
 
 export default function DocumentsTab() {
     const [docType, setDocType] = useState<'invoice' | 'contract' | 'letter'>('letter');
@@ -125,7 +125,7 @@ export default function DocumentsTab() {
     };
 
     const handleEmail = async (doc: any) => {
-        const email = prompt('Enter recipient email:', '');
+        const email = await modernPrompt('Enter recipient email:', '');
         if (!email) return;
 
         setLoading(true);
@@ -515,8 +515,8 @@ export default function DocumentsTab() {
                                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ overflow: 'visible' }}>
                                             {/* Defs for text paths */}
                                             <defs>
-                                                <path id="curveTop" d="M 30,100 A 70,70 0 0,1 170,100" />
-                                                <path id="curveBottom" d="M 30,100 A 70,70 0 0,0 170,100" />
+                                                <path id="curveTop" d="M 20,100 A 80,80 0 0,1 180,100" />
+                                                <path id="curveBottom" d="M 20,100 A 80,80 0 0,0 180,100" />
                                             </defs>
 
                                             {/* Outer Ring - Double Border */}
@@ -524,7 +524,7 @@ export default function DocumentsTab() {
                                             <circle cx="100" cy="100" r="88" fill="none" stroke="#b71c1c" strokeWidth="1" />
 
                                             {/* Curved Text Top */}
-                                            <text width="200" style={{ fill: '#b71c1c', fontSize: '24px', fontWeight: 'bold', fontFamily: 'Courier New, monospace', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                            <text width="200" style={{ fill: '#b71c1c', fontSize: '20px', fontWeight: 'bold', fontFamily: 'Courier New, monospace', textTransform: 'uppercase', letterSpacing: '2px' }}>
                                                 <textPath href="#curveTop" startOffset="50%" textAnchor="middle">
                                                     OfficialUM1 LLC
                                                 </textPath>

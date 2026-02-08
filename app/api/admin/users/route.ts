@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { sendEmail, sendVerificationEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 export async function GET(req: Request) {
     try {
@@ -85,10 +87,39 @@ export async function POST(req: Request) {
             await query("UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?", [amount, userId]);
             await query("INSERT INTO wallet_transactions (user_id, amount, type, description, status) VALUES (?, ?, 'deposit', 'Admin Adjustment', 'completed')",
                 [userId, amount]);
-        } else if (action === 'resend_registration' || action === 'resend_forgot') {
-            // Mock email sending for now, or integrate with email service
-            console.log(`[Mock Email] Sending ${action} to ${email}`);
-            return NextResponse.json({ success: true, message: 'Email queued' });
+        } else if (action === 'resend_registration') {
+            const token = crypto.randomBytes(32).toString('hex');
+
+            // Update token in DB
+            await query("UPDATE users SET verification_token = ? WHERE email = ?", [token, email]);
+
+            // Determine Origin
+            const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://officialum1.com';
+            const link = `${origin}/verify-email?token=${token}`;
+
+            // Send Email using Helper
+            console.log(`Sending verification email to ${email} with link: ${link}`);
+            const sent = await sendVerificationEmail(email, link);
+
+            if (sent) {
+                return NextResponse.json({ success: true, message: 'Verification email sent' });
+            } else {
+                console.error("Failed to send verification email via SMTP helper");
+                return NextResponse.json({ success: false, error: 'Failed to send email via SMTP' });
+            }
+        } else if (action === 'resend_forgot') {
+            const token = crypto.randomBytes(32).toString('hex');
+            await query("UPDATE users SET reset_token = ? WHERE email = ?", [token, email]);
+
+            const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://officialum1.com';
+            const link = `${origin}/reset-password?token=${token}`;
+
+            await sendEmail({
+                to: email,
+                subject: 'Reset Password Request',
+                html: `<p>Click here to reset your password: <a href="${link}">Reset Password</a></p>`
+            });
+            return NextResponse.json({ success: true, message: 'Reset email sent' });
         } else if (action === 'bulk_import') {
             const emails: string[] = body.emails || [];
             let count = 0;

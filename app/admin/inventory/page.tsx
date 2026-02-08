@@ -663,9 +663,15 @@ function AdminDashboard() {
                 method: 'POST',
                 body: JSON.stringify({ action, userId, email })
             });
-            if (res.ok) alert('Communication sent successfully');
-            else alert('Failed to send email. Check logs.');
-        } catch (e) { alert('Failed to send email'); }
+            const data = await res.json();
+            if (res.ok && data.success) {
+                modernAlert('Communication sent successfully', '', 'success');
+            } else {
+                modernAlert('Failed to send email', data.error || 'Unknown error', 'error');
+            }
+        } catch (e) {
+            modernAlert('Failed to send email', 'Network error', 'error');
+        }
     };
 
     const handleAddEmployee = async (e: React.FormEvent) => {
