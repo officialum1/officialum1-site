@@ -499,31 +499,63 @@ export default function DocumentsTab() {
 
                                     {/* Realistic Stamp (Positioned over issuer) */}
                                     {/* Realistic Stamp (Positioned over issuer) */}
+                                    {/* Realistic Stamp (Positioned over issuer) */}
                                     <div style={{
                                         position: 'absolute',
-                                        bottom: '30px',
-                                        left: '120px',
-                                        width: '130px',
-                                        height: '130px',
-                                        transform: 'rotate(-15deg)',
-                                        opacity: 0.9,
+                                        bottom: '20px',
+                                        left: '100px',
+                                        width: '160px',
+                                        height: '160px',
+                                        transform: 'rotate(-25deg)',
+                                        opacity: 0.85,
                                         pointerEvents: 'none',
                                         zIndex: 1,
                                         mixBlendMode: 'multiply'
                                     }}>
-                                        <img
-                                            src="/logo.jpg"
-                                            alt="Official Seal"
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'contain',
-                                                filter: 'sepia(100%) saturate(500%) hue-rotate(-50deg) contrast(120%)',
-                                                border: '3px solid #d32f2f',
-                                                borderRadius: '50%',
-                                                padding: '5px'
-                                            }}
-                                        />
+                                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ overflow: 'visible' }}>
+                                            {/* Defs for text paths */}
+                                            <defs>
+                                                <path id="curveTop" d="M 30,100 A 70,70 0 0,1 170,100" />
+                                                <path id="curveBottom" d="M 30,100 A 70,70 0 0,0 170,100" />
+                                            </defs>
+
+                                            {/* Outer Ring - Double Border */}
+                                            <circle cx="100" cy="100" r="95" fill="none" stroke="#b71c1c" strokeWidth="4" />
+                                            <circle cx="100" cy="100" r="88" fill="none" stroke="#b71c1c" strokeWidth="1" />
+
+                                            {/* Curved Text Top */}
+                                            <text width="200" style={{ fill: '#b71c1c', fontSize: '24px', fontWeight: 'bold', fontFamily: 'Courier New, monospace', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                                <textPath href="#curveTop" startOffset="50%" textAnchor="middle">
+                                                    OfficialUM1 LLC
+                                                </textPath>
+                                            </text>
+
+                                            {/* Center Logo - Inked Effect */}
+                                            <image
+                                                href="/logo.jpg"
+                                                x="50"
+                                                y="50"
+                                                width="100"
+                                                height="100"
+                                                style={{
+                                                    filter: 'grayscale(100%) sepia(100%) saturate(500%) hue-rotate(-50deg) contrast(150%) brightness(0.9)',
+                                                    opacity: 0.9
+                                                }}
+                                            />
+
+                                            {/* Curved Text Bottom */}
+                                            <text width="200" style={{ fill: '#b71c1c', fontSize: '20px', fontWeight: 'bold', fontFamily: 'Courier New, monospace', textTransform: 'uppercase', letterSpacing: '4px' }}>
+                                                <textPath href="#curveBottom" startOffset="50%" textAnchor="middle">
+                                                    VERIFIED
+                                                </textPath>
+                                            </text>
+
+                                            {/* Grunge Texture Overlay (Simple Noise using SVG filter could be done, but simple dots suffice for 'ink' spots) */}
+                                            <circle cx="40" cy="60" r="2" fill="#b71c1c" opacity="0.4" />
+                                            <circle cx="160" cy="140" r="1.5" fill="#b71c1c" opacity="0.3" />
+                                            <circle cx="120" cy="30" r="2" fill="#b71c1c" opacity="0.5" />
+                                            <circle cx="80" cy="170" r="1" fill="#b71c1c" opacity="0.4" />
+                                        </svg>
                                     </div>
                                 </div>
 
