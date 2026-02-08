@@ -617,5 +617,29 @@ export async function initDB(force = false) {
         )
     `);
 
+    // 19. Official Documents Archive
+    await query(`
+        CREATE TABLE IF NOT EXISTS documents (
+            id VARCHAR(50) PRIMARY KEY,
+            type ENUM('invoice', 'contract', 'letter') NOT NULL,
+            document_number VARCHAR(100) UNIQUE NOT NULL,
+            recipient_name VARCHAR(255) NOT NULL,
+            recipient_email VARCHAR(255),
+            recipient_address TEXT,
+            subject VARCHAR(255),
+            content LONGTEXT, -- Stores body content or contract terms
+            items JSON, -- Stores invoice line items
+            amount DECIMAL(10, 2),
+            currency VARCHAR(10) DEFAULT 'USD',
+            status ENUM('draft', 'issued', 'void') DEFAULT 'issued',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_by VARCHAR(50) DEFAULT 'Admin'
+        )
+    `);
+
+    // Index for quick document lookups
+    try { await query("CREATE INDEX idx_docs_number ON documents(document_number)"); } catch (e) { }
+    try { await query("CREATE INDEX idx_docs_recipient ON documents(recipient_name)"); } catch (e) { }
+
     isInitialized = true;
 }
