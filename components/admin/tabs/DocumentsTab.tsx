@@ -498,38 +498,32 @@ export default function DocumentsTab() {
                                     </div>
 
                                     {/* Realistic Stamp (Positioned over issuer) */}
+                                    {/* Realistic Stamp (Positioned over issuer) */}
                                     <div style={{
                                         position: 'absolute',
                                         bottom: '30px',
                                         left: '120px',
-                                        border: '4px double #d32f2f',
-                                        color: '#d32f2f',
                                         width: '130px',
                                         height: '130px',
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: '900',
-                                        fontSize: '0.8rem',
                                         transform: 'rotate(-15deg)',
-                                        opacity: 0.8,
+                                        opacity: 0.9,
                                         pointerEvents: 'none',
-                                        letterSpacing: '1px',
-                                        textAlign: 'center',
-                                        padding: '5px',
-                                        boxShadow: 'inset 0 0 10px rgba(211, 47, 47, 0.2)',
-                                        background: 'rgba(211, 47, 47, 0.02)',
-                                        textTransform: 'uppercase',
-                                        lineHeight: '1.4',
                                         zIndex: 1,
                                         mixBlendMode: 'multiply'
                                     }}>
-                                        <div style={{ border: '2px solid #d32f2f', width: '94%', height: '94%', borderRadius: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ fontSize: '1rem', marginBottom: '2px' }}>OFFICIAL</div>
-                                            <div style={{ fontSize: '1.2rem', borderTop: '1px solid #d32f2f', borderBottom: '1px solid #d32f2f', width: '80%', margin: '4px 0' }}>SEAL</div>
-                                            <div style={{ fontSize: '0.7rem' }}>VERIFIED</div>
-                                        </div>
+                                        <img
+                                            src="/logo.jpg"
+                                            alt="Official Seal"
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'contain',
+                                                filter: 'sepia(100%) saturate(500%) hue-rotate(-50deg) contrast(120%)',
+                                                border: '3px solid #d32f2f',
+                                                borderRadius: '50%',
+                                                padding: '5px'
+                                            }}
+                                        />
                                     </div>
                                 </div>
 
