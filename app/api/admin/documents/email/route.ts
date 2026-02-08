@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
         console.log(`Sending Document Email to ${recipientEmail} for doc ${doc.document_number} with link ${verificationLink}`);
 
-        const emailSent = await sendEmail({
+        await sendEmail({
             to: recipientEmail,
             subject: `Official Document: ${doc.subject || doc.type.toUpperCase()} - ${doc.document_number}`,
             html: `
@@ -39,15 +39,11 @@ export async function POST(req: Request) {
                      <p style="margin-top: 30px; font-size: 0.8em; color: #888;">This is an automated message. Please do not reply.</p>
                  </div>
              `,
-        });
-
-        if (!emailSent) {
-            return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
-        }
+        }, true);
 
         return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Email error:', error);
-        return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to send email' }, { status: 500 });
     }
 }

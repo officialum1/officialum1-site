@@ -8,7 +8,7 @@ interface EmailOptions {
     html?: string;
 }
 
-export async function sendEmail({ to, subject, text, html }: EmailOptions) {
+export async function sendEmail({ to, subject, text, html }: EmailOptions, throwOnError = false) {
     try {
         // 1. Fetch SMTP settings from DB (Optional override)
         let settings: any = {};
@@ -49,6 +49,7 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions) {
 
     } catch (e: any) {
         console.error('Email Send Error:', e.message);
+        if (throwOnError) throw e;
         return false;
     }
 }
