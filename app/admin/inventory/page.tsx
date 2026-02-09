@@ -1698,6 +1698,7 @@ function AdminDashboard() {
                             searchQuery={searchQuery}
                             setSearchQuery={setSearchQuery}
                             handleReplaceItem={handleReplaceItem}
+                            fetchData={fetchData}
                         />
                     )}
 

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from 'react';
 
 interface StockTabProps {
     inventory: any[];
@@ -17,6 +18,7 @@ interface StockTabProps {
     searchQuery: string;
     setSearchQuery: (q: string) => void;
     handleReplaceItem?: (id: string) => Promise<void>;
+    fetchData?: () => Promise<void>;
 }
 
 export default function StockTab({
@@ -35,8 +37,12 @@ export default function StockTab({
     handleBulkImport,
     searchQuery,
     setSearchQuery,
-    handleReplaceItem
+    handleReplaceItem,
+    fetchData
 }: StockTabProps) {
+    const [editingItem, setEditingItem] = useState<any>(null);
+    const [showEditItem, setShowEditItem] = useState(false);
+
     const filteredInventory = inventory.filter(i => {
         const q = searchQuery.toLowerCase();
         return (
@@ -46,6 +52,63 @@ export default function StockTab({
             i.platform?.toLowerCase().includes(q)
         );
     });
+
+    const handleEditClick = (item: any) => {
+        let credentials = '';
+        if (item.accountDetails) {
+            try {
+                const details = typeof item.accountDetails === 'string' ? JSON.parse(item.accountDetails) : item.accountDetails;
+                // Format: user:pass:email:extra
+                credentials = `${details.username || ''}:${details.password || ''}:${details.email || ''}`;
+                if (details.extraInfo) credentials += `:${details.extraInfo}`;
+            } catch (e) {
+                credentials = 'Error parsing details';
+            }
+        }
+
+        setEditingItem({
+            id: item.id,
+            name: item.name,
+            platform: item.platform,
+            purchasePrice: item.purchasePrice,
+            credentials,
+            tag: item.tag || '' // Assuming tag might be added later or is part of details
+        });
+        setShowEditItem(true);
+    };
+
+    const handleUpdateInventory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingItem) return;
+
+        try {
+            const res = await fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_item',
+                    itemId: editingItem.id,
+                    name: editingItem.name,
+                    platform: editingItem.platform,
+                    purchasePrice: editingItem.purchasePrice,
+                    credentials: editingItem.credentials,
+                    tag: editingItem.tag
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Item Updated Successfully!');
+                setShowEditItem(false);
+                setEditingItem(null);
+                if (fetchData) fetchData();
+            } else {
+                alert('❌ Update Failed: ' + (data.error || 'Unknown Error'));
+            }
+        } catch (e) {
+            alert('❌ Network Error');
+        }
+    };
 
     return (
         <div className="FadeIn">
@@ -82,7 +145,7 @@ export default function StockTab({
                         {['In Stock', 'Sold', 'Defective'].map(status => (
                             <button
                                 key={status}
-                                onClick={() => setSearchQuery(status === 'In Stock' ? '' : status)} // Quick filter hack or better use a real state
+                                onClick={() => setSearchQuery(status === 'In Stock' ? '' : status)}
                                 className="btn"
                                 style={{
                                     padding: '6px 15px',
@@ -166,7 +229,7 @@ export default function StockTab({
                                 {filteredInventory.map((item: any) => (
                                     <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '1rem' }}>
-                                            <div>{item.name}</div>
+                                            <div style={{ fontWeight: '500' }}>{item.name}</div>
                                             <div style={{ fontSize: '0.75rem', color: '#666' }}>{item.account_email || item.account_username}</div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>{item.platform}</td>
@@ -181,7 +244,7 @@ export default function StockTab({
                                             </span>
                                         </td>
                                         <td style={{ padding: '1rem', textAlign: 'right' }}>
-                                            {item.status === 'Sold' && (
+                                            {item.status === 'Sold' ? (
                                                 <button
                                                     onClick={() => handleReplaceItem && handleReplaceItem(item.id)}
                                                     className="btn"
@@ -195,7 +258,21 @@ export default function StockTab({
                                                 >
                                                     🔄 Replace
                                                 </button>
-                                            )}
+                                            ) : item.status === 'In Stock' ? (
+                                                <button
+                                                    onClick={() => handleEditClick(item)}
+                                                    className="btn"
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        fontSize: '0.75rem',
+                                                        background: 'rgba(0,180,255,0.1)',
+                                                        border: '1px solid #00b4ff',
+                                                        color: '#00b4ff'
+                                                    }}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                            ) : null}
                                         </td>
                                     </tr>
                                 ))}
@@ -205,7 +282,7 @@ export default function StockTab({
                     </div>
                 )}
 
-                {/* Forms */}
+                {/* Add Item Modal */}
                 {showAddInv && (
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', marginTop: '2rem' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Add Inventory Stock</h3>
@@ -226,10 +303,78 @@ export default function StockTab({
                     </div>
                 )}
 
+                {/* Edit Item Modal */}
+                {showEditItem && editingItem && (
+                    <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #00b4ff', marginTop: '2rem' }}>
+                        <h3 style={{ marginBottom: '1.5rem', color: '#00b4ff' }}>✏️ Edit Inventory Item</h3>
+                        <form onSubmit={handleUpdateInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div>
+                                <label>Platform</label>
+                                <select
+                                    className="input-field"
+                                    value={editingItem.platform}
+                                    onChange={e => setEditingItem({ ...editingItem, platform: e.target.value })}
+                                    style={{ width: '100%', background: '#111', color: '#fff' }}
+                                >
+                                    <option value="Z2U">Z2U</option>
+                                    <option value="PlayerUp">PlayerUp</option>
+                                    <option value="G2G">G2G</option>
+                                    <option value="Direct">Direct Sale</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Item Name</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    required
+                                    value={editingItem.name}
+                                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div>
+                                <label>Inventory Tag</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    value={editingItem.tag || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, tag: e.target.value })}
+                                    placeholder="#tag"
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div>
+                                <label>Purchase Price</label>
+                                <input
+                                    type="number"
+                                    required
+                                    className="input-field"
+                                    value={editingItem.purchasePrice}
+                                    onChange={e => setEditingItem({ ...editingItem, purchasePrice: e.target.value })}
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label>Account Credentials (User:Pass:Email)</label>
+                                <textarea
+                                    className="input-field"
+                                    value={editingItem.credentials || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, credentials: e.target.value })}
+                                    style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
+                                />
+                            </div>
+                            <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setShowEditItem(false)} className="btn btn-outline">Cancel</button>
+                                <button type="submit" className="btn btn-primary" style={{ background: '#00b4ff', borderColor: '#00b4ff' }}>Update Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
                 {showBulk && (
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid #06b6d4', marginTop: '2rem' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Bulk Import Inventory</h3>
-
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div>
                                 <label style={{ fontSize: '0.8rem', color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>

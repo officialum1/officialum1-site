@@ -545,6 +545,43 @@ export async function POST(request: Request) {
             });
         }
 
+        if (action === 'update_item') {
+            const { itemId, name, platform, purchasePrice, credentials, tag } = body;
+
+            // Parse credentials (user:pass:email:extra)
+            let username = '', password = '', email = '', extra = '';
+            const parts = credentials.split(':');
+
+            if (parts.length >= 1) username = parts[0].trim();
+            if (parts.length >= 2) password = parts[1].trim();
+            if (parts.length >= 3) email = parts[2].trim();
+            if (parts.length >= 4) extra = parts.slice(3).join(':').trim();
+
+            if (username.includes('@') && !email) email = username;
+
+            const detailsObj = {
+                username,
+                password,
+                email,
+                extraInfo: extra,
+                tag: tag || ''
+            };
+
+            await query(
+                `UPDATE inventory 
+                 SET name = ?, platform = ?, purchasePrice = ?, accountDetails = ?, account_email = ?, account_username = ?, account_password = ?
+                 WHERE id = ?`,
+                [name, platform, Number(purchasePrice), JSON.stringify(detailsObj), email, username, password, itemId]
+            );
+
+            // Log
+            await query("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
+                [`log_${Date.now()}`, 'Admin', 'Update Item', `Updated item ${itemId} (${name})`]
+            );
+
+            return ApiResponse.success({ success: true });
+        }
+
         if (action === 'replace_sale') {
             const { transactionId } = body;
 
