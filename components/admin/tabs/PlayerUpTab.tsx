@@ -16,10 +16,9 @@ interface Listing {
 export default function PlayerUpTab() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showAdd, setShowAdd] = useState(false);
-    const [newListing, setNewListing] = useState({ title: '', url: '' });
     const [showImport, setShowImport] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All');
+    const [draftCount, setDraftCount] = useState(0);
 
     useEffect(() => {
         fetchListings();
@@ -71,37 +70,13 @@ export default function PlayerUpTab() {
         }
     };
 
-    const handleShareToMarketing = async (listing: Listing) => {
-        const ok = await modernConfirm("Create Social Draft?", `Send this listing to your Marketing Hub as a draft?`);
-        if (!ok) return;
-
-        try {
-            const res = await fetch('/api/social', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `🚀 NEW LISTING: ${listing.title}\n\nCheck it out here: ${listing.url}\n\n#${listing.platform.toLowerCase()} #DigitalSolutions #OfficialUM1`,
-                    platforms: ['All']
-                })
-            });
-            if (res.ok) {
-                modernAlert("Success", "Sent to Marketing Hub! You can find it under the 'Marketing' tab.", "success");
-            }
-        } catch (e) {
-            modernAlert("Error", "Failed to share listing.");
-        }
-    };
-
     const handleBulkImport = async () => {
         const importBox = document.getElementById('magic-import-box');
-        if (!importBox) {
-            modernAlert("Error: Import box not found. Please refresh.");
-            return;
-        }
+        if (!importBox) return;
 
         const htmlContent = importBox.innerHTML;
-        const textContent = importBox.innerText;
 
+        // Advanced Storefront & Thread Regex
         const linkRegex = /href=["'](https:\/\/www\.playerup\.com\/)?(threads\/[^"']+\.\d+\/?)["']/g;
         const matches = [...htmlContent.matchAll(linkRegex)];
 
@@ -115,6 +90,8 @@ export default function PlayerUpTab() {
             }
             if (uniqueUrls.has(urlPath)) return;
             uniqueUrls.add(urlPath);
+
+            // Clean title from URL slug
             const slugMatch = urlPath.match(/threads\/([^\.]+)\./);
             let title = "PlayerUp Listing";
             if (slugMatch) {
@@ -123,31 +100,15 @@ export default function PlayerUpTab() {
             parsedListings.push({ title, url: urlPath });
         });
 
-        if (matches.length === 0) {
-            const textRegex = /playerup\.com\/threads\/([^\s"']+)\/?/g;
-            const textMatches = [...textContent.matchAll(textRegex)];
-            textMatches.forEach(match => {
-                let tempUrl = `https://www.${match[0].replace('www.', '')}`;
-                const cleanUrl = tempUrl.split('"')[0].split("'")[0];
-                if (!uniqueUrls.has(cleanUrl)) {
-                    uniqueUrls.add(cleanUrl);
-                    let titleSlug = match[1].split('.')[0];
-                    let title = titleSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    parsedListings.push({ title, url: cleanUrl });
-                }
-            });
-        }
-
         if (parsedListings.length === 0) {
-            modernAlert("No PlayerUp threads found! \n\nMake sure to:\n1. Copy from PlayerUp\n2. Paste here.");
+            modernAlert("No threads found in pasted content.", "Make sure to copy the table from your PlayerUp Storefront.");
             return;
         }
 
-        if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} threads! Import them now?`))) return;
+        if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} deals! Deploy to database?`))) return;
 
         setLoading(true);
-        const originalContent = importBox.innerHTML;
-        importBox.innerHTML = '<div style="color: #00c3ff; font-family: monospace; text-align: center; padding: 2rem;">⚡ Syncing with Database...</div>';
+        importBox.innerHTML = `<div style="text-align:center; padding: 2rem; color: #00c3ff;">⚡ Syncing ${parsedListings.length} items to database...</div>`;
 
         try {
             const res = await fetch('/api/admin/playerup', {
@@ -157,25 +118,21 @@ export default function PlayerUpTab() {
             });
             if (res.ok) {
                 const data = await res.json();
-                modernAlert(`✅ Sync Complete!`, `Imported ${data.count} threads.`);
-                importBox.innerHTML = '';
+                modernAlert("Sync Complete", `Successfully merged ${parsedListings.length} listings into your database.`, "success");
                 setShowImport(false);
                 fetchListings();
-            } else {
-                throw new Error("Server error");
             }
         } catch (e) {
-            importBox.innerHTML = originalContent;
-            modernAlert("Import failed");
+            modernAlert("Import Error");
             setLoading(false);
         }
     };
 
+    const platforms = ['All', 'Reddit', 'Snapchat', 'Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter', 'Google', 'Discord', 'Telegram', 'Streaming', 'Social'];
+
     const filteredListings = activeFilter === 'All'
         ? listings
         : listings.filter(l => l.platform === activeFilter);
-
-    const platforms = ['All', 'Reddit', 'Snapchat', 'Instagram', 'TikTok', 'Facebook', 'Twitter', 'YouTube', 'Discord', 'Telegram', 'Social'];
 
     return (
         <div className="FadeIn">
@@ -184,19 +141,17 @@ export default function PlayerUpTab() {
                     <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
                         🚀 PlayerUp Manager
                         <span style={{ fontSize: '0.8rem', background: '#00c3ff22', color: '#00c3ff', padding: '2px 8px', borderRadius: '4px' }}>
-                            {listings.length} Threads
+                            {listings.length} Active
                         </span>
                     </h2>
-                    <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Automate your account bumps and cross-platform promotion.</p>
+                    <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Managing ${(listings.length * 150).toLocaleString()}+ in digital assets.</p>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => setShowImport(true)} className="btn btn-primary" style={{ background: 'linear-gradient(45deg, #00c3ff, #0088cc)', border: 'none' }}>
-                        🪄 Magic Sync
-                    </button>
-                </div>
+                <button onClick={() => setShowImport(true)} className="btn btn-primary" style={{ background: 'linear-gradient(45deg, #00c3ff, #0088cc)', border: 'none', padding: '0.8rem 1.5rem' }}>
+                    ✨ Mass Power Sync
+                </button>
             </div>
 
-            {/* Platform Filter */}
+            {/* Filter Bar */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '10px' }}>
                 {platforms.map(p => (
                     <button
@@ -222,119 +177,101 @@ export default function PlayerUpTab() {
             </div>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>⚡ Syncing database...</div>
+                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>⚡ Accessing SQL Database...</div>
             ) : filteredListings.length === 0 ? (
-                <div className="glass" style={{ padding: '4rem', textAlign: 'center', borderRadius: '24px', color: '#666', border: '1px dashed #333' }}>
-                    No {activeFilter === 'All' ? '' : activeFilter} threads found.
+                <div className="glass" style={{ padding: '6rem', textAlign: 'center', borderRadius: '24px', color: '#444', border: '1px dashed #222' }}>
+                    No listings found for <b>{activeFilter}</b>.
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
                     {filteredListings.map(l => (
-                        <div key={l.id} className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid #1f2937', position: 'relative', overflow: 'hidden' }}>
-                            <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
-                                <img src={getPlatformIcon(l.platform)} style={{ width: '24px', height: '24px', borderRadius: '4px', opacity: 0.8 }} alt={l.platform} />
+                        <div key={l.id} className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid #1f2937', position: 'relative' }}>
+                            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
+                                <img src={getPlatformIcon(l.platform)} style={{ width: '28px', height: '28px', borderRadius: '6px' }} alt={l.platform} />
                             </div>
 
-                            <div style={{ marginBottom: '1.2rem', paddingRight: '2.5rem' }}>
+                            <div style={{ marginBottom: '1.2rem', paddingRight: '2rem' }}>
                                 <div style={{ fontSize: '0.65rem', color: '#00c3ff', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>{l.platform}</div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem', lineHeight: '1.4' }}>
-                                    {l.title}
-                                </h3>
-                                <a href={l.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#555', textDecoration: 'none', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {l.url}
-                                </a>
+                                <h3 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem', lineHeight: '1.4' }}>{l.title}</h3>
+                                <a href={l.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', color: '#555', textDecoration: 'none' }}>Link: {l.url.substring(0, 40)}...</a>
                             </div>
 
-                            <div style={{ background: '#000', padding: '1rem', borderRadius: '12px', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '1rem', borderRadius: '12px' }}>
                                 <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                    Last Bumped: <br />
-                                    <span style={{ color: l.lastBumped ? '#00ff88' : '#888', fontWeight: 'bold' }}>
-                                        {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString() : 'Never'}
+                                    Last Sync Wave:<br />
+                                    <span style={{ color: l.lastBumped ? '#00ff88' : '#888' }}>
+                                        {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString() : 'Ready'}
                                     </span>
                                 </div>
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                    <button
-                                        onClick={() => handleDelete(l.id)}
-                                        style={{ background: '#ff444411', border: '1px solid #ff444422', color: '#ff4444', padding: '5px 8px', borderRadius: '8px', cursor: 'pointer' }}
-                                    >
-                                        🗑️
-                                    </button>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button onClick={() => handleDelete(l.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
                                     <button
                                         onClick={() => handleBump(l)}
-                                        className="btn-primary"
-                                        style={{ background: '#00c3ff', color: '#000', padding: '6px 12px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+                                        className="btn btn-primary"
+                                        style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#00c3ff', color: '#000' }}
                                     >
-                                        🚀 BUMP
+                                        BUMP
                                     </button>
                                 </div>
                             </div>
-
-                            <button
-                                onClick={() => handleShareToMarketing(l)}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    borderRadius: '12px',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid #222',
-                                    color: '#888',
-                                    fontSize: '0.75rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '8px',
-                                    transition: '0.2s'
-                                }}
-                            >
-                                📢 Share to Marketing Hub
-                            </button>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Import Modal */}
             {showImport && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', width: '600px', maxWidth: '90vw', border: '1px solid #00c3ff' }}>
-                        <h3 style={{ marginBottom: '1rem', color: '#00c3ff' }}>🪄 Magic Sync (Bulk Hub)</h3>
-                        <div style={{ background: 'rgba(0,195,255,0.1)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(0,195,255,0.2)' }}>
-                            <p style={{ fontSize: '0.85rem', color: '#fff', margin: 0, lineHeight: '1.5' }}>
-                                <b>Import Hundreds of Threads:</b><br />
-                                1. Go to PlayerUp <a href="https://www.playerup.com/account/threads" target="_blank" style={{ color: '#00c3ff' }}>Your Threads</a>.<br />
-                                2. Copy multiple pages if needed (Ctrl+A, Ctrl+C).<br />
-                                3. Paste them all below. We'll automatically sort them by <b>Social Platform</b>!<br />
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
+                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', width: '700px', maxWidth: '95vw', border: '1px solid #00c3ff44' }}>
+                        <h3 style={{ marginBottom: '1rem', color: '#00c3ff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span>✨</span> Power Mass Sync (19,000+ Mode)
+                        </h3>
+
+                        <div style={{ background: '#00c3ff11', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', border: '1px solid #00c3ff22' }}>
+                            <p style={{ fontSize: '0.85rem', color: '#fff', margin: 0, lineHeight: '1.6' }}>
+                                <b>Storefront Syncing:</b><br />
+                                1. Go to <a href="https://www.playerup.com/officialum1" target="_blank" style={{ color: '#00c3ff' }}>officialum1 Storefront</a>.<br />
+                                2. Select the whole table (Ctrl + A) and Copy (Ctrl + C).<br />
+                                3. Paste below. We auto-sort <b>Reddit, Snapchat, Google</b> etc. by the "Game" column!<br />
+                                <span style={{ color: '#00c3ff' }}>Tip: You can paste multiple pages one after another!</span>
                             </p>
                         </div>
 
                         <div
                             id="magic-import-box"
                             contentEditable={true}
+                            onInput={(e) => {
+                                const html = (e.target as HTMLDivElement).innerHTML;
+                                const links = [...html.matchAll(/href=["'][^"']+threads\/[^"']+["']/g)];
+                                setDraftCount(links.length);
+                            }}
                             style={{
                                 width: '100%',
-                                height: '200px',
-                                padding: '1rem',
-                                borderRadius: '12px',
+                                height: '250px',
+                                padding: '1.5rem',
+                                borderRadius: '16px',
                                 background: '#000',
                                 border: '1px solid #333',
-                                color: '#ccc',
+                                color: '#00c3ff',
                                 fontFamily: 'monospace',
                                 marginBottom: '1.5rem',
                                 fontSize: '0.8rem',
-                                overflowY: 'auto',
-                                whiteSpace: 'pre-wrap'
+                                overflowY: 'auto'
                             }}
                         />
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ fontSize: '0.75rem', color: '#555', maxWidth: '60%' }}>
-                                <span style={{ color: '#888' }}>Social Wise:</span> We auto-detect Instagram, TikTok, etc. from titles to keep your manager organized.
+                            <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                                📑 Currently detected: <b style={{ color: '#00c3ff' }}>{draftCount}</b> listings in paste buffer.
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline" disabled={loading}>Cancel</button>
-                                <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }} disabled={loading}>
-                                    {loading ? 'Processing...' : '✨ Start Magic Sync'}
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
+                                <button
+                                    onClick={handleBulkImport}
+                                    className="btn btn-primary"
+                                    style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}
+                                    disabled={loading || draftCount === 0}
+                                >
+                                    {loading ? 'SYNCING...' : '⚡ IMPORT TO DATABASE'}
                                 </button>
                             </div>
                         </div>

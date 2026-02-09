@@ -6,22 +6,22 @@ function detectPlatform(title: string, url: string) {
     const t = title.toLowerCase();
     const u = url.toLowerCase();
 
-    // Primary "Social Wise" categories
+    // Explicit PlayerUp Category Detection (Social Wise)
     if (t.includes('reddit') || u.includes('reddit')) return 'Reddit';
     if (t.includes('snapchat') || u.includes('snapchat') || t.includes('snap ') || u.includes('snap ')) return 'Snapchat';
     if (t.includes('instagram') || u.includes('instagram') || t.includes(' ig ')) return 'Instagram';
     if (t.includes('tiktok') || u.includes('tiktok') || t.includes(' tt ')) return 'TikTok';
+    if (t.includes('youtube') || u.includes('youtube') || t.includes(' yt ')) return 'YouTube';
     if (t.includes('facebook') || u.includes('facebook') || t.includes(' fb ')) return 'Facebook';
     if (t.includes('twitter') || t.includes(' x ') || u.includes('twitter')) return 'Twitter';
-    if (t.includes('youtube') || u.includes('youtube') || t.includes(' yt ')) return 'YouTube';
     if (t.includes('discord') || u.includes('discord')) return 'Discord';
     if (t.includes('telegram') || u.includes('telegram') || t.includes(' tg ')) return 'Telegram';
+    if (t.includes('linkedin') || u.includes('linkedin')) return 'LinkedIn';
 
-    // Streaming/Gaming
-    if (t.includes('netflix')) return 'Netflix';
-    if (t.includes('spotify')) return 'Spotify';
-    if (t.includes('fortnite') || t.includes('fn ')) return 'Fortnite';
-    if (t.includes('roblox')) return 'Roblox';
+    // Other categories seen in your screenshot
+    if (t.includes('google') || t.includes('gmail')) return 'Google';
+    if (t.includes('webhosting') || t.includes('hosting')) return 'Hosting';
+    if (t.includes('netflix') || t.includes('spotify') || t.includes('streaming')) return 'Streaming';
 
     return 'Social';
 }
@@ -56,11 +56,9 @@ export async function POST(req: Request) {
             await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [id]);
         } else if (action === 'bulk_import') {
             if (Array.isArray(listings)) {
-                // Batch deduplication
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
                 const existingUrls = new Set(existingRows.map((r: any) => r.url));
 
-                // Process in chunks to avoid blocking the DB
                 for (const item of listings) {
                     if (!existingUrls.has(item.url)) {
                         const newId = Date.now() + Math.random().toString(36).substr(2, 9);
