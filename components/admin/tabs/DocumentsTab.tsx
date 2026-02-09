@@ -138,16 +138,61 @@ export default function DocumentsTab() {
 
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/documents/email', {
-                method: 'POST',
-                body: JSON.stringify({ id: doc.id, recipientEmail: email })
-            });
-            if (res.ok) modernAlert('Email sent successfully!');
-            else modernAlert('Failed to send email');
+            // Load html2pdf dynamically
+            // @ts-ignore
+            const html2pdf = (await import('html2pdf.js')).default;
+
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="width: 210mm; min-height: 297mm; background: white; color: black; position: relative; display: flex; flexDirection: column;">
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+                        body { margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+                        .header-bar { height: 15px; width: 100%; background: #2b4c7e; border-bottom: 5px solid #f0b90b; }
+                        .invoice-table th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding: 1rem; text-align: left; }
+                        .invoice-table td { padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #334155; }
+                        .invoice-card { background: #f8fafc; border-radius: 12px; padding: 1.5rem; }
+                    </style>
+                    ${printRef.current?.innerHTML || ''}
+                </div>
+            `;
+
+            const opt = {
+                margin: 0,
+                filename: `${doc.document_number}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+            const reader = new FileReader();
+
+            reader.onloadend = async () => {
+                const base64data = reader.result as string;
+
+                const res = await fetch('/api/admin/documents/email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: doc.id,
+                        recipientEmail: email,
+                        pdfBase64: base64data.split(',')[1] // Send only base64 content
+                    })
+                });
+
+                if (res.ok) modernAlert('Email with PDF sent successfully!', '', 'success');
+                else modernAlert('Failed to send email', '', 'error');
+                setLoading(false);
+            };
+
+            reader.readAsDataURL(pdfBlob);
+
         } catch (e) {
-            modernAlert('Error sending email');
+            console.error(e);
+            modernAlert('Error generating PDF or sending email', '', 'error');
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const loadDocument = (doc: any) => {

@@ -4,7 +4,7 @@ import { query } from '@/lib/db';
 
 export async function POST(req: Request) {
     try {
-        const { id, recipientEmail } = await req.json();
+        const { id, recipientEmail, pdfBase64 } = await req.json();
 
         // Fetch details from DB to personalize email
         const [doc]: any = await query('SELECT * FROM documents WHERE id = ?', [id]);
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
         console.log(`Sending Document Email to ${recipientEmail} for doc ${doc.document_number} with link ${verificationLink}`);
 
-        await sendEmail({
+        const emailOptions: any = {
             to: recipientEmail,
             subject: `Official Document: ${doc.subject || doc.type.toUpperCase()} - ${doc.document_number}`,
             html: `
@@ -33,13 +33,25 @@ export async function POST(req: Request) {
                          <strong>Subject:</strong> ${doc.subject || 'N/A'}
                      </div>
  
-                     <p>You can verify and view the details of this document by clicking the link below:</p>
-                     <a href="${verificationLink}" style="background: #2b4c7e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Document</a>
+                     <p>You can verify this document by clicking the link below or viewing the attached PDF.</p>
+                     <a href="${verificationLink}" style="background: #2b4c7e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Document Online</a>
                      
                      <p style="margin-top: 30px; font-size: 0.8em; color: #888;">This is an automated message. Please do not reply.</p>
                  </div>
              `,
-        }, true);
+        };
+
+        if (pdfBase64) {
+            emailOptions.attachments = [
+                {
+                    filename: `${doc.document_number}.pdf`,
+                    content: Buffer.from(pdfBase64, 'base64'),
+                    contentType: 'application/pdf'
+                }
+            ];
+        }
+
+        await sendEmail(emailOptions, true);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {
