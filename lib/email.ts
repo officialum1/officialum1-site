@@ -39,7 +39,7 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions, throw
             });
 
             await transporter.sendMail({
-                from: `"OfficialUM1 Support" <${user}>`,
+                from: `"OfficialUM1" <${user}>`,
                 to,
                 subject,
                 text,
