@@ -174,20 +174,30 @@ export default function PlayerUpTab() {
 
         if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} threads! Import them now?`))) return;
 
+        // Show loading state to user
+        const originalContent = importBox.innerHTML;
+        importBox.innerHTML = '<div style="color: #00c3ff; font-family: monospace; text-align: center; padding: 2rem;">⚡ Syncing with database... please wait...</div>';
+
         try {
             const res = await fetch('/api/admin/playerup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'bulk_import', listings: parsedListings })
             });
+
             if (res.ok) {
-                modernAlert(`✅ Sync Complete! Added ${parsedListings.length} listings.`);
+                const data = await res.json();
+                modernAlert(`✅ Sync Complete!`, `Successfully imported ${data.count} threads.`);
                 importBox.innerHTML = ''; // Clear
                 setShowImport(false);
                 fetchListings();
+            } else {
+                throw new Error("Server responded with error");
             }
         } catch (e) {
-            modernAlert("Import failed");
+            console.error(e);
+            importBox.innerHTML = originalContent; // Restore content
+            modernAlert("Import failed", "Something went wrong. Check console for details.");
         }
     };
 
@@ -299,7 +309,7 @@ export default function PlayerUpTab() {
 
             {/* Import Modal */}
             {showImport && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div className="glass" style={{ padding: '2rem', borderRadius: '24px', width: '600px', maxWidth: '90vw', border: '1px solid #00c3ff' }}>
                         <h3 style={{ marginBottom: '1rem', color: '#00c3ff' }}>🪄 Magic Sync (Auto-Import)</h3>
                         <div style={{ background: 'rgba(0,195,255,0.1)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(0,195,255,0.2)' }}>
@@ -331,9 +341,14 @@ export default function PlayerUpTab() {
                             }}
                         />
 
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
-                            <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}>Find Threads</button>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#555', maxWidth: '60%' }}>
+                                <span style={{ color: '#888' }}>Why no auto-login?</span> PlayerUp uses Cloudflare security which blocks server bots. <b>Magic Sync</b> is the safest way to import your data without getting blocked.
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                                <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
+                                <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}>Find Threads</button>
+                            </div>
                         </div>
                     </div>
                 </div>
