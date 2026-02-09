@@ -108,44 +108,42 @@ export default function PlayerUpTab() {
     const handleBulkImport = async () => {
         if (!importData) return;
 
-        // Simple parser for now
-        const lines = importData.split('\n');
-        const parsedListings: any[] = [];
+        // Smart Regex to find all PlayerUp thread URLs in ANY pasted text
+        // Matches: playerup.com/threads/some-title.12345/
+        const regex = /playerup\.com\/threads\/([^\/]+)\/?/g;
+        const matches = [...importData.matchAll(regex)];
 
-        // Heuristic: line with URL is url, line before is title?
-        // Or user pastes list of URLs?
-        // Let's assume standard format or just extract URLs.
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            // If line is a PlayerUp URL
-            if (line.includes('playerup.com/threads/')) {
-                // Try to find title in the line or previous line
-                // But url usually contains title slug.
-
-                // Extraction from URL: playerup.com/threads/[title-slug].[id]
-                // Regex to extract title from URL
-                const match = line.match(/threads\/([^\.]+)\./);
-                let title = match ? match[1].replace(/-/g, ' ') : 'Imported Listing';
-
-                // Capitalize title
-                title = title.replace(/\b\w/g, l => l.toUpperCase());
-
-                parsedListings.push({
-                    title: title,
-                    url: line
-                });
-            }
-        }
-
-        if (parsedListings.length === 0) {
-            modernAlert("No PlayerUp thread URLs found in text.");
+        if (matches.length === 0) {
+            modernAlert("No PlayerUp thread URLs found. \n\nTip: Go to your 'Your Threads' page on PlayerUp, press Ctrl+A then Ctrl+C, then paste EVERYTHING here.");
             return;
         }
 
-        if (!(await modernConfirm(`Found ${parsedListings.length} listings. Import them?`))) return;
+        const parsedListings: any[] = [];
+        const uniqueUrls = new Set();
+
+        matches.forEach(match => {
+            const urlPath = match[0]; // playerup.com/threads/title.123/
+            const fullUrl = `https://www.${urlPath.replace('www.', '')}`;
+
+            if (uniqueUrls.has(fullUrl)) return;
+            uniqueUrls.add(fullUrl);
+
+            // Extract Title from URL (heuristic)
+            // match[1] is "title-slug.123456"
+            let titleSlug = match[1].split('.')[0]; // remove .123456
+            let title = titleSlug.replace(/-/g, ' '); // replace dashes with spaces
+            // Capitalize
+            title = title.replace(/\b\w/g, l => l.toUpperCase());
+
+            parsedListings.push({
+                title: title,
+                url: fullUrl
+            });
+        });
+
+        if (parsedListings.length === 0) return;
+
+        if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} threads! Import them now?`))) return;
 
         try {
             const res = await fetch('/api/admin/playerup', {
@@ -154,7 +152,7 @@ export default function PlayerUpTab() {
                 body: JSON.stringify({ action: 'bulk_import', listings: parsedListings })
             });
             if (res.ok) {
-                modernAlert(`Imported ${parsedListings.length} listings!`);
+                modernAlert(`✅ Successfully syncronized ${parsedListings.length} listings!`);
                 setImportData('');
                 setShowImport(false);
                 fetchListings();
@@ -177,11 +175,11 @@ export default function PlayerUpTab() {
                     <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Manage and bump your PlayerUp listings efficiently.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => setShowImport(true)} className="btn btn-outline">
-                        📥 Import
+                    <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ borderColor: '#00c3ff', color: '#00c3ff' }}>
+                        🪄 Magic Sync
                     </button>
                     <button onClick={() => setShowAdd(true)} className="btn btn-primary">
-                        + Add Listing
+                        + Add Manually
                     </button>
                 </div>
             </div>
@@ -273,20 +271,24 @@ export default function PlayerUpTab() {
             {/* Import Modal */}
             {showImport && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', width: '600px', maxWidth: '90vw' }}>
-                        <h3 style={{ marginBottom: '1rem' }}>Import Listings</h3>
-                        <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1rem' }}>
-                            Paste your PlayerUp threads list or text containing URLs below. We'll automatically identify thread URLs.
-                        </p>
+                    <div className="glass" style={{ padding: '2rem', borderRadius: '24px', width: '600px', maxWidth: '90vw', border: '1px solid #00c3ff' }}>
+                        <h3 style={{ marginBottom: '1rem', color: '#00c3ff' }}>🪄 Magic Sync (Auto-Import)</h3>
+                        <div style={{ background: 'rgba(0,195,255,0.1)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(0,195,255,0.2)' }}>
+                            <p style={{ fontSize: '0.9rem', color: '#fff', margin: 0, lineHeight: '1.5' }}>
+                                1. Open <a href="https://www.playerup.com/account/threads" target="_blank" style={{ color: '#00c3ff' }}>Your Threads</a> on PlayerUp.<br />
+                                2. Press <b>Ctrl + A</b> (Select All) then <b>Ctrl + C</b> (Copy).<br />
+                                3. Paste EVERYTHING in the box below.<br />
+                            </p>
+                        </div>
                         <textarea
                             value={importData}
                             onChange={e => setImportData(e.target.value)}
-                            placeholder="Paste text here..."
-                            style={{ width: '100%', height: '200px', padding: '1rem', borderRadius: '12px', background: '#000', border: '1px solid #333', color: '#fff', fontFamily: 'monospace', marginBottom: '1.5rem' }}
+                            placeholder="Paste your copied text here..."
+                            style={{ width: '100%', height: '200px', padding: '1rem', borderRadius: '12px', background: '#000', border: '1px solid #333', color: '#fff', fontFamily: 'monospace', marginBottom: '1.5rem', fontSize: '0.8rem' }}
                         />
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                             <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
-                            <button type="button" onClick={handleBulkImport} className="btn btn-primary">Process Import</button>
+                            <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}>Find Threads</button>
                         </div>
                     </div>
                 </div>
