@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -105,43 +104,73 @@ export default function PlayerUpTab() {
         }
     };
 
+    // MAGIC SYNC: Handle pasting rich text (HTML) to get links
     const handleBulkImport = async () => {
-        if (!importData) return;
+        const importBox = document.getElementById('magic-import-box');
+        if (!importBox) return;
 
-        // Smart Regex to find all PlayerUp thread URLs in ANY pasted text
-        // Matches: playerup.com/threads/some-title.12345/
-        const regex = /playerup\.com\/threads\/([^\/]+)\/?/g;
-        const matches = [...importData.matchAll(regex)];
+        const htmlContent = importBox.innerHTML;
+        const textContent = importBox.innerText; // Fallback text
 
-        if (matches.length === 0) {
-            modernAlert("No PlayerUp thread URLs found. \n\nTip: Go to your 'Your Threads' page on PlayerUp, press Ctrl+A then Ctrl+C, then paste EVERYTHING here.");
-            return;
-        }
+        // Regex to match hrefs that point to threads
+        // Matches: href="threads/some-slug.12345/" or full URLs
+        // We look for both relative and absolute paths
+        const linkRegex = /href=["'](https:\/\/www\.playerup\.com\/)?(threads\/[^"']+\.\d+\/?)["']/g;
+        const matches = [...htmlContent.matchAll(linkRegex)];
 
         const parsedListings: any[] = [];
         const uniqueUrls = new Set();
 
         matches.forEach(match => {
-            const urlPath = match[0]; // playerup.com/threads/title.123/
-            const fullUrl = `https://www.${urlPath.replace('www.', '')}`;
+            // match[2] is the part starting with threads/...
+            let urlPath = match[2];
 
-            if (uniqueUrls.has(fullUrl)) return;
-            uniqueUrls.add(fullUrl);
+            // Ensure we have a full URL
+            if (!urlPath.startsWith('http')) {
+                urlPath = `https://www.playerup.com/${urlPath}`;
+            }
 
-            // Extract Title from URL (heuristic)
-            // match[1] is "title-slug.123456"
-            let titleSlug = match[1].split('.')[0]; // remove .123456
-            let title = titleSlug.replace(/-/g, ' '); // replace dashes with spaces
-            // Capitalize
-            title = title.replace(/\b\w/g, l => l.toUpperCase());
+            if (uniqueUrls.has(urlPath)) return;
+            uniqueUrls.add(urlPath);
+
+            // Extract title from slug (heuristic)
+            // urlPath: .../threads/title-slug.12345/
+            const slugMatch = urlPath.match(/threads\/([^\.]+)\./);
+            let title = "PlayerUp Listing";
+            if (slugMatch) {
+                title = slugMatch[1].replace(/-/g, ' ');
+                title = title.replace(/\b\w/g, l => l.toUpperCase());
+            }
 
             parsedListings.push({
                 title: title,
-                url: fullUrl
+                url: urlPath
             });
         });
 
-        if (parsedListings.length === 0) return;
+        // Also fallback loop for plain text in case the user pasted raw URLs
+        if (matches.length === 0) {
+            const textRegex = /playerup\.com\/threads\/([^\s"']+)\/?/g;
+            const textMatches = [...textContent.matchAll(textRegex)];
+
+            textMatches.forEach(match => {
+                let tempUrl = `https://www.${match[0].replace('www.', '')}`;
+                // Clean potential trailing noise
+                const cleanUrl = tempUrl.split('"')[0].split("'")[0];
+
+                if (!uniqueUrls.has(cleanUrl)) {
+                    uniqueUrls.add(cleanUrl);
+                    let titleSlug = match[1].split('.')[0];
+                    let title = titleSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    parsedListings.push({ title, url: cleanUrl });
+                }
+            });
+        }
+
+        if (parsedListings.length === 0) {
+            modernAlert("No PlayerUp threads found! \n\nMake sure to:\n1. Copy the entries from PlayerUp (Ctrl+A, Ctrl+C)\n2. Paste them here directly.");
+            return;
+        }
 
         if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} threads! Import them now?`))) return;
 
@@ -152,8 +181,8 @@ export default function PlayerUpTab() {
                 body: JSON.stringify({ action: 'bulk_import', listings: parsedListings })
             });
             if (res.ok) {
-                modernAlert(`✅ Successfully syncronized ${parsedListings.length} listings!`);
-                setImportData('');
+                modernAlert(`✅ Sync Complete! Added ${parsedListings.length} listings.`);
+                importBox.innerHTML = ''; // Clear
                 setShowImport(false);
                 fetchListings();
             }
@@ -175,11 +204,11 @@ export default function PlayerUpTab() {
                     <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Manage and bump your PlayerUp listings efficiently.</p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ borderColor: '#00c3ff', color: '#00c3ff' }}>
+                    <button onClick={() => setShowImport(true)} className="btn btn-primary" style={{ background: 'linear-gradient(45deg, #00c3ff, #0088cc)', border: 'none' }}>
                         🪄 Magic Sync
                     </button>
-                    <button onClick={() => setShowAdd(true)} className="btn btn-primary">
-                        + Add Manually
+                    <button onClick={() => setShowAdd(true)} className="btn btn-outline">
+                        + Manual Add
                     </button>
                 </div>
             </div>
@@ -188,7 +217,7 @@ export default function PlayerUpTab() {
                 <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>Loading listings...</div>
             ) : listings.length === 0 ? (
                 <div className="glass" style={{ padding: '4rem', textAlign: 'center', borderRadius: '24px', color: '#666', border: '1px dashed #333' }}>
-                    No listings found. Add one manually or import from text.
+                    No listings found. Use <b>Magic Sync</b> to import your threads automatically.
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -206,7 +235,7 @@ export default function PlayerUpTab() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
                                 <div style={{ fontSize: '0.7rem', color: '#666' }}>
                                     Last Bumped: <br />
-                                    <span style={{ color: l.lastBumped ? '#aaa' : '#666' }}>
+                                    <span style={{ color: l.lastBumped ? '#00ff88' : '#666' }}>
                                         {l.lastBumped ? new Date(l.lastBumped).toLocaleString() : 'Never'}
                                     </span>
                                 </div>
@@ -275,17 +304,33 @@ export default function PlayerUpTab() {
                         <h3 style={{ marginBottom: '1rem', color: '#00c3ff' }}>🪄 Magic Sync (Auto-Import)</h3>
                         <div style={{ background: 'rgba(0,195,255,0.1)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(0,195,255,0.2)' }}>
                             <p style={{ fontSize: '0.9rem', color: '#fff', margin: 0, lineHeight: '1.5' }}>
-                                1. Open <a href="https://www.playerup.com/account/threads" target="_blank" style={{ color: '#00c3ff' }}>Your Threads</a> on PlayerUp.<br />
-                                2. Press <b>Ctrl + A</b> (Select All) then <b>Ctrl + C</b> (Copy).<br />
-                                3. Paste EVERYTHING in the box below.<br />
+                                <b>Instructions:</b><br />
+                                1. Go to <a href="https://www.playerup.com/account/threads" target="_blank" style={{ color: '#00c3ff' }}>Your Threads</a> page.<br />
+                                2. Select everything (Ctrl + A) and Copy (Ctrl + C).<br />
+                                3. Click the box below and Paste (Ctrl + V).<br />
+                                <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>(We'll auto-extract the hidden links!)</span>
                             </p>
                         </div>
-                        <textarea
-                            value={importData}
-                            onChange={e => setImportData(e.target.value)}
-                            placeholder="Paste your copied text here..."
-                            style={{ width: '100%', height: '200px', padding: '1rem', borderRadius: '12px', background: '#000', border: '1px solid #333', color: '#fff', fontFamily: 'monospace', marginBottom: '1.5rem', fontSize: '0.8rem' }}
+
+                        <div
+                            id="magic-import-box"
+                            contentEditable={true}
+                            style={{
+                                width: '100%',
+                                height: '200px',
+                                padding: '1rem',
+                                borderRadius: '12px',
+                                background: '#000',
+                                border: '1px solid #333',
+                                color: '#ccc',
+                                fontFamily: 'monospace',
+                                marginBottom: '1.5rem',
+                                fontSize: '0.8rem',
+                                overflowY: 'auto',
+                                whiteSpace: 'pre-wrap'
+                            }}
                         />
+
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                             <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
                             <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}>Find Threads</button>
