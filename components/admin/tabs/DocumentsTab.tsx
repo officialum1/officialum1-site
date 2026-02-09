@@ -94,15 +94,23 @@ export default function DocumentsTab() {
                         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
                         body { margin: 0; padding: 0; font-family: 'Outfit', sans-serif; -webkit-print-color-adjust: exact; }
                         @media print {
-                            body { -webkit-print-color-adjust: exact; }
+                            @page { size: A4; margin: 0; }
+                            body { -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
+                            .page-container {
+                                width: 210mm;
+                                height: 296mm; /* Slightly less than 297mm to prevent blank page overflow */
+                                break-after: page;
+                            }
                         }
                         .page-container {
                             width: 210mm;
                             min-height: 297mm;
+                            padding: 0;
                             margin: 0 auto;
                             background: white;
                             position: relative;
-                            overflow: hidden;
+                            display: flex;
+                            flex-direction: column; 
                         }
                         /* Styles copied from preview */
                         .header-bar { height: 15px; width: 100%; background: #2b4c7e; border-bottom: 5px solid #f0b90b; }
