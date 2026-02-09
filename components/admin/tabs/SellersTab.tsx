@@ -32,6 +32,12 @@ export default function SellersTab({ users, fetchData }: SellersTabProps) {
             return;
         }
 
+        // KYC Enforcement
+        if (!userToPromote.is_verified) {
+            modernAlert("User must complete Identity Verification (KYC) before becoming a Seller.");
+            return;
+        }
+
         if (await modernConfirm(`Are you sure you want to promote ${userToPromote.email} to Seller?`)) {
             try {
                 const res = await fetch('/api/admin/users', {
