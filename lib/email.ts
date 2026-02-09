@@ -18,10 +18,10 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions, throw
         console.warn("Failed to fetch SMTP settings from DB, using defaults");
     }
 
-    // Hardcoded Defaults (Titan Email)
-    const defaultHost = 'smtp.hostinger.com';
-    const defaultUser = 'no-reply@officialum1.com';
-    const defaultPass = ')Nn+z6X=edr9deL';
+    // Environment Defaults (Recommended)
+    const defaultHost = process.env.SMTP_HOST || 'smtp.hostinger.com';
+    const defaultUser = process.env.SMTP_USER || 'no-reply@officialum1.com';
+    const defaultPass = process.env.SMTP_PASS || '';
 
     // Prioritize DB settings, fallback to defaults
     const smtpHost = settings.smtpHost || defaultHost;
