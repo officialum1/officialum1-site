@@ -221,18 +221,17 @@ export default function AboutPage() {
                                 <div style={{
                                     width: '150px',
                                     height: '150px',
-                                    background: 'linear-gradient(45deg, #ff4444, #882222)',
                                     borderRadius: '50%',
                                     margin: '0 auto 20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '3rem',
-                                    color: 'white',
-                                    fontWeight: 'bold',
+                                    overflow: 'hidden',
+                                    border: '2px solid #ff4444',
                                     boxShadow: '0 10px 30px rgba(255, 68, 68, 0.2)'
                                 }}>
-                                    UM
+                                    <img
+                                        src="/founder.jpg"
+                                        alt="Muhammad Umar Mumtaz"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
                                 </div>
                                 <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Muhammad Umar Mumtaz</h3>
                                 <p style={{ color: '#ff4444', marginBottom: '20px' }}>Founder & Lead Strategist</p>
