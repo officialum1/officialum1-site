@@ -7,6 +7,7 @@ export default function VerificationTab() {
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+    const [viewImage, setViewImage] = useState<string | null>(null);
 
     useEffect(() => {
         fetchRequests();
@@ -114,9 +115,9 @@ export default function VerificationTab() {
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '10px' }}>IDENTITY CARD</div>
                                     {req.document_image ? (
-                                        <a href={req.document_image} target="_blank" rel="noopener noreferrer">
-                                            <img src={req.document_image} alt="ID" style={{ height: '80px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }} title="Click to enlarge" />
-                                        </a>
+                                        <div onClick={() => setViewImage(req.document_image)} style={{ cursor: 'pointer' }}>
+                                            <img src={req.document_image} alt="ID" style={{ height: '80px', borderRadius: '12px', border: '1px solid #333' }} title="Click to enlarge" />
+                                        </div>
                                     ) : <div style={{ color: '#333' }}>N/A</div>}
                                 </div>
 
@@ -124,9 +125,9 @@ export default function VerificationTab() {
                                 <div style={{ textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.7rem', color: '#666', marginBottom: '10px' }}>SELFIE MATCH</div>
                                     {req.selfie_image ? (
-                                        <a href={req.selfie_image} target="_blank" rel="noopener noreferrer">
-                                            <img src={req.selfie_image} alt="Selfie" style={{ height: '80px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }} title="Click to enlarge" />
-                                        </a>
+                                        <div onClick={() => setViewImage(req.selfie_image)} style={{ cursor: 'pointer' }}>
+                                            <img src={req.selfie_image} alt="Selfie" style={{ height: '80px', borderRadius: '12px', border: '1px solid #333' }} title="Click to enlarge" />
+                                        </div>
                                     ) : <div style={{ color: '#333' }}>N/A</div>}
                                 </div>
 
@@ -151,5 +152,62 @@ export default function VerificationTab() {
                 </div>
             )}
         </div>
+    )
+}
+
+{/* Image Viewer Modal */ }
+{
+    viewImage && (
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 9999,
+                background: 'rgba(0,0,0,0.9)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+            }}
+            onClick={() => setViewImage(null)}
+        >
+            <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
+                <img
+                    src={viewImage}
+                    alt="Full View"
+                    style={{
+                        maxWidth: '100%',
+                        maxHeight: '90vh',
+                        borderRadius: '8px',
+                        boxShadow: '0 0 50px rgba(0,0,0,0.5)',
+                        objectFit: 'contain'
+                    }}
+                />
+                <button
+                    onClick={() => setViewImage(null)}
+                    style={{
+                        position: 'absolute',
+                        top: '-40px',
+                        right: '-40px',
+                        background: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        cursor: 'pointer',
+                        fontSize: '1.5rem',
+                        color: 'black',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+    )
+}
+        </div >
     );
 }
