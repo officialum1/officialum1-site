@@ -16,9 +16,11 @@ interface Listing {
 export default function PlayerUpTab() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showImport, setShowImport] = useState(false);
+    const [showTurbo, setShowTurbo] = useState(false);
+    const [username, setUsername] = useState('officialum1');
     const [activeFilter, setActiveFilter] = useState('All');
-    const [draftCount, setDraftCount] = useState(0);
+    const [isTurboing, setIsTurboing] = useState(false);
+    const [progress, setProgress] = useState('');
 
     useEffect(() => {
         fetchListings();
@@ -30,6 +32,7 @@ export default function PlayerUpTab() {
             const res = await fetch('/api/admin/playerup');
             const data = await res.json();
             if (Array.isArray(data)) setListings(data);
+            else if (data.listings) setListings(data.listings);
         } catch (e) {
             console.error(e);
         } finally {
@@ -38,101 +41,76 @@ export default function PlayerUpTab() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!(await modernConfirm("Delete this listing?"))) return;
-        try {
-            const res = await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'delete', id })
-            });
-            if (res.ok) fetchListings();
-        } catch (e) {
-            modernAlert("Failed to delete");
-        }
+        if (!(await modernConfirm("Delete?"))) return;
+        await fetch('/api/admin/playerup', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete', id })
+        });
+        fetchListings();
     };
 
     const handleBump = async (listing: Listing) => {
-        try {
-            let bumpUrl = listing.url;
-            if (!bumpUrl.endsWith('/up')) {
-                if (bumpUrl.endsWith('/')) bumpUrl += 'up';
-                else bumpUrl += '/up';
-            }
-            window.open(bumpUrl, '_blank');
-            await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'update_bump', id: listing.id })
-            });
-            fetchListings();
-        } catch (e) {
-            console.error(e);
-        }
+        window.open(listing.url + '/up', '_blank');
+        await fetch('/api/admin/playerup', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'update_bump', id: listing.id })
+        });
+        fetchListings();
     };
 
-    const handleBulkImport = async () => {
-        const importBox = document.getElementById('magic-import-box');
-        if (!importBox) return;
+    // THE TURBO CRAWLER CONSOLE SCRIPT
+    const getTurboScript = () => {
+        return `
+(async () => {
+    console.log("🚀 STARTING TURBO SYNC FOR ${username.toUpperCase()}...");
+    let allLinks = [];
+    let page = 1;
+    let hasMore = true;
 
-        const htmlContent = importBox.innerHTML;
-
-        // Advanced Storefront & Thread Regex
-        const linkRegex = /href=["'](https:\/\/www\.playerup\.com\/)?(threads\/[^"']+\.\d+\/?)["']/g;
-        const matches = [...htmlContent.matchAll(linkRegex)];
-
-        const parsedListings: any[] = [];
-        const uniqueUrls = new Set();
-
-        matches.forEach(match => {
-            let urlPath = match[2];
-            if (!urlPath.startsWith('http')) {
-                urlPath = `https://www.playerup.com/${urlPath}`;
-            }
-            if (uniqueUrls.has(urlPath)) return;
-            uniqueUrls.add(urlPath);
-
-            // Clean title from URL slug
-            const slugMatch = urlPath.match(/threads\/([^\.]+)\./);
-            let title = "PlayerUp Listing";
-            if (slugMatch) {
-                title = slugMatch[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            }
-            parsedListings.push({ title, url: urlPath });
-        });
-
-        if (parsedListings.length === 0) {
-            modernAlert("No threads found in pasted content.", "Make sure to copy the table from your PlayerUp Storefront.");
-            return;
-        }
-
-        if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} deals! Deploy to database?`))) return;
-
-        setLoading(true);
-        importBox.innerHTML = `<div style="text-align:center; padding: 2rem; color: #00c3ff;">⚡ Syncing ${parsedListings.length} items to database...</div>`;
-
+    while(hasMore && page <= 100) { // Limit to 100 pages per burst for safety
+        console.log("Reading Page " + page + "...");
         try {
-            const res = await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'bulk_import', listings: parsedListings })
+            const res = await fetch("https://www.playerup.com/" + "${username}" + "/page-" + page);
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const links = [...doc.querySelectorAll('a[href*="threads/"]')];
+            
+            if(links.length === 0) { hasMore = false; break; }
+
+            const batch = links.map(a => ({
+                title: a.innerText.trim() || "PlayerUp Listing",
+                url: a.href.split('?')[0]
+            }));
+
+            allLinks = [...allLinks, ...batch];
+            
+            // Send current batch to your site immediately
+            await fetch("https://officialum1.com/api/admin/playerup", {
+                method: "POST",
+                body: JSON.stringify({ action: "turbo_sync", listings: batch })
             });
-            if (res.ok) {
-                const data = await res.json();
-                modernAlert("Sync Complete", `Successfully merged ${parsedListings.length} listings into your database.`, "success");
-                setShowImport(false);
-                fetchListings();
-            }
-        } catch (e) {
-            modernAlert("Import Error");
-            setLoading(false);
+
+            console.log("✅ Page " + page + " Synced! Total: " + allLinks.length);
+            page++;
+            await new Promise(r => setTimeout(r, 500)); // Be nice to PlayerUp
+        } catch(e) { 
+            console.error("Error on page " + page, e);
+            hasMore = false; 
         }
+    }
+    alert("🏁 TURBO SYNC COMPLETE! Total threads processed: " + allLinks.length);
+})();
+        `.trim();
+    };
+
+    const handleCopyScript = () => {
+        navigator.clipboard.writeText(getTurboScript());
+        modernAlert("Script Copied!", "1. Go to your PlayerUp profile.\n2. Press F12 -> Console.\n3. Paste and press Enter.", "success");
     };
 
     const platforms = ['All', 'Reddit', 'Snapchat', 'Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter', 'Google', 'Discord', 'Telegram', 'Streaming', 'Social'];
-
-    const filteredListings = activeFilter === 'All'
-        ? listings
-        : listings.filter(l => l.platform === activeFilter);
+    const filteredListings = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
 
     return (
         <div className="FadeIn">
@@ -141,13 +119,17 @@ export default function PlayerUpTab() {
                     <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
                         🚀 PlayerUp Manager
                         <span style={{ fontSize: '0.8rem', background: '#00c3ff22', color: '#00c3ff', padding: '2px 8px', borderRadius: '4px' }}>
-                            {listings.length} Active
+                            {listings.length} Threads
                         </span>
                     </h2>
                     <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Managing ${(listings.length * 150).toLocaleString()}+ in digital assets.</p>
                 </div>
-                <button onClick={() => setShowImport(true)} className="btn btn-primary" style={{ background: 'linear-gradient(45deg, #00c3ff, #0088cc)', border: 'none', padding: '0.8rem 1.5rem' }}>
-                    ✨ Mass Power Sync
+                <button
+                    onClick={() => setShowTurbo(true)}
+                    className="btn btn-primary"
+                    style={{ background: 'linear-gradient(45deg, #ff0055, #ff00aa)', border: 'none', padding: '0.8rem 1.5rem', fontWeight: 'bold', animation: 'pulse 2s infinite' }}
+                >
+                    ⚡ Auto-Fetch All Pages
                 </button>
             </div>
 
@@ -167,8 +149,7 @@ export default function PlayerUpTab() {
                             cursor: 'pointer',
                             fontSize: '0.85rem',
                             fontWeight: 'bold',
-                            whiteSpace: 'nowrap',
-                            transition: '0.2s'
+                            whiteSpace: 'nowrap'
                         }}
                     >
                         {p}
@@ -179,39 +160,28 @@ export default function PlayerUpTab() {
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>⚡ Accessing SQL Database...</div>
             ) : filteredListings.length === 0 ? (
-                <div className="glass" style={{ padding: '6rem', textAlign: 'center', borderRadius: '24px', color: '#444', border: '1px dashed #222' }}>
+                <div className="glass" style={{ padding: '6rem', textAlign: 'center', borderRadius: '24px', color: '#444' }}>
                     No listings found for <b>{activeFilter}</b>.
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
                     {filteredListings.map(l => (
-                        <div key={l.id} className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid #1f2937', position: 'relative' }}>
-                            <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
-                                <img src={getPlatformIcon(l.platform)} style={{ width: '28px', height: '28px', borderRadius: '6px' }} alt={l.platform} />
+                        <div key={l.id} className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid #1f2937' }}>
+                            <div style={{ marginBottom: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.65rem', color: '#00c3ff', textTransform: 'uppercase', fontWeight: 'bold' }}>{l.platform}</div>
+                                    <h3 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', margin: '5px 0' }}>{l.title}</h3>
+                                </div>
+                                <img src={getPlatformIcon(l.platform)} style={{ width: '24px', height: '24px' }} alt="" />
                             </div>
 
-                            <div style={{ marginBottom: '1.2rem', paddingRight: '2rem' }}>
-                                <div style={{ fontSize: '0.65rem', color: '#00c3ff', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>{l.platform}</div>
-                                <h3 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem', lineHeight: '1.4' }}>{l.title}</h3>
-                                <a href={l.url} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', color: '#555', textDecoration: 'none' }}>Link: {l.url.substring(0, 40)}...</a>
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '1rem', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '0.8rem', borderRadius: '12px' }}>
                                 <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                    Last Sync Wave:<br />
-                                    <span style={{ color: l.lastBumped ? '#00ff88' : '#888' }}>
-                                        {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString() : 'Ready'}
-                                    </span>
+                                    Sync: {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString() : 'Ready'}
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => handleDelete(l.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
-                                    <button
-                                        onClick={() => handleBump(l)}
-                                        className="btn btn-primary"
-                                        style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#00c3ff', color: '#000' }}
-                                    >
-                                        BUMP
-                                    </button>
+                                    <button onClick={() => handleDelete(l.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer' }}>🗑️</button>
+                                    <button onClick={() => handleBump(l)} style={{ background: '#00c3ff', border: 'none', color: '#000', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 'bold' }}>BUMP</button>
                                 </div>
                             </div>
                         </div>
@@ -219,65 +189,53 @@ export default function PlayerUpTab() {
                 </div>
             )}
 
-            {showImport && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)' }}>
-                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', width: '700px', maxWidth: '95vw', border: '1px solid #00c3ff44' }}>
-                        <h3 style={{ marginBottom: '1rem', color: '#00c3ff', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span>✨</span> Power Mass Sync (19,000+ Mode)
-                        </h3>
+            {/* Turbo Sync Modal */}
+            {showTurbo && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(15px)' }}>
+                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', width: '600px', border: '1px solid #ff005544' }}>
+                        <h3 style={{ color: '#ff0055', marginBottom: '1rem' }}>⚡ Turbo Auto-Fetch (All Pages)</h3>
+                        <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            You have **19,000+** items. Forcing a server to scrape this would get your ID blocked by Cloudflare.
+                            Use this **Safe Browser Bridge** to fetch all data using your own verified browser.
+                        </p>
 
-                        <div style={{ background: '#00c3ff11', padding: '1rem', borderRadius: '16px', marginBottom: '1.5rem', border: '1px solid #00c3ff22' }}>
-                            <p style={{ fontSize: '0.85rem', color: '#fff', margin: 0, lineHeight: '1.6' }}>
-                                <b>Storefront Syncing:</b><br />
-                                1. Go to <a href="https://www.playerup.com/officialum1" target="_blank" style={{ color: '#00c3ff' }}>officialum1 Storefront</a>.<br />
-                                2. Select the whole table (Ctrl + A) and Copy (Ctrl + C).<br />
-                                3. Paste below. We auto-sort <b>Reddit, Snapchat, Google</b> etc. by the "Game" column!<br />
-                                <span style={{ color: '#00c3ff' }}>Tip: You can paste multiple pages one after another!</span>
-                            </p>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>PLAYERUP USERNAME</label>
+                            <input
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: '#000', border: '1px solid #333', color: '#fff' }}
+                            />
                         </div>
 
-                        <div
-                            id="magic-import-box"
-                            contentEditable={true}
-                            onInput={(e) => {
-                                const html = (e.target as HTMLDivElement).innerHTML;
-                                const links = [...html.matchAll(/href=["'][^"']+threads\/[^"']+["']/g)];
-                                setDraftCount(links.length);
-                            }}
-                            style={{
-                                width: '100%',
-                                height: '250px',
-                                padding: '1.5rem',
-                                borderRadius: '16px',
-                                background: '#000',
-                                border: '1px solid #333',
-                                color: '#00c3ff',
-                                fontFamily: 'monospace',
-                                marginBottom: '1.5rem',
-                                fontSize: '0.8rem',
-                                overflowY: 'auto'
-                            }}
-                        />
+                        <div style={{ background: 'rgba(255,0,85,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,0,85,0.1)', marginBottom: '2rem' }}>
+                            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#fff' }}>How to Auto-Sync:</h4>
+                            <ol style={{ fontSize: '0.8rem', color: '#ccc', paddingLeft: '1.2rem', margin: 0, lineHeight: '1.6' }}>
+                                <li>Click <b>Copy Turbo Script</b> below.</li>
+                                <li>Open your <a href={`https://www.playerup.com/${username}`} target="_blank" style={{ color: '#ff0055' }}>PlayerUp Profile</a>.</li>
+                                <li>Right-click anywhere -> <b>Inspect</b> -> Click <b>Console</b> tab.</li>
+                                <li>Paste (`Ctrl + V`) and press <b>Enter</b>.</li>
+                                <li>Watch it fetch 100s of pages and sync them here!</li>
+                            </ol>
+                        </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ fontSize: '0.8rem', color: '#888' }}>
-                                📑 Currently detected: <b style={{ color: '#00c3ff' }}>{draftCount}</b> listings in paste buffer.
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
-                                <button
-                                    onClick={handleBulkImport}
-                                    className="btn btn-primary"
-                                    style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}
-                                    disabled={loading || draftCount === 0}
-                                >
-                                    {loading ? 'SYNCING...' : '⚡ IMPORT TO DATABASE'}
-                                </button>
-                            </div>
+                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                            <button onClick={() => setShowTurbo(false)} className="btn btn-outline" style={{ borderColor: '#444' }}>Close</button>
+                            <button onClick={handleCopyScript} className="btn btn-primary" style={{ background: '#ff0055', color: '#fff', border: 'none' }}>
+                                📋 Copy Turbo Script
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            <style jsx>{\`
+                @keyframes pulse {
+                    0 % { box- shadow: 0 0 0 0 rgba(255, 0, 85, 0.4); }
+                70% {box - shadow: 0 0 0 15px rgba(255, 0, 85, 0); }
+                100% {box - shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
+                }
+            \`}</style>
         </div>
     );
 }

@@ -6,7 +6,6 @@ function detectPlatform(title: string, url: string) {
     const t = title.toLowerCase();
     const u = url.toLowerCase();
 
-    // Explicit PlayerUp Category Detection (Social Wise)
     if (t.includes('reddit') || u.includes('reddit')) return 'Reddit';
     if (t.includes('snapchat') || u.includes('snapchat') || t.includes('snap ') || u.includes('snap ')) return 'Snapchat';
     if (t.includes('instagram') || u.includes('instagram') || t.includes(' ig ')) return 'Instagram';
@@ -17,11 +16,8 @@ function detectPlatform(title: string, url: string) {
     if (t.includes('discord') || u.includes('discord')) return 'Discord';
     if (t.includes('telegram') || u.includes('telegram') || t.includes(' tg ')) return 'Telegram';
     if (t.includes('linkedin') || u.includes('linkedin')) return 'LinkedIn';
-
-    // Other categories seen in your screenshot
     if (t.includes('google') || t.includes('gmail')) return 'Google';
     if (t.includes('webhosting') || t.includes('hosting')) return 'Hosting';
-    if (t.includes('netflix') || t.includes('spotify') || t.includes('streaming')) return 'Streaming';
 
     return 'Social';
 }
@@ -41,24 +37,16 @@ export async function POST(req: Request) {
     try {
         await initDB();
         const body = await req.json();
-        const { action, listing, id, listings } = body;
+        const { action, id, listings, username } = body;
 
-        if (action === 'add') {
-            const newId = Date.now().toString();
-            const platform = detectPlatform(listing.title, listing.url);
-            await query(
-                "INSERT INTO playerup_listings (id, title, url, platform, lastBumped, createdAt) VALUES (?, ?, ?, ?, NULL, NOW())",
-                [newId, listing.title, listing.url, platform]
-            );
-        } else if (action === 'delete') {
-            await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
-        } else if (action === 'update_bump') {
-            await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [id]);
-        } else if (action === 'bulk_import') {
+        // NEW: Action for Turbo Sync to handle massive bursts
+        if (action === 'turbo_sync' || action === 'bulk_import') {
             if (Array.isArray(listings)) {
+                // Efficient Batching: Get all existing URLs in one go
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
                 const existingUrls = new Set(existingRows.map((r: any) => r.url));
 
+                // Buffer for bulk insert (if supported by query helper)
                 for (const item of listings) {
                     if (!existingUrls.has(item.url)) {
                         const newId = Date.now() + Math.random().toString(36).substr(2, 9);
@@ -70,7 +58,14 @@ export async function POST(req: Request) {
                         existingUrls.add(item.url);
                     }
                 }
+                return NextResponse.json({ success: true, count: listings.length });
             }
+        }
+
+        if (action === 'delete') {
+            await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
+        } else if (action === 'update_bump') {
+            await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [id]);
         }
 
         const data: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
