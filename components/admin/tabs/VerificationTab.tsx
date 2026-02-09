@@ -151,63 +151,57 @@ export default function VerificationTab() {
                     ))}
                 </div>
             )}
-        </div>
-    )
-}
-
-{/* Image Viewer Modal */ }
-{
-    viewImage && (
-        <div
-            style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 9999,
-                background: 'rgba(0,0,0,0.9)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-            }}
-            onClick={() => setViewImage(null)}
-        >
-            <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
-                <img
-                    src={viewImage}
-                    alt="Full View"
+            {/* Image Viewer Modal */}
+            {viewImage && (
+                <div
                     style={{
-                        maxWidth: '100%',
-                        maxHeight: '90vh',
-                        borderRadius: '8px',
-                        boxShadow: '0 0 50px rgba(0,0,0,0.5)',
-                        objectFit: 'contain'
-                    }}
-                />
-                <button
-                    onClick={() => setViewImage(null)}
-                    style={{
-                        position: 'absolute',
-                        top: '-40px',
-                        right: '-40px',
-                        background: 'white',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '40px',
-                        height: '40px',
-                        cursor: 'pointer',
-                        fontSize: '1.5rem',
-                        color: 'black',
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9999,
+                        background: 'rgba(0,0,0,0.9)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        cursor: 'pointer'
                     }}
+                    onClick={() => setViewImage(null)}
                 >
-                    ✕
-                </button>
-            </div>
+                    <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}>
+                        <img
+                            src={viewImage}
+                            alt="Full View"
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '90vh',
+                                borderRadius: '8px',
+                                boxShadow: '0 0 50px rgba(0,0,0,0.5)',
+                                objectFit: 'contain'
+                            }}
+                        />
+                        <button
+                            onClick={() => setViewImage(null)}
+                            style={{
+                                position: 'absolute',
+                                top: '-40px',
+                                right: '-40px',
+                                background: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '40px',
+                                height: '40px',
+                                cursor: 'pointer',
+                                fontSize: '1.5rem',
+                                color: 'black',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-    )
-}
-        </div >
     );
 }
