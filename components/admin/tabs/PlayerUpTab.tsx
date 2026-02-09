@@ -341,7 +341,7 @@ export default function PlayerUpTab() {
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                 <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline" disabled={loading}>Cancel</button>
                                 <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold', opacity: loading ? 0.5 : 1 }} disabled={loading}>
-                                    {loading ? 'Processing...' : 'Start Magic Sync'}
+                                    {loading ? 'Processing...' : '✨ Start Magic Sync'}
                                 </button>
                             </div>
                         </div>
