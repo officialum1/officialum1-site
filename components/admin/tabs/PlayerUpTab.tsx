@@ -16,7 +16,6 @@ export default function PlayerUpTab() {
     const [loading, setLoading] = useState(true);
     const [showAdd, setShowAdd] = useState(false);
     const [newListing, setNewListing] = useState({ title: '', url: '' });
-    const [importData, setImportData] = useState('');
     const [showImport, setShowImport] = useState(false);
 
     useEffect(() => {
@@ -82,9 +81,7 @@ export default function PlayerUpTab() {
             if (!bumpUrl.endsWith('/up')) {
                 // If it's a thread URL, append /up if it doesn't have it.
                 // Assuming standard PlayerUp structure, usually it's thread_url/up or similar action.
-                // However, user provided: ...threads/....6707365/up
                 // If the URL provided is the thread URL, we might need to construct the bump URL.
-                // If it already has /up, use it.
                 if (bumpUrl.endsWith('/')) bumpUrl += 'up';
                 else bumpUrl += '/up';
             }
@@ -107,14 +104,15 @@ export default function PlayerUpTab() {
     // MAGIC SYNC: Handle pasting rich text (HTML) to get links
     const handleBulkImport = async () => {
         const importBox = document.getElementById('magic-import-box');
-        if (!importBox) return;
+        if (!importBox) {
+            modernAlert("Error: Import box not found. Please refresh.");
+            return;
+        }
 
         const htmlContent = importBox.innerHTML;
-        const textContent = importBox.innerText; // Fallback text
+        const textContent = importBox.innerText;
 
         // Regex to match hrefs that point to threads
-        // Matches: href="threads/some-slug.12345/" or full URLs
-        // We look for both relative and absolute paths
         const linkRegex = /href=["'](https:\/\/www\.playerup\.com\/)?(threads\/[^"']+\.\d+\/?)["']/g;
         const matches = [...htmlContent.matchAll(linkRegex)];
 
@@ -122,10 +120,7 @@ export default function PlayerUpTab() {
         const uniqueUrls = new Set();
 
         matches.forEach(match => {
-            // match[2] is the part starting with threads/...
             let urlPath = match[2];
-
-            // Ensure we have a full URL
             if (!urlPath.startsWith('http')) {
                 urlPath = `https://www.playerup.com/${urlPath}`;
             }
@@ -133,8 +128,6 @@ export default function PlayerUpTab() {
             if (uniqueUrls.has(urlPath)) return;
             uniqueUrls.add(urlPath);
 
-            // Extract title from slug (heuristic)
-            // urlPath: .../threads/title-slug.12345/
             const slugMatch = urlPath.match(/threads\/([^\.]+)\./);
             let title = "PlayerUp Listing";
             if (slugMatch) {
@@ -142,20 +135,15 @@ export default function PlayerUpTab() {
                 title = title.replace(/\b\w/g, l => l.toUpperCase());
             }
 
-            parsedListings.push({
-                title: title,
-                url: urlPath
-            });
+            parsedListings.push({ title, url: urlPath });
         });
 
-        // Also fallback loop for plain text in case the user pasted raw URLs
+        // Fallback for plain text
         if (matches.length === 0) {
             const textRegex = /playerup\.com\/threads\/([^\s"']+)\/?/g;
             const textMatches = [...textContent.matchAll(textRegex)];
-
             textMatches.forEach(match => {
                 let tempUrl = `https://www.${match[0].replace('www.', '')}`;
-                // Clean potential trailing noise
                 const cleanUrl = tempUrl.split('"')[0].split("'")[0];
 
                 if (!uniqueUrls.has(cleanUrl)) {
@@ -172,9 +160,13 @@ export default function PlayerUpTab() {
             return;
         }
 
+        // Delay slightly to ensure UI is ready
+        await new Promise(r => setTimeout(r, 50));
+
         if (!(await modernConfirm(`🪄 Magic Sync found ${parsedListings.length} threads! Import them now?`))) return;
 
-        // Show loading state to user
+        // Show loading state
+        setLoading(true); // Disable buttons
         const originalContent = importBox.innerHTML;
         importBox.innerHTML = '<div style="color: #00c3ff; font-family: monospace; text-align: center; padding: 2rem;">⚡ Syncing with database... please wait...</div>';
 
@@ -188,16 +180,17 @@ export default function PlayerUpTab() {
             if (res.ok) {
                 const data = await res.json();
                 modernAlert(`✅ Sync Complete!`, `Successfully imported ${data.count} threads.`);
-                importBox.innerHTML = ''; // Clear
+                importBox.innerHTML = '';
                 setShowImport(false);
-                fetchListings();
+                fetchListings(); // This will reset loading=false eventually
             } else {
                 throw new Error("Server responded with error");
             }
         } catch (e) {
             console.error(e);
-            importBox.innerHTML = originalContent; // Restore content
+            importBox.innerHTML = originalContent;
             modernAlert("Import failed", "Something went wrong. Check console for details.");
+            setLoading(false); // Re-enable on error
         }
     };
 
@@ -346,8 +339,10 @@ export default function PlayerUpTab() {
                                 <span style={{ color: '#888' }}>Why no auto-login?</span> PlayerUp uses Cloudflare security which blocks server bots. <b>Magic Sync</b> is the safest way to import your data without getting blocked.
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                                <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline">Cancel</button>
-                                <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold' }}>Find Threads</button>
+                                <button type="button" onClick={() => setShowImport(false)} className="btn btn-outline" disabled={loading}>Cancel</button>
+                                <button type="button" onClick={handleBulkImport} className="btn btn-primary" style={{ background: '#00c3ff', color: '#000', fontWeight: 'bold', opacity: loading ? 0.5 : 1 }} disabled={loading}>
+                                    {loading ? 'Processing...' : 'Start Magic Sync'}
+                                </button>
                             </div>
                         </div>
                     </div>
