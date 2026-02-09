@@ -665,5 +665,16 @@ export async function initDB(force = false) {
     try { await query("CREATE INDEX idx_docs_number ON documents(document_number)"); } catch (e) { }
     try { await query("CREATE INDEX idx_docs_recipient ON documents(recipient_name)"); } catch (e) { }
 
+    // 20. PlayerUp Listings
+    await query(`
+        CREATE TABLE IF NOT EXISTS playerup_listings (
+            id VARCHAR(50) PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            url VARCHAR(255) UNIQUE NOT NULL,
+            lastBumped TIMESTAMP NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
     isInitialized = true;
 }

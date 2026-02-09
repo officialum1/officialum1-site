@@ -1,77 +1,58 @@
 
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'playerup.json');
-
-function getListings() {
-    if (!fs.existsSync(DATA_FILE)) {
-        return [];
-    }
-    const content = fs.readFileSync(DATA_FILE, 'utf-8');
-    try {
-        return JSON.parse(content);
-    } catch (e) {
-        return [];
-    }
-}
-
-function saveListings(listings: any[]) {
-    // Ensure data directory exists
-    const dir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(listings, null, 2));
-}
+import { query, initDB } from '@/lib/db';
 
 export async function GET() {
-    return NextResponse.json(getListings());
+    try {
+        await initDB(); // ensure table exists
+        const listings = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
+        return NextResponse.json(listings);
+    } catch (e) {
+        console.error(e);
+        return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });
+    }
 }
 
 export async function POST(req: Request) {
     try {
+        await initDB(); // ensure table exists
         const body = await req.json();
         const { action, listing, id, listings } = body;
-        let data = getListings();
 
         if (action === 'add') {
-            const newItem = {
-                id: Date.now().toString(),
-                ...listing,
-                lastBumped: null,
-                createdAt: new Date().toISOString()
-            };
-            data.unshift(newItem);
+            const newId = Date.now().toString();
+            await query(
+                "INSERT INTO playerup_listings (id, title, url, lastBumped, createdAt) VALUES (?, ?, ?, NULL, NOW())",
+                [newId, listing.title, listing.url]
+            );
         } else if (action === 'delete') {
-            data = data.filter((item: any) => item.id !== id);
+            await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
         } else if (action === 'update_bump') {
-            data = data.map((item: any) => {
-                if (item.id === id) {
-                    return { ...item, lastBumped: new Date().toISOString() };
-                }
-                return item;
-            });
+            await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [id]);
         } else if (action === 'bulk_import') {
-            // listing argument here is actually an array of items for bulk import
             if (Array.isArray(listings)) {
-                // simple deduplication by url if provided
-                const existingUrls = new Set(data.map((i: any) => i.url));
-                const newItems = listings.filter((l: any) => !existingUrls.has(l.url)).map((l: any) => ({
-                    id: Date.now() + Math.random().toString(36).substr(2, 9),
-                    ...l,
-                    lastBumped: null,
-                    createdAt: new Date().toISOString()
-                }));
-                data = [...newItems, ...data];
+                // Fetch existing URLs to avoid duplicates in this session
+                const existingRows: any = await query("SELECT url FROM playerup_listings");
+                const existingUrls = new Set(existingRows.map((r: any) => r.url));
+
+                for (const item of listings) {
+                    if (!existingUrls.has(item.url)) {
+                        const newId = Date.now() + Math.random().toString(36).substr(2, 9);
+                        // IGNORE duplicates for safety if multiple threads run
+                        await query(
+                            "INSERT IGNORE INTO playerup_listings (id, title, url, lastBumped, createdAt) VALUES (?, ?, ?, NULL, NOW())",
+                            [newId, item.title, item.url]
+                        );
+                        existingUrls.add(item.url);
+                    }
+                }
             }
         }
 
-        saveListings(data);
+        const data: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
         return NextResponse.json({ success: true, count: data.length, listings: data });
     } catch (e) {
-        console.error(e);
-        return NextResponse.json({ success: false, error: 'Failed to save listing' }, { status: 500 });
+        console.error("PlayerUp API Error:", e);
+        return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });
     }
 }
