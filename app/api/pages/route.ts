@@ -4,10 +4,17 @@ import { NextResponse } from 'next/server';
 
 const dataFilePath = path.join(process.cwd(), 'data', 'pages.json');
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const page = searchParams.get('page');
         const fileContents = await fs.readFile(dataFilePath, 'utf8');
         const data = JSON.parse(fileContents);
+
+        if (page && data[page]) {
+            return NextResponse.json({ content: data[page] });
+        }
+
         return NextResponse.json(data);
     } catch (error) {
         console.error("Error reading pages file:", error);

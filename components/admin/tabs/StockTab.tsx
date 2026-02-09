@@ -114,21 +114,41 @@ export default function StockTab({
                             if (inStock === 0) return null;
 
                             return (
-                                <div key={name} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 8px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                <div
+                                    key={name}
+                                    onClick={() => {
+                                        setSearchQuery(name);
+                                        setViewMode('list');
+                                    }}
+                                    className="glass stock-card"
+                                    style={{
+                                        padding: '1.5rem',
+                                        borderRadius: '16px',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        cursor: 'pointer',
+                                        transition: '0.3s'
+                                    }}
+                                >
+                                    <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 10px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
                                         ACTIVE
                                     </div>
                                     <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
                                     <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
 
-                                    <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px' }}>
-                                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#00ff88' }}>{inStock}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase' }}>Available Stock</div>
+                                    <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                        <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#00ff88', lineHeight: '1' }}>{inStock}</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '5px' }}>Check stock items</div>
+                                    </div>
+
+                                    <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#444' }}>
+                                        Click to divide & edit individual items
                                     </div>
                                 </div>
                             );
                         })}
-                        {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666' }}>No active stock found.</div>}
+                        {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666', gridColumn: 'span 3', textAlign: 'center', padding: '4rem' }}>No active stock found.</div>}
                     </div>
                 ) : (
                     <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
