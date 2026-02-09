@@ -175,7 +175,7 @@ export default function PlayerUpTab() {
         ? listings
         : listings.filter(l => l.platform === activeFilter);
 
-    const platforms = ['All', 'Instagram', 'TikTok', 'Facebook', 'Twitter', 'YouTube', 'Discord', 'Telegram', 'Social'];
+    const platforms = ['All', 'Reddit', 'Snapchat', 'Instagram', 'TikTok', 'Facebook', 'Twitter', 'YouTube', 'Discord', 'Telegram', 'Social'];
 
     return (
         <div className="FadeIn">
