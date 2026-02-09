@@ -114,7 +114,7 @@ function ModernLayout(content: string, type: 'success' | 'alert' | 'info' | 'aut
     `;
 }
 
-export async function sendVerificationEmail(to: string, link: string) {
+export async function sendVerificationEmail(to: string, link: string, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <div style="font-size: 50px; margin-bottom: 20px;">🎒</div>
@@ -126,7 +126,7 @@ export async function sendVerificationEmail(to: string, link: string) {
     return await sendEmail({ to, subject: "Action Required: Verify your Account", html: ModernLayout(content, 'info') });
 }
 
-export async function sendAuditReport(to: string, subject: string, data: any) {
+export async function sendAuditReport(to: string, subject: string, data: any, settings?: any) {
     const content = `
         <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin-bottom: 10px; text-align: center;">Order Fulfilled 🚀</h1>
         <div style="background: #161b22; border: 1px solid #1f2937; border-radius: 20px; padding: 25px; margin-bottom: 30px;">
@@ -140,7 +140,7 @@ export async function sendAuditReport(to: string, subject: string, data: any) {
     return await sendEmail({ to, subject: `Delivery: Access for ${data.pa || 'your order'}`, html: ModernLayout(content, 'success') });
 }
 
-export async function sendPasswordResetEmail(to: string, link: string) {
+export async function sendPasswordResetEmail(to: string, link: string, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <div style="font-size: 50px; margin-bottom: 20px;">🔐</div>
@@ -152,7 +152,7 @@ export async function sendPasswordResetEmail(to: string, link: string) {
     return await sendEmail({ to, subject: "Security Alert: Reset Your Password", html: ModernLayout(content, 'alert') });
 }
 
-export async function sendDepositEmail(to: string, amount: number, method: string) {
+export async function sendDepositEmail(to: string, amount: number, method: string, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <div style="font-size: 50px; margin-bottom: 20px;">💰</div>
@@ -167,7 +167,7 @@ export async function sendDepositEmail(to: string, amount: number, method: strin
     return await sendEmail({ to, subject: `Deposit Confirmed: $${amount.toFixed(2)} credited`, html: ModernLayout(content, 'success') });
 }
 
-export async function sendTicketReplyEmail(to: string, ticketSubject: string, message: string) {
+export async function sendTicketReplyEmail(to: string, ticketSubject: string, message: string, settings?: any) {
     const content = `
         <h2 style="color: #ffffff; font-size: 24px; font-weight: 800;">Support Update</h2>
         <p style="color: #4b5563; font-size: 14px; margin-bottom: 20px;">Subject: <span style="color: #ff4444;">${ticketSubject}</span></p>
@@ -178,7 +178,7 @@ export async function sendTicketReplyEmail(to: string, ticketSubject: string, me
     return await sendEmail({ to, subject: `New Support Reply: ${ticketSubject}`, html: ModernLayout(content, 'info') });
 }
 
-export async function sendRestockEmail(to: string, product: any, productUrl: string) {
+export async function sendRestockEmail(to: string, product: any, productUrl: string, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <h1 style="color: #ffffff; font-size: 28px; font-weight: 800;">Back in Stock!</h1>
@@ -193,7 +193,7 @@ export async function sendRestockEmail(to: string, product: any, productUrl: str
     return await sendEmail({ to, subject: `Back in Stock: ${product.name}`, html: ModernLayout(content, 'success') });
 }
 
-export async function sendReferralBonusEmail(to: string, amount: number) {
+export async function sendReferralBonusEmail(to: string, amount: number, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <div style="font-size: 50px; margin-bottom: 20px;">🎁</div>
@@ -206,7 +206,7 @@ export async function sendReferralBonusEmail(to: string, amount: number) {
     return await sendEmail({ to, subject: `Referral Bonus Earned!`, html: ModernLayout(content, 'success') });
 }
 
-export async function sendOrderReceivedEmail(to: string, itemName: string, orderId: string) {
+export async function sendOrderReceivedEmail(to: string, itemName: string, orderId: string, settings?: any) {
     const content = `
         <div style="text-align: center;">
             <h1 style="color: #ffffff; font-size: 28px; font-weight: 800;">Order Received</h1>
@@ -221,7 +221,7 @@ export async function sendOrderReceivedEmail(to: string, itemName: string, order
     return await sendEmail({ to, subject: `Received: Order #${orderId}`, html: ModernLayout(content, 'info') });
 }
 
-export async function sendVerificationStatusEmail(to: string, status: 'approved' | 'rejected', reason?: string) {
+export async function sendVerificationStatusEmail(to: string, status: 'approved' | 'rejected', reason?: string, settings?: any) {
     const isApproved = status === 'approved';
     const content = `
         <div style="text-align: center;">
@@ -245,4 +245,3 @@ export async function sendVerificationStatusEmail(to: string, status: 'approved'
         html: ModernLayout(content, isApproved ? 'success' : 'alert')
     });
 }
-

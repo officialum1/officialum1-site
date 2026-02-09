@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { sendEmail, sendVerificationEmail } from '@/lib/email';
+import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from '@/lib/email';
 import crypto from 'crypto';
 
 export async function GET(req: Request) {
