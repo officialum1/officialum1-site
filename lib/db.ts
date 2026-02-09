@@ -671,10 +671,14 @@ export async function initDB(force = false) {
             id VARCHAR(50) PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
             url VARCHAR(255) UNIQUE NOT NULL,
+            platform VARCHAR(50) DEFAULT 'Other',
             lastBumped TIMESTAMP NULL,
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    // Migration: Add platform column if missing
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN platform VARCHAR(50) DEFAULT 'Other'"); } catch (e) { }
 
     isInitialized = true;
 }
