@@ -1008,6 +1008,27 @@ function AdminDashboard() {
         }
     };
 
+    const handleReplaceItem = async (itemId: string) => {
+        if (!confirm('Are you sure you want to REPLACE this specific item? It will be marked as DEFECTIVE and a new one will be assigned to the delivery.')) return;
+
+        try {
+            const res = await fetch('/api/admin/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'replace_item', itemId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Item replaced successfully! Customer delivery link has been updated with the new credentials.');
+                fetchData();
+            } else {
+                alert('❌ Replacement failed: ' + (data.error || 'Check stock/logs'));
+            }
+        } catch (e) {
+            alert('❌ Network error');
+        }
+    };
+
     const handleCreateBundle = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -1673,6 +1694,7 @@ function AdminDashboard() {
                             handleBulkImport={handleBulkImport}
                             searchQuery={searchQuery}
                             setSearchQuery={setSearchQuery}
+                            handleReplaceItem={handleReplaceItem}
                         />
                     )}
 

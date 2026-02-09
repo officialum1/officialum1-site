@@ -16,6 +16,7 @@ interface StockTabProps {
     handleBulkImport: (e?: any) => Promise<void>;
     searchQuery: string;
     setSearchQuery: (q: string) => void;
+    handleReplaceItem?: (id: string) => Promise<void>;
 }
 
 export default function StockTab({
@@ -33,7 +34,8 @@ export default function StockTab({
     handleAddInventory,
     handleBulkImport,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    handleReplaceItem
 }: StockTabProps) {
     const filteredInventory = inventory.filter(i => {
         const q = searchQuery.toLowerCase();
@@ -74,8 +76,26 @@ export default function StockTab({
                     </div>
                 </div>
 
-                {/* STOCK VIEW TOGGLE */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+                {/* STOCK VIEW TOGGLE & STATUS FILTER */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {['In Stock', 'Sold', 'Defective'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setSearchQuery(status === 'In Stock' ? '' : status)} // Quick filter hack or better use a real state
+                                className="btn"
+                                style={{
+                                    padding: '6px 15px',
+                                    fontSize: '0.8rem',
+                                    background: searchQuery === status ? '#00ff88' : 'rgba(255,255,255,0.05)',
+                                    color: searchQuery === status ? '#000' : '#888',
+                                    border: '1px solid #333'
+                                }}
+                            >
+                                {status}
+                            </button>
+                        ))}
+                    </div>
                     <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
                         <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
                         <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
@@ -119,10 +139,11 @@ export default function StockTab({
                                     <th style={{ padding: '1rem', textAlign: 'left' }}>Platform</th>
                                     <th style={{ padding: '1rem', textAlign: 'left' }}>Asset Value</th>
                                     <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
+                                    <th style={{ padding: '1rem', textAlign: 'right' }}>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredInventory.filter(i => i.status === 'In Stock').map((item: any) => (
+                                {filteredInventory.map((item: any) => (
                                     <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '1rem' }}>
                                             <div>{item.name}</div>
@@ -130,10 +151,35 @@ export default function StockTab({
                                         </td>
                                         <td style={{ padding: '1rem' }}>{item.platform}</td>
                                         <td style={{ padding: '1rem', color: '#ccc' }}>{item.purchasePrice ? `$${item.purchasePrice}` : '***'}</td>
-                                        <td style={{ padding: '1rem' }}><span style={{ color: '#00ff88' }}>In Stock</span></td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{
+                                                color: item.status === 'In Stock' ? '#00ff88' : (item.status === 'Sold' ? '#ffa500' : '#ff4444'),
+                                                fontSize: '0.8rem',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {item.status}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                            {item.status === 'Sold' && (
+                                                <button
+                                                    onClick={() => handleReplaceItem && handleReplaceItem(item.id)}
+                                                    className="btn"
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        fontSize: '0.75rem',
+                                                        background: 'rgba(255,165,0,0.1)',
+                                                        border: '1px solid #ffa500',
+                                                        color: '#ffa500'
+                                                    }}
+                                                >
+                                                    🔄 Replace
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
-                                {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items found.</td></tr>}
+                                {filteredInventory.length === 0 && <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No items found.</td></tr>}
                             </tbody>
                         </table>
                     </div>

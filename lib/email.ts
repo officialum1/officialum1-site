@@ -19,9 +19,9 @@ export async function sendEmail({ to, subject, text, html }: EmailOptions, throw
     }
 
     // Hardcoded Defaults (Titan Email)
-    const defaultHost = 'smtp.titan.email';
+    const defaultHost = 'smtp.hostinger.com';
     const defaultUser = 'no-reply@officialum1.com';
-    const defaultPass = '4f_89yv@.3AWfBP';
+    const defaultPass = ')Nn+z6X=edr9deL';
 
     // Prioritize DB settings, fallback to defaults
     const smtpHost = settings.smtpHost || defaultHost;

@@ -119,6 +119,8 @@ export async function initDB(force = false) {
     try { await query("ALTER TABLE orders ADD COLUMN quantity INT DEFAULT 1"); } catch (e) { }
     try { await query("ALTER TABLE orders ADD COLUMN delivery_info TEXT"); } catch (e) { }
     try { await query("ALTER TABLE orders ADD COLUMN delivery_status VARCHAR(50) DEFAULT 'pending'"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN delivery_details TEXT"); } catch (e) { }
+    try { await query("ALTER TABLE orders ADD COLUMN fulfilled_by VARCHAR(50)"); } catch (e) { }
 
     // Tickets Table
     await query(`
@@ -243,6 +245,17 @@ export async function initDB(force = false) {
             processedBy VARCHAR(100),
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             inventoryId VARCHAR(50)
+        )
+    `);
+
+    // Activity Logs (Internal Audit Trail)
+    await query(`
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id VARCHAR(50) PRIMARY KEY,
+            user VARCHAR(100),
+            action VARCHAR(100),
+            details TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
