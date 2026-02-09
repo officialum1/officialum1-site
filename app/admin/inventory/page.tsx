@@ -29,6 +29,7 @@ const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGe
 const ReviewsTab = dynamic(() => import('@/components/admin/tabs/ReviewsTab'), { ssr: false });
 const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'), { ssr: false });
 const VerificationTab = dynamic(() => import('@/components/admin/tabs/VerificationTab'), { ssr: false });
+const SellersTab = dynamic(() => import('@/components/admin/tabs/SellersTab'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -520,6 +521,10 @@ function AdminDashboard() {
                 case 'users':
                     const usersRes = await fetch('/api/admin/users');
                     setUsers(await safeData(usersRes));
+                    break;
+                case 'sellers':
+                    const allUsersRes = await fetch('/api/admin/users');
+                    setUsers(await safeData(allUsersRes));
                     break;
                 case 'promos':
                 case 'marketing':
@@ -1557,6 +1562,7 @@ function AdminDashboard() {
                                     { id: 'sell', label: '💸 Sales', perm: 'sales' },
                                     { id: 'leads', label: '👥 Leads', perm: 'leads' },
                                     { id: 'users', label: '👤 Buyers', perm: 'users' },
+                                    { id: 'sellers', label: '🛍️ Sellers', perm: 'users' },
                                     { id: 'verifications', label: '🛡️ Verifications', perm: 'users' },
                                     { id: 'support', label: '🎫 Support', perm: 'support' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
@@ -1913,11 +1919,19 @@ function AdminDashboard() {
                             setUserForm={setUserForm}
                             showUserEdit={showUserEdit}
                             setShowUserEdit={setShowUserEdit}
-                            handleUpdateUser={handleUpdateUser}
+                            handleUpdateUser={handleUpdateUser} // Pass the function prop
                             handleResendUserEmail={handleResendUserEmail}
                             fetchData={fetchData}
                         />
                     )}
+
+                    {activeTab === 'sellers' && (
+                        <SellersTab
+                            users={users}
+                            fetchData={fetchData}
+                        />
+                    )}
+
                     {/* SUPPORT TAB */}
                     {activeTab === 'support' && (
                         <SupportTab
