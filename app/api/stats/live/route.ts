@@ -9,12 +9,14 @@ export async function GET() {
         const [testiCount] = await query("SELECT COUNT(*) as count FROM testimonials WHERE approved = 1") as any[];
         const [userCount] = await query("SELECT COUNT(*) as count FROM users") as any[];
         const [kbViews] = await query("SELECT SUM(views) as total FROM knowledge_base") as any[];
+        const [productCount] = await query("SELECT COUNT(*) as count FROM products") as any[];
 
         // 2. Define High-Traffic Offsets (to match user's latest 3.6k+ request)
         const baseOrders = 3600;
         const baseReviews = 3675;
         const baseProjects = 250;
         const baseUptime = 4.9;
+        const baseProducts = 10000;
 
         // 3. Get Latest Activity Feed
         const latestOrders = await query(`
@@ -37,7 +39,8 @@ export async function GET() {
                 projects: (orderCount?.count || 0) + baseProjects,
                 satisfaction: Number((4.85 + (Math.random() * 0.1)).toFixed(2)),
                 activeUsers: (userCount?.count || 0) + 142 + Math.floor(Math.random() * 10),
-                kbEngagement: (kbViews?.total || 0) + 12000
+                kbEngagement: (kbViews?.total || 0) + 12000,
+                marketAssets: (productCount?.count || 0) + baseProducts
             },
             feed: {
                 latestOrders,

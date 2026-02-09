@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 
 interface LiveCountProps {
-    metric: 'orders' | 'reviews' | 'projects' | 'satisfaction' | 'activeUsers' | 'kbEngagement';
+    metric: 'orders' | 'reviews' | 'projects' | 'satisfaction' | 'activeUsers' | 'kbEngagement' | 'marketAssets';
     suffix?: string;
     prefix?: string;
     decimals?: number;
@@ -19,7 +19,8 @@ export default function LiveCount({ metric, suffix = "", prefix = "", decimals =
         projects: 250,
         satisfaction: 4.88,
         activeUsers: 142,
-        kbEngagement: 12000
+        kbEngagement: 12000,
+        marketAssets: 10000
     };
 
     const [count, setCount] = useState<number>(baseValues[metric] || 0);

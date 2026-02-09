@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import LiveCount from '@/components/LiveCount';
 
 const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -11,6 +12,8 @@ const fadeIn = {
 };
 
 export default function AboutPage() {
+    // Removed manual stats state/effect
+
     return (
         <main style={{ background: '#030305', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
             <Navbar />
@@ -71,24 +74,59 @@ export default function AboutPage() {
                         border: '1px solid rgba(255,255,255,0.05)',
                         backdropFilter: 'blur(10px)'
                     }}>
-                        {[
-                            { label: 'Market Assets', value: '10k+' },
-                            { label: 'Active Users', value: '5,000+' },
-                            { label: 'Orders Fulfilled', value: '25k+' },
-                            { label: 'Success Rate', value: '99.9%' }
-                        ].map((stat, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: i * 0.1 }}
-                                viewport={{ once: true }}
-                                style={{ textAlign: 'center' }}
-                            >
-                                <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>{stat.value}</div>
-                                <div style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: '600' }}>{stat.label}</div>
-                            </motion.div>
-                        ))}
+                        {/* Market Assets */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0 }}
+                            viewport={{ once: true }}
+                            style={{ textAlign: 'center' }}
+                        >
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                                <LiveCount metric="marketAssets" suffix="+" short={true} />
+                            </div>
+                            <div style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: '600' }}>Market Assets</div>
+                        </motion.div>
+
+                        {/* Active Users */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.1 }}
+                            viewport={{ once: true }}
+                            style={{ textAlign: 'center' }}
+                        >
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                                <LiveCount metric="activeUsers" suffix="+" short={true} />
+                            </div>
+                            <div style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: '600' }}>Active Users</div>
+                        </motion.div>
+
+                        {/* Orders Fulfilled */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                            viewport={{ once: true }}
+                            style={{ textAlign: 'center' }}
+                        >
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                                <LiveCount metric="orders" suffix="+" short={true} />
+                            </div>
+                            <div style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: '600' }}>Orders Fulfilled</div>
+                        </motion.div>
+
+                        {/* Success Rate */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.3 }}
+                            viewport={{ once: true }}
+                            style={{ textAlign: 'center' }}
+                        >
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>99.9%</div>
+                            <div style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', fontWeight: '600' }}>Success Rate</div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
