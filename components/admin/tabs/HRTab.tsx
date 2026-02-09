@@ -88,6 +88,7 @@ export default function HRTab({
                                     { id: 'finance', label: '💰 Finance' },
                                     { id: 'leads', label: '👥 Leads' },
                                     { id: 'users', label: '👤 Buyers' },
+                                    { id: 'playerup', label: '🆙 PlayerUp' },
                                     { id: 'support', label: '🎫 Support' },
                                     { id: 'marketing', label: '📢 Marketing' },
                                     { id: 'tools', label: '🛠️ Tools' },

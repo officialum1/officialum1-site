@@ -1529,7 +1529,7 @@ function AdminDashboard() {
                                     { id: 'orders', label: '📦 Orders', perm: 'orders' },
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
                                     { id: 'g2g_hub', label: '🎮 G2G Center', perm: 'orders', onClick: () => router.push('/admin/g2g') },
-                                    { id: 'playerup', label: '🆙 PlayerUp', perm: 'inventory' },
+                                    { id: 'playerup', label: '🆙 PlayerUp', perm: 'playerup' },
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
                                     <button
