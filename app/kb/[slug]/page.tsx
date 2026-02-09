@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
