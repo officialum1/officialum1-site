@@ -30,6 +30,7 @@ const ReviewsTab = dynamic(() => import('@/components/admin/tabs/ReviewsTab'), {
 const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'), { ssr: false });
 const VerificationTab = dynamic(() => import('@/components/admin/tabs/VerificationTab'), { ssr: false });
 const SellersTab = dynamic(() => import('@/components/admin/tabs/SellersTab'), { ssr: false });
+const PlayerUpTab = dynamic(() => import('@/components/admin/tabs/PlayerUpTab'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -1528,6 +1529,7 @@ function AdminDashboard() {
                                     { id: 'orders', label: '📦 Orders', perm: 'orders' },
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
                                     { id: 'g2g_hub', label: '🎮 G2G Center', perm: 'orders', onClick: () => router.push('/admin/g2g') },
+                                    { id: 'playerup', label: '🆙 PlayerUp', perm: 'inventory' },
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
                                     <button
@@ -1811,6 +1813,11 @@ function AdminDashboard() {
                             setOfferForm={setOfferForm}
                             trackedG2GOffers={trackedG2GOffers}
                         />
+                    )}
+
+                    {/* PLAYERUP TAB */}
+                    {activeTab === 'playerup' && (
+                        <PlayerUpTab />
                     )}
 
                     {/* FINANCE TAB (was Sales) */}
