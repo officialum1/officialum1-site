@@ -181,7 +181,7 @@ export default function AboutPage() {
                                 <p style={{ fontStyle: 'italic', color: '#e2e8f0', margin: 0 }}>
                                     "OfficialUM1 isn't just an agency; it's a commitment to excellence. We don't just reach goals; we redefine them."
                                 </p>
-                                <div style={{ marginTop: '1rem', fontWeight: 'bold' }}>— Muhammad Umar Mumtaz</div>
+                                <div style={{ marginTop: '1rem', fontWeight: 'bold' }}>&mdash; Muhammad Umar Mumtaz</div>
                                 <div style={{ fontSize: '0.8rem', color: '#ff4444' }}>Founder & CEO</div>
                             </div>
                         </motion.div>

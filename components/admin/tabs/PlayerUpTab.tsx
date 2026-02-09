@@ -233,8 +233,8 @@ export default function PlayerUpTab() {
                             <ol style={{ fontSize: '0.8rem', color: '#ccc', paddingLeft: '1.2rem', margin: 0, lineHeight: '1.7' }}>
                                 <li>Click <b>Copy Turbo Script</b> below.</li>
                                 <li>Open your <a href={`https://www.playerup.com/${username}`} target="_blank" style={{ color: '#ff0055', fontWeight: 'bold' }}>PlayerUp Profile</a>.</li>
-                                <li>Right-click -> <b>Inspect</b> -> Click <b>Console</b>.</li>
-                                <li>Paste (`Ctrl + V`) and press <b>Enter</b>.</li>
+                                <li>Right-click &rarr; <b>Inspect</b> &rarr; Click <b>Console</b>.</li>
+                                <li>Paste (Ctrl + V) and press <b>Enter</b>.</li>
                                 <li>Watch it turns pages automatically and sync everything here!</li>
                             </ol>
                         </div>
@@ -249,17 +249,6 @@ export default function PlayerUpTab() {
                 </div>
             )}
 
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @keyframes pulse-pink {
-                    0% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.4); }
-                    70% { box-shadow: 0 0 0 15px rgba(255, 0, 85, 0); }
-                    100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
-                }
-                .pulse-btn {
-                    animation: pulse-pink 2s infinite;
-                }
-            ` }} />
         </div>
     );
 }
