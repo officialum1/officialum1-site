@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, initDB } from '@/lib/db';
 
 export async function POST(req: Request) {
     try {
+        await initDB();
         const { userId, type, documentImage, selfieImage } = await req.json();
 
         if (!userId) {

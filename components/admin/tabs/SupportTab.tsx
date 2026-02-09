@@ -9,6 +9,7 @@ interface SupportTabProps {
     replyMsg: string;
     setReplyMsg: (msg: string) => void;
     handleReplyTicket: (id: number) => Promise<void>;
+    handleCloseTicket: (id: number) => Promise<void>;
 }
 
 export default function SupportTab({
@@ -17,7 +18,8 @@ export default function SupportTab({
     setActiveTicketId,
     replyMsg,
     setReplyMsg,
-    handleReplyTicket
+    handleReplyTicket,
+    handleCloseTicket
 }: SupportTabProps) {
     const [filter, setFilter] = useState<'all' | 'open' | 'closed'>('all');
 
@@ -129,7 +131,18 @@ export default function SupportTab({
                                 <h3 style={{ margin: 0, color: '#fff' }}>{activeTicket.subject}</h3>
                                 <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.3rem' }}>Ticket #{activeTicket.id} • {activeTicket.email}</div>
                             </div>
-                            <button onClick={() => setActiveTicketId(null)} style={{ background: 'none', border: 'none', color: '#666', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                {activeTicket.status === 'open' && (
+                                    <button
+                                        onClick={() => handleCloseTicket(activeTicket.id)}
+                                        className="btn btn-outline"
+                                        style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', color: '#ff4444', borderColor: '#ff444433' }}
+                                    >
+                                        Close Ticket
+                                    </button>
+                                )}
+                                <button onClick={() => setActiveTicketId(null)} style={{ background: 'none', border: 'none', color: '#666', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                            </div>
                         </div>
 
                         {/* Chat Area */}

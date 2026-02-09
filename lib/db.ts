@@ -621,14 +621,20 @@ export async function initDB(force = false) {
             user_id VARCHAR(50) NOT NULL,
             type VARCHAR(50) DEFAULT 'identity',
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-            document_image TEXT,
-            selfie_image TEXT,
+            document_image LONGTEXT,
+            selfie_image LONGTEXT,
             notes TEXT,
+            rejection_reason TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `);
+
+    // Migration: Update to LONGTEXT for Base64 Image Storage
+    try { await query("ALTER TABLE verification_requests MODIFY COLUMN document_image LONGTEXT"); } catch (e) { }
+    try { await query("ALTER TABLE verification_requests MODIFY COLUMN selfie_image LONGTEXT"); } catch (e) { }
+    try { await query("ALTER TABLE verification_requests ADD COLUMN rejection_reason TEXT"); } catch (e) { }
 
     // 19. Official Documents Archive
     await query(`

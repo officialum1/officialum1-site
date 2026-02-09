@@ -735,6 +735,19 @@ function AdminDashboard() {
         } catch { modernAlert('Failed to send reply'); }
     };
 
+    const handleCloseTicket = async (ticketId: number) => {
+        if (!(await modernConfirm('Are you sure you want to close this ticket?'))) return;
+        try {
+            await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'close', ticketId })
+            });
+            modernAlert('Ticket Closed');
+            fetchData();
+        } catch { modernAlert('Failed to close ticket'); }
+    };
+
     const handleUpdateAdminProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
@@ -1914,6 +1927,7 @@ function AdminDashboard() {
                             replyMsg={replyMsg}
                             setReplyMsg={setReplyMsg}
                             handleReplyTicket={handleReplyTicket}
+                            handleCloseTicket={handleCloseTicket}
                         />
                     )}
                     {activeTab === 'verifications' && (

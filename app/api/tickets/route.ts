@@ -61,6 +61,10 @@ export async function POST(req: Request) {
             }
 
             return NextResponse.json({ success: true });
+        } else if (body.action === 'close') {
+            const { ticketId } = body;
+            await query("UPDATE tickets SET status = 'closed' WHERE id = ?", [ticketId]);
+            return NextResponse.json({ success: true });
         } else {
             // Create New Ticket
             const { userId, subject, message, attachment, email } = body;
