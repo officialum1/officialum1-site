@@ -595,6 +595,11 @@ export async function initDB(force = false) {
     try { await query("CREATE INDEX idx_products_type ON products(type)"); } catch (e) { }
     try { await query("CREATE INDEX idx_products_stock ON products(stock)"); } catch (e) { }
 
+    // Seller System Migrations
+    try { await query("ALTER TABLE products ADD COLUMN user_id VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE products ADD COLUMN status VARCHAR(50) DEFAULT 'active'"); } catch (e) { }
+    try { await query("CREATE INDEX idx_products_user ON products(user_id)"); } catch (e) { }
+
     // Leads table indexes
     try { await query("CREATE INDEX idx_leads_status ON leads(status)"); } catch (e) { }
     try { await query("CREATE INDEX idx_leads_platform ON leads(platform)"); } catch (e) { }

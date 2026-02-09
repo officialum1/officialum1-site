@@ -20,19 +20,23 @@ export async function GET(request: Request) {
 
         const notifications = await query("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5", [userId || email]);
 
+        let verification = { status: 'none' };
         let wallet = { balance: 0, affiliate_earnings: 0 };
         if (userId) {
-            const userRows: any = await query("SELECT wallet_balance, total_affiliate_earnings FROM users WHERE id = ?", [userId]);
+            const userRows: any = await query("SELECT wallet_balance, total_affiliate_earnings, is_verified FROM users WHERE id = ?", [userId]);
             if (userRows.length > 0) {
                 wallet.balance = parseFloat(userRows[0].wallet_balance || 0);
                 wallet.affiliate_earnings = parseFloat(userRows[0].total_affiliate_earnings || 0);
-            }
-        }
 
-        let verification = { status: 'none' };
-        if (userId) {
-            const verifRows: any = await query("SELECT status FROM verification_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", [userId]);
-            if (verifRows.length > 0) verification.status = verifRows[0].status;
+                // Prioritize the actual user table status
+                if (userRows[0].is_verified) {
+                    verification.status = 'approved';
+                } else {
+                    // Fallback to latest request status if user table says false (e.g. pending)
+                    const verifRows: any = await query("SELECT status FROM verification_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1", [userId]);
+                    if (verifRows.length > 0) verification.status = verifRows[0].status;
+                }
+            }
         }
 
         return NextResponse.json({ orders, notifications, wallet, verification });

@@ -82,6 +82,14 @@ export default function ClientDashboard() {
                         Welcome back, <span className="text-gradient" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 136, 0.2))' }}>{user.email.split('@')[0]}</span>
                     </h1>
                     <p style={{ color: '#888', fontSize: '1.1rem' }}>Manage your digital assets, track deliveries, and top up your wallet.</p>
+
+                    {(user.role === 'seller' || user.role === 'admin') && (
+                        <div style={{ marginTop: '20px' }}>
+                            <Link href="/dashboard/seller" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '10px 20px', borderRadius: '12px', border: '1px solid #ffd700', color: '#ffd700', textDecoration: 'none', background: 'rgba(255, 215, 0, 0.05)' }}>
+                                <span>🛍️</span> Switch to Seller Dashboard
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Quick Stats Grid */}
