@@ -90,9 +90,12 @@ export default function VerificationTab() {
 
                                 {/* User Info */}
                                 <div>
-                                    <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>Buyer</div>
+                                    <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>
+                                        Trust Identity - {req.user_tier || 'Bronze'}
+                                    </div>
                                     <div style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', margin: '5px 0' }}>{req.user_email}</div>
-                                    <div style={{ fontSize: '0.8rem', color: '#444' }}>Submitted: {new Date(req.created_at).toLocaleString()}</div>
+                                    {req.user_username && <div style={{ fontSize: '0.9rem', color: '#888' }}>@{req.user_username}</div>}
+                                    <div style={{ fontSize: '0.8rem', color: '#444', marginTop: '5px' }}>Submitted: {new Date(req.created_at).toLocaleString()}</div>
                                     <div style={{ marginTop: '10px' }}>
                                         <span style={{
                                             padding: '4px 10px',
@@ -102,7 +105,7 @@ export default function VerificationTab() {
                                             background: req.status === 'approved' ? 'rgba(0,255,136,0.1)' : (req.status === 'pending' ? 'rgba(255,215,0,0.1)' : 'rgba(255,68,68,0.1)'),
                                             color: req.status === 'approved' ? '#00ff88' : (req.status === 'pending' ? '#ffd700' : '#ff4444')
                                         }}>
-                                            {req.status.toUpperCase()}
+                                            {req.status === 'pending' ? 'UNDER REVIEW' : req.status.toUpperCase()}
                                         </span>
                                     </div>
                                 </div>

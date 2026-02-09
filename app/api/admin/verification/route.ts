@@ -5,9 +5,11 @@ import { sendVerificationStatusEmail } from '@/lib/email';
 export async function GET(req: Request) {
     try {
         const requests = await query(`
-            SELECT 
-                vr.*, 
-                u.email as user_email
+            SELECT
+                vr.*,
+                u.email as user_email,
+                u.username as user_username,
+                u.tier as user_tier
             FROM verification_requests vr
             JOIN users u ON vr.user_id = u.id
             ORDER BY vr.created_at DESC
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
 
         // Add notification for user
         const title = status === 'approved' ? "Identity Verified! 🎉" : "Verification Declined ❌";
-        const message = status === 'approved' ? "Your identity documents have been approved. Welcome to the Verified Pro program." : `Your verification was declined. Reason: ${reason}`;
+        const message = status === 'approved' ? "Your identity documents have been approved. Welcome to the Verified Pro program." : `Your verification was declined.Reason: ${reason} `;
 
         await query("INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)", [userId, title, message]);
 
