@@ -18,7 +18,7 @@ export default function LiveCount({ metric, suffix = "", prefix = "", decimals =
         reviews: 3675,
         projects: 250,
         satisfaction: 4.88,
-        activeUsers: 142,
+        activeUsers: 2500,
         kbEngagement: 12000,
         marketAssets: 10000
     };

@@ -17,6 +17,7 @@ export async function GET() {
         const baseProjects = 250;
         const baseUptime = 4.9;
         const baseProducts = 10000;
+        const baseUsers = 2500;
 
         // 3. Get Latest Activity Feed
         const latestOrders = await query(`
@@ -38,7 +39,7 @@ export async function GET() {
                 reviews: (reviewCount?.count || 0) + (testiCount?.count || 0) + baseReviews,
                 projects: (orderCount?.count || 0) + baseProjects,
                 satisfaction: Number((4.85 + (Math.random() * 0.1)).toFixed(2)),
-                activeUsers: (userCount?.count || 0) + 142 + Math.floor(Math.random() * 10),
+                activeUsers: (userCount?.count || 0) + baseUsers + Math.floor(Math.random() * 10),
                 kbEngagement: (kbViews?.total || 0) + 12000,
                 marketAssets: (productCount?.count || 0) + baseProducts
             },
