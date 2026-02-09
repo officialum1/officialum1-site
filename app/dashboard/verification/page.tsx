@@ -44,8 +44,8 @@ export default function VerificationPage() {
         if (!file) return;
 
         // Basic client side validation
-        if (file.size > 10 * 1024 * 1024) {
-            toast.error("File size too large (Max 10MB)");
+        if (file.size > 1.5 * 1024 * 1024) {
+            toast.error("File too large (Max 1.5MB). Please compress image.");
             return;
         }
 
