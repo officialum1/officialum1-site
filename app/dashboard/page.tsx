@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Link from 'next/link';
 
 export default function ClientDashboard() {
     const [orders, setOrders] = useState<any[]>([]);
@@ -43,11 +44,11 @@ export default function ClientDashboard() {
     if (loading) return (
         <div style={{ background: '#050505', minHeight: '100vh', padding: '120px 20px' }}>
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <div className="skeleton" style={{ width: '300px', height: '40px', marginBottom: '1rem' }}></div>
-                <div className="skeleton" style={{ width: '500px', height: '20px', marginBottom: '3rem' }}></div>
-                <div className="grid-2">
-                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px' }}></div>
-                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px' }}></div>
+                <div className="skeleton" style={{ width: '300px', height: '40px', marginBottom: '1rem', background: '#111', borderRadius: '8px' }}></div>
+                <div className="skeleton" style={{ width: '500px', height: '20px', marginBottom: '3rem', background: '#111', borderRadius: '4px' }}></div>
+                <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px', background: '#111' }}></div>
+                    <div className="skeleton" style={{ height: '400px', borderRadius: '24px', background: '#111' }}></div>
                 </div>
             </div>
         </div>
@@ -55,167 +56,214 @@ export default function ClientDashboard() {
 
     if (!user) return (
         <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', flexDirection: 'column' }}>
-            <h2 style={{ marginBottom: '1rem' }}>Please Login to View Progress</h2>
-            <a href="/login.html" className="btn btn-primary" style={{ textDecoration: 'none' }}>Go to Login</a>
+            <div style={{ fontSize: '4rem', marginBottom: '2rem' }}>🔒</div>
+            <h2 style={{ marginBottom: '1rem', fontWeight: 'bold' }}>Access Restricted</h2>
+            <p style={{ color: '#888', marginBottom: '2rem' }}>Please login to your account to access the buyer dashboard.</p>
+            <Link href="/login" className="btn btn-primary" style={{ textDecoration: 'none', padding: '1rem 3rem' }}>Login Now</Link>
         </div>
     );
 
     return (
         <main style={{ minHeight: '100vh', background: '#050505', color: '#fff' }}>
             <Navbar />
-            <div className="container-main" style={{ maxWidth: '1200px', margin: '0 auto', padding: '120px 20px 60px' }}>
+
+            <div className="dashboard-content" style={{ maxWidth: '1400px', margin: '0 auto', padding: '140px 20px 80px' }}>
 
                 {/* Header Section */}
-                <div style={{ marginBottom: '3rem', borderLeft: '4px solid #00ff88', paddingLeft: '1.5rem' }}>
-                    <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Welcome back, <span className="text-gradient">{user.email.split('@')[0]}</span></h1>
-                    <p style={{ color: '#888', marginTop: '0.5rem' }}>Track your project progress and view recent updates in real-time.</p>
+                <div style={{ marginBottom: '4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+                        <span style={{ padding: '5px 12px', background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                            {verification.status === 'approved' ? '✓ Verified Pro Account' : 'Standard Buyer'}
+                        </span>
+                        <span style={{ color: '#444' }}>•</span>
+                        <span style={{ color: '#888', fontSize: '12px' }}>Member since 2026</span>
+                    </div>
+                    <h1 style={{ fontSize: '3rem', fontWeight: '900', letterSpacing: '-1.5px', marginBottom: '10px' }}>
+                        Welcome back, <span className="text-gradient" style={{ filter: 'drop-shadow(0 0 10px rgba(0, 255, 136, 0.2))' }}>{user.email.split('@')[0]}</span>
+                    </h1>
+                    <p style={{ color: '#888', fontSize: '1.1rem' }}>Manage your digital assets, track deliveries, and top up your wallet.</p>
                 </div>
 
-                <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
+                {/* Quick Stats Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
 
-                    {/* Active Projects */}
+                    {/* Wallet Stat */}
+                    <div className="glass" style={{ padding: '25px', borderRadius: '28px', background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.05), transparent)', border: '1px solid rgba(255, 215, 0, 0.15)', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <span style={{ color: '#ffd700', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Wallet Balance</span>
+                            <span style={{ fontSize: '1.5rem' }}>💳</span>
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '900' }}>${wallet.balance.toFixed(2)}</div>
+                        <div style={{ marginTop: '15px' }}>
+                            <Link href="/membership" style={{ color: '#ffd700', fontSize: '0.85rem', textDecoration: 'none', fontWeight: 'bold' }}>+ Top Up Balance</Link>
+                        </div>
+                    </div>
+
+                    {/* Orders Stat */}
+                    <div className="glass" style={{ padding: '25px', borderRadius: '28px', background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.05), transparent)', border: '1px solid rgba(0, 255, 136, 0.15)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <span style={{ color: '#00ff88', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Active Deliveries</span>
+                            <span style={{ fontSize: '1.5rem' }}>🚀</span>
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '900' }}>{orders.length}</div>
+                        <div style={{ marginTop: '15px', color: '#888', fontSize: '0.85rem' }}>Total Digital Assets Owned</div>
+                    </div>
+
+                    {/* Affiliate Stat */}
+                    <div className="glass" style={{ padding: '25px', borderRadius: '28px', background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.05), transparent)', border: '1px solid rgba(124, 58, 237, 0.15)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <span style={{ color: '#7c3aed', fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Referral Rewards</span>
+                            <span style={{ fontSize: '1.5rem' }}>🎁</span>
+                        </div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: '900' }}>${wallet.affiliate_earnings.toFixed(2)}</div>
+                        <Link href="/refer" style={{ display: 'block', marginTop: '15px', color: '#7c3aed', fontSize: '0.85rem', textDecoration: 'none', fontWeight: 'bold' }}>Share & Earn commissions</Link>
+                    </div>
+
+                </div>
+
+                <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr', gap: '40px' }}>
+
+                    {/* Main Section: Digital Vault */}
                     <div>
-                        <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            🚀 Active Projects & Orders
-                        </h3>
-                        <div style={{ display: 'grid', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '800', letterSpacing: '-0.5px' }}>📦 Digital Vault & Inventory</h3>
+                            <Link href="/shop" style={{ fontSize: '0.9rem', color: '#00ff88', textDecoration: 'none', fontWeight: 'bold' }}>Browse Store &rarr;</Link>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '20px' }}>
                             {orders.length === 0 ? (
-                                <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
-                                    <p style={{ color: '#666' }}>No active projects found. Ready to start something new?</p>
-                                    <a href="/#services" className="btn btn-outline" style={{ marginTop: '1rem', display: 'inline-block' }}>Explore Services</a>
+                                <div className="glass" style={{ padding: '60px', textAlign: 'center', borderRadius: '32px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>🛒</div>
+                                    <h4 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Your Vault is Empty</h4>
+                                    <p style={{ color: '#666', marginBottom: '25px', maxWidth: '400px', margin: '0 auto 25px' }}>You haven't purchased any digital items yet. Explore our premium accounts and services to get started.</p>
+                                    <Link href="/shop" className="btn btn-primary" style={{ padding: '12px 35px' }}>Browse Marketplace</Link>
                                 </div>
                             ) : orders.map((order: any) => (
-                                <div key={order.orderId} className="glass" style={{ padding: '2rem', borderRadius: '24px', position: 'relative', overflow: 'hidden' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-                                        <div>
-                                            <div style={{ fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Order #{order.orderId}</div>
-                                            <h4 style={{ fontSize: '1.25rem', marginTop: '0.5rem' }}>{order.productId}</h4>
+                                <div key={order.orderId} className="glass card-hover" style={{ padding: '25px', borderRadius: '28px', border: '1px solid #1f2937', background: '#0d1117' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                            <div style={{ width: '60px', height: '60px', background: '#111', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '1px solid #1f2937' }}>
+                                                🔑
+                                            </div>
+                                            <div>
+                                                <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '1px' }}>Order #{order.orderId}</div>
+                                                <h4 style={{ fontSize: '1.2rem', margin: '4px 0', fontWeight: 'bold' }}>{order.productName || order.productId}</h4>
+                                                <div style={{ display: 'flex', gap: '15px', marginTop: '5px' }}>
+                                                    <span style={{ fontSize: '0.8rem', color: '#888' }}>📅 {new Date(order.date).toLocaleDateString()}</span>
+                                                    <span style={{ fontSize: '0.8rem', color: '#888' }}>💰 ${order.amount ? parseFloat(order.amount).toFixed(2) : '0.00'}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div style={{
-                                            padding: '5px 15px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 'bold',
-                                            background: order.status === 'paid' ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.05)',
-                                            color: order.status === 'paid' ? '#00ff88' : '#888'
-                                        }}>
-                                            {order.status.toUpperCase()}
-                                        </div>
-                                    </div>
-
-                                    {/* Progress Bar */}
-                                    <div style={{ marginTop: '2rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.8rem' }}>
-                                            <span style={{ color: '#888' }}>Current Progress</span>
-                                            <span style={{ color: '#00ff88', fontWeight: 'bold' }}>{order.progress_percent || 0}%</span>
-                                        </div>
-                                        <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+                                        <div style={{ textAlign: 'right' }}>
                                             <div style={{
-                                                width: `${order.progress_percent || 0}%`,
-                                                height: '100%',
-                                                background: 'linear-gradient(90deg, #00ff88, #00ccff)',
-                                                boxShadow: '0 0 10px rgba(0,255,136,0.5)'
-                                            }} />
+                                                padding: '6px 15px',
+                                                borderRadius: '12px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                                background: order.status === 'completed' ? 'rgba(0, 255, 136, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                                                color: order.status === 'completed' ? '#00ff88' : '#ff4444',
+                                                marginBottom: '10px',
+                                                display: 'inline-block'
+                                            }}>
+                                                {order.status}
+                                            </div>
+                                            <div>
+                                                <Link href={`/my-orders?id=${order.orderId}`} style={{ color: '#00c3ff', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 'bold' }}>View Details </Link>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    {order.report_link && (
-                                        <a
-                                            href={order.report_link}
-                                            target="_blank"
-                                            style={{
-                                                marginTop: '1.5rem',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '0.5rem',
-                                                color: '#00ccff',
-                                                textDecoration: 'none',
-                                                fontSize: '0.9rem'
-                                            }}
-                                        >
-                                            📄 View Delivery Report
-                                        </a>
-                                    )}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Notifications & Support */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {/* Sidebar Sections */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
 
-                        {/* Custom Wallet Card */}
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255,215,0,0.1), transparent)', border: '1px solid rgba(255,215,0,0.3)' }}>
-                            <h4 style={{ marginBottom: '0.5rem', color: '#ffd700', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>💰 Wallet Balance</h4>
-                            <div className="wallet-amt" style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>${wallet.balance.toFixed(2)}</div>
-                            <p style={{ color: '#ccc', fontSize: '0.85rem', marginTop: '0.5rem', lineHeight: '1.4' }}>
-                                Available Store Credit.<br />
-                                <span style={{ color: '#00ff88', fontSize: '0.8rem' }}>Lifetime Earnings: ${wallet.affiliate_earnings.toFixed(2)}</span>
+                        {/* Trust & Verification Card */}
+                        <div className="glass" style={{ padding: '30px', borderRadius: '32px', border: verification.status === 'approved' ? '1px solid rgba(0, 255, 136, 0.3)' : '1px solid rgba(255, 68, 68, 0.2)', background: 'linear-gradient(180deg, #0d1117 0%, transparent 100%)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h4 style={{ fontSize: '1.2rem', fontWeight: '800' }}>🛡️ Trust Identity</h4>
+                                <span style={{ padding: '4px 10px', borderRadius: '8px', fontSize: '10px', background: '#000', color: verification.status === 'approved' ? '#00ff88' : '#ff4444', fontWeight: 'bold' }}>
+                                    {verification.status.toUpperCase()}
+                                </span>
+                            </div>
+
+                            <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', marginBottom: '20px', overflow: 'hidden' }}>
+                                <div style={{
+                                    width: verification.status === 'approved' ? '100%' : (verification.status === 'pending' ? '70%' : '30%'),
+                                    height: '100%',
+                                    background: verification.status === 'approved' ? '#00ff88' : (verification.status === 'pending' ? '#ffd700' : '#ff4444'),
+                                    boxShadow: `0 0 10px ${verification.status === 'approved' ? 'rgba(0, 255, 136, 0.5)' : 'rgba(255, 68, 68, 0.3)'}`
+                                }}></div>
+                            </div>
+
+                            <p style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.6', marginBottom: '25px' }}>
+                                {verification.status === 'approved'
+                                    ? "Verified Pro. You have full access to premium assets, instant delivery, and high limits."
+                                    : (verification.status === 'pending'
+                                        ? "Verification is under review. This usually takes 2-6 hours."
+                                        : "Standard account. Verify your identity to unlock higher purchase limits.")}
                             </p>
-                            <a href="/shop" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem', background: '#ffd700', color: '#000', fontWeight: 'bold', textAlign: 'center', display: 'block' }}>Shop Now</a>
+
+                            {verification.status === 'none' && (
+                                <Link href="/dashboard/verification" className="btn btn-primary" style={{ width: '100%', padding: '12px', textAlign: 'center', borderRadius: '12px', border: '1px solid #00ff88', background: 'transparent', color: '#00ff88' }}>Complete Verification</Link>
+                            )}
+                            {verification.status === 'pending' && (
+                                <div style={{ textAlign: 'center', color: '#ffd700', fontSize: '0.9rem', fontWeight: 'bold' }}>⏳ Reviewing Documents</div>
+                            )}
                         </div>
 
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
-                            <h4 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>🔔 Notifications</h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {/* Recent Activity / Notifications */}
+                        <div className="glass" style={{ padding: '30px', borderRadius: '32px' }}>
+                            <h4 style={{ marginBottom: '20px', fontSize: '1.2rem', fontWeight: '800' }}>🔔 Recent Alerts</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                 {notifications.length === 0 ? (
-                                    <p style={{ color: '#444', fontSize: '0.9rem' }}>No new notifications.</p>
+                                    <div style={{ textAlign: 'center', padding: '20px', color: '#444' }}>
+                                        <p style={{ fontSize: '0.85rem' }}>No new notifications.</p>
+                                    </div>
                                 ) : notifications.map((n: any) => (
-                                    <div key={n.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.8rem' }}>
-                                        <div style={{ fontSize: '0.9rem', color: '#fff' }}>{n.title}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px' }}>{new Date(n.created_at).toLocaleDateString()}</div>
+                                    <div key={n.id} style={{ display: 'flex', gap: '15px', paddingBottom: '15px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', marginTop: '6px' }}></div>
+                                        <div>
+                                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{n.title}</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>{new Date(n.created_at).toLocaleDateString()}</div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', border: verification.status === 'approved' ? '1px solid #00ff88' : (verification.status === 'pending' ? '1px solid #ffd700' : '1px solid rgba(0, 195, 255, 0.2)') }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                <h4 style={{ fontSize: '1.1rem' }}>🛡️ Trust Score</h4>
-                                <span style={{ fontSize: '0.8rem', color: '#888' }}>{verification.status === 'approved' ? 'Verified Pro' : (verification.status === 'pending' ? 'Pending Review' : 'Level 1')}</span>
-                            </div>
-                            <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', marginBottom: '1.5rem' }}>
-                                <div style={{ width: verification.status === 'approved' ? '100%' : (verification.status === 'pending' ? '60%' : '30%'), height: '100%', background: verification.status === 'approved' ? '#00ff88' : (verification.status === 'pending' ? '#ffd700' : '#00c3ff') }}></div>
-                            </div>
-                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.5rem' }}>
-                                {verification.status === 'approved'
-                                    ? "Your identity is verified. You have full access to all features."
-                                    : (verification.status === 'pending'
-                                        ? "Your verification is under review. This usually takes 2-6 hours."
-                                        : "Verify your identity to increase limits and unlock 'Pro' account features.")}
-                            </p>
-                            {verification.status === 'none' && (
-                                <a href="/dashboard/verification" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block', background: 'rgba(0,195,255,0.1)', color: '#00c3ff', border: '1px solid #00c3ff' }}>Verify Identity</a>
-                            )}
-                            {verification.status === 'pending' && (
-                                <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(255,215,0,0.1)', color: '#ffd700', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>Review in Progress</div>
-                            )}
-                            {verification.status === 'approved' && (
-                                <div style={{ textAlign: 'center', padding: '10px', background: 'rgba(0,255,136,0.1)', color: '#00ff88', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>✓ Fully Verified</div>
-                            )}
+                        {/* Support Center */}
+                        <div className="glass" style={{ padding: '30px', borderRadius: '32px', background: 'linear-gradient(135deg, rgba(0, 195, 255, 0.05), transparent)' }}>
+                            <h4 style={{ marginBottom: '10px', fontWeight: '800' }}>Need Assistance?</h4>
+                            <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '20px', lineHeight: '1.6' }}>Our dedicated staff is online 24/7 to help you with your inventory.</p>
+                            <Link href="/support" className="btn btn-primary" style={{ width: '100%', padding: '12px', textAlign: 'center', borderRadius: '12px' }}>Open Ticket</Link>
                         </div>
 
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(0,255,136,0.05), transparent)' }}>
-                            <h4 style={{ marginBottom: '1rem' }}>Need Assistance?</h4>
-                            <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '1.5rem' }}>Our team is available 24/7 for project updates and support.</p>
-                            <a href="/support" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}>Open Support Ticket</a>
-                        </div>
                     </div>
 
                 </div>
             </div>
+
             <Footer />
+
             <style jsx>{`
-                @media (max-width: 968px) {
-                    .container-main { padding-top: 100px !important; }
-                    .dashboard-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-                    h1 { font-size: 1.8rem !important; }
-                    .glass { padding: 1.5rem !important; }
+                .card-hover {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                @media (max-width: 480px) {
-                    h1 { font-size: 1.5rem !important; }
-                    .wallet-amt { font-size: 2rem !important; }
-                    .btn { padding: 0.8rem !important; font-size: 0.85rem !important; }
+                .card-hover:hover {
+                    transform: translateY(-5px);
+                    border-color: rgba(0, 255, 136, 0.3) !important;
+                    background: #111827 !important;
+                }
+                @media (max-width: 1024px) {
+                    .dashboard-grid { grid-template-columns: 1fr !important; }
+                }
+                @media (max-width: 768px) {
+                    h1 { font-size: 2.2rem !important; }
+                    .dashboard-content { padding-top: 100px !important; }
                 }
             `}</style>
         </main>

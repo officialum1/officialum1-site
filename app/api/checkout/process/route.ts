@@ -311,40 +311,18 @@ export async function POST(req: Request) {
                             await sendAuditReport(recipientEmail, `Order Delivered: ${pName}`, {
                                 pa: pName,
                                 details: combinedCreds
-                            }, settings);
+                            });
                         } else {
                             // Partial/No Stock - Send Receipt
-                            const { sendEmail } = require('@/lib/email'); // Lazy import helper
-                            await sendEmail({
-                                to: recipientEmail,
-                                subject: `Order Received: ${pName}`,
-                                html: `
-                                    <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff;">
-                                        <h2>Order Confirmed</h2>
-                                        <p>Thank you for purchasing <strong>${pName}</strong>.</p>
-                                        <p>We are currently establishing the secure connection to deliver your goods. You will receive a separate email with your credentials shortly.</p>
-                                        <p>Order ID: ${orderId}</p>
-                                    </div>
-                                `
-                            });
+                            const { sendOrderReceivedEmail } = require('@/lib/email');
+                            await sendOrderReceivedEmail(recipientEmail, pName, orderId);
                         }
                     }
                 }
                 // 3. Bulk Order
                 else if (isBulk) {
-                    const { sendEmail } = require('@/lib/email');
-                    await sendEmail({
-                        to: recipientEmail,
-                        subject: `Bulk Order Confirmed: #${orderId}`,
-                        html: `
-                            <div style="font-family: sans-serif; padding: 20px; background: #111; color: #fff;">
-                                <h2>Bulk Order Received</h2>
-                                <p>Thank you for your bulk purchase of <strong>${cartItems.length} items</strong>.</p>
-                                <p>Total Paid: $${amountToCharge}</p>
-                                <p>Your items are being prepared and will be delivered via email shortly.</p>
-                            </div>
-                        `
-                    });
+                    const { sendOrderReceivedEmail } = require('@/lib/email');
+                    await sendOrderReceivedEmail(recipientEmail, `${cartItems.length} Items (Bulk)`, orderId);
                 }
 
                 // 4. Referral Commission (Automatic Payout)

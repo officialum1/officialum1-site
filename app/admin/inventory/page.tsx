@@ -28,6 +28,7 @@ const SettingsTab = dynamic(() => import('@/components/admin/tabs/SettingsTab'),
 const CatalogGenerator = dynamic(() => import('@/components/admin/tabs/CatalogGenerator'), { ssr: false });
 const ReviewsTab = dynamic(() => import('@/components/admin/tabs/ReviewsTab'), { ssr: false });
 const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'), { ssr: false });
+const VerificationTab = dynamic(() => import('@/components/admin/tabs/VerificationTab'), { ssr: false });
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -183,6 +184,7 @@ function AdminDashboard() {
     const [messages, setMessages] = useState<any[]>([]);
     const [promoCodes, setPromoCodes] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
+    const [verifications, setVerifications] = useState<any[]>([]);
 
     // RESTORED: Form States
     const [blogForm, setBlogForm] = useState({ title: '', excerpt: '', content: '', category: '', image: '' });
@@ -1542,6 +1544,7 @@ function AdminDashboard() {
                                     { id: 'sell', label: '💸 Sales', perm: 'sales' },
                                     { id: 'leads', label: '👥 Leads', perm: 'leads' },
                                     { id: 'users', label: '👤 Buyers', perm: 'users' },
+                                    { id: 'verifications', label: '🛡️ Verifications', perm: 'users' },
                                     { id: 'support', label: '🎫 Support', perm: 'support' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
                                     <button
@@ -1911,6 +1914,9 @@ function AdminDashboard() {
                             setReplyMsg={setReplyMsg}
                             handleReplyTicket={handleReplyTicket}
                         />
+                    )}
+                    {activeTab === 'verifications' && (
+                        <VerificationTab />
                     )}
                     {activeTab === 'documents' && (
                         <DocumentsTab />

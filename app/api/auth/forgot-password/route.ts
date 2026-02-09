@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { sendAuditReport } from '@/lib/email';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
     try {
@@ -18,13 +18,9 @@ export async function POST(req: Request) {
         // 3. Save Token to DB
         await query("UPDATE users SET reset_token = ? WHERE email = ?", [resetToken, email]);
 
-        // 4. Send Email
-        await sendAuditReport(email, "Password Reset Request", {
-            da: "RESET PASSWORD",
-            pa: "Action Required",
-            links: 0,
-            details: `We received a request to reset your password.\n\nYour Temporary Reset Code is: **${resetToken}**\n\n(Use this code to login, then change your password in settings)`
-        }, {});
+        const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://officialum1.com';
+        const link = `${origin}/reset-password?token=${resetToken}`;
+        await sendPasswordResetEmail(email, link);
 
         return NextResponse.json({ success: true });
 

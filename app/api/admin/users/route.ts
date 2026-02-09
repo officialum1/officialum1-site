@@ -114,11 +114,7 @@ export async function POST(req: Request) {
             const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://officialum1.com';
             const link = `${origin}/reset-password?token=${token}`;
 
-            await sendEmail({
-                to: email,
-                subject: 'Reset Password Request',
-                html: `<p>Click here to reset your password: <a href="${link}">Reset Password</a></p>`
-            });
+            await sendPasswordResetEmail(email, link);
             return NextResponse.json({ success: true, message: 'Reset email sent' });
         } else if (action === 'bulk_import') {
             const emails: string[] = body.emails || [];
