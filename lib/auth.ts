@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (!ADMIN_PASSWORD) {
-    console.error("FATAL: ADMIN_PASSWORD not set in environment variables!");
+    console.warn("WARNING: ADMIN_PASSWORD not set in environment variables!");
 }
 
 export async function isAuthenticated() {

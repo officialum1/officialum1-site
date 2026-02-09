@@ -3,7 +3,7 @@ import { query } from './db';
 
 const BASE_URL = "https://open-api.g2g.com/v2";
 
-interface G2GProduct { }
+type G2GProduct = Record<string, any>;
 
 export async function getG2GCredentials() {
     // Try env first, then DB

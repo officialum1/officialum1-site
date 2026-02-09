@@ -1,5 +1,5 @@
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query, initDB } from '@/lib/db';
 
 function detectPlatform(title: string, url: string) {
@@ -33,7 +33,7 @@ export async function GET() {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         await initDB();
         const body = await req.json();

@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (!DEFAULT_ADMIN_PASSWORD) {
-    console.error("FATAL: ADMIN_PASSWORD not configured");
+    console.warn("WARNING: ADMIN_PASSWORD not configured");
 }
 
 export async function POST(request: NextRequest) {
