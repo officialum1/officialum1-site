@@ -179,7 +179,7 @@ export default function AboutPage() {
                             </p>
                             <div style={{ padding: '2rem', background: 'rgba(0,0,0,0.3)', borderRadius: '20px', borderLeft: '4px solid #ff4444' }}>
                                 <p style={{ fontStyle: 'italic', color: '#e2e8f0', margin: 0 }}>
-                                    "OfficialUM1 isn't just an agency; it's a commitment to excellence. We don't just reach goals; we redefine them."
+                                    &quot;OfficialUM1 isn&apos;t just an agency; it&apos;s a commitment to excellence. We don&apos;t just reach goals; we redefine them.&quot;
                                 </p>
                                 <div style={{ marginTop: '1rem', fontWeight: 'bold' }}>&mdash; Muhammad Umar Mumtaz</div>
                                 <div style={{ fontSize: '0.8rem', color: '#ff4444' }}>Founder & CEO</div>
@@ -235,7 +235,7 @@ export default function AboutPage() {
                                 </div>
                                 <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Muhammad Umar Mumtaz</h3>
                                 <p style={{ color: '#ff4444', marginBottom: '20px' }}>Founder & Lead Strategist</p>
-                                <p style={{ color: '#888', fontStyle: 'italic' }}>"Innovation is the ability to see change as an opportunity - not a threat."</p>
+                                <p style={{ color: '#888', fontStyle: 'italic' }}>&quot;Innovation is the ability to see change as an opportunity &mdash; not a threat.&quot;</p>
                             </div>
                         </motion.div>
 

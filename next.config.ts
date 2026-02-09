@@ -17,7 +17,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
   // Standard Next.js way to skip checks
   typescript: {
     ignoreBuildErrors: true,
