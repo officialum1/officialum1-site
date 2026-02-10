@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'OfficialUM1 Admin',
   webDir: 'mobile-build', // Points to fallback index.html
   server: {
-    url: 'https://officialum1.com/admin', // Point directly to admin login
+    url: 'https://officialum1.com/admin/login', // Correct Entry Point
     cleartext: true, // Allow http for development
     allowNavigation: [
       'officialum1.com',

@@ -27,7 +27,7 @@ Download and install [Android Studio](https://developer.android.com/studio). Thi
 - Open **OfficialUM1 Admin**.
 
 ## ⚙️ How It Works
-The app is configured to load `https://officialum1.com/admin` directly. This means:
+The app is configured to load `https://officialum1.com/admin/login` directly. This means:
 - You **don't** need to rebuild the app when you update the website.
 - The app always shows the latest version of your admin panel.
 - It acts as a dedicated, fullscreen browser for your admin tools.

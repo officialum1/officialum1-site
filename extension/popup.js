@@ -117,6 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     openDash.addEventListener('click', () => {
-        chrome.tabs.create({ url: 'https://officialum1.com/admin' });
+        chrome.tabs.create({ url: 'https://officialum1.com/admin/inventory' });
     });
 });
