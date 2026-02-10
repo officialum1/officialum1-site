@@ -43,30 +43,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             const html = await response.text();
                             const listings = [];
                             const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
-                            const idRegex = /data-id="(\d+)"|id="listing-(\d+)"/;
-                            const titleRegex = /<a[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/a>|<div[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/div>/;
-                            const priceRegex = /unit-price">([^<]+)<\/span>|\$([\d.]+)/;
-                            const stockRegex = /stock-input"[^>]*value="(\d+)"|stock">(\d+)<\/div>/;
-                            const statusRegex = /status-text">([^<]+)<\/span>|status">([^<]+)<\/div>/;
+
+                            // Even more robust regexes
+                            const idRegex = /data-id="(\d+)"|id="listing-(\d+)"|#(\d{6,})/;
+                            const titleRegex = /<a[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/a>|<div[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/div>/;
+                            const priceRegex = /unit-price">([\s\S]*?)<\/span>|\$([\d.]+)/;
+                            const stockRegex = /stock-input"[^>]*value="(\d+)"|stock">(\d+)<\/div>|(\d+)\s*Stock/;
 
                             let match;
                             while ((match = rowRegex.exec(html)) !== null) {
                                 const content = match[1];
-                                const idMatch = content.match(idRegex) || match[0].match(idRegex);
+                                let idMatch = content.match(idRegex) || match[0].match(idRegex);
                                 const titleMatch = content.match(titleRegex);
-                                const priceMatch = content.match(priceRegex);
-                                const stockMatch = content.match(stockRegex);
-                                const statusMatch = content.match(statusRegex);
 
                                 if (idMatch && titleMatch) {
-                                    const id = idMatch[1] || idMatch[2];
+                                    const id = idMatch[1] || idMatch[2] || idMatch[3];
+                                    const titleStr = (titleMatch[1] || titleMatch[2]).replace(/<[^>]*>/g, '').trim();
+
+                                    const priceMatch = content.match(priceRegex);
+                                    const stockMatch = content.match(stockRegex);
+
                                     listings.push({
                                         id,
-                                        title: (titleMatch[1] || titleMatch[2]).trim(),
+                                        title: titleStr,
                                         url: `https://www.z2u.com/products/${id}.html`,
                                         price: priceMatch ? (priceMatch[1] || priceMatch[2]).replace(/[^\d.]/g, '') : '0',
-                                        stock: stockMatch ? (stockMatch[1] || stockMatch[2]) : '0',
-                                        status: statusMatch ? (statusMatch[1] || statusMatch[2]).trim() : 'Unknown'
+                                        stock: stockMatch ? (stockMatch[1] || stockMatch[2] || stockMatch[3]) : '0',
+                                        status: content.includes('Deactivate') ? 'Active' : 'Deactivated'
                                     });
                                 }
                             }
@@ -86,49 +89,53 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.action === "REMOTE_SYNC") {
 
                 try {
-                    let page = 1;
+                    const syncTargets = [
+                        "https://www.playerup.com/accounts/-/postings",
+                        "https://www.playerup.com/accounts/-/threads",
+                        "https://www.playerup.com/account/threads"
+                    ];
+
                     let totalPushed = 0;
 
-                    while (page <= 5) {
-                        const url = `https://www.playerup.com/accounts/-/postings${page > 1 ? '?page=' + page : ''}`;
-                        const response = await fetch(url, {
-                            credentials: 'include',
-                            headers: {
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                    for (const baseUrl of syncTargets) {
+                        let page = 1;
+                        while (page <= 3) {
+                            const url = page === 1 ? baseUrl : `${baseUrl}?page=${page}`;
+                            const response = await fetch(url, {
+                                credentials: 'include',
+                                headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" }
+                            });
+
+                            if (!response.ok) break;
+                            const html = await response.text();
+                            const threadRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([\s\S]*?)<\/a>/g;
+                            const listings = [];
+                            let match;
+                            while ((match = threadRegex.exec(html)) !== null) {
+                                let threadUrl = match[1];
+                                if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
+                                if (!threadUrl.startsWith('http')) threadUrl = "https://www.playerup.com/" + threadUrl;
+
+                                listings.push({ url: threadUrl, title: match[2].replace(/<[^>]*>/g, '').trim() });
                             }
-                        });
 
-                        if (!response.ok) break;
-                        const html = await response.text();
+                            if (listings.length === 0) break;
 
-                        // Robust Regex for Threads
-                        const threadRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([^<]+)<\/a>/g;
-                        const listings = [];
-                        let match;
-                        while ((match = threadRegex.exec(html)) !== null) {
-                            let threadUrl = match[1];
-                            // Resolve relative URLs to Absolute
-                            if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
-                            if (!threadUrl.startsWith('http')) threadUrl = "https://www.playerup.com/" + threadUrl;
+                            const pushRes = await fetch("https://officialum1.com/api/admin/playerup", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                body: JSON.stringify({ action: "turbo_sync", listings })
+                            });
 
-                            listings.push({ url: threadUrl, title: match[2].trim() });
+                            const pushData = await pushRes.json();
+                            totalPushed += (pushData.count || 0);
+
+                            page++;
+                            await new Promise(r => setTimeout(r, 1200));
                         }
-
-                        if (listings.length === 0) break;
-
-                        const pushRes = await fetch("https://officialum1.com/api/admin/playerup", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                            body: JSON.stringify({ action: "turbo_sync", listings })
-                        });
-
-                        const pushData = await pushRes.json();
-                        totalPushed += (pushData.count || 0);
-
-                        page++;
-                        await new Promise(r => setTimeout(r, 1200));
                     }
                 } catch (e) { console.error("Sync Error:", e); }
+
             } else {
                 try {
                     if (request.singleUrl) {
