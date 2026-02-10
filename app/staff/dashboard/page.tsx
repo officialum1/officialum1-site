@@ -214,6 +214,8 @@ export default function StaffDashboard() {
                         { id: 'support', label: '🎫 Support', permission: 'support' },
                         { id: 'website', label: '🌐 Website', permission: 'website' },
                         { id: 'finance', label: '💰 Finance', permission: 'finance' },
+                        { id: 'playerup', label: '🆙 PlayerUp', permission: 'playerup' },
+                        { id: 'z2u', label: '🥈 Z2U Center', permission: 'z2u' },
                         { id: 'settings', label: '⚙️ Settings', permission: 'any' }
                     ].filter(tab => tab.permission === 'any' || staff?.permissions?.includes(tab.permission)).map(tab => (
                         <button
@@ -472,6 +474,20 @@ export default function StaffDashboard() {
                         <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
                             <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>💰 Finance & Revenue</h2>
                             <p style={{ color: '#888' }}>Access to revenue logs and payout information.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'playerup' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🆙 PlayerUp Hub</h2>
+                            <p style={{ color: '#888' }}>Background bumping and thread management center.</p>
+                        </div>
+                    )}
+
+                    {activeTab === 'z2u' && (
+                        <div className="glass" style={{ padding: '3rem', textAlign: 'center', borderRadius: '24px' }}>
+                            <h2 style={{ color: '#00ff88', marginBottom: '1rem' }}>🥈 Z2U Command Center</h2>
+                            <p style={{ color: '#888' }}>Manage Z2U listings and underground sync engine.</p>
                         </div>
                     )}
 
