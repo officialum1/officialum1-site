@@ -116,15 +116,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.action === "REMOTE_SYNC") {
                 console.log("[OfficialUM1] Starting PlayerUp Crawler...");
 
-                // Start with both Postings (replies/activity) and Threads (topics created)
+                // Expanded queue to catch all variations
                 let queue = [
                     "https://www.playerup.com/accounts/-/threads",
-                    "https://www.playerup.com/accounts/-/postings"
+                    "https://www.playerup.com/accounts/-/postings",
+                    "https://www.playerup.com/accounts/threads",
+                    "https://www.playerup.com/accounts/postings"
                 ];
                 let visited = new Set();
                 let pageCount = 0;
 
-                while (queue.length > 0 && pageCount < 50) { // Increased limit
+                while (queue.length > 0 && pageCount < 50) {
                     const url = queue.shift();
                     if (visited.has(url)) continue;
                     visited.add(url);
@@ -133,18 +135,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     console.log(`[PlayerUp] Crawling Page ${pageCount}: ${url}`);
 
                     try {
+                        // Removed custom User-Agent to avoid Cloudflare flags
                         const response = await fetch(url, { credentials: 'include' });
                         if (!response.ok) continue;
                         const html = await response.text();
 
-                        // 1. Extract Listings
-                        const threadRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([\s\S]*?)<\/a>/g;
+                        // 1. Extract Listings - Relaxed Regex
+                        // Matches href=".../threads/..." and captures URL and Title
+                        const threadRegex = /href="([^"]*\/threads\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
                         const listings = [];
                         let match;
                         while ((match = threadRegex.exec(html)) !== null) {
                             let threadUrl = match[1];
+                            const title = match[2].replace(/<[^>]*>/g, '').trim();
+
+                            // Basic filtering
+                            if (threadUrl.includes('page-') || threadUrl.includes('#') || title.length < 5) continue;
+
                             if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
-                            listings.push({ url: threadUrl, title: match[2].replace(/<[^>]*>/g, '').trim() });
+                            listings.push({ url: threadUrl, title });
                         }
 
                         if (listings.length > 0) {
@@ -155,8 +164,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             });
                         }
 
-                        // 2. Find "Next >" Button (Handle arbitrary attribute order)
-                        // Matches <a ... class="...pageNav-jump--next..." ... href="..." ...> OR <a ... href="..." ... class="...pageNav-jump--next..." ...>
+                        // 2. Find "Next >" Button (Robust)
                         const nextLinkRegex = /<a[^>]+href="([^"]+)"[^>]*class="[^"]*pageNav-jump--next[^"]*"|<a[^>]+class="[^"]*pageNav-jump--next[^"]*"[^>]*href="([^"]+)"/i;
                         const nextMatch = nextLinkRegex.exec(html);
 
@@ -164,33 +172,41 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             let nextUrl = nextMatch[1] || nextMatch[2];
                             if (nextUrl) {
                                 if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
-                                // Decode entities like &amp; to &
                                 nextUrl = nextUrl.replace(/&amp;/g, '&');
                                 if (!visited.has(nextUrl)) queue.push(nextUrl);
                             }
                         }
-
-                        await new Promise(r => setTimeout(r, 1000));
+                        await new Promise(r => setTimeout(r, 1200));
 
                     } catch (e) { console.error("Page Fetch failed", url, e); }
                 }
-
                 console.log("[OfficialUM1] PlayerUp Sync Finished.");
 
             } else {
-                // BUMPING LOGIC (With Validation)
+                // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
                 try {
+                    const fallbackBump = async (url) => {
+                        // Open tab, wait, close
+                        const tab = await chrome.tabs.create({ url: url, active: false });
+                        await new Promise(r => setTimeout(r, 5000)); // Wait for load
+                        await chrome.tabs.remove(tab.id);
+                        return true;
+                    };
+
                     const verifyBump = async (url) => {
                         const upUrl = url.replace(/\/$/, '') + '/up';
-                        const res = await fetch(upUrl, { credentials: 'include' });
-                        if (!res.ok) return false;
-
-                        const finalUrl = res.url;
-                        const text = await res.text();
-
-                        if (finalUrl.includes('login') || text.includes('Log in')) return false;
-                        if (text.includes('error') && !text.includes('success')) return false;
-                        return true;
+                        try {
+                            const res = await fetch(upUrl, { credentials: 'include' });
+                            if (!res.ok) throw new Error("Fetch Failed");
+                            const text = await res.text();
+                            if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
+                                throw new Error("Login/Error detected");
+                            }
+                            return true;
+                        } catch (e) {
+                            console.log("Fetch bump failed, trying Tab Fallback...", e);
+                            return await fallbackBump(upUrl);
+                        }
                     };
 
                     if (request.singleUrl) {
@@ -215,7 +231,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
                                 body: JSON.stringify({ action: "update_bump", id: item.id, success })
                             });
-                            await new Promise(r => setTimeout(r, 1200));
+                            await new Promise(r => setTimeout(r, 2000));
                         }
                     }
                 } catch (e) { console.error("Bump Error:", e); }
