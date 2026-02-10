@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     try {
         await initDB();
         const body = await req.json();
-        const { action, id, listings, username } = body;
+        const { action, id, listings: bulkListings, username } = body;
 
         // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
         if (action === 'cloud_fetch') {
@@ -114,13 +114,48 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, count: scrapedListings.length, new: newCount });
         }
 
+        // NEW: Cloud Bump All (Pings /up URL for all listings)
+        if (action === 'cloud_bump_all') {
+            const siteKey = 'session_cookies_www_playerup_com';
+            const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [siteKey]);
+            const cookies = rows[0]?.setting_value;
+
+            if (!cookies) return NextResponse.json({ success: false, error: "No session cookies. Sync via extension first." });
+
+            const listings: any = await query("SELECT id, url FROM playerup_listings");
+            let bumpCount = 0;
+
+            // We do this in a background-style loop
+            for (const item of listings) {
+                try {
+                    // PlayerUp bumps are triggered by visiting the /up URL with a session
+                    await fetch(`${item.url.replace(/\/$/, '')}/up`, {
+                        headers: {
+                            "Cookie": cookies,
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                        }
+                    });
+
+                    await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [item.id]);
+                    bumpCount++;
+
+                    // Tiny delay to be safe
+                    await new Promise(r => setTimeout(r, 300));
+                } catch (e) {
+                    console.error(`Failed to bump ${item.url}`, e);
+                }
+            }
+
+            return NextResponse.json({ success: true, bumped: bumpCount });
+        }
+
         // Action for Turbo Sync
         if (action === 'turbo_sync' || action === 'bulk_import') {
-            if (Array.isArray(listings)) {
+            if (Array.isArray(bulkListings)) {
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
                 const existingUrls = new Set(existingRows.map((r: any) => r.url));
 
-                for (const item of listings) {
+                for (const item of bulkListings) {
                     if (!existingUrls.has(item.url)) {
                         const newId = Date.now() + Math.random().toString(36).substr(2, 9);
                         const platform = detectPlatform(item.title, item.url);
@@ -131,7 +166,7 @@ export async function POST(req: NextRequest) {
                         existingUrls.add(item.url);
                     }
                 }
-                return NextResponse.json({ success: true, count: listings.length }, {
+                return NextResponse.json({ success: true, count: bulkListings.length }, {
                     headers: { 'Access-Control-Allow-Origin': '*' }
                 });
             }

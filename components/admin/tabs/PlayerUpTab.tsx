@@ -46,6 +46,28 @@ export default function PlayerUpTab() {
         }
     };
 
+    const handleCloudBump = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cloud_bump_all' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                modernAlert("Cloud Bump Finished!", `Successfully bumped ${data.bumped} threads! 🚀`, "success");
+                fetchListings();
+            } else {
+                modernAlert("Cloud Bump Failed", data.error || "Session expired?", "error");
+            }
+        } catch (e) {
+            modernAlert("Cloud Bump Error", "Could not connect to sync engine.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     async function fetchListings() {
         setLoading(true);
         try {
@@ -208,6 +230,14 @@ export default function PlayerUpTab() {
                     >
                         <span>☁️</span>
                         {loading ? 'Powering Sync...' : 'Cloud Master Sync'}
+                    </button>
+                    <button
+                        onClick={handleCloudBump}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(249,115,22,0.3)]"
+                    >
+                        <span>🔥</span>
+                        {loading ? 'Bumping...' : 'BUMP ALL LISTINGS'}
                     </button>
                     <button
                         onClick={() => setShowAutoFetch(true)}
