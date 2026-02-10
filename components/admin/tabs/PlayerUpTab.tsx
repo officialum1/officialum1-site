@@ -209,9 +209,26 @@ export default function PlayerUpTab() {
                                 threads.push({ title, url });
                             }
 
-                            // Strategy 2: Simple URL list
+                            // Strategy 3: Raw Text Copy-Paste (e.g. from Selecting page text)
+                            // Often user copies: "Title Here\nhttps://www.playerup.com/threads/..."
                             if (threads.length === 0) {
-                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[^"'\s]+/g;
+                                // Split by lines and look for patterns
+                                const lines = input.split('\n').map(l => l.trim()).filter(l => l);
+                                for (let i = 0; i < lines.length; i++) {
+                                    const line = lines[i];
+                                    // Valid Thread URL
+                                    if (line.match(/^https:\/\/www\.playerup\.com\/threads\/[^"'\s]+$/)) {
+                                        // If previous line wasn't a URL, use it as title
+                                        const prev = lines[i - 1];
+                                        const title = (prev && !prev.includes('http')) ? prev : "Imported Thread";
+                                        threads.push({ title, url: line });
+                                    }
+                                }
+                            }
+
+                            // Strategy 4: Find any thread URLs anywhere in text
+                            if (threads.length === 0) {
+                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[^\s"']+/g;
                                 const urls = input.match(urlOnlyRegex) || [];
                                 urls.forEach(u => threads.push({ title: "Imported Thread", url: u }));
                             }
@@ -230,7 +247,7 @@ export default function PlayerUpTab() {
                                     fetchListings();
                                 });
                             } else {
-                                modernAlert("No Threads Found", "Could not parse any threads from the input.", "error"); // Use "error" instead of "warning"
+                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure you are copying the full page source (Ctrl+U) or a list of URLs.", "error");
                             }
 
                         }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
