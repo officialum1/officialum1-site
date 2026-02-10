@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "OfficialUM1 Sync Master",
+    "version": "1.0",
+    "description": "Turbo-sync listings from PlayerUp, G2G, and Z2U to the OfficialUM1 dashboard.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+    ],
+    "host_permissions": [
+        "https://www.playerup.com/*",
+        "https://www.g2g.com/*",
+        "https://www.z2u.com/*",
+        "https://officialum1.com/*",
+        "http://localhost:3000/*"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "128": "icons/icon128.png"
+        }
+    },
+    "icons": {
+        "128": "icons/icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.playerup.com/*",
+                "https://www.g2g.com/*",
+                "https://www.z2u.com/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
