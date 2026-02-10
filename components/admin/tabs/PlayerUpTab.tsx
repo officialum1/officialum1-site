@@ -70,46 +70,85 @@ export default function PlayerUpTab() {
         const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://officialum1.com';
         return `
 (async () => {
-    console.log("🚀 STARTING TURBO SYNC FOR ${username.toUpperCase()}...");
-    let page = 1;
-    let hasMore = true;
-    let totalSynced = 0;
+    console.clear();
+    console.log("%c 🚀 OFFICIALUM1 TURBO ENGINE STARTING... ", "background: #ff0055; color: white; font-weight: bold; font-size: 16px; padding: 10px; border-radius: 5px;");
+    console.log("%cTarget Site: ${siteUrl}", "color: #00c3ff; font-weight: bold;");
 
-    while(hasMore && page <= 500) { 
-        console.log("Reading Page " + page + "...");
+    let page = 1;
+    let totalSynced = 0;
+    let consecutiveEmptyCount = 0;
+    const maxEmptyPages = 3; // Stop if 3 pages in a row have 0 results
+    
+    // Auto-detect the base URL from current tab or default to slug
+    let baseUrl = window.location.href.split('?')[0].split('/page-')[0];
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+    
+    console.log("Starting sync from: " + baseUrl);
+
+    while(page <= 1000) { 
+        const targetUrl = page === 1 ? baseUrl : baseUrl + "/page-" + page;
+        console.log("%cScanning Page " + page + "... %c(" + targetUrl + ")", "color: #ffaa00; font-weight: bold;", "color: #555; font-size: 0.8rem;");
+
         try {
-            const res = await fetch("https://www.playerup.com/" + "${username}" + "/page-" + page);
-            if (!res.ok) { hasMore = false; break; }
+            const res = await fetch(targetUrl);
+            if (!res.ok) {
+                console.warn("Page " + page + " not found (404/Limit). Stopping.");
+                break;
+            }
             const html = await res.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
-            const links = [...doc.querySelectorAll('a[href*="threads/"]')];
             
-            if(links.length === 0) { hasMore = false; break; }
+            // XenForo Selectors: .structItem-title a, .previewLink, or general thread links
+            const threadLinks = [...doc.querySelectorAll('.structItem-title a, a[href*="/threads/"]')];
+            
+            // Deduplicate and clean
+            const uniqueThreads = new Map();
+            threadLinks.forEach(a => {
+                const url = a.href.split('?')[0];
+                const title = a.innerText.trim();
+                if (url.includes('/threads/') && title && !uniqueThreads.has(url)) {
+                    uniqueThreads.set(url, { title, url });
+                }
+            });
 
-            const batch = links.map(a => ({
-                title: a.innerText.trim() || "PlayerUp Listing",
-                url: a.href.split('?')[0]
-            })).filter(item => item.url.includes('threads/'));
+            const batch = Array.from(uniqueThreads.values());
 
-            if (batch.length > 0) {
-                await fetch("${siteUrl}/api/admin/playerup", {
+            if (batch.length === 0) {
+                consecutiveEmptyCount++;
+                console.log("%cNo threads found on page " + page, "color: #666;");
+                if (consecutiveEmptyCount >= maxEmptyPages) {
+                    console.log("3 consecutive empty pages. Ending sync.");
+                    break;
+                }
+            } else {
+                consecutiveEmptyCount = 0;
+                console.log("%cFound " + batch.length + " listings. Syncing to database...", "color: #00ff88;");
+                
+                const syncResponse = await fetch("${siteUrl}/api/admin/playerup", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ action: "turbo_sync", listings: batch })
                 });
-                totalSynced += batch.length;
-                console.log("✅ Page " + page + " Synced! Total: " + totalSynced);
+                
+                if (syncResponse.ok) {
+                    totalSynced += batch.length;
+                    console.log("%c✅ Successfully Synced! Total: " + totalSynced, "background: #004422; color: #00ff88; padding: 2px 5px;");
+                } else {
+                    console.error("❌ Failed to sync batch to your website database.");
+                }
             }
 
             page++;
-            await new Promise(r => setTimeout(r, 600)); 
+            // Randomized delay to stay under the radar
+            await new Promise(r => setTimeout(r, 800 + Math.random() * 400)); 
         } catch(e) { 
-            console.error("Error on page " + page, e);
-            hasMore = false; 
+            console.error("Critical error on page " + page, e);
+            break; 
         }
     }
-    alert("🏁 TURBO SYNC COMPLETE! Total threads processed: " + totalSynced);
+    
+    alert("🏁 TURBO ENGINE FINISHED!\\n\\nTotal threads synced: " + totalSynced + "\\nCheck your admin dashboard for the live listings.");
 })();
         `.trim();
     };
