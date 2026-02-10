@@ -12,9 +12,17 @@ export default function AdminDashboard() {
     useEffect(() => {
         // Authenticate Admin (Simplified)
         const adminKey = localStorage.getItem('admin_key');
+
         if (!adminKey) {
             window.location.href = '/admin/login';
             return;
+        }
+
+        // SYNC WITH EXTENSION (Fix for "Missing Admin Password" error)
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('OFFICIALUM1_AUTH_UPDATE', {
+                detail: { pass: adminKey }
+            }));
         }
 
         fetch('/api/admin/dashboard')

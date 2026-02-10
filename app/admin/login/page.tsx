@@ -30,6 +30,10 @@ export default function AdminLoginPage() {
                     // Set Local Storage for Navbar and Dashboard
                     localStorage.setItem('buyer_user', JSON.stringify(data.user));
 
+                    // SAVE ADMIN KEY for Extension & Dashboard Access
+                    // (This assumes the user password = admin password, or at least grants access)
+                    localStorage.setItem('admin_key', password);
+
                     // Redirect
                     window.location.href = '/admin/inventory';
                 } else {

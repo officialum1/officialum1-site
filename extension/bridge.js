@@ -28,3 +28,12 @@ window.addEventListener('OFFICIALUM1_SINGLE_BUMP', (e) => {
         id: e.detail.id
     });
 });
+
+window.addEventListener('OFFICIALUM1_AUTH_UPDATE', (e) => {
+    console.log("📡 Auth Update Signal Received...");
+    if (e.detail.pass) {
+        chrome.storage.local.set({ admin_pass: e.detail.pass }, () => {
+            console.log("✅ Admin Password Synced to Extension");
+        });
+    }
+});
