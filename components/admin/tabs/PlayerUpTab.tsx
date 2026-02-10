@@ -47,12 +47,17 @@ export default function PlayerUpTab() {
     };
 
     const handleCloudBump = async () => {
+        const countStr = prompt("How many listings do you want to bump? (Enter 0 or leave empty for ALL)", "10");
+        if (countStr === null) return; // Cancelled
+
+        const limit = parseInt(countStr) || 0;
+
         setLoading(true);
         try {
             const res = await fetch('/api/admin/playerup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'cloud_bump_all' })
+                body: JSON.stringify({ action: 'cloud_bump_all', limit })
             });
             const data = await res.json();
             if (data.success) {

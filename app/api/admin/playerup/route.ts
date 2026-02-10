@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     try {
         await initDB();
         const body = await req.json();
-        const { action, id, listings: bulkListings, username } = body;
+        const { action, id, listings: bulkListings, username, limit } = body;
 
         // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
         if (action === 'cloud_fetch') {
@@ -135,7 +135,15 @@ export async function POST(req: NextRequest) {
 
             if (!cookies) return NextResponse.json({ success: false, error: "No session cookies. Sync via extension first." });
 
-            const listings: any = await query("SELECT id, url FROM playerup_listings");
+            let sql = "SELECT id, url FROM playerup_listings ORDER BY lastBumped ASC, createdAt DESC";
+            const params: any[] = [];
+
+            if (limit && limit > 0) {
+                sql += " LIMIT ?";
+                params.push(limit);
+            }
+
+            const listings: any = await query(sql, params);
             let bumpCount = 0;
 
             // We do this in a background-style loop
