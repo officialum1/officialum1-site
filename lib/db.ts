@@ -679,6 +679,9 @@ export async function initDB(force = false) {
 
     // Migration: Add platform column if missing
     try { await query("ALTER TABLE playerup_listings ADD COLUMN platform VARCHAR(50) DEFAULT 'Other'"); } catch (e) { }
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN frequency VARCHAR(50) DEFAULT 'Every 24 hours'"); } catch (e) { }
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN status VARCHAR(50) DEFAULT 'Inactive'"); } catch (e) { }
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN username VARCHAR(100) DEFAULT 'officialum1'"); } catch (e) { }
 
     isInitialized = true;
 }

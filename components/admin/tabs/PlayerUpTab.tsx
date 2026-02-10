@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from 'react';
 import { modernAlert, modernConfirm } from '@/components/ModernUIOverlay';
 import { getPlatformIcon } from '@/lib/icons';
@@ -11,66 +10,22 @@ interface Listing {
     platform: string;
     lastBumped: string | null;
     createdAt: string;
+    status: string;
+    frequency: string;
+    username: string;
 }
 
 export default function PlayerUpTab() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAutoFetch, setShowAutoFetch] = useState(false);
-    const [username, setUsername] = useState('officialum1');
     const [activeFilter, setActiveFilter] = useState('All');
 
     useEffect(() => {
         fetchListings();
     }, []);
 
-    const handleCloudSync = async () => {
-        // Trigger the signal for bridge.js
-        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
-        modernAlert("Underground Sync Started", "Fetching latest threads... New listings will appear in 15 seconds. 🛰️", "success");
-
-        // Wait and refresh
-        setTimeout(() => {
-            fetchListings();
-            modernAlert("Sync Sweep Complete", "Reloading database... Check your list now! 🚀", "success");
-        }, 15000);
-
-        try {
-            await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'cloud_fetch' })
-            });
-        } catch (e) { }
-    };
-
-    const handleCloudBump = async () => {
-        const countStr = prompt("How many listings do you want to bump? (Enter 0 or leave empty for ALL)", "10");
-        if (countStr === null) return;
-
-        const limit = parseInt(countStr) || 0;
-
-        // Trigger the signal for bridge.js
-        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_BUMP', { detail: { limit } }));
-        modernAlert("Underground Bump Active", `Bumping ${limit || 'all'} threads silently... This takes about 1 second per listing. 🛰️🔥`, "success");
-
-        try {
-            const res = await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'cloud_bump_all', limit })
-            });
-            const data = await res.json();
-            if (data.success) {
-                modernAlert("Bump Complete!", `Server and Extension combined to bump threads! 🔥`, "success");
-                fetchListings();
-            }
-        } catch (e) {
-            // Silent error - we trust the extension
-        }
-    };
-
-    async function fetchListings() {
+    const fetchListings = async () => {
         setLoading(true);
         try {
             const res = await fetch('/api/admin/playerup');
@@ -82,276 +37,167 @@ export default function PlayerUpTab() {
         } finally {
             setLoading(false);
         }
-    }
+    };
+
+    const handleUpdate = async (listing: Listing, updates: Partial<Listing>) => {
+        const updated = { ...listing, ...updates };
+        try {
+            await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update', ...updated })
+            });
+            setListings(prev => prev.map(l => l.id === listing.id ? updated : l));
+        } catch (e) {
+            modernAlert("Update Failed");
+        }
+    };
+
+    const handleCloudSync = async () => {
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
+        modernAlert("Sync Sweep Started", "Fetching latest threads... Wait 15s. 🛰️", "success");
+        setTimeout(() => fetchListings(), 15000);
+        try { await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cloud_fetch' }) }); } catch (e) { }
+    };
+
+    const handleCloudBump = async () => {
+        const countStr = prompt("Bump limit? (0 for ALL)", "10");
+        if (countStr === null) return;
+        const limit = parseInt(countStr) || 0;
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_BUMP', { detail: { limit } }));
+        modernAlert("Active Bump", `Bumping ${limit || 'all'} threads... 🛰️🔥`, "success");
+        try {
+            const res = await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cloud_bump_all', limit }) });
+            if ((await res.json()).success) { modernAlert("Complete!", "Threads bumped! 🔥", "success"); fetchListings(); }
+        } catch (e) { }
+    };
 
     const handleDelete = async (id: string) => {
         if (!(await modernConfirm("Delete this listing?"))) return;
         try {
-            await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'delete', id })
-            });
+            await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
             fetchListings();
-        } catch (e) {
-            modernAlert("Failed to delete");
-        }
+        } catch (e) { modernAlert("Failed to delete"); }
     };
 
-    const handleBump = async (listing: Listing) => {
+    const handleManualBump = async (listing: Listing) => {
+        window.open(listing.url + '/up', '_blank');
         try {
-            window.open(listing.url + '/up', '_blank');
-            await fetch('/api/admin/playerup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'update_bump', id: listing.id })
-            });
+            await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_bump', id: listing.id }) });
             fetchListings();
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { }
     };
 
-    const getTurboScript = () => {
-        const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://officialum1.com';
-        return `
+    const getTurboScript = () => `
 (async () => {
     console.clear();
-    console.log("%c 🚀 OFFICIALUM1 TURBO ENGINE STARTING... ", "background: #ff0055; color: white; font-weight: bold; font-size: 16px; padding: 10px; border-radius: 5px;");
-    console.log("%cTarget Site: ${siteUrl}", "color: #00c3ff; font-weight: bold;");
-
-    let page = 1;
-    let totalSynced = 0;
-    let consecutiveEmptyCount = 0;
-    const maxEmptyPages = 3; // Stop if 3 pages in a row have 0 results
-    
-    // Auto-detect the base URL from current tab or default to slug
     let baseUrl = window.location.href.split('?')[0].split('/page-')[0];
     if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
-    
-    console.log("Starting sync from: " + baseUrl);
-
-    while(page <= 1000) { 
-        const targetUrl = page === 1 ? baseUrl : baseUrl + "/page-" + page;
-        console.log("%cScanning Page " + page + "... %c(" + targetUrl + ")", "color: #ffaa00; font-weight: bold;", "color: #555; font-size: 0.8rem;");
-
-        try {
-            const res = await fetch(targetUrl);
-            if (!res.ok) {
-                console.warn("Page " + page + " not found (404/Limit). Stopping.");
-                break;
-            }
-            const html = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, "text/html");
-            
-            // XenForo Selectors: .structItem-title a, .previewLink, or general thread links
-            const threadLinks = [...doc.querySelectorAll('.structItem-title a, a[href*="/threads/"]')];
-            
-            // Deduplicate and clean
-            const uniqueThreads = new Map();
-            threadLinks.forEach(a => {
-                const url = a.href.split('?')[0];
-                const title = a.innerText.trim();
-                if (url.includes('/threads/') && title && !uniqueThreads.has(url)) {
-                    uniqueThreads.set(url, { title, url });
-                }
-            });
-
-            const batch = Array.from(uniqueThreads.values());
-
-            if (batch.length === 0) {
-                consecutiveEmptyCount++;
-                console.log("%cNo threads found on page " + page, "color: #666;");
-                if (consecutiveEmptyCount >= maxEmptyPages) {
-                    console.log("3 consecutive empty pages. Ending sync.");
-                    break;
-                }
-            } else {
-                consecutiveEmptyCount = 0;
-                console.log("%cFound " + batch.length + " listings. Syncing to database...", "color: #00ff88;");
-                
-                const syncResponse = await fetch("${siteUrl}/api/admin/playerup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "turbo_sync", listings: batch })
-                });
-                
-                if (syncResponse.ok) {
-                    totalSynced += batch.length;
-                    console.log("%c✅ Successfully Synced! Total: " + totalSynced, "background: #004422; color: #00ff88; padding: 2px 5px;");
-                } else {
-                    console.error("❌ Failed to sync batch to your website database.");
-                }
-            }
-
-            page++;
-            // Randomized delay to stay under the radar
-            await new Promise(r => setTimeout(r, 800 + Math.random() * 400)); 
-        } catch(e) { 
-            console.error("Critical error on page " + page, e);
-            break; 
-        }
+    let page = 1, total = 0;
+    while(page <= 50) {
+        const html = await (await fetch(page === 1 ? baseUrl : baseUrl + "/page-" + page)).text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        const links = [...doc.querySelectorAll('.structItem-title a, a[href*="/threads/"]')];
+        const batch = Array.from(new Set(links.map(a => ({ title: a.innerText.trim(), url: a.href.split('?')[0] })))).filter(t => t.title && t.url.includes('/threads/'));
+        if (batch.length === 0) break;
+        await fetch("${window.location.origin}/api/admin/playerup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "turbo_sync", listings: batch }) });
+        total += batch.length; page++;
+        await new Promise(r => setTimeout(r, 1000));
     }
-    
-    alert("🏁 TURBO ENGINE FINISHED!\\n\\nTotal threads synced: " + totalSynced + "\\nCheck your admin dashboard for the live listings.");
-})();
-        `.trim();
-    };
+    alert("Sync Finished! Total: " + total);
+})();`.trim();
 
-    const handleCopyScript = () => {
-        if (typeof navigator !== 'undefined' && navigator.clipboard) {
-            navigator.clipboard.writeText(getTurboScript());
-            modernAlert("Script Copied!", "1. Go to your PlayerUp profile.\n2. Press F12 -> Console.\n3. Paste and press Enter.", "success");
-        } else {
-            modernAlert("Clipboard Error", "Please copy the script manually from the console (if you can see it).");
-            console.log(getTurboScript());
-        }
-    };
-
-    const platforms = ['All', 'Reddit', 'Snapchat', 'Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter', 'Google', 'Discord', 'Telegram', 'Streaming', 'Social'];
-    const filteredListings = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
+    const filtered = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
+    const frequencies = ['Every 5 seconds', 'Every 15 seconds', 'Every 30 seconds', 'Every 1 minute', 'Every 5 minutes', 'Every 1 hour', 'Every 24 hours'];
 
     return (
-        <div className="FadeIn">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div className="FadeIn p-4">
+            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
                 <div>
-                    <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        🚀 PlayerUp Manager
-                        <span style={{ fontSize: '0.8rem', background: '#00c3ff22', color: '#00c3ff', padding: '2px 8px', borderRadius: '4px' }}>
-                            {listings.length} Threads
-                        </span>
+                    <h2 className="text-2xl font-bold flex items-center gap-3">
+                        🚀 PlayerUp Command Center
+                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">{listings.length} THREADS</span>
                     </h2>
-                    <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Managing digital assets live on database.</p>
+                    <p className="text-gray-400 text-sm mt-1">Automated listing management & scheduled bumping engine.</p>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleCloudSync}
-                        disabled={loading}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
-                    >
-                        <span>☁️</span>
-                        {loading ? 'Powering Sync...' : 'Cloud Master Sync'}
-                    </button>
-                    <button
-                        onClick={handleCloudBump}
-                        disabled={loading}
-                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(249,115,22,0.3)]"
-                    >
-                        <span>🔥</span>
-                        {loading ? 'Bumping...' : 'BUMP ALL LISTINGS'}
-                    </button>
-                    <button
-                        onClick={() => setShowAutoFetch(true)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-lg hover:shadow-pink-500/20"
-                    >
-                        <span>⚡</span>
-                        Auto-Fetch All Pages
-                    </button>
+                <div className="flex gap-3">
+                    <button onClick={handleCloudSync} className="bg-blue-600/10 text-blue-400 border border-blue-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-blue-600 hover:text-white transition-all">☁️ Cloud Sync</button>
+                    <button onClick={handleCloudBump} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20 transition-all">🔥 Bump All</button>
+                    <button onClick={() => { navigator.clipboard.writeText(getTurboScript()); modernAlert("Turbo Script Copied!", "Paste in PlayerUp Console.", "success"); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">⚡ Turbo Script</button>
                 </div>
             </div>
 
-            {/* Filter Bar */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '10px' }}>
-                {platforms.map(p => (
-                    <button
-                        key={p}
-                        onClick={() => setActiveFilter(p)}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: '20px',
-                            background: activeFilter === p ? '#00c3ff' : '#111',
-                            color: activeFilter === p ? '#000' : '#888',
-                            border: '1px solid',
-                            borderColor: activeFilter === p ? '#00c3ff' : '#222',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem',
-                            fontWeight: 'bold',
-                            whiteSpace: 'nowrap',
-                            transition: '0.2s'
-                        }}
-                    >
-                        {p}
-                    </button>
-                ))}
+            <div className="overflow-x-auto glass rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-white/5 text-[11px] uppercase tracking-[0.2em] text-gray-400 font-black">
+                            <th className="px-6 py-5">Status</th>
+                            <th className="px-6 py-5">Account</th>
+                            <th className="px-6 py-5">Thread / Title</th>
+                            <th className="px-6 py-5 text-center">Type</th>
+                            <th className="px-6 py-5">Frequency</th>
+                            <th className="px-6 py-5 text-center">Last Bump</th>
+                            <th className="px-6 py-5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-sm">
+                        {loading && listings.length === 0 ? (
+                            <tr><td colSpan={7} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
+                        ) : filtered.length === 0 ? (
+                            <tr><td colSpan={7} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
+                        ) : filtered.map(l => (
+                            <tr key={l.id} className="hover:bg-white/[0.02] transition-colors">
+                                <td className="px-6 py-4">
+                                    <button
+                                        onClick={() => handleUpdate(l, { status: l.status === 'Active' ? 'Inactive' : 'Active' })}
+                                        className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase border tracking-tighter transition-all ${l.status === 'Active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}
+                                    >
+                                        {l.status}
+                                    </button>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <button
+                                        onClick={() => { const u = prompt("Enter PlayerUp Username", l.username); if (u) handleUpdate(l, { username: u }); }}
+                                        className="flex items-center gap-2 bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-500 transition-all font-medium text-xs"
+                                    >
+                                        <span className="opacity-50">👤</span> {l.username}
+                                    </button>
+                                </td>
+                                <td className="px-6 py-4 max-w-[300px]">
+                                    <a href={l.url} target="_blank" className="text-blue-400 hover:text-blue-300 font-semibold truncate block transition-colors">{l.title}</a>
+                                    <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-tight font-black opacity-30">{l.url.split('/').pop()}</div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <img src={getPlatformIcon(l.platform)} className="w-6 h-6 inline-block opacity-80" alt="" />
+                                </td>
+                                <td className="px-6 py-4">
+                                    <select
+                                        value={l.frequency}
+                                        onChange={(e) => handleUpdate(l, { frequency: e.target.value })}
+                                        className="bg-zinc-900 text-xs text-gray-300 border border-zinc-700 rounded-lg px-2 py-1.5 outline-none hover:border-zinc-500 transition-all cursor-pointer"
+                                    >
+                                        {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
+                                    </select>
+                                </td>
+                                <td className="px-6 py-4 text-center whitespace-nowrap">
+                                    <div className="text-xs font-mono text-emerald-400 font-bold">
+                                        {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '[Off]'}
+                                    </div>
+                                    <div className="text-[10px] text-gray-600 mt-0.5 uppercase font-medium">
+                                        {l.lastBumped ? 'Latest Wave' : 'Pending'}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex gap-2 justify-end">
+                                        <button onClick={() => handleDelete(l.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 transition-all">🗑️</button>
+                                        <button onClick={() => handleManualBump(l)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all">▶️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-
-            {loading ? (
-                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>⚡ Accessing SQL Database...</div>
-            ) : filteredListings.length === 0 ? (
-                <div className="glass" style={{ padding: '6rem', textAlign: 'center', borderRadius: '24px', color: '#444', border: '1px dashed #222' }}>
-                    No listings found for <b>{activeFilter}</b>.
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-                    {filteredListings.map(l => (
-                        <div key={l.id} className="glass" style={{ padding: '1.5rem', borderRadius: '20px', border: '1px solid #1f2937', position: 'relative' }}>
-                            <div style={{ marginBottom: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div>
-                                    <div style={{ fontSize: '0.65rem', color: '#00c3ff', textTransform: 'uppercase', fontWeight: 'bold' }}>{l.platform}</div>
-                                    <h3 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', margin: '5px 0', lineHeight: '1.4' }}>{l.title}</h3>
-                                </div>
-                                <img src={getPlatformIcon(l.platform)} style={{ width: '24px', height: '24px', borderRadius: '4px' }} alt="" />
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '0.8rem', borderRadius: '12px' }}>
-                                <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                                    Last Sync Wave:<br />
-                                    <span style={{ color: l.lastBumped ? '#00ff88' : '#888', fontWeight: 'bold' }}>
-                                        {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString() : 'Ready'}
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => handleDelete(l.id)} style={{ background: 'none', border: 'none', color: '#ff4444', cursor: 'pointer', fontSize: '1rem' }}>🗑️</button>
-                                    <button onClick={() => handleBump(l)} style={{ background: '#00c3ff', border: 'none', color: '#000', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>BUMP</button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {showAutoFetch && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
-                    <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', width: '600px', maxWidth: '90vw', border: '1px solid #ff005544' }}>
-                        <h3 style={{ color: '#ff0055', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span>⚡</span> Turbo Auto-Fetch (All Pages)
-                        </h3>
-                        <p style={{ color: '#888', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-                            You have **19,000+** items. Forcing our server to scrape this would get your account blocked.
-                            Use this **Safe Browser Bridge** to fetch all data using your own browser session.
-                        </p>
-
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', fontSize: '0.7rem', color: '#555', fontWeight: 'bold', marginBottom: '0.5rem', textTransform: 'uppercase' }}>PLAYERUP USERNAME</label>
-                            <input
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: '#000', border: '1px solid #333', color: '#fff', fontSize: '1rem' }}
-                            />
-                        </div>
-
-                        <div style={{ background: 'rgba(255,0,85,0.05)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,0,85,0.1)', marginBottom: '2rem' }}>
-                            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#fff' }}>How to Auto-Sync:</h4>
-                            <ol style={{ fontSize: '0.8rem', color: '#ccc', paddingLeft: '1.2rem', margin: 0, lineHeight: '1.7' }}>
-                                <li>Click <b>Copy Turbo Script</b> below.</li>
-                                <li>Open your <a href={`https://www.playerup.com/${username}`} target="_blank" style={{ color: '#ff0055', fontWeight: 'bold' }}>PlayerUp Profile</a>.</li>
-                                <li>Right-click &rarr; <b>Inspect</b> &rarr; Click <b>Console</b>.</li>
-                                <li>Paste (Ctrl + V) and press <b>Enter</b>.</li>
-                                <li>Watch it turns pages automatically and sync everything here!</li>
-                            </ol>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button onClick={() => setShowAutoFetch(false)} className="btn btn-outline" style={{ borderColor: '#333' }}>Close</button>
-                            <button onClick={handleCopyScript} className="btn btn-primary" style={{ background: '#ff0055', color: '#fff', border: 'none', fontWeight: 'bold' }}>
-                                📋 Copy Turbo Script
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
         </div>
     );
 }

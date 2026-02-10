@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     try {
         await initDB();
         const body = await req.json();
-        const { action, id, listings: bulkListings, username, limit } = body;
+        const { action, id, listings: bulkListings, username, limit, status, frequency } = body;
 
         // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
         if (action === 'cloud_fetch') {
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
                     const newId = Date.now() + Math.random().toString(36).substr(2, 9);
                     const platform = detectPlatform(item.title, item.url);
                     await query(
-                        "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt) VALUES (?, ?, ?, ?, NULL, NOW())",
+                        "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt, status, frequency, username) VALUES (?, ?, ?, ?, NULL, NOW(), 'Inactive', 'Every 24 hours', 'officialum1')",
                         [newId, item.title, item.url, platform]
                     );
                     newCount++;
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
                         const newId = Date.now() + Math.random().toString(36).substr(2, 9);
                         const platform = detectPlatform(item.title, item.url);
                         await query(
-                            "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt) VALUES (?, ?, ?, ?, NULL, NOW())",
+                            "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt, status, frequency, username) VALUES (?, ?, ?, ?, NULL, NOW(), 'Inactive', 'Every 24 hours', 'officialum1')",
                             [newId, item.title, item.url, platform]
                         );
                         existingUrls.add(item.url);
@@ -197,6 +197,8 @@ export async function POST(req: NextRequest) {
             await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
         } else if (action === 'update_bump') {
             await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [id]);
+        } else if (action === 'update') {
+            await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
         }
 
         const data: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
