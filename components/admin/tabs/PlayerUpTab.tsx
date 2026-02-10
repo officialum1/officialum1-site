@@ -27,7 +27,7 @@ export default function PlayerUpTab() {
     const handleCloudSync = async () => {
         // Trigger the signal for bridge.js
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
-        modernAlert("Underground Sync Started", "Your extension is syncing listings in the background. No tabs will open. 🛰️", "success");
+        modernAlert("Underground Sync Started", "Fetching your latest threads silently... Please wait about 15-20 seconds, then refresh the listings. 🛰️", "success");
 
         // We still try the server, but we ignore 403 errors because we know the extension is working
         try {
@@ -54,7 +54,7 @@ export default function PlayerUpTab() {
 
         // Trigger the signal for bridge.js
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_BUMP', { detail: { limit } }));
-        modernAlert("Underground Bump Started", `Your extension is bumping ${limit || 'all'} threads in the background! 🔥`, "success");
+        modernAlert("Underground Bump Active", `Bumping ${limit || 'all'} threads silently... This takes about 1 second per listing. 🛰️🔥`, "success");
 
         try {
             const res = await fetch('/api/admin/playerup', {

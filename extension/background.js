@@ -28,28 +28,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const adminPass = res.admin_pass;
 
             if (isSync) {
-                // UNDERGROUND SYNC: Fetch & Parse without showing anything
+                // UNDERGROUND SYNC: Multi-page scan
                 try {
-                    const response = await fetch("https://www.playerup.com/accounts/-/postings", {
-                        credentials: 'include'
-                    });
-                    const html = await response.text();
+                    let page = 1;
+                    let totalFound = 0;
 
-                    // Regex to find thread links
-                    const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
-                    const listings = [];
-                    let match;
-                    while ((match = threadRegex.exec(html)) !== null) {
-                        listings.push({ url: match[1], title: match[2].trim() });
-                    }
+                    while (page <= 5) { // Scan first 5 pages (~125 listings)
+                        const url = page === 1 ?
+                            "https://www.playerup.com/accounts/-/postings" :
+                            `https://www.playerup.com/accounts/-/postings?page=${page}`;
 
-                    if (listings.length > 0) {
-                        fetch("https://officialum1.com/api/admin/playerup", {
+                        const response = await fetch(url, { credentials: 'include' });
+                        const html = await response.text();
+
+                        const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
+                        const listings = [];
+                        let match;
+                        while ((match = threadRegex.exec(html)) !== null) {
+                            listings.push({ url: match[1], title: match[2].trim() });
+                        }
+
+                        if (listings.length === 0) break; // No more listings
+
+                        // Push to server
+                        await fetch("https://officialum1.com/api/admin/playerup", {
                             method: "POST",
                             headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
                             body: JSON.stringify({ action: "turbo_sync", listings })
                         });
+
+                        totalFound += listings.length;
+                        page++;
+                        await new Promise(r => setTimeout(r, 1000)); // Stealth gap
                     }
+                    console.log(`Underground Sync Complete: Found ${totalFound} items.`);
                 } catch (e) { console.error("Underground Sync Failed:", e); }
             } else {
                 // UNDERGROUND BUMP: Ping /up URLs in sequence
