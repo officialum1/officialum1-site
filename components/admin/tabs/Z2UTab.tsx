@@ -70,7 +70,8 @@ export default function Z2UTab() {
                     <button onClick={handleSync} className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-orange-600/20 transition-all flex items-center gap-2">
                         <span>🛰️</span> Synchronize Z2U
                     </button>
-                    <button onClick={() => window.open('https://www.z2u.com/user/listing', '_blank')} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+                    <button onClick={() => window.open('https://www.z2u.com/sell/manage', '_blank')} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+
                         Open Z2U Panel
                     </button>
                 </div>

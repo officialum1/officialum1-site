@@ -28,41 +28,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             if (request.action === "Z2U_SYNC") {
                 try {
-                    const response = await fetch("https://www.z2u.com/user/listing", {
+                    const response = await fetch("https://www.z2u.com/sell/manage", {
                         credentials: 'include',
                         headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" }
                     });
                     if (response.ok) {
                         const html = await response.text();
-                        // Extract JSON data from script tag if possible, or parse HTML
-                        // Z2U often has a JSON blob or clear table structure
                         const listings = [];
-                        const rowRegex = /<tr[^>]*data-id="(\d+)"[^>]*>([\s\S]*?)<\/tr>/g;
-                        const titleRegex = /<a[^>]*class="title"[^>]*>([^<]+)<\/a>/;
-                        const priceRegex = /<span[^>]*class="unit-price"[^>]*>([^<]+)<\/span>/;
-                        const stockRegex = /<input[^>]*class="stock-input"[^>]*value="(\d+)"/;
-                        const statusRegex = /<span[^>]*class="status-text"[^>]*>([^<]+)<\/span>/;
+
+                        // Z2U Seller Manage Page uses a table with data-id or similar attributes
+                        // We'll use a more flexible regex to capture rows and common class names
+                        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
+                        const idRegex = /data-id="(\d+)"|id="listing-(\d+)"/;
+                        const titleRegex = /<a[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/a>|<div[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/div>/;
+                        const priceRegex = /unit-price">([^<]+)<\/span>|\$([\d.]+)/;
+                        const stockRegex = /stock-input"[^>]*value="(\d+)"|stock">(\d+)<\/div>/;
+                        const statusRegex = /status-text">([^<]+)<\/span>|status">([^<]+)<\/div>/;
+
 
                         let match;
                         while ((match = rowRegex.exec(html)) !== null) {
-                            const id = match[1];
-                            const content = match[2];
+                            const content = match[1];
+                            const idMatch = content.match(idRegex) || match[0].match(idRegex);
                             const titleMatch = content.match(titleRegex);
                             const priceMatch = content.match(priceRegex);
                             const stockMatch = content.match(stockRegex);
                             const statusMatch = content.match(statusRegex);
 
-                            if (titleMatch) {
+                            if (idMatch && titleMatch) {
+                                const id = idMatch[1] || idMatch[2];
                                 listings.push({
                                     id,
-                                    title: titleMatch[1].trim(),
+                                    title: (titleMatch[1] || titleMatch[2]).trim(),
                                     url: `https://www.z2u.com/products/${id}.html`,
-                                    price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : '0',
-                                    stock: stockMatch ? stockMatch[1] : '0',
-                                    status: statusMatch ? statusMatch[1].trim() : 'Unknown'
+                                    price: priceMatch ? (priceMatch[1] || priceMatch[2]).replace(/[^\d.]/g, '') : '0',
+                                    stock: stockMatch ? (stockMatch[1] || stockMatch[2]) : '0',
+                                    status: statusMatch ? (statusMatch[1] || statusMatch[2]).trim() : 'Unknown'
                                 });
                             }
                         }
+
 
                         if (listings.length > 0) {
                             await fetch("https://officialum1.com/api/admin/z2u", {
