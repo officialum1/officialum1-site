@@ -23,50 +23,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "REMOTE_SYNC" || request.action === "REMOTE_BUMP") {
         const isSync = request.action === "REMOTE_SYNC";
 
-        // Get the saved admin password for the final push
         chrome.storage.local.get(['admin_pass'], async (res) => {
             const adminPass = res.admin_pass;
 
             if (isSync) {
-                // UNDERGROUND SYNC: Multi-page scan
                 try {
                     let page = 1;
-                    let totalFound = 0;
+                    let totalPushed = 0;
 
-                    while (page <= 5) { // Scan first 5 pages (~125 listings)
-                        const url = page === 1 ?
-                            "https://www.playerup.com/accounts/-/postings" :
-                            `https://www.playerup.com/accounts/-/postings?page=${page}`;
+                    while (page <= 5) {
+                        const url = `https://www.playerup.com/accounts/-/postings${page > 1 ? '?page=' + page : ''}`;
+                        const response = await fetch(url, {
+                            credentials: 'include',
+                            headers: {
+                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                            }
+                        });
 
-                        const response = await fetch(url, { credentials: 'include' });
+                        if (!response.ok) break;
                         const html = await response.text();
 
-                        const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
+                        // Robust Regex for Threads
+                        const threadRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([^<]+)<\/a>/g;
                         const listings = [];
                         let match;
                         while ((match = threadRegex.exec(html)) !== null) {
-                            listings.push({ url: match[1], title: match[2].trim() });
+                            let threadUrl = match[1];
+                            // Resolve relative URLs to Absolute
+                            if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
+                            if (!threadUrl.startsWith('http')) threadUrl = "https://www.playerup.com/" + threadUrl;
+
+                            listings.push({ url: threadUrl, title: match[2].trim() });
                         }
 
-                        if (listings.length === 0) break; // No more listings
+                        if (listings.length === 0) break;
 
-                        // Push to server
-                        await fetch("https://officialum1.com/api/admin/playerup", {
+                        const pushRes = await fetch("https://officialum1.com/api/admin/playerup", {
                             method: "POST",
                             headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
                             body: JSON.stringify({ action: "turbo_sync", listings })
                         });
 
-                        totalFound += listings.length;
+                        const pushData = await pushRes.json();
+                        totalPushed += (pushData.count || 0);
+
                         page++;
-                        await new Promise(r => setTimeout(r, 1000)); // Stealth gap
+                        await new Promise(r => setTimeout(r, 1200));
                     }
-                    console.log(`Underground Sync Complete: Found ${totalFound} items.`);
-                } catch (e) { console.error("Underground Sync Failed:", e); }
+                } catch (e) { console.error("Sync Error:", e); }
             } else {
-                // UNDERGROUND BUMP: Ping /up URLs in sequence
                 try {
-                    // 1. Get listings from our server
                     const listRes = await fetch("https://officialum1.com/api/admin/playerup");
                     const data = await listRes.json();
                     let targets = Array.isArray(data) ? data : (data.listings || []);
@@ -74,14 +80,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     for (const item of targets) {
                         const upUrl = item.url.replace(/\/$/, '') + '/up';
-                        await fetch(upUrl, { credentials: 'include' });
-                        await new Promise(r => setTimeout(r, 600)); // Stealth delay
+                        await fetch(upUrl, {
+                            credentials: 'include',
+                            headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" }
+                        });
+                        await new Promise(r => setTimeout(r, 800));
                     }
-                } catch (e) { console.error("Underground Bump Failed:", e); }
+                } catch (e) { console.error("Bump Error:", e); }
             }
         });
 
-        sendResponse({ success: true, mode: "UNDERGROUND" });
+        sendResponse({ success: true });
         return true;
     }
 
