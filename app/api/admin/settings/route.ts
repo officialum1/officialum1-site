@@ -5,7 +5,8 @@ import { isAuthenticated } from '@/lib/auth';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');
-    const isPublic = key === 'announcement_banner';
+    const isPublic = key === 'announcement_banner' || key === 'admin_online_status';
+
 
     if (!isPublic && !await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

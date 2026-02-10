@@ -31,6 +31,8 @@ const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'
 const VerificationTab = dynamic(() => import('@/components/admin/tabs/VerificationTab'), { ssr: false });
 const SellersTab = dynamic(() => import('@/components/admin/tabs/SellersTab'), { ssr: false });
 const PlayerUpTab = dynamic(() => import('@/components/admin/tabs/PlayerUpTab'), { ssr: false });
+const Z2UTab = dynamic(() => import('@/components/admin/tabs/Z2UTab'), { ssr: false });
+
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import ModernUIOverlay, { modernAlert, modernConfirm, modernPrompt } from '@/components/ModernUIOverlay';
 
@@ -59,6 +61,8 @@ function AdminDashboard() {
     const [showAddInv, setShowAddInv] = useState(false);
     const [showBulk, setShowBulk] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [adminOnline, setAdminOnline] = useState(false);
+
 
     // Filter Stats
     const [stats, setStats] = useState({
@@ -254,7 +258,14 @@ function AdminDashboard() {
         } else {
             fetchData(); // Fallback for no user
         }
+
+        // Fetch Online Status
+        fetch('/api/admin/settings?key=admin_online_status')
+            .then(res => res.json())
+            .then(data => setAdminOnline(data.value === 'online' || data.value === 'true'))
+            .catch(() => { });
     }, []);
+
 
     // Helper to update cache
     useEffect(() => {
@@ -1530,6 +1541,7 @@ function AdminDashboard() {
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
                                     { id: 'g2g_hub', label: '🎮 G2G Center', perm: 'orders', onClick: () => router.push('/admin/g2g') },
                                     { id: 'playerup', label: '🆙 PlayerUp', perm: 'playerup' },
+                                    { id: 'z2u', label: '🥈 Z2U Center', perm: 'inventory' },
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
                                 ].filter(tab => hasPermission(tab.perm)).map(tab => (
                                     <button
@@ -1667,8 +1679,45 @@ function AdminDashboard() {
 
                 {/* MAIN CONTENT AREA */}
                 <div style={{ flex: 1, padding: '2rem 3rem', maxWidth: '1600px', overflowX: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginBottom: '2rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'rgba(255,255,255,0.05)', padding: '0.4rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <span style={{ fontSize: '0.8rem', color: '#aaa', fontWeight: 'bold' }}>PUBLIC STATUS</span>
+                            <button
+                                onClick={async () => {
+                                    const next = !adminOnline;
+                                    setAdminOnline(next);
+                                    await fetch('/api/admin/settings', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ admin_online_status: next ? 'online' : 'away' })
+                                    });
+                                }}
+                                style={{
+                                    background: adminOnline ? '#00ff88' : '#333',
+                                    width: '40px',
+                                    height: '20px',
+                                    borderRadius: '20px',
+                                    position: 'relative',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s'
+                                }}
+                            >
+                                <div style={{
+                                    width: '16px',
+                                    height: '16px',
+                                    background: '#fff',
+                                    borderRadius: '50%',
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: adminOnline ? '22px' : '2px',
+                                    transition: 'all 0.3s'
+                                }}></div>
+                            </button>
+                            <span style={{ fontSize: '0.8rem', color: adminOnline ? '#00ff88' : '#666', fontWeight: 'bold' }}>{adminOnline ? 'ONLINE' : 'AWAY'}</span>
+                        </div>
                         <button
+
                             onClick={async () => {
                                 setLoading(true);
                                 try {
@@ -1818,6 +1867,11 @@ function AdminDashboard() {
                     {/* PLAYERUP TAB */}
                     {activeTab === 'playerup' && (
                         <PlayerUpTab />
+                    )}
+
+                    {/* Z2U TAB */}
+                    {activeTab === 'z2u' && (
+                        <Z2UTab />
                     )}
 
                     {/* FINANCE TAB (was Sales) */}

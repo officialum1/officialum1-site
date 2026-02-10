@@ -136,3 +136,35 @@ async function startSyncProcess() {
 
     chrome.runtime.sendMessage({ action: "SYNC_COMPLETE", count: totalSynced });
 }
+// LISTENER FOR REMOTE COMMANDS FROM DASHBOARD
+window.addEventListener('OFFICIALUM1_Z2U_SYNC', () => {
+    chrome.storage.local.get(['admin_pass'], (res) => {
+        chrome.runtime.sendMessage({ action: "Z2U_SYNC", adminPass: res.admin_pass });
+    });
+});
+
+window.addEventListener('OFFICIALUM1_REMOTE_SYNC', () => {
+    chrome.storage.local.get(['admin_pass'], (res) => {
+        chrome.runtime.sendMessage({ action: "REMOTE_SYNC", adminPass: res.admin_pass });
+    });
+});
+
+window.addEventListener('OFFICIALUM1_REMOTE_BUMP', (e) => {
+    chrome.storage.local.get(['admin_pass'], (res) => {
+        chrome.runtime.sendMessage({ action: "REMOTE_BUMP", adminPass: res.admin_pass, limit: e.detail?.limit || 0 });
+    });
+});
+
+
+window.addEventListener('OFFICIALUM1_SINGLE_BUMP', (e) => {
+    chrome.storage.local.get(['admin_pass'], (res) => {
+        chrome.runtime.sendMessage({ action: "REMOTE_BUMP", adminPass: res.admin_pass, singleUrl: e.detail.url });
+    });
+});
+
+window.addEventListener('OFFICIALUM1_SYNC_COOKIES', (e) => {
+
+    chrome.storage.local.get(['admin_pass'], (res) => {
+        chrome.runtime.sendMessage({ action: "SYNC_COOKIES", url: e.detail.url, adminPass: res.admin_pass });
+    });
+});

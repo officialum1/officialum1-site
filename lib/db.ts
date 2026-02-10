@@ -673,15 +673,27 @@ export async function initDB(force = false) {
             url VARCHAR(255) UNIQUE NOT NULL,
             platform VARCHAR(50) DEFAULT 'Other',
             lastBumped TIMESTAMP NULL,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            frequency VARCHAR(50) DEFAULT 'Every 24 hours',
+            status VARCHAR(50) DEFAULT 'Inactive',
+            username VARCHAR(100) DEFAULT 'officialum1'
         )
     `);
 
-    // Migration: Add platform column if missing
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN platform VARCHAR(50) DEFAULT 'Other'"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN frequency VARCHAR(50) DEFAULT 'Every 24 hours'"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN status VARCHAR(50) DEFAULT 'Inactive'"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN username VARCHAR(100) DEFAULT 'officialum1'"); } catch (e) { }
+    // 21. Z2U Listings
+    await query(`
+        CREATE TABLE IF NOT EXISTS z2u_listings (
+            id VARCHAR(50) PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            url VARCHAR(255) UNIQUE NOT NULL,
+            platform VARCHAR(50) DEFAULT 'Other',
+            unit_price VARCHAR(50),
+            stock VARCHAR(50),
+            status VARCHAR(50) DEFAULT 'Active',
+            lastSync TIMESTAMP NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
 
     isInitialized = true;
 }

@@ -80,13 +80,32 @@ export default function PlayerUpTab() {
         } catch (e) { modernAlert("Failed to delete"); }
     };
 
+    const [bumpingIds, setBumpingIds] = useState<Set<string>>(new Set());
+
     const handleManualBump = async (listing: Listing) => {
-        window.open(listing.url + '/up', '_blank');
+        setBumpingIds(prev => new Set(prev).add(listing.id));
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_SINGLE_BUMP', { detail: { url: listing.url } }));
+        modernAlert("Bump Queued", "Bumping listing in the background... 🚀", "success");
         try {
             await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_bump', id: listing.id }) });
-            fetchListings();
-        } catch (e) { }
+            setTimeout(() => {
+                setBumpingIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(listing.id);
+                    return next;
+                });
+                fetchListings();
+            }, 3000);
+        } catch (e) {
+            setBumpingIds(prev => {
+                const next = new Set(prev);
+                next.delete(listing.id);
+                return next;
+            });
+        }
     };
+
+
 
     const getTurboScript = () => `
 (async () => {
@@ -190,7 +209,14 @@ export default function PlayerUpTab() {
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex gap-2 justify-end">
                                         <button onClick={() => handleDelete(l.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 transition-all">🗑️</button>
-                                        <button onClick={() => handleManualBump(l)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-black transition-all">▶️</button>
+                                        <button
+                                            onClick={() => handleManualBump(l)}
+                                            disabled={bumpingIds.has(l.id)}
+                                            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${bumpingIds.has(l.id) ? 'bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.5)] text-white animate-pulse' : 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-black'}`}
+                                        >
+                                            {bumpingIds.has(l.id) ? '🔥' : '▶️'}
+                                        </button>
+
                                     </div>
                                 </td>
                             </tr>

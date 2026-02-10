@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
+import AdminStatusBadge from "@/components/AdminStatusBadge";
+
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -72,10 +74,14 @@ export default function Navbar() {
     return (
         <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
             <div className="navbar-content">
-                <Link href="/" className="logo text-gradient">
+                <Link href="/" className="logo text-gradient flex items-center gap-3">
                     <img src="/logo.jpg" alt="OfficialUM1 Logo" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                    OfficialUM1
+                    <span className="flex flex-col">
+                        <span className="leading-tight">OfficialUM1</span>
+                        <AdminStatusBadge />
+                    </span>
                 </Link>
+
 
                 <button
                     className="mobile-menu-btn"
