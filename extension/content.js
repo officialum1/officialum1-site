@@ -83,18 +83,16 @@ async function startSyncProcess() {
                 batch.slice(0, 2).forEach(item => {
                     chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `+ Found: ${item.title.substring(0, 20)}...` });
                 });
-                if (batch.length > 2) {
-                    chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `...and ${batch.length - 2} more.` });
-                }
 
-                // Sync to OfficialUM1 API
-                await fetch("https://officialum1.com/api/admin/playerup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action: "turbo_sync", listings: batch })
+                // DELEGATE TO BACKGROUND: Fixes CORS and connection drops
+                await new Promise((resolve) => {
+                    chrome.runtime.sendMessage({ action: "SYNC_TO_SERVER", listings: batch }, (response) => {
+                        if (response && response.success) {
+                            totalSynced += batch.length;
+                        }
+                        resolve();
+                    });
                 });
-
-                totalSynced += batch.length;
             }
 
             page++;

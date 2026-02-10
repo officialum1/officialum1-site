@@ -3,6 +3,9 @@
     "name": "OfficialUM1 Sync Master",
     "version": "1.0",
     "description": "Turbo-sync listings from PlayerUp, G2G, and Z2U to the OfficialUM1 dashboard.",
+    "background": {
+        "service_worker": "background.js"
+    },
     "permissions": [
         "activeTab",
         "scripting",
