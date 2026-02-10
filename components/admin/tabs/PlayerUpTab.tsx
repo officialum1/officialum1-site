@@ -226,14 +226,17 @@ export default function PlayerUpTab() {
                                 }
                             }
 
-                            // Strategy 4: Find any thread URLs anywhere in text
+                            // Strategy 4: Find ANY thread URLs anywhere in text using global regex
+                            // This is the "Nuclear Option" - if a match exists, we take it.
                             if (threads.length === 0) {
-                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[^\s"']+/g;
+                                // Match https://www.playerup.com/threads/anything.12345/
+                                // or https://www.playerup.com/threads/anything.12345
+                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[a-zA-Z0-9-]+\.\d+\/?/g;
                                 const urls = input.match(urlOnlyRegex) || [];
-                                urls.forEach(u => threads.push({ title: "Imported Thread", url: u }));
+                                urls.forEach(u => threads.push({ title: "Imported Thread (Unknown Title)", url: u }));
                             }
 
-                            // Deduplicate
+                            // Deduplicate by URL
                             const unique = Array.from(new Set(threads.map(t => t.url))).map(url => threads.find(t => t.url === url)!);
 
                             if (unique.length > 0) {
@@ -247,7 +250,7 @@ export default function PlayerUpTab() {
                                     fetchListings();
                                 });
                             } else {
-                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure you are copying the full page source (Ctrl+U) or a list of URLs.", "error");
+                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure your links look like 'https://www.playerup.com/threads/title.12345/'", "error");
                             }
 
                         }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
