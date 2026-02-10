@@ -23,6 +23,7 @@ export default function PlayerUpTab() {
     const [showAutoFetch, setShowAutoFetch] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All');
     const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
+    const [showManualImport, setShowManualImport] = useState(false);
 
     useEffect(() => {
         fetchListings();
@@ -174,8 +175,68 @@ export default function PlayerUpTab() {
                     <button onClick={handleCloudSync} className="bg-blue-600/10 text-blue-400 border border-blue-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-blue-600 hover:text-white transition-all">☁️ Cloud Sync</button>
                     <button onClick={handleCloudBump} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20 transition-all">🔥 Bump All</button>
                     <button onClick={() => { navigator.clipboard.writeText(getTurboScript()); modernAlert("Turbo Script Copied!", "Paste in PlayerUp Console.", "success"); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">⚡ Turbo Script</button>
+                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">📋 Manual Import</button>
                 </div>
             </div>
+
+            {showManualImport && (
+                <div className="mb-8 glass p-6 rounded-2xl border border-emerald-500/30 animate-in fade-in slide-in-from-top-4">
+                    <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">📋 Manual Thread Importer</h3>
+                    <p className="text-sm text-gray-400 mb-4">Go to your PlayerUp Threads page, press <code className="bg-black/30 px-1 rounded">Ctrl+U</code> to view source, then <code className="bg-black/30 px-1 rounded">Ctrl+A</code> and <code className="bg-black/30 px-1 rounded">Ctrl+C</code>. Paste everything below.</p>
+                    <textarea
+                        className="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 focus:border-emerald-500/50 outline-none resize-y"
+                        placeholder='Paste HTML Source Code or List of URLs here...'
+                        id="manual-import-area"
+                    ></textarea>
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button onClick={() => setShowManualImport(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                        <button onClick={() => {
+                            const input = (document.getElementById('manual-import-area') as HTMLTextAreaElement).value;
+                            if (!input) return;
+
+                            // Robust Parsing Logic
+                            const threads: { title: string, url: string }[] = [];
+
+                            // Strategy 1: Regex for HTML Source (href="..." ... title="...")
+                            // Capture Title from link text OR title attribute
+                            const htmlRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([\s\S]*?)<\/a>/g;
+                            let match;
+                            while ((match = htmlRegex.exec(input)) !== null) {
+                                let url = match[1];
+                                if (url.startsWith('/')) url = "https://www.playerup.com" + url;
+                                let title = match[2].replace(/<[^>]*>/g, '').trim();
+                                if (!title) continue;
+                                threads.push({ title, url });
+                            }
+
+                            // Strategy 2: Simple URL list
+                            if (threads.length === 0) {
+                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[^"'\s]+/g;
+                                const urls = input.match(urlOnlyRegex) || [];
+                                urls.forEach(u => threads.push({ title: "Imported Thread", url: u }));
+                            }
+
+                            // Deduplicate
+                            const unique = Array.from(new Set(threads.map(t => t.url))).map(url => threads.find(t => t.url === url)!);
+
+                            if (unique.length > 0) {
+                                fetch('/api/admin/playerup', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'turbo_sync', listings: unique })
+                                }).then(() => {
+                                    modernAlert("Import Successful", `Processed ${unique.length} threads.`, "success");
+                                    setShowManualImport(false);
+                                    fetchListings();
+                                });
+                            } else {
+                                modernAlert("No Threads Found", "Could not parse any threads from the input.", "error"); // Use "error" instead of "warning"
+                            }
+
+                        }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
+                    </div>
+                </div>
+            )}
 
             <div className="overflow-x-auto glass rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
                 <table className="w-full text-left border-collapse">
