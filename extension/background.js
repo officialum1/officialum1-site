@@ -3,7 +3,10 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "SYNC_COOKIES") {
         const url = new URL(request.url);
-        chrome.cookies.getAll({ domain: url.hostname }, async (cookies) => {
+        const baseDomain = url.hostname.split('.').slice(-2).join('.'); // e.g. playerup.com
+
+        // Get all cookies for the entire domain (not just sub-domain)
+        chrome.cookies.getAll({ domain: baseDomain }, async (cookies) => {
             const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
 
             // Send to our settings/session API
@@ -15,7 +18,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 },
                 body: JSON.stringify({
                     action: "save_session",
-                    site: url.hostname,
+                    site: baseDomain,
                     cookies: cookieString
                 })
             })

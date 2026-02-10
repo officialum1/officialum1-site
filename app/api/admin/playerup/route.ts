@@ -61,9 +61,17 @@ export async function POST(req: NextRequest) {
 
         // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
         if (action === 'cloud_fetch') {
-            const siteKey = 'session_cookies_www_playerup_com';
-            const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [siteKey]);
-            const cookies = rows[0]?.setting_value;
+            // Check both variations
+            const siteKeys = ['session_cookies_www_playerup_com', 'session_cookies_playerup_com'];
+            let cookies = null;
+
+            for (const key of siteKeys) {
+                const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [key]);
+                if (rows[0]?.setting_value) {
+                    cookies = rows[0].setting_value;
+                    break;
+                }
+            }
 
             if (!cookies) return NextResponse.json({ success: false, error: "No cookies found. Please sync cookies via extension first." });
 
@@ -72,11 +80,16 @@ export async function POST(req: NextRequest) {
             const response = await fetch(target, {
                 headers: {
                     "Cookie": cookies,
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
                 }
             });
 
-            if (!response.ok) return NextResponse.json({ success: false, error: "PlayerUp rejected the cloud request." });
+            if (!response.ok) {
+                return NextResponse.json({
+                    success: false,
+                    error: `PlayerUp Error (${response.status} ${response.statusText}). Try syncing cookies again.`
+                });
+            }
 
             const html = await response.text();
             const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
