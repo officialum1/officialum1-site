@@ -16,13 +16,35 @@ interface Listing {
 export default function PlayerUpTab() {
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showTurbo, setShowTurbo] = useState(false);
+    const [showAutoFetch, setShowAutoFetch] = useState(false);
     const [username, setUsername] = useState('officialum1');
     const [activeFilter, setActiveFilter] = useState('All');
 
     useEffect(() => {
         fetchListings();
     }, []);
+
+    const handleCloudSync = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cloud_fetch' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                modernAlert("Cloud Sync Complete!", `Found ${data.count} listings. Added ${data.new} new items.`, "success");
+                fetchListings();
+            } else {
+                modernAlert("Cloud Sync Failed", data.error || "Check your session cookies status.", "error");
+            }
+        } catch (e) {
+            modernAlert("Cloud Sync Error", "The server couldn't reach PlayerUp.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     async function fetchListings() {
         setLoading(true);
@@ -178,13 +200,23 @@ export default function PlayerUpTab() {
                     </h2>
                     <p style={{ color: '#888', margin: '5px 0 0 0', fontSize: '0.9rem' }}>Managing digital assets live on database.</p>
                 </div>
-                <button
-                    onClick={() => setShowTurbo(true)}
-                    className="btn btn-primary pulse-btn"
-                    style={{ background: 'linear-gradient(45deg, #ff0055, #ff00aa)', border: 'none', padding: '0.8rem 1.5rem', fontWeight: 'bold' }}
-                >
-                    ⚡ Auto-Fetch All Pages
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleCloudSync}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                    >
+                        <span>☁️</span>
+                        {loading ? 'Powering Sync...' : 'Cloud Master Sync'}
+                    </button>
+                    <button
+                        onClick={() => setShowAutoFetch(true)}
+                        className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-lg hover:shadow-pink-500/20"
+                    >
+                        <span>⚡</span>
+                        Auto-Fetch All Pages
+                    </button>
+                </div>
             </div>
 
             {/* Filter Bar */}
@@ -247,7 +279,7 @@ export default function PlayerUpTab() {
                 </div>
             )}
 
-            {showTurbo && (
+            {showAutoFetch && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(20px)' }}>
                     <div className="glass" style={{ padding: '2.5rem', borderRadius: '32px', width: '600px', maxWidth: '90vw', border: '1px solid #ff005544' }}>
                         <h3 style={{ color: '#ff0055', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -279,7 +311,7 @@ export default function PlayerUpTab() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button onClick={() => setShowTurbo(false)} className="btn btn-outline" style={{ borderColor: '#333' }}>Close</button>
+                            <button onClick={() => setShowAutoFetch(false)} className="btn btn-outline" style={{ borderColor: '#333' }}>Close</button>
                             <button onClick={handleCopyScript} className="btn btn-primary" style={{ background: '#ff0055', color: '#fff', border: 'none', fontWeight: 'bold' }}>
                                 📋 Copy Turbo Script
                             </button>

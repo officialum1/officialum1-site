@@ -59,7 +59,62 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { action, id, listings, username } = body;
 
-        // NEW: Action for Turbo Sync to handle massive bursts
+        // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
+        if (action === 'cloud_fetch') {
+            const siteKey = 'session_cookies_www_playerup_com';
+            const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [siteKey]);
+            const cookies = rows[0]?.setting_value;
+
+            if (!cookies) return NextResponse.json({ success: false, error: "No cookies found. Please sync cookies via extension first." });
+
+            const target = `https://www.playerup.com/accounts/-/postings`;
+
+            const response = await fetch(target, {
+                headers: {
+                    "Cookie": cookies,
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                }
+            });
+
+            if (!response.ok) return NextResponse.json({ success: false, error: "PlayerUp rejected the cloud request." });
+
+            const html = await response.text();
+            const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
+            let match;
+            const scrapedListings = [];
+            const seen = new Set();
+
+            while ((match = threadRegex.exec(html)) !== null) {
+                let url = match[1];
+                const title = match[2].trim();
+                if (!url.startsWith('http')) url = 'https://www.playerup.com/' + url.replace(/^\//, '');
+                url = url.split('?')[0];
+                if (title && !seen.has(url) && !title.toLowerCase().includes('contact')) {
+                    scrapedListings.push({ title, url });
+                    seen.add(url);
+                }
+            }
+
+            const existingRows: any = await query("SELECT url FROM playerup_listings");
+            const existingUrls = new Set(existingRows.map((r: any) => r.url));
+            let newCount = 0;
+
+            for (const item of scrapedListings) {
+                if (!existingUrls.has(item.url)) {
+                    const newId = Date.now() + Math.random().toString(36).substr(2, 9);
+                    const platform = detectPlatform(item.title, item.url);
+                    await query(
+                        "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt) VALUES (?, ?, ?, ?, NULL, NOW())",
+                        [newId, item.title, item.url, platform]
+                    );
+                    newCount++;
+                }
+            }
+
+            return NextResponse.json({ success: true, count: scrapedListings.length, new: newCount });
+        }
+
+        // Action for Turbo Sync
         if (action === 'turbo_sync' || action === 'bulk_import') {
             if (Array.isArray(listings)) {
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
