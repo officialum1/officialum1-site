@@ -47,54 +47,73 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 try {
                     let queue = [
                         "https://www.z2u.com/sell/manage",
-                        "https://www.z2u.com/sell/manageList?service=5&game=15132",
-                        "https://www.z2u.com/sell/manageList?service=5&game=15133"
+                        "https://www.z2u.com/sell/manageList?service=5"
                     ];
 
                     let visited = new Set();
                     let listings = [];
+                    let pageCount = 0;
 
-                    while (queue.length > 0) {
+                    while (queue.length > 0 && pageCount < 30) {
                         const targetUrl = queue.shift();
                         if (visited.has(targetUrl)) continue;
                         visited.add(targetUrl);
+                        pageCount++;
 
-                        console.log(`[Z2U] Scanning: ${targetUrl}`);
-                        const response = await fetch(targetUrl, { credentials: 'include' });
-                        if (!response.ok) continue;
+                        console.log(`[Z2U] Scanning Page ${pageCount}: ${targetUrl}`);
+
+                        // Z2U often requires basic headers to not look like a robot
+                        const response = await fetch(targetUrl, {
+                            credentials: 'include',
+                            headers: {
+                                'Accept': 'text/html,application/xhtml+xml,application/xml',
+                                'Upgrade-Insecure-Requests': '1'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            console.error(`[Z2U] Failed to fetch ${targetUrl}: ${response.status}`);
+                            continue;
+                        }
 
                         const html = await response.text();
 
-                        // 1. Parse Listings
+                        // 1. Parse Listings using a more generic approach
+                        // Iterate through table rows
                         const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
-                        const idRegex = /data-id="(\d+)"|id="listing-(\d+)"|#(\d{6,})/;
-                        const titleRegex = /<a[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/a>|<div[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/div>/;
-
                         let match;
                         while ((match = rowRegex.exec(html)) !== null) {
                             const content = match[1];
-                            const urlMatch = content.match(/href="[^"]*products\/(\d+)\.html"/);
-                            const id = urlMatch ? urlMatch[1] : (content.match(idRegex) || match[0].match(idRegex))?.[1];
-                            let titleMatch = content.match(titleRegex);
-                            let titleStr = titleMatch ? (titleMatch[1] || titleMatch[2]).replace(/<[^>]*>/g, '').trim() : "";
-                            if (!titleStr) {
-                                const anyLink = content.match(/<a[^>]*>([^<]{10,})<\/a>/);
-                                if (anyLink) titleStr = anyLink[1].trim();
-                            }
 
-                            if (id && titleStr && titleStr.length > 5) {
+                            // Check if this looks like a product row (has edit/offline buttons)
+                            if (!content.includes('manage/edit') && !content.includes('offline-action')) continue;
+
+                            // ID Extraction
+                            const idMatch = content.match(/data-id="(\d+)"/) || content.match(/id="[^"]*(\d+)"/) || content.match(/products\/(\d+)\.html/);
+                            if (!idMatch) continue;
+                            const id = idMatch[1];
+
+                            // Title Extraction (Look for the link to the product)
+                            const titleMatch = content.match(/<a[^>]+href="[^"]*products\/\d+\.html"[^>]*>([\s\S]*?)<\/a>/);
+                            const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : "Unknown Z2U Listing";
+
+                            if (title.length > 3) {
                                 listings.push({
-                                    id, title: titleStr,
+                                    id,
+                                    title,
                                     url: `https://www.z2u.com/products/${id}.html`,
-                                    price: (content.match(/unit-price">([\s\S]*?)<\/span>|\$([\d.]+)/)?.[1] || "0").replace(/[^\d.]/g, ''),
-                                    stock: (content.match(/stock-input"[^>]*value="(\d+)"|stock">(\d+)<\/div>|(\d+)\s*Stock/)?.[1] || "0"),
-                                    status: content.includes('Deactivate') || content.includes('Active') ? 'Active' : 'Deactivated'
+                                    price: (content.match(/unit-price[^>]*>([\s\S]*?)<|\$([\d.]+)/)?.[1] || "0").replace(/[^\d.]/g, ''),
+                                    stock: (content.match(/stock[^>]*>(\d+)<|value="(\d+)"/)?.[1] || "1").replace(/[^\d]/g, ''),
+                                    status: content.includes('active') ? 'Active' : 'Deactivated'
                                 });
                             }
                         }
 
+                        console.log(`[Z2U] Found ${listings.length} listings so far...`);
+
                         // 2. Find Next Page (Robust Finder)
-                        const nextMatch = html.match(/href="([^"]+)"[^>]*>[^<]*Next[^<]*<\/a>/i) || html.match(/<a[^>]+href="([^"]+)"[^>]*class="[^"]*next[^"]*"/i);
+                        // Look for a link with text "Next", or class "next"
+                        const nextMatch = html.match(/<a[^>]+href="([^"]+)"[^>]*>[^<]*Next[^<]*<\/a>/i) || html.match(/<a[^>]+class="[^"]*next[^"]*"[^>]+href="([^"]+)"/i);
                         if (nextMatch) {
                             let nextUrl = nextMatch[1];
                             if (!nextUrl.startsWith('http')) nextUrl = "https://www.z2u.com" + (nextUrl.startsWith('/') ? '' : '/') + nextUrl;
@@ -106,11 +125,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             await fetch(`${apiBase}/api/admin/z2u`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "turbo_sync", listings: listings.splice(0, listings.length) })
+                                body: JSON.stringify({ action: "turbo_sync", listings })
                             });
+                            // Clear batch to avoid re-sending
+                            listings = [];
                         }
-                        await new Promise(r => setTimeout(r, 1500));
+                        await new Promise(r => setTimeout(r, 2000));
                     }
+                    console.log("[OfficialUM1] Z2U Sync Complete.");
                 } catch (e) { console.error("Z2U Sync Error:", e); }
 
             } else if (request.action === "REMOTE_SYNC") {
