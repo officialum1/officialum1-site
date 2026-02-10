@@ -1,6 +1,9 @@
 // BRIDGE SCRIPT - Links Dashboard with Extension
 console.log("🚀 OfficialUM1 Extension Bridge Active");
 
+// Auto-detect and save the API URL for the background script
+chrome.storage.local.set({ last_api_url: window.location.origin });
+
 // Listen for custom signals from the React Dashboard
 window.addEventListener('OFFICIALUM1_REMOTE_SYNC', (e) => {
     console.log("📡 Remote Sync Signal Received...");
