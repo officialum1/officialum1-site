@@ -196,52 +196,53 @@ export default function PlayerUpTab() {
 
                             // Robust Parsing Logic
                             const threads: { title: string, url: string }[] = [];
+                            const playerupDomain = "https://www.playerup.com";
 
-                            // Strategy 1: Regex for HTML Source (href="..." ... title="...")
-                            // Capture Title from link text OR title attribute
-                            const htmlRegex = /href="([^"]*\/threads\/[^"]+\.\d+\/?)"[^>]*>([\s\S]*?)<\/a>/g;
+                            // Strategy 1: Prioritize href attributes (even relative or without domain)
+                            // This covers full HTML source code.
+                            // Matches href="..." or href='...'
+                            const hrefRegex = /href=["'](\/threads\/[^"']+\.\d+\/?|https?:\/\/(?:www\.)?playerup\.com\/threads\/[^"']+\.\d+\/?)["'][^>]*>(.*?)<\/a>/gi;
                             let match;
-                            while ((match = htmlRegex.exec(input)) !== null) {
+                            while ((match = hrefRegex.exec(input)) !== null) {
                                 let url = match[1];
-                                if (url.startsWith('/')) url = "https://www.playerup.com" + url;
+                                if (url.startsWith('/')) {
+                                    url = playerupDomain + url;
+                                }
+                                // Clean up title: remove HTML tags, trim whitespace
                                 let title = match[2].replace(/<[^>]*>/g, '').trim();
-                                if (!title) continue;
-                                threads.push({ title, url });
-                            }
-
-                            // Strategy 3: Raw Text Copy-Paste (e.g. from Selecting page text)
-                            // Often user copies: "Title Here\nhttps://www.playerup.com/threads/..."
-                            if (threads.length === 0) {
-                                // Split by lines and look for patterns
-                                const lines = input.split('\n').map(l => l.trim()).filter(l => l);
-                                for (let i = 0; i < lines.length; i++) {
-                                    const line = lines[i];
-                                    // Valid Thread URL
-                                    if (line.match(/^https:\/\/www\.playerup\.com\/threads\/[^"'\s]+$/)) {
-                                        // If previous line wasn't a URL, use it as title
-                                        const prev = lines[i - 1];
-                                        const title = (prev && !prev.includes('http')) ? prev : "Imported Thread";
-                                        threads.push({ title, url: line });
-                                    }
+                                if (title) {
+                                    threads.push({ title, url });
                                 }
                             }
 
-                            // Strategy 4: Find ANY thread URLs anywhere in text using global regex
-                            // This is the "Nuclear Option" - if a match exists, we take it.
-                            if (threads.length === 0) {
-                                // Match https://www.playerup.com/threads/[anything]
-                                // Relaxed to handle any characters after threads/
-                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]+/g;
-                                const urls = input.match(urlOnlyRegex) || [];
-                                urls.forEach(u => {
-                                    // Basic cleanup to remove trailing punctuation if pasted from sentence
-                                    let cleanUrl = u.replace(/[.,;)]$/, '');
-                                    threads.push({ title: "Imported Thread (Unknown Title)", url: cleanUrl });
-                                });
+                            // Strategy 2: Fallback for raw text or URLs without full HTML context
+                            // Looks for any text that resembles a thread path (e.g., "threads/title.12345/")
+                            // This covers simple pasted text or URLs.
+                            const threadPathRegex = /(?:https?:\/\/(?:www\.)?playerup\.com)?(\/threads\/[^"'\s]+?\.\d+\/?)/gi;
+                            let pathMatch;
+                            while ((pathMatch = threadPathRegex.exec(input)) !== null) {
+                                let url = pathMatch[1];
+                                if (!url.startsWith('http')) { // If it's just a path, prepend domain
+                                    url = playerupDomain + url;
+                                }
+                                // Use a generic title for these, as we don't have context
+                                threads.push({ title: "Imported Thread (Text Scan)", url });
                             }
 
-                            // Deduplicate by URL
-                            const unique = Array.from(new Set(threads.map(t => t.url))).map(url => threads.find(t => t.url === url)!);
+                            // Deduplicate by URL and ensure unique titles (if possible)
+                            const uniqueThreadsMap = new Map<string, { title: string, url: string }>();
+                            for (const thread of threads) {
+                                // If we already have this URL, prefer the one with a more specific title
+                                if (uniqueThreadsMap.has(thread.url)) {
+                                    const existing = uniqueThreadsMap.get(thread.url)!;
+                                    if (existing.title.includes("Imported Thread") && !thread.title.includes("Imported Thread")) {
+                                        uniqueThreadsMap.set(thread.url, thread);
+                                    }
+                                } else {
+                                    uniqueThreadsMap.set(thread.url, thread);
+                                }
+                            }
+                            const unique = Array.from(uniqueThreadsMap.values());
 
                             if (unique.length > 0) {
                                 fetch('/api/admin/playerup', {
@@ -254,7 +255,7 @@ export default function PlayerUpTab() {
                                     fetchListings();
                                 });
                             } else {
-                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure your links look like 'https://www.playerup.com/threads/title.12345/'", "error");
+                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure your links look like 'https://www.playerup.com/threads/title.12345/' or paste the full HTML source.", "error");
                             }
 
                         }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
