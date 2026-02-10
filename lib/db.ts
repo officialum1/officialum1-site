@@ -676,9 +676,13 @@ export async function initDB(force = false) {
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             frequency VARCHAR(50) DEFAULT 'Every 24 hours',
             status VARCHAR(50) DEFAULT 'Inactive',
-            username VARCHAR(100) DEFAULT 'officialum1'
+            username VARCHAR(100) DEFAULT 'officialum1',
+            lastBumpStatus VARCHAR(20) DEFAULT 'pending'
         )
     `);
+
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN lastBumpStatus VARCHAR(20) DEFAULT 'pending'"); } catch (e) { }
+
 
     // 21. Z2U Listings
     await query(`

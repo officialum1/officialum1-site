@@ -9,7 +9,9 @@ interface Listing {
     url: string;
     platform: string;
     lastBumped: string | null;
+    lastBumpStatus?: 'pending' | 'success' | 'failed';
     createdAt: string;
+
     status: string;
     frequency: string;
     username: string;
@@ -84,25 +86,20 @@ export default function PlayerUpTab() {
 
     const handleManualBump = async (listing: Listing) => {
         setBumpingIds(prev => new Set(prev).add(listing.id));
-        window.dispatchEvent(new CustomEvent('OFFICIALUM1_SINGLE_BUMP', { detail: { url: listing.url } }));
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_SINGLE_BUMP', {
+            detail: { url: listing.url, id: listing.id }
+        }));
         modernAlert("Bump Queued", "Bumping listing in the background... 🚀", "success");
-        try {
-            await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_bump', id: listing.id }) });
-            setTimeout(() => {
-                setBumpingIds(prev => {
-                    const next = new Set(prev);
-                    next.delete(listing.id);
-                    return next;
-                });
-                fetchListings();
-            }, 3000);
-        } catch (e) {
+
+        // Refresh UI after a short delay for the extension to work
+        setTimeout(() => {
             setBumpingIds(prev => {
                 const next = new Set(prev);
                 next.delete(listing.id);
                 return next;
             });
-        }
+            fetchListings();
+        }, 4000);
     };
 
 
@@ -199,13 +196,20 @@ export default function PlayerUpTab() {
                                     </select>
                                 </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap">
-                                    <div className="text-xs font-mono text-emerald-400 font-bold">
+                                    <div className={`text-xs font-mono font-bold ${l.lastBumpStatus === 'failed' ? 'text-red-400' : 'text-emerald-400'}`}>
                                         {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '[Off]'}
                                     </div>
-                                    <div className="text-[10px] text-gray-600 mt-0.5 uppercase font-medium">
-                                        {l.lastBumped ? 'Latest Wave' : 'Pending'}
+                                    <div className="text-[10px] text-gray-500 mt-1 uppercase font-bold flex items-center justify-center gap-1.5">
+                                        {l.lastBumpStatus === 'failed' ? (
+                                            <span className="text-red-500/80">❌ FAILED</span>
+                                        ) : (l.lastBumpStatus === 'success' || l.lastBumped) ? (
+                                            <span className="text-emerald-500/80">✅ SUCCESS</span>
+                                        ) : (
+                                            <span>PENDING</span>
+                                        )}
                                     </div>
                                 </td>
+
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex gap-2 justify-end">
                                         <button onClick={() => handleDelete(l.id)} className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 transition-all">🗑️</button>

@@ -158,9 +158,15 @@ window.addEventListener('OFFICIALUM1_REMOTE_BUMP', (e) => {
 
 window.addEventListener('OFFICIALUM1_SINGLE_BUMP', (e) => {
     chrome.storage.local.get(['admin_pass'], (res) => {
-        chrome.runtime.sendMessage({ action: "REMOTE_BUMP", adminPass: res.admin_pass, singleUrl: e.detail.url });
+        chrome.runtime.sendMessage({
+            action: "REMOTE_BUMP",
+            adminPass: res.admin_pass,
+            singleUrl: e.detail.url,
+            id: e.detail.id
+        });
     });
 });
+
 
 window.addEventListener('OFFICIALUM1_SYNC_COOKIES', (e) => {
 
