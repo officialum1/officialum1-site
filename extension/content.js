@@ -22,9 +22,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.action === "START_SYNC") {
         sendResponse({ status: "STARTED" }); // Reply immediately to fix "Still sleeping" error
         startSyncProcess();
+    } else if (request.action === "START_BUMP") {
+        sendResponse({ status: "BUMPING" });
+        startBumpProcess(request.limit);
     }
     return true;
 });
+
+async function startBumpProcess(limit = 0) {
+    chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `> Starting Auto-Bump Engine...` });
+
+    // Target common thread links
+    const container = document.querySelector('.p-body-main, .main-content, #content, .structItemContainer, .ProfilePostings') || document;
+    const links = [...container.querySelectorAll('.structItem-title a, .previewLink, a[href*="/threads/"]')];
+
+    const uniqueUrls = [...new Set(links.map(a => a.href.split('?')[0]))].filter(url => url.includes('/threads/'));
+    const finalTargets = limit > 0 ? uniqueUrls.slice(0, limit) : uniqueUrls;
+
+    let bumped = 0;
+    for (const url of finalTargets) {
+        chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `🔥 Bumping: ${url.split('/').pop()}` });
+        try {
+            const upUrl = url.endsWith('/') ? url + 'up' : url + '/up';
+            const res = await fetch(upUrl);
+            if (res.ok) {
+                bumped++;
+                // Tell our server we bumped it so the dashboard updates
+                chrome.runtime.sendMessage({ action: "SYNC_TO_SERVER", listings: [{ url, title: "BUMPED" }], type: "BUMP_UPDATE" });
+            }
+        } catch (e) { console.error(e); }
+        await new Promise(r => setTimeout(r, 800)); // Safety delay
+    }
+
+    chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `✅ Finished! Bumped ${bumped} threads.` });
+}
 
 async function startSyncProcess() {
     const host = window.location.hostname.replace('www.', '');

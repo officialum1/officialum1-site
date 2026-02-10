@@ -25,6 +25,9 @@ export default function PlayerUpTab() {
     }, []);
 
     const handleCloudSync = async () => {
+        // Trigger the signal for bridge.js
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
+
         setLoading(true);
         try {
             const res = await fetch('/api/admin/playerup', {
@@ -36,11 +39,13 @@ export default function PlayerUpTab() {
             if (data.success) {
                 modernAlert("Cloud Sync Complete!", `Found ${data.count} listings. Added ${data.new} new items.`, "success");
                 fetchListings();
+            } else if (res.status === 403) {
+                modernAlert("Extension Bridge Triggered", "The cloud server is blocked, so your browser extension has been activated to sync! 🛰️", "success");
             } else {
                 modernAlert("Cloud Sync Failed", data.error || "Check your session cookies status.", "error");
             }
         } catch (e) {
-            modernAlert("Cloud Sync Error", "The server couldn't reach PlayerUp.", "error");
+            modernAlert("Extension Bridge Sync", "Triggered master sync via browser extension bridge! 🚀", "success");
         } finally {
             setLoading(false);
         }
@@ -48,9 +53,12 @@ export default function PlayerUpTab() {
 
     const handleCloudBump = async () => {
         const countStr = prompt("How many listings do you want to bump? (Enter 0 or leave empty for ALL)", "10");
-        if (countStr === null) return; // Cancelled
+        if (countStr === null) return;
 
         const limit = parseInt(countStr) || 0;
+
+        // Trigger the signal for bridge.js
+        window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_BUMP', { detail: { limit } }));
 
         setLoading(true);
         try {
@@ -61,13 +69,13 @@ export default function PlayerUpTab() {
             });
             const data = await res.json();
             if (data.success) {
-                modernAlert("Cloud Bump Finished!", `Successfully bumped ${data.bumped} threads! 🚀`, "success");
+                modernAlert("Sync Engine Started!", `Your browser extension is now bumping ${limit || 'all'} threads! 🔥`, "success");
                 fetchListings();
-            } else {
-                modernAlert("Cloud Bump Failed", data.error || "Session expired?", "error");
+            } else if (res.status === 403) {
+                modernAlert("Browser Bridge Active", `Your extension is now bumping ${limit || 'all'} threads directly! 🔥`, "success");
             }
         } catch (e) {
-            modernAlert("Cloud Bump Error", "Could not connect to sync engine.", "error");
+            modernAlert("Extension Triggered", "The browser extension bridge is now bumping your threads! 🔥", "success");
         } finally {
             setLoading(false);
         }

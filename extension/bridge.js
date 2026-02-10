@@ -1,19 +1,13 @@
-
-// BRIDGE SCRIPT - Runs on OfficialUM1 Dashboard to link with the extension
+// BRIDGE SCRIPT - Links Dashboard with Extension
 console.log("🚀 OfficialUM1 Extension Bridge Active");
 
-// Listen for clicks on the Cloud Sync / Bump buttons
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
+// Listen for custom signals from the React Dashboard
+window.addEventListener('OFFICIALUM1_REMOTE_SYNC', (e) => {
+    console.log("📡 Remote Sync Signal Received...");
+    chrome.runtime.sendMessage({ action: "REMOTE_SYNC" });
+});
 
-    if (btn.innerText.includes('Cloud Master Sync')) {
-        console.log("📡 Triggering Browser Master Sync...");
-        chrome.runtime.sendMessage({ action: "REMOTE_SYNC" });
-    }
-
-    if (btn.innerText.includes('BUMP ALL LISTINGS')) {
-        console.log("📡 Triggering Browser Master Bump...");
-        chrome.runtime.sendMessage({ action: "REMOTE_BUMP" });
-    }
+window.addEventListener('OFFICIALUM1_REMOTE_BUMP', (e) => {
+    console.log("📡 Remote Bump Signal Received (Limit: " + e.detail.limit + ")...");
+    chrome.runtime.sendMessage({ action: "REMOTE_BUMP", limit: e.detail.limit });
 });
