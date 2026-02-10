@@ -22,14 +22,28 @@ function detectPlatform(title: string, url: string) {
     return 'Social';
 }
 
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+    });
+}
+
 export async function GET() {
     try {
         await initDB();
         const listings = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
-        return NextResponse.json(listings);
+        return NextResponse.json(listings, {
+            headers: { 'Access-Control-Allow-Origin': '*' }
+        });
     } catch (e) {
         console.error(e);
-        return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 }
 
@@ -42,11 +56,9 @@ export async function POST(req: NextRequest) {
         // NEW: Action for Turbo Sync to handle massive bursts
         if (action === 'turbo_sync' || action === 'bulk_import') {
             if (Array.isArray(listings)) {
-                // Efficient Batching: Get all existing URLs in one go
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
                 const existingUrls = new Set(existingRows.map((r: any) => r.url));
 
-                // Buffer for bulk insert (if supported by query helper)
                 for (const item of listings) {
                     if (!existingUrls.has(item.url)) {
                         const newId = Date.now() + Math.random().toString(36).substr(2, 9);
@@ -58,7 +70,9 @@ export async function POST(req: NextRequest) {
                         existingUrls.add(item.url);
                     }
                 }
-                return NextResponse.json({ success: true, count: listings.length });
+                return NextResponse.json({ success: true, count: listings.length }, {
+                    headers: { 'Access-Control-Allow-Origin': '*' }
+                });
             }
         }
 
@@ -69,9 +83,14 @@ export async function POST(req: NextRequest) {
         }
 
         const data: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
-        return NextResponse.json({ success: true, count: data.length, listings: data });
+        return NextResponse.json({ success: true, count: data.length, listings: data }, {
+            headers: { 'Access-Control-Allow-Origin': '*' }
+        });
     } catch (e) {
         console.error("PlayerUp API Error:", e);
-        return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });
+        return NextResponse.json({ success: false, error: 'Database error' }, {
+            status: 500,
+            headers: { 'Access-Control-Allow-Origin': '*' }
+        });
     }
 }
