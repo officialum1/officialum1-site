@@ -78,33 +78,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         const html = await response.text();
 
-                        // 1. Parse Listings using a more generic approach
-                        // Iterate through table rows
+                        // 1. Z2U Logic Refined
+                        // Sometimes Z2U listings are in <tr class="item-list"> or just <tr>
                         const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
                         let match;
                         while ((match = rowRegex.exec(html)) !== null) {
                             const content = match[1];
 
-                            // Check if this looks like a product row (has edit/offline buttons)
-                            if (!content.includes('manage/edit') && !content.includes('offline-action')) continue;
+                            // Must contain either "edit" link or "product-id"
+                            if (!content.includes('manage/edit') && !content.includes('products/') && !content.includes('data-id=')) continue;
 
                             // ID Extraction
                             const idMatch = content.match(/data-id="(\d+)"/) || content.match(/id="[^"]*(\d+)"/) || content.match(/products\/(\d+)\.html/);
                             if (!idMatch) continue;
                             const id = idMatch[1];
 
-                            // Title Extraction (Look for the link to the product)
-                            const titleMatch = content.match(/<a[^>]+href="[^"]*products\/\d+\.html"[^>]*>([\s\S]*?)<\/a>/);
-                            const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : "Unknown Z2U Listing";
+                            let title = "Z2U Listing " + id;
+                            // Try multiple ways to find the title
+                            const titleMatch = content.match(/class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/a>/) || content.match(/<a[^>]+href="[^"]*products\/\d+\.html"[^>]*>([\s\S]*?)<\/a>/);
+                            if (titleMatch) {
+                                title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
+                            } else {
+                                // Fallback: find any link that looks like a title
+                                const anyLink = content.match(/<a[^>]*>([^<]{10,})<\/a>/);
+                                if (anyLink) title = anyLink[1].trim();
+                            }
 
-                            if (title.length > 3) {
+                            const priceMatch = content.match(/unit-price[^>]*>([\s\S]*?)<|\$([\d.]+)/);
+                            const stockMatch = content.match(/stock[^>]*>(\d+)<|value="(\d+)"/);
+
+                            if (title) {
                                 listings.push({
                                     id,
-                                    title,
+                                    title: title.replace(/&amp;/g, '&'),
                                     url: `https://www.z2u.com/products/${id}.html`,
-                                    price: (content.match(/unit-price[^>]*>([\s\S]*?)<|\$([\d.]+)/)?.[1] || "0").replace(/[^\d.]/g, ''),
-                                    stock: (content.match(/stock[^>]*>(\d+)<|value="(\d+)"/)?.[1] || "1").replace(/[^\d]/g, ''),
-                                    status: content.includes('active') ? 'Active' : 'Deactivated'
+                                    price: (priceMatch?.[1] || priceMatch?.[2] || "0").replace(/[^\d.]/g, ''),
+                                    stock: (stockMatch?.[1] || stockMatch?.[2] || "999").replace(/[^\d]/g, ''),
+                                    status: content.toLowerCase().includes('active') ? 'Active' : 'Deactivated'
                                 });
                             }
                         }
