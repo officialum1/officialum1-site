@@ -57,10 +57,19 @@ export default function PlayerUpTab() {
 
     const handleCloudSync = async () => {
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
-        modernAlert("Sync Sweep Started", "Fetching latest threads... Wait 15s. 🛰️", "success");
-        setTimeout(() => fetchListings(), 15000);
+        modernAlert("Deep Sync Started", "Scanning PlayerUp for all possible threads (20 pages depth). This may take 60s... 🛰️", "success");
+
+        // Refresh every 10s for the first minute to show progress
+        let count = 0;
+        const interval = setInterval(() => {
+            fetchListings();
+            count++;
+            if (count > 6) clearInterval(interval);
+        }, 10000);
+
         try { await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cloud_fetch' }) }); } catch (e) { }
     };
+
 
     const handleCloudBump = async () => {
         const countStr = prompt("Bump limit? (0 for ALL)", "10");

@@ -25,8 +25,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         chrome.storage.local.get(['admin_pass'], async (res) => {
             const adminPass = adminPassAction || res.admin_pass;
+            if (!adminPass) {
+                console.error("[OfficialUM1] No Admin Password found in storage. Action restricted.");
+                return;
+            }
 
             if (request.action === "Z2U_SYNC") {
+                console.log("[OfficialUM1] Starting Z2U Scraping...");
                 try {
                     const targets = [
                         "https://www.z2u.com/sell/manage",
@@ -53,13 +58,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             let match;
                             while ((match = rowRegex.exec(html)) !== null) {
                                 const content = match[1];
-                                let idMatch = content.match(idRegex) || match[0].match(idRegex);
-                                const titleMatch = content.match(titleRegex);
 
-                                if (idMatch && titleMatch) {
-                                    const id = idMatch[1] || idMatch[2] || idMatch[3];
-                                    const titleStr = (titleMatch[1] || titleMatch[2]).replace(/<[^>]*>/g, '').trim();
+                                // URL based ID detection (More reliable)
+                                const urlMatch = content.match(/href="[^"]*products\/(\d+)\.html"/);
+                                const id = urlMatch ? urlMatch[1] : (content.match(idRegex) || match[0].match(idRegex))?.[1];
 
+                                // Title search - look for any reasonable link or text if specific class fails
+                                let titleMatch = content.match(titleRegex);
+                                let titleStr = titleMatch ? (titleMatch[1] || titleMatch[2]).replace(/<[^>]*>/g, '').trim() : "";
+
+                                if (!titleStr) {
+                                    // Fallback: search for first substantial link text
+                                    const anyLink = content.match(/<a[^>]*>([^<]{10,})<\/a>/);
+                                    if (anyLink) titleStr = anyLink[1].trim();
+                                }
+
+                                if (id && titleStr && titleStr.length > 5) {
                                     const priceMatch = content.match(priceRegex);
                                     const stockMatch = content.match(stockRegex);
 
@@ -67,9 +81,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         id,
                                         title: titleStr,
                                         url: `https://www.z2u.com/products/${id}.html`,
-                                        price: priceMatch ? (priceMatch[1] || priceMatch[2]).replace(/[^\d.]/g, '') : '0',
-                                        stock: stockMatch ? (stockMatch[1] || stockMatch[2] || stockMatch[3]) : '0',
-                                        status: content.includes('Deactivate') ? 'Active' : 'Deactivated'
+                                        price: priceMatch ? (priceMatch[1] || priceMatch[2] || "0").replace(/[^\d.]/g, '') : '0',
+                                        stock: stockMatch ? (stockMatch[1] || stockMatch[2] || stockMatch[3] || "0") : '0',
+                                        status: content.includes('Deactivate') || content.includes('Active') || !content.includes('Hidden') ? 'Active' : 'Deactivated'
                                     });
                                 }
                             }
@@ -89,18 +103,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.action === "REMOTE_SYNC") {
 
                 try {
+                    console.log("[OfficialUM1] Starting Depth Sync (20 Pages)...");
                     const syncTargets = [
                         "https://www.playerup.com/accounts/-/postings",
                         "https://www.playerup.com/accounts/-/threads",
                         "https://www.playerup.com/account/threads"
                     ];
 
-                    let totalPushed = 0;
-
                     for (const baseUrl of syncTargets) {
                         let page = 1;
-                        while (page <= 3) {
-                            const url = page === 1 ? baseUrl : `${baseUrl}?page=${page}`;
+                        while (page <= 20) {
+                            const url = page === 1 ? baseUrl : (baseUrl.endsWith('/') ? `${baseUrl}page-${page}` : `${baseUrl}/page-${page}`);
                             const response = await fetch(url, {
                                 credentials: 'include',
                                 headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" }
@@ -121,20 +134,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                             if (listings.length === 0) break;
 
-                            const pushRes = await fetch("https://officialum1.com/api/admin/playerup", {
+                            await fetch("https://officialum1.com/api/admin/playerup", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
                                 body: JSON.stringify({ action: "turbo_sync", listings })
                             });
 
-                            const pushData = await pushRes.json();
-                            totalPushed += (pushData.count || 0);
-
                             page++;
-                            await new Promise(r => setTimeout(r, 1200));
+                            await new Promise(r => setTimeout(r, 600));
                         }
                     }
+                    console.log("[OfficialUM1] Depth Sync Complete.");
                 } catch (e) { console.error("Sync Error:", e); }
+
 
             } else {
                 try {
@@ -197,14 +209,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-// AUTO-BUMP SCHEDULER (Runs every 1 minute)
+// AUTO-BUMP SCHEDULER (Alarm as backup, Loop for speed)
 chrome.alarms.create("AUTO_BUMP_CHECK", { periodInMinutes: 1 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "AUTO_BUMP_CHECK") {
-        runAutoBumpEngine();
+        startBumpLoop();
     }
 });
+
+let _isLooping = false;
+async function startBumpLoop() {
+    if (_isLooping) return;
+    _isLooping = true;
+    while (true) {
+        await runAutoBumpEngine();
+        await new Promise(r => setTimeout(r, 15000)); // Real-time check every 15s
+    }
+}
+
+// Start immediately
+startBumpLoop();
 
 async function runAutoBumpEngine() {
     chrome.storage.local.get(['admin_pass'], async (res) => {

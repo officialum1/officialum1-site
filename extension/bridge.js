@@ -7,7 +7,21 @@ window.addEventListener('OFFICIALUM1_REMOTE_SYNC', (e) => {
     chrome.runtime.sendMessage({ action: "REMOTE_SYNC" });
 });
 
+window.addEventListener('OFFICIALUM1_Z2U_SYNC', (e) => {
+    console.log("📡 Z2U Sync Signal Received...");
+    chrome.runtime.sendMessage({ action: "Z2U_SYNC" });
+});
+
 window.addEventListener('OFFICIALUM1_REMOTE_BUMP', (e) => {
     console.log("📡 Remote Bump Signal Received (Limit: " + e.detail.limit + ")...");
     chrome.runtime.sendMessage({ action: "REMOTE_BUMP", limit: e.detail.limit });
+});
+
+window.addEventListener('OFFICIALUM1_SINGLE_BUMP', (e) => {
+    console.log("📡 Single Bump Signal Received (Listing: " + e.detail.id + ")...");
+    chrome.runtime.sendMessage({
+        action: "REMOTE_BUMP",
+        singleUrl: e.detail.url,
+        id: e.detail.id
+    });
 });
