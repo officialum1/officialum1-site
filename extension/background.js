@@ -116,11 +116,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else if (request.action === "REMOTE_SYNC") {
                 console.log("[OfficialUM1] Starting PlayerUp Crawler...");
 
-                let queue = ["https://www.playerup.com/accounts/-/postings"];
+                // Start with both Postings (replies/activity) and Threads (topics created)
+                let queue = [
+                    "https://www.playerup.com/accounts/-/threads",
+                    "https://www.playerup.com/accounts/-/postings"
+                ];
                 let visited = new Set();
                 let pageCount = 0;
 
-                while (queue.length > 0 && pageCount < 30) {
+                while (queue.length > 0 && pageCount < 50) { // Increased limit
                     const url = queue.shift();
                     if (visited.has(url)) continue;
                     visited.add(url);
@@ -130,7 +134,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     try {
                         const response = await fetch(url, { credentials: 'include' });
-                        if (!response.ok) continue; // Skip invalid pages
+                        if (!response.ok) continue;
                         const html = await response.text();
 
                         // 1. Extract Listings
@@ -151,13 +155,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             });
                         }
 
-                        // 2. Find "Next >" Button
-                        const nextLinkRegex = /<a\s+href="([^"]+)"\s+class="[^"]*pageNav-jump--next[^"]*"/i;
+                        // 2. Find "Next >" Button (Handle arbitrary attribute order)
+                        // Matches <a ... class="...pageNav-jump--next..." ... href="..." ...> OR <a ... href="..." ... class="...pageNav-jump--next..." ...>
+                        const nextLinkRegex = /<a[^>]+href="([^"]+)"[^>]*class="[^"]*pageNav-jump--next[^"]*"|<a[^>]+class="[^"]*pageNav-jump--next[^"]*"[^>]*href="([^"]+)"/i;
                         const nextMatch = nextLinkRegex.exec(html);
+
                         if (nextMatch) {
-                            let nextUrl = nextMatch[1];
-                            if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
-                            if (!visited.has(nextUrl)) queue.push(nextUrl);
+                            let nextUrl = nextMatch[1] || nextMatch[2];
+                            if (nextUrl) {
+                                if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
+                                // Decode entities like &amp; to &
+                                nextUrl = nextUrl.replace(/&amp;/g, '&');
+                                if (!visited.has(nextUrl)) queue.push(nextUrl);
+                            }
                         }
 
                         await new Promise(r => setTimeout(r, 1000));
