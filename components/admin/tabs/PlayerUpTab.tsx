@@ -229,11 +229,15 @@ export default function PlayerUpTab() {
                             // Strategy 4: Find ANY thread URLs anywhere in text using global regex
                             // This is the "Nuclear Option" - if a match exists, we take it.
                             if (threads.length === 0) {
-                                // Match https://www.playerup.com/threads/anything.12345/
-                                // or https://www.playerup.com/threads/anything.12345
-                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[a-zA-Z0-9-]+\.\d+\/?/g;
+                                // Match https://www.playerup.com/threads/[anything]
+                                // Relaxed to handle any characters after threads/
+                                const urlOnlyRegex = /https:\/\/www\.playerup\.com\/threads\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=%]+/g;
                                 const urls = input.match(urlOnlyRegex) || [];
-                                urls.forEach(u => threads.push({ title: "Imported Thread (Unknown Title)", url: u }));
+                                urls.forEach(u => {
+                                    // Basic cleanup to remove trailing punctuation if pasted from sentence
+                                    let cleanUrl = u.replace(/[.,;)]$/, '');
+                                    threads.push({ title: "Imported Thread (Unknown Title)", url: cleanUrl });
+                                });
                             }
 
                             // Deduplicate by URL
