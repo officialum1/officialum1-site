@@ -18,10 +18,22 @@ interface Z2UListing {
 export default function Z2UTab() {
     const [listings, setListings] = useState<Z2UListing[]>([]);
     const [loading, setLoading] = useState(true);
+    const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
 
     useEffect(() => {
         fetchListings();
+        checkCookieStatus();
     }, []);
+
+    const checkCookieStatus = async () => {
+        try {
+            const res = await fetch('/api/admin/settings');
+            const settings = await res.json();
+            if (settings['session_cookies_z2u_com'] && settings['session_cookies_z2u_com'].length > 20) {
+                setCookieStatus('connected');
+            }
+        } catch (e) { console.error("Cookie check failed", e); }
+    };
 
     const fetchListings = async () => {
         setLoading(true);
@@ -63,6 +75,17 @@ export default function Z2UTab() {
                     <h2 className="text-2xl font-bold flex items-center gap-3">
                         🥈 Z2U Command Center
                         <span className="text-xs bg-orange-500/10 text-orange-400 px-3 py-1 rounded-full border border-orange-500/20 uppercase tracking-widest">{listings.length} OFFERS</span>
+                        {cookieStatus === 'connected' ? (
+                            <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                Cookies Connected
+                            </span>
+                        ) : (
+                            <span className="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded-full border border-red-500/20 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                Cookies Disconnected
+                            </span>
+                        )}
                     </h2>
                     <p className="text-gray-400 text-sm mt-1">Direct bridge to Z2U listing management.</p>
                 </div>

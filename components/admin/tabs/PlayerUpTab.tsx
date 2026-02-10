@@ -22,10 +22,22 @@ export default function PlayerUpTab() {
     const [loading, setLoading] = useState(true);
     const [showAutoFetch, setShowAutoFetch] = useState(false);
     const [activeFilter, setActiveFilter] = useState('All');
+    const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
 
     useEffect(() => {
         fetchListings();
+        checkCookieStatus();
     }, []);
+
+    const checkCookieStatus = async () => {
+        try {
+            const res = await fetch('/api/admin/settings');
+            const settings = await res.json();
+            if (settings['session_cookies_playerup_com'] && settings['session_cookies_playerup_com'].length > 20) {
+                setCookieStatus('connected');
+            }
+        } catch (e) { console.error("Cookie check failed", e); }
+    };
 
     const fetchListings = async () => {
         setLoading(true);
@@ -40,6 +52,8 @@ export default function PlayerUpTab() {
             setLoading(false);
         }
     };
+
+    // ... (rest of functions)
 
     const handleUpdate = async (listing: Listing, updates: Partial<Listing>) => {
         const updated = { ...listing, ...updates };
@@ -142,6 +156,17 @@ export default function PlayerUpTab() {
                     <h2 className="text-2xl font-bold flex items-center gap-3">
                         🚀 PlayerUp Command Center
                         <span className="text-xs bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-full border border-cyan-500/20 uppercase tracking-widest">{listings.length} THREADS</span>
+                        {cookieStatus === 'connected' ? (
+                            <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                Cookies Connected
+                            </span>
+                        ) : (
+                            <span className="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded-full border border-red-500/20 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                Cookies Disconnected
+                            </span>
+                        )}
                     </h2>
                     <p className="text-gray-400 text-sm mt-1">Automated listing management & scheduled bumping engine.</p>
                 </div>
