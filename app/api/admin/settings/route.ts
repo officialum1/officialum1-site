@@ -33,9 +33,26 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminPass = request.headers.get('X-Admin-Password');
+    const isExtension = adminPass === process.env.ADMIN_PASSWORD;
+
+    if (!isExtension && !await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     try {
         const body = await request.json();
+
+        // SPECIAL: Extension Session Sync
+        if (body.action === 'save_session') {
+            const { site, cookies } = body;
+            const key = `session_cookies_${site.replace(/\./g, '_')}`;
+            await query(`
+                INSERT INTO settings (setting_key, setting_value) 
+                VALUES (?, ?) 
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+            `, [key, cookies]);
+            return NextResponse.json({ success: true, message: "Session Saved" });
+        }
+
         const keys = Object.keys(body);
 
         // Prepare queries for atomic updates

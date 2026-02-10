@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query, initDB } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 function detectPlatform(title: string, url: string) {
     const t = title.toLowerCase();
@@ -48,6 +49,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const adminPass = req.headers.get('X-Admin-Password');
+    const isExtension = adminPass === process.env.ADMIN_PASSWORD;
+
+    if (!isExtension && !await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     try {
         await initDB();
         const body = await req.json();
