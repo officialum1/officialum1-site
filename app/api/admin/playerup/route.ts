@@ -196,9 +196,14 @@ export async function POST(req: NextRequest) {
         if (action === 'delete') {
             await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
         } else if (action === 'update_bump') {
-            const success = body.success !== false; // Default to true if not provided
+            const success = body.success === true; // Strict true check
             const status = success ? 'success' : 'failed';
-            await query("UPDATE playerup_listings SET lastBumped = NOW(), lastBumpStatus = ? WHERE id = ?", [status, id]);
+            if (success) {
+                await query("UPDATE playerup_listings SET lastBumped = NOW(), lastBumpStatus = ? WHERE id = ?", [status, id]);
+            } else {
+                // If failed, only update status, not time (so it retries or shows error)
+                await query("UPDATE playerup_listings SET lastBumpStatus = ? WHERE id = ?", [status, id]);
+            }
         } else if (action === 'update') {
 
             await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
