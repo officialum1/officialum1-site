@@ -172,22 +172,42 @@ export async function POST(req: NextRequest) {
 
         // Action for Turbo Sync
         if (action === 'turbo_sync' || action === 'bulk_import') {
+            console.log(`[PlayerUp] Received ${bulkListings?.length} listings for import.`);
+
             if (Array.isArray(bulkListings)) {
                 const existingRows: any = await query("SELECT url FROM playerup_listings");
-                const existingUrls = new Set(existingRows.map((r: any) => r.url));
+                // Normalize existing URLs for comparison (strip protocol, www, trailing slash)
+                const normalize = (u: string) => u.toLowerCase().replace(/https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+                const existingUrls = new Set(existingRows.map((r: any) => normalize(r.url)));
+
+                let adedCount = 0;
 
                 for (const item of bulkListings) {
-                    if (!existingUrls.has(item.url)) {
-                        const newId = Date.now() + Math.random().toString(36).substr(2, 9);
-                        const platform = detectPlatform(item.title, item.url);
+                    if (!item.url || !item.url.includes('playerup')) continue;
+
+                    const normalizedUrl = normalize(item.url);
+
+                    if (!existingUrls.has(normalizedUrl)) {
+                        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                        // Ensure title isn't empty
+                        const title = item.title || "Imported PlayerUp Thread";
+                        const platform = detectPlatform(title, item.url);
+
                         await query(
-                            "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt, status, frequency, username) VALUES (?, ?, ?, ?, NULL, NOW(), 'Inactive', 'Every 24 hours', 'officialum1')",
-                            [newId, item.title, item.url, platform]
+                            `INSERT IGNORE INTO playerup_listings 
+                            (id, title, url, platform, lastBumped, createdAt, status, frequency, username) 
+                            VALUES (?, ?, ?, ?, NULL, NOW(), 'Active', 'Every 24 hours', 'officialum1')`,
+                            // Default to 'Active' so they start bumping immediately if needed
+                            [newId, title, item.url, platform]
                         );
-                        existingUrls.add(item.url);
+                        existingUrls.add(normalizedUrl);
+                        adedCount++;
                     }
                 }
-                return NextResponse.json({ success: true, count: bulkListings.length }, {
+                console.log(`[PlayerUp] Successfully imported ${adedCount} new listings.`);
+
+                const allData: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
+                return NextResponse.json({ success: true, count: allData.length, new: adedCount, listings: allData }, {
                     headers: { 'Access-Control-Allow-Origin': '*' }
                 });
             }
