@@ -39,6 +39,15 @@
             "js": [
                 "content.js"
             ]
+        },
+        {
+            "matches": [
+                "https://*.officialum1.com/*",
+                "http://localhost:3000/*"
+            ],
+            "js": [
+                "bridge.js"
+            ]
         }
     ]
 }
