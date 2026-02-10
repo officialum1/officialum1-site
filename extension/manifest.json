@@ -9,10 +9,10 @@
         "storage"
     ],
     "host_permissions": [
-        "https://www.playerup.com/*",
-        "https://www.g2g.com/*",
-        "https://www.z2u.com/*",
-        "https://officialum1.com/*",
+        "https://*.playerup.com/*",
+        "https://*.g2g.com/*",
+        "https://*.z2u.com/*",
+        "https://*.officialum1.com/*",
         "http://localhost:3000/*"
     ],
     "action": {
@@ -27,9 +27,9 @@
     "content_scripts": [
         {
             "matches": [
-                "https://www.playerup.com/*",
-                "https://www.g2g.com/*",
-                "https://www.z2u.com/*"
+                "https://*.playerup.com/*",
+                "https://*.g2g.com/*",
+                "https://*.z2u.com/*"
             ],
             "js": [
                 "content.js"

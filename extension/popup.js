@@ -30,15 +30,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         logDiv.style.display = 'block';
         logDiv.innerHTML = `<div>> Initializing Bridge...</div>`;
 
-        // Send message to content script
+        // Attempt to "wake up" the content script
+        try {
+            await chrome.tabs.sendMessage(tab.id, { action: "PING" });
+            startSync();
+        } catch (e) {
+            // If ping fails, force-inject the script and try again
+            logDiv.innerHTML += `<div>> Waking up sync engine...</div>`;
+            chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['content.js']
+            }, () => {
+                setTimeout(startSync, 500);
+            });
+        }
+    });
+
+    function startSync() {
         chrome.tabs.sendMessage(tab.id, { action: "START_SYNC" }, (response) => {
             if (chrome.runtime.lastError) {
-                logDiv.innerHTML += `<div style="color:#ff6666">Error: Refresh your PlayerUp tab first!</div>`;
+                logDiv.innerHTML += `<div style="color:#ff6666">Error: Still sleeping! Please refresh F5.</div>`;
                 syncBtn.innerText = "START SYNC";
                 syncBtn.disabled = false;
             }
         });
-    });
+    }
 
     // Listen for progress from content script
     chrome.runtime.onMessage.addListener((msg) => {

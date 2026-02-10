@@ -17,18 +17,22 @@ const SITE_CONFIG = {
 };
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "START_SYNC") {
+    if (request.action === "PING") {
+        sendResponse({ status: "ALIVE" });
+    } else if (request.action === "START_SYNC") {
+        sendResponse({ status: "STARTED" }); // Reply immediately to fix "Still sleeping" error
         startSyncProcess();
     }
+    return true;
 });
 
 async function startSyncProcess() {
     const host = window.location.hostname.replace('www.', '');
     const config = SITE_CONFIG[host] || SITE_CONFIG['playerup.com']; // Fallback
 
-    chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `> Scanning ${config.name}...` });
+    chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `> Sync Engine Online...` });
 
-    const JUNK_TITLES = ['contact', 'help', 'terms', 'privacy', 'rules', 'navigation', 'search', 'profile'];
+    const JUNK_TITLES = ['contact', 'help', 'terms', 'privacy', 'rules', 'navigation', 'search', 'profile', 'logout', 'login'];
 
     let page = 1;
     let totalSynced = 0;
@@ -48,8 +52,8 @@ async function startSyncProcess() {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, "text/html");
 
-            // Focus on main content area to avoid sidebars/footers
-            const mainContent = doc.querySelector('.p-body-main, .main-content, #content') || doc;
+            // Broaden container search for Profile vs Forum support
+            const mainContent = doc.querySelector('.p-body-main, .main-content, #content, .structItemContainer, .ProfilePostings') || doc;
             const links = [...mainContent.querySelectorAll(config.selector)];
 
             const uniqueThreads = new Map();
