@@ -14,19 +14,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     // COOKIE SYNC
     if (request.action === "SYNC_COOKIES") {
-        const url = new URL(request.url);
-        const baseDomain = url.hostname.split('.').slice(-2).join('.');
-        chrome.cookies.getAll({ domain: baseDomain }, async (cookies) => {
-            const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-            const apiBase = await getApiUrl();
-            fetch(`${apiBase}/api/admin/settings`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
-                body: JSON.stringify({ action: "save_session", site: baseDomain, cookies: cookieString })
-            })
-                .then(res => res.ok ? sendResponse({ success: true }) : sendResponse({ success: false }))
-                .catch(() => sendResponse({ success: false }));
-        });
+        (async () => {
+            try {
+                const url = new URL(request.url);
+                const baseDomain = url.hostname.split('.').slice(-2).join('.');
+
+                // Robust Admin Pass Retrieval
+                let adminPass = request.adminPass;
+                if (!adminPass) {
+                    const stored = await getStorage(['admin_pass']);
+                    adminPass = stored.admin_pass;
+                }
+
+                chrome.cookies.getAll({ domain: baseDomain }, async (cookies) => {
+                    const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+                    const apiBase = await getApiUrl();
+
+                    try {
+                        const res = await fetch(`${apiBase}/api/admin/settings`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                            body: JSON.stringify({ action: "save_session", site: baseDomain, cookies: cookieString })
+                        });
+
+                        // Try to parse JSON if possible, else just check ok
+                        let data;
+                        try { data = await res.json(); } catch (e) { data = {}; }
+
+                        if (res.ok) sendResponse({ success: true });
+                        else sendResponse({ success: false, error: data.error || 'Server Error' });
+
+                    } catch (e) {
+                        console.error("Cookie Sync Error", e);
+                        sendResponse({ success: false, error: e.message });
+                    }
+                });
+            } catch (e) { console.error("Sync Logic Fail", e); sendResponse({ success: false }); }
+        })();
         return true;
     }
 
