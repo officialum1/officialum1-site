@@ -76,10 +76,16 @@ export default function Z2UTab() {
                         🥈 Z2U Command Center
                         <span className="text-xs bg-orange-500/10 text-orange-400 px-3 py-1 rounded-full border border-orange-500/20 uppercase tracking-widest">{listings.length} OFFERS</span>
                         {cookieStatus === 'connected' ? (
-                            <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                Cookies Connected
-                            </span>
+                            <div className="flex gap-2">
+                                <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    Cookies Connected
+                                </span>
+                                <span className="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                                    Auto-Online Active
+                                </span>
+                            </div>
                         ) : (
                             <span className="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded-full border border-red-500/20 uppercase tracking-widest flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-red-500"></span>
@@ -118,7 +124,7 @@ export default function Z2UTab() {
                         {loading && listings.length === 0 ? (
                             <tr><td colSpan={8} className="text-center py-20 text-gray-500 animate-pulse">Connecting to Z2U Database...</td></tr>
                         ) : listings.length === 0 ? (
-                            <tr><td colSpan={8} className="text-center py-20 text-gray-500">No Z2U listings found. Run Sync to fetch data.</td></tr>
+                            <tr><td colSpan={8} className="text-center py-20 text-gray-500">No Z2U listings found. Ensure you are logged into Z2U in your browser, then click Synchronize.</td></tr>
                         ) : listings.map(l => (
                             <tr key={l.id} className="hover:bg-white/[0.02] transition-colors">
                                 <td className="px-6 py-4">
