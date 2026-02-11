@@ -194,55 +194,52 @@ export default function PlayerUpTab() {
                             const input = (document.getElementById('manual-import-area') as HTMLTextAreaElement).value;
                             if (!input) return;
 
-                            // Robust Parsing Logic
+                            // Robust Parsing Logic (Ultra-Simpified)
                             const threads: { title: string, url: string }[] = [];
                             const playerupDomain = "https://www.playerup.com";
 
-                            // Strategy 1: Prioritize href attributes (even relative or without domain)
-                            // This covers full HTML source code.
-                            // Matches href="..." or href='...'
-                            const hrefRegex = /href=["'](\/threads\/[^"']+\.\d+\/?|https?:\/\/(?:www\.)?playerup\.com\/threads\/[^"']+\.\d+\/?)["'][^>]*>(.*?)<\/a>/gi;
+                            // Strategy 1: Find ANY href that contains "threads/"
+                            // matches: href="threads/..." or href="/threads/..."
+                            const hrefRegex = /href=["'](\/threads\/[^"']+|threads\/[^"']+)["'][^>]*>(.*?)<\/a>/gi;
                             let match;
                             while ((match = hrefRegex.exec(input)) !== null) {
                                 let url = match[1];
-                                if (url.startsWith('/')) {
-                                    url = playerupDomain + url;
-                                }
-                                // Clean up title: remove HTML tags, trim whitespace
+                                // Exclude non-thread pages (like navigating to threads list)
+                                if (url.includes('account/threads') || url.includes('watched/threads') || url.includes('find-threads')) continue;
+
+                                if (url.startsWith('/')) url = playerupDomain + url;
+                                else if (!url.startsWith('http')) url = playerupDomain + "/" + url;
+
                                 let title = match[2].replace(/<[^>]*>/g, '').trim();
                                 if (title) {
                                     threads.push({ title, url });
                                 }
                             }
 
-                            // Strategy 2: Fallback for raw text or URLs without full HTML context
-                            // Looks for any text that resembles a thread path (e.g., "threads/title.12345/")
-                            // This covers simple pasted text or URLs.
-                            const threadPathRegex = /(?:https?:\/\/(?:www\.)?playerup\.com)?(\/threads\/[^"'\s]+?\.\d+\/?)/gi;
-                            let pathMatch;
-                            while ((pathMatch = threadPathRegex.exec(input)) !== null) {
-                                let url = pathMatch[1];
-                                if (!url.startsWith('http')) { // If it's just a path, prepend domain
-                                    url = playerupDomain + url;
+                            // Strategy 2: Fallback - Raw text scan for "threads/xxxxx"
+                            if (threads.length === 0) {
+                                // Just find "threads/anything" until a space, quote, or newline
+                                const rawRegex = /(?:playerup\.com\/|\/|^)(threads\/[a-zA-Z0-9-._]+(?:\.\d+)?\/?)/gi;
+                                let m;
+                                while ((m = rawRegex.exec(input)) !== null) {
+                                    let url = m[1];
+                                    if (url.includes('account/') || url.includes('watched/')) continue;
+
+                                    if (!url.startsWith('http')) url = playerupDomain + "/" + url;
+                                    threads.push({ title: "Imported Thread", url: url.replace(/\/+/g, '/') });
                                 }
-                                // Use a generic title for these, as we don't have context
-                                threads.push({ title: "Imported Thread (Text Scan)", url });
                             }
 
-                            // Deduplicate by URL and ensure unique titles (if possible)
-                            const uniqueThreadsMap = new Map<string, { title: string, url: string }>();
-                            for (const thread of threads) {
-                                // If we already have this URL, prefer the one with a more specific title
-                                if (uniqueThreadsMap.has(thread.url)) {
-                                    const existing = uniqueThreadsMap.get(thread.url)!;
-                                    if (existing.title.includes("Imported Thread") && !thread.title.includes("Imported Thread")) {
-                                        uniqueThreadsMap.set(thread.url, thread);
-                                    }
-                                } else {
-                                    uniqueThreadsMap.set(thread.url, thread);
-                                }
-                            }
-                            const unique = Array.from(uniqueThreadsMap.values());
+                            // Cleaning and Deduplication
+                            // 1. Fix double slashes (https://www.playerup.com//threads) -> (https://www.playerup.com/threads)
+                            const uniqueMap = new Map();
+                            threads.forEach(t => {
+                                t.url = t.url.replace('playerup.com//', 'playerup.com/');
+                                if (!uniqueMap.has(t.url)) uniqueMap.set(t.url, t);
+                                else if (t.title !== "Imported Thread") uniqueMap.set(t.url, t); // Upgrade title
+                            });
+
+                            const unique = Array.from(uniqueMap.values());
 
                             if (unique.length > 0) {
                                 fetch('/api/admin/playerup', {
