@@ -363,30 +363,64 @@ async function runAutoBumpEngine() {
 }
 
 async function performBumpAction(item, adminPass, apiBase) {
-    const upUrl = item.url.replace(/\/$/, '') + '/up';
+    const threadUrl = item.url;
     let success = false;
 
+    console.log(`[OfficialUM1] Starting Stealth Bump for: ${item.title}`);
+
     try {
-        const bumpRes = await fetch(upUrl, { credentials: 'include' });
-        if (bumpRes.ok) {
-            const text = await bumpRes.text();
-            const finalUrl = bumpRes.url;
+        await new Promise((resolve) => {
+            chrome.windows.create({ url: threadUrl, state: 'minimized' }, async (win) => {
+                const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
+                if (!tabId) { resolve(false); return; }
 
-            const isLogin = finalUrl.includes('login') || text.includes('Log in');
-            const noPermission = text.includes('do not have permission') || text.includes('error_not_found');
+                // Wait for load
+                const waitForLoad = () => new Promise(r => {
+                    const listener = (tid, changeInfo) => {
+                        if (tid === tabId && changeInfo.status === 'complete') {
+                            chrome.tabs.onUpdated.removeListener(listener);
+                            setTimeout(r, 2000);
+                        }
+                    };
+                    chrome.tabs.onUpdated.addListener(listener);
+                });
+                await waitForLoad();
 
-            if (!isLogin && !noPermission) {
-                success = true;
-            } else {
-                console.warn(`[OfficialUM1] Fetch bump denied. Trying Tab Fallback...`);
-                success = await fallbackBump(upUrl);
-            }
-        } else {
-            success = await fallbackBump(upUrl);
-        }
+                // Inject Click Script
+                try {
+                    const results = await chrome.scripting.executeScript({
+                        target: { tabId: tabId },
+                        func: () => {
+                            const btn = document.querySelector('a.UpControl.UpButtonView') || document.getElementById('upButtonCountdown');
+                            if (btn) {
+                                btn.click();
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+
+                    if (results && results[0] && results[0].result === true) {
+                        success = true;
+                        console.log("[OfficialUM1] Bump Clicked Successfully!");
+                        // Wait for action to register
+                        await new Promise(r => setTimeout(r, 2000));
+                    } else {
+                        console.warn("[OfficialUM1] Bump button not found on page.");
+                    }
+                } catch (e) {
+                    console.error("Bump Script Failed", e);
+                }
+
+                setTimeout(() => {
+                    chrome.windows.remove(win.id);
+                    resolve(success);
+                }, 1000);
+            });
+        });
+
     } catch (e) {
-        console.error("Bump Fetch failure, falling back to tab", e);
-        success = await fallbackBump(upUrl);
+        console.error("Bump Window process failed", e);
     }
 
     await fetch(`${apiBase}/api/admin/playerup`, {
@@ -396,14 +430,5 @@ async function performBumpAction(item, adminPass, apiBase) {
     });
 }
 
-async function fallbackBump(url) {
-    // Open tab, wait for it to trigger the /up logic, close it
-    try {
-        const tab = await chrome.tabs.create({ url: url, active: false });
-        await new Promise(r => setTimeout(r, 6000)); // PlayerUp needs a few secs
-        await chrome.tabs.remove(tab.id);
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
+// Remove fallbackBump as it's no longer needed or used
+async function fallbackBump(url) { return false; }
