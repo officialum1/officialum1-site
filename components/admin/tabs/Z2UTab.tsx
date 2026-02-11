@@ -56,10 +56,11 @@ export default function Z2UTab() {
         setTimeout(fetchListings, 15000);
     };
 
-    const handleManualImport = async (input: string) => {
-        if (!input) return;
+    const [singleIdInput, setSingleIdInput] = useState("");
 
-        // Robust Z2U Parsing Logic (Client-Side)
+    const handleManualImport = async (input: string) => {
+        // Removed: if (!input) return; as singleIdInput can also trigger it.
+
         const listings: Z2UListing[] = [];
         const foundIds = new Set<string>();
 
@@ -79,73 +80,86 @@ export default function Z2UTab() {
             });
         };
 
-        // Strategy A: Row-based (Rich Data)
-        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-        const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
-
-        let loopRegex = rowRegex;
-        // If strict rows aren't found, try div items, or just proceed to Strategy B
-        if ((input.match(rowRegex) || []).length < 2) loopRegex = itemRegex;
-
-        let match;
-        while ((match = loopRegex.exec(input)) !== null) {
-            const content = match[1];
-
-            // Extract ID
-            const idMatch = content.match(/data-id=["'](\d+)["']/)
-                || content.match(/id=["']\D*(\d+)["']/)
-                || content.match(/products\/(\d+)\.html/)
-                || content.match(/manage\/edit\?id=(\d+)/);
-
-            if (!idMatch) continue;
-            const id = idMatch[1];
-
-            // Extract Metadata
-            let title = `Z2U Listing #${id}`;
-            const tMatch = content.match(/<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i) || content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
-            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').trim();
-
-            const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
-            const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/value=["'](\d+)["'][^>]*name=["']stock["']/i) || content.match(/>\s*(\d+)\s*</);
-
-            addListing(id, {
-                title,
-                unit_price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
-                stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
-                status: (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated'
-            });
+        // 1. Process Single ID Input
+        if (singleIdInput.trim()) {
+            const ids = singleIdInput.match(/\d+/g);
+            if (ids) {
+                ids.forEach(id => addListing(id, { title: `Manually Added #${id}` }));
+            }
         }
 
-        // Strategy B: Fallback Global Link Scan (If rows failed)
-        if (listings.length === 0) {
-            const fallbackRegex = /<a[^>]+href=["'].*?products\/(\d+)\.html["'][^>]*>([\s\S]*?)<\/a>/gi;
-            let fMatch;
-            while ((fMatch = fallbackRegex.exec(input)) !== null) {
-                if (fMatch[2].includes('<img')) continue;
-                addListing(fMatch[1], {
-                    title: fMatch[2].replace(/<[^>]*>/g, '').trim(),
-                    status: "Active"
+        // 2. Process Bulk HTML Input
+        if (input) {
+            // Robust Z2U Parsing Logic (Client-Side)
+            // Strategy A: Row-based (Rich Data)
+            const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+            const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
+
+            let loopRegex = rowRegex;
+            // If strict rows aren't found, try div items, or just proceed to Strategy B
+            if ((input.match(rowRegex) || []).length < 2) loopRegex = itemRegex;
+
+            let match;
+            while ((match = loopRegex.exec(input)) !== null) {
+                const content = match[1];
+
+                // Extract ID
+                const idMatch = content.match(/data-id=["'](\d+)["']/)
+                    || content.match(/id=["']\D*(\d+)["']/)
+                    || content.match(/products\/(\d+)\.html/)
+                    || content.match(/manage\/edit\?id=(\d+)/);
+
+                if (!idMatch) continue;
+                const id = idMatch[1];
+
+                // Extract Metadata
+                let title = `Z2U Listing #${id}`;
+                const tMatch = content.match(/<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i) || content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
+                if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').trim();
+
+                const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
+                const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/value=["'](\d+)["'][^>]*name=["']stock["']/i) || content.match(/>\s*(\d+)\s*</);
+
+                addListing(id, {
+                    title,
+                    unit_price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
+                    stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
+                    status: (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated'
                 });
             }
-        }
 
-        // Strategy C: Ultra-Aggressive ID Scan (e.g. "edit?id=12345")
-        // This catches "manageList" pages where the preview link might be missing but edit buttons exist
-        if (listings.length === 0) {
-            console.log("Attempting Strategy C: Raw ID Scan");
-            // Match href=".../edit?id=123" or value="123" name="id"
-            const editIdRegex = /edit\?id=(\d+)/gi;
-            let eMatch;
-            while ((eMatch = editIdRegex.exec(input)) !== null) {
-                addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+            // Strategy B: Fallback Global Link Scan (If rows failed)
+            if (listings.length === 0) {
+                const fallbackRegex = /<a[^>]+href=["'].*?products\/(\d+)\.html["'][^>]*>([\s\S]*?)<\/a>/gi;
+                let fMatch;
+                while ((fMatch = fallbackRegex.exec(input)) !== null) {
+                    if (fMatch[2].includes('<img')) continue;
+                    addListing(fMatch[1], {
+                        title: fMatch[2].replace(/<[^>]*>/g, '').trim(),
+                        status: "Active"
+                    });
+                }
             }
 
-            // Also look for data-id="123" globally
-            const dataIdRegex = /data-id=["'](\d+)["']/gi;
-            while ((eMatch = dataIdRegex.exec(input)) !== null) {
-                addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+            // Strategy C: Ultra-Aggressive ID Scan (e.g. "edit?id=12345")
+            // This catches "manageList" pages where the preview link might be missing but edit buttons exist
+            if (listings.length === 0) {
+                console.log("Attempting Strategy C: Raw ID Scan");
+                // Match href=".../edit?id=123" or value="123" name="id"
+                const editIdRegex = /edit\?id=(\d+)/gi;
+                let eMatch;
+                while ((eMatch = editIdRegex.exec(input)) !== null) {
+                    addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+                }
+
+                // Also look for data-id="123" globally
+                const dataIdRegex = /data-id=["'](\d+)["']/gi;
+                while ((eMatch = dataIdRegex.exec(input)) !== null) {
+                    addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+                }
             }
         }
+
 
         if (listings.length > 0) {
             await fetch('/api/admin/z2u', {
@@ -222,12 +236,30 @@ export default function Z2UTab() {
             {showManualImport && (
                 <div className="mb-8 glass p-6 rounded-2xl border border-emerald-500/30 animate-in fade-in slide-in-from-top-4">
                     <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">📋 Manual Z2U Importer (Fallback)</h3>
-                    <p className="text-sm text-gray-400 mb-4">If Auto-Sync fails, go to your <b>Z2U My Offers Page</b>, right click &gt; View Page Source, copy everything, and paste it here.</p>
-                    <textarea
-                        className="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 focus:border-emerald-500/50 outline-none resize-y"
-                        placeholder='Paste HTML Source Code here...'
-                        id="z2u-manual-import-area"
-                    ></textarea>
+                    <p className="text-sm text-gray-400 mb-4">If Auto-Sync fails, paste the source code <b>OR</b> enter the product ID directly.</p>
+
+                    <div className="flex gap-4 mb-4">
+                        <div className="flex-1">
+                            <label className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2 block">Option 1: Scan Page Source (Best)</label>
+                            <textarea
+                                className="w-full h-32 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 focus:border-emerald-500/50 outline-none resize-y"
+                                placeholder='Paste HTML Source Code here...'
+                                id="z2u-manual-import-area"
+                            ></textarea>
+                        </div>
+                        <div className="w-1/3">
+                            <label className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2 block">Option 2: Single ID</label>
+                            <input
+                                type="text"
+                                value={singleIdInput}
+                                onChange={(e) => setSingleIdInput(e.target.value)}
+                                placeholder="e.g. 1014915"
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm font-mono text-white focus:border-emerald-500/50 outline-none"
+                            />
+                            <p className="text-[10px] text-gray-500 mt-2">Enter an ID to force-add a listing even if scanning fails. You can enter multiple IDs separated by spaces.</p>
+                        </div>
+                    </div>
+
                     <div className="flex justify-end gap-3 mt-4">
                         <button onClick={() => setShowManualImport(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
                         <button onClick={() => handleManualImport((document.getElementById('z2u-manual-import-area') as HTMLTextAreaElement).value)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
