@@ -43,256 +43,229 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             if (request.action === "Z2U_SYNC") {
-                console.log("[OfficialUM1] Starting Z2U Deep Sync...");
-                try {
-                    let queue = ["https://www.z2u.com/sell/manage"];
-                    let visited = new Set();
-                    let listings = [];
-                    let pageCount = 0;
+                console.log("[OfficialUM1] Starting Z2U Stealth Sync...");
+                const startUrl = "https://www.z2u.com/sell/manage";
 
-                    while (queue.length > 0 && pageCount < 60) {
-                        const targetUrl = queue.shift();
-                        if (visited.has(targetUrl)) continue;
-                        visited.add(targetUrl);
-                        pageCount++;
+                chrome.windows.create({ url: startUrl, state: 'minimized' }, async (win) => {
+                    const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
+                    if (!tabId) return;
 
-                        console.log(`[Z2U] Scanning Page ${pageCount}: ${targetUrl}`);
-                        const response = await fetch(targetUrl, {
-                            credentials: 'include',
-                            headers: { 'Upgrade-Insecure-Requests': '1' }
+                    // Helper to wait for load
+                    const waitForLoad = () => new Promise(resolve => {
+                        const listener = (tid, changeInfo) => {
+                            if (tid === tabId && changeInfo.status === 'complete') {
+                                chrome.tabs.onUpdated.removeListener(listener);
+                                setTimeout(resolve, 2000); // Extra wait for rendering
+                            }
+                        };
+                        chrome.tabs.onUpdated.addListener(listener);
+                    });
+
+                    await waitForLoad();
+
+                    // Inject Scraper Script
+                    try {
+                        const results = await chrome.scripting.executeScript({
+                            target: { tabId: tabId },
+                            func: () => {
+                                // IN-BROWSER PARSING LOGIC
+                                const listings = [];
+
+                                // Category Discovery
+                                const catLinks = Array.from(document.querySelectorAll('a[href*="/sell/manageList"]')).map(a => a.href);
+
+                                // Current Page Parsing
+                                const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list'));
+                                for (const row of rows) {
+                                    const html = row.outerHTML;
+                                    const idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/products\/(\d+)\.html/) || html.match(/manage\/edit\?id=(\d+)/);
+                                    if (!idMatch) continue;
+
+                                    const id = idMatch[1];
+                                    let title = `Z2U Listing #${id}`;
+                                    const tEl = row.querySelector('a[href*="products"], .title, .product-name');
+                                    if (tEl) title = tEl.innerText.trim();
+
+                                    let price = "0.00";
+                                    const pEl = row.querySelector('.price, span:contains("$"), span:contains("USD")'); // Psuedo-selector won't work in pure JS, using regex below
+                                    const pMatch = html.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i);
+                                    if (pMatch) price = pMatch[1];
+
+                                    let stock = "1";
+                                    const sMatch = html.match(/Stock:?\s*(\d+)/i) || html.match(/>(\d+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*Actions/i);
+                                    if (sMatch) stock = sMatch[1];
+
+                                    const status = (html.toLowerCase().includes('publish') || html.includes('active') || html.includes('manage/offline')) ? 'Active' : 'Deactivated';
+
+                                    listings.push({ id, title, url: `https://www.z2u.com/products/${id}.html`, price, stock, status });
+                                }
+                                return { listings, catLinks };
+                            }
                         });
 
-                        if (!response.ok) continue;
-                        const html = await response.text();
+                        if (results && results[0] && results[0].result) {
+                            const data = results[0].result;
+                            console.log(`[Z2U] Found ${data.listings.length} listings`);
 
-                        if (html.includes("Log In") || html.includes("Sign In")) {
-                            console.error("[Z2U] Session Expired.");
-                            continue;
-                        }
-
-                        // Discovery: Find all category-specific management links
-                        const catLinkRegex = /href=["']([^"']*\/sell\/manageList\?[^"']+)["']/gi;
-                        let catMatch;
-                        while ((catMatch = catLinkRegex.exec(html)) !== null) {
-                            let link = catMatch[1];
-                            if (!link.startsWith('http')) link = "https://www.z2u.com" + (link.startsWith('/') ? '' : '/') + link;
-                            if (!visited.has(link) && !queue.includes(link)) queue.push(link);
-                        }
-
-                        // Strategy A: Row-based Parsing (Table structure)
-                        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-                        let rows = html.match(rowRegex) || [];
-
-                        for (const content of rows) {
-                            // ID Extraction (Looking for #123456 or products/12345.html)
-                            const idMatch = content.match(/#(\d{6,})/) || content.match(/products\/(\d+)\.html/) || content.match(/id=(\d+)/);
-                            if (!idMatch) continue;
-                            const id = idMatch[1];
-
-                            // Title: Link or descriptive text
-                            let title = `Z2U Listing #${id}`;
-                            const tMatch = content.match(/<a[^>]+>(.*?)<\/a>/i);
-                            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').replace(/#\d+/g, '').trim();
-
-                            // Price: Looking for number followed by currency or in span
-                            const priceMatch = content.match(/([\d,]+\.?\d*)\s*(?:USD|\$)/i) || content.match(/unit_price[^>]*>([\d.]+)/i);
-
-                            // Stock: looking for numbers under the Stock column
-                            const stockMatch = content.match(/(\d+)\s*<\/td>\s*<td[^>]*>Order Delivery/i) || content.match(/Stock:?\s*(\d+)/i) || content.match(/>(\d+)<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>Actions/i);
-
-                            listings.push({
-                                id,
-                                title: title.replace(/&amp;/g, '&') || `Listing ${id}`,
-                                url: `https://www.z2u.com/products/${id}.html`,
-                                price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
-                                stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
-                                status: (content.toLowerCase().includes('publish') || content.includes('active')) ? 'Active' : 'Deactivated'
-                            });
-                        }
-
-                        // Strategy B: Link-based Discovery for pages without clear <tr>
-                        if (listings.length < 5) {
-                            const globalIdRegex = /products\/(\d+)\.html/gi;
-                            let gMatch;
-                            const seenIds = new Set(listings.map(l => l.id));
-                            while ((gMatch = globalIdRegex.exec(html)) !== null) {
-                                const gid = gMatch[1];
-                                if (gid && !seenIds.has(gid)) {
-                                    listings.push({
-                                        id: gid,
-                                        title: `Sync Detected #${gid}`,
-                                        url: `https://www.z2u.com/products/${gid}.html`,
-                                        price: "0.00", stock: "1", status: "Active"
-                                    });
-                                    seenIds.add(gid);
-                                }
-                            }
-                        }
-
-                        // Find Next Page
-                        const nextMatch = html.match(/<a[^>]+href="([^"]+)"[^>]*>[^<]*Next[^<]*<\/a>/i) || html.match(/class="[^"]*next[^"]*"[^>]+href="([^"]+)"/i);
-                        if (nextMatch) {
-                            let nextUrl = nextMatch[1];
-                            if (!nextUrl.startsWith('http')) nextUrl = "https://www.z2u.com" + (nextUrl.startsWith('/') ? '' : '/') + nextUrl;
-                            if (!visited.has(nextUrl)) queue.push(nextUrl);
-                        }
-
-                        if (listings.length > 0) {
                             await fetch(`${apiBase}/api/admin/z2u`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "turbo_sync", listings })
+                                body: JSON.stringify({ action: "turbo_sync", listings: data.listings })
                             });
-                            listings = []; // Reset for next page/category
+
+                            // If we found categories, we *could* navigate to them, but for "Stealth V1" let's just do the main page to be safe and fast.
                         }
-                        await new Promise(r => setTimeout(r, 1500));
+                    } catch (e) {
+                        console.error("Script Injection Failed", e);
                     }
-                    console.log("[OfficialUM1] Z2U Deep Sync Complete.");
-                } catch (e) { console.error("Z2U Sync Error:", e); }
 
-            } else if (request.action === "REMOTE_SYNC") {
-                console.log("[OfficialUM1] Starting PlayerUp Crawler...");
-
-                // Expanded queue to catch all variations
-                let queue = [
-                    "https://www.playerup.com/accounts/-/threads",
-                    "https://www.playerup.com/accounts/-/postings",
-                    "https://www.playerup.com/accounts/threads",
-                    "https://www.playerup.com/accounts/postings"
-                ];
-                let visited = new Set();
-                let pageCount = 0;
-
-                while (queue.length > 0 && pageCount < 50) {
-                    const url = queue.shift();
-                    if (visited.has(url)) continue;
-                    visited.add(url);
-                    pageCount++;
-
-                    console.log(`[PlayerUp] Crawling Page ${pageCount}: ${url}`);
-
-                    try {
-                        // Removed custom User-Agent to avoid Cloudflare flags
-                        const response = await fetch(url, { credentials: 'include' });
-                        if (!response.ok) continue;
-                        const html = await response.text();
-
-                        // 1. Extract Listings - Relaxed Regex
-                        // Matches href=".../threads/..." and captures URL and Title
-                        const threadRegex = /href="([^"]*\/threads\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
-                        const listings = [];
-                        let match;
-                        while ((match = threadRegex.exec(html)) !== null) {
-                            let threadUrl = match[1];
-                            const title = match[2].replace(/<[^>]*>/g, '').trim();
-
-                            // Basic filtering
-                            if (threadUrl.includes('page-') || threadUrl.includes('#') || title.length < 5) continue;
-
-                            if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
-                            listings.push({ url: threadUrl, title });
-                        }
-
-                        if (listings.length > 0) {
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "turbo_sync", listings })
-                            });
-                        }
-
-                        // 2. Find "Next >" Button (Robust)
-                        const nextLinkRegex = /<a[^>]+href="([^"]+)"[^>]*class="[^"]*pageNav-jump--next[^"]*"|<a[^>]+class="[^"]*pageNav-jump--next[^"]*"[^>]*href="([^"]+)"/i;
-                        const nextMatch = nextLinkRegex.exec(html);
-
-                        if (nextMatch) {
-                            let nextUrl = nextMatch[1] || nextMatch[2];
-                            if (nextUrl) {
-                                if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
-                                nextUrl = nextUrl.replace(/&amp;/g, '&');
-                                if (!visited.has(nextUrl)) queue.push(nextUrl);
-                            }
-                        }
-                        await new Promise(r => setTimeout(r, 1200));
-
-                    } catch (e) { console.error("Page Fetch failed", url, e); }
-                }
-                console.log("[OfficialUM1] PlayerUp Sync Finished.");
-
-            } else {
-                // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
-                try {
-                    const fallbackBump = async (url) => {
-                        // Open tab, wait, close
-                        const tab = await chrome.tabs.create({ url: url, active: false });
-                        await new Promise(r => setTimeout(r, 5000)); // Wait for load
-                        await chrome.tabs.remove(tab.id);
-                        return true;
-                    };
-
-                    const verifyBump = async (url) => {
-                        const upUrl = url.replace(/\/$/, '') + '/up';
-                        try {
-                            const res = await fetch(upUrl, { credentials: 'include' });
-                            if (!res.ok) throw new Error("Fetch Failed");
-                            const text = await res.text();
-                            if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
-                                throw new Error("Login/Error detected");
-                            }
-                            return true;
-                        } catch (e) {
-                            console.log("Fetch bump failed, trying Tab Fallback...", e);
-                            return await fallbackBump(upUrl);
-                        }
-                    };
-
-                    if (request.singleUrl) {
-                        const success = await verifyBump(request.singleUrl);
-                        if (request.id) {
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "update_bump", id: request.id, success })
-                            });
-                        }
-                    } else {
-                        const listRes = await fetch(`${apiBase}/api/admin/playerup`);
-                        const data = await listRes.json();
-                        let targets = Array.isArray(data) ? data : (data.listings || []);
-                        if (request.limit > 0) targets = targets.slice(0, request.limit);
-
-                        for (const item of targets) {
-                            const success = await verifyBump(item.url);
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "update_bump", id: item.id, success })
-                            });
-                            await new Promise(r => setTimeout(r, 2000));
-                        }
-                    }
-                } catch (e) { console.error("Bump Error:", e); }
+                    setTimeout(() => chrome.windows.remove(win.id), 1000);
+                });
             }
-        })();
-        sendResponse({ success: true });
-        return true;
+
+        } else if (request.action === "REMOTE_SYNC") {
+            console.log("[OfficialUM1] Starting PlayerUp Crawler...");
+
+            // Expanded queue to catch all variations
+            let queue = [
+                "https://www.playerup.com/accounts/-/threads",
+                "https://www.playerup.com/accounts/-/postings",
+                "https://www.playerup.com/accounts/threads",
+                "https://www.playerup.com/accounts/postings"
+            ];
+            let visited = new Set();
+            let pageCount = 0;
+
+            while (queue.length > 0 && pageCount < 50) {
+                const url = queue.shift();
+                if (visited.has(url)) continue;
+                visited.add(url);
+                pageCount++;
+
+                console.log(`[PlayerUp] Crawling Page ${pageCount}: ${url}`);
+
+                try {
+                    // Removed custom User-Agent to avoid Cloudflare flags
+                    const response = await fetch(url, { credentials: 'include' });
+                    if (!response.ok) continue;
+                    const html = await response.text();
+
+                    // 1. Extract Listings - Relaxed Regex
+                    // Matches href=".../threads/..." and captures URL and Title
+                    const threadRegex = /href="([^"]*\/threads\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+                    const listings = [];
+                    let match;
+                    while ((match = threadRegex.exec(html)) !== null) {
+                        let threadUrl = match[1];
+                        const title = match[2].replace(/<[^>]*>/g, '').trim();
+
+                        // Basic filtering
+                        if (threadUrl.includes('page-') || threadUrl.includes('#') || title.length < 5) continue;
+
+                        if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
+                        listings.push({ url: threadUrl, title });
+                    }
+
+                    if (listings.length > 0) {
+                        await fetch(`${apiBase}/api/admin/playerup`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                            body: JSON.stringify({ action: "turbo_sync", listings })
+                        });
+                    }
+
+                    // 2. Find "Next >" Button (Robust)
+                    const nextLinkRegex = /<a[^>]+href="([^"]+)"[^>]*class="[^"]*pageNav-jump--next[^"]*"|<a[^>]+class="[^"]*pageNav-jump--next[^"]*"[^>]*href="([^"]+)"/i;
+                    const nextMatch = nextLinkRegex.exec(html);
+
+                    if (nextMatch) {
+                        let nextUrl = nextMatch[1] || nextMatch[2];
+                        if (nextUrl) {
+                            if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
+                            nextUrl = nextUrl.replace(/&amp;/g, '&');
+                            if (!visited.has(nextUrl)) queue.push(nextUrl);
+                        }
+                    }
+                    await new Promise(r => setTimeout(r, 1200));
+
+                } catch (e) { console.error("Page Fetch failed", url, e); }
+            }
+            console.log("[OfficialUM1] PlayerUp Sync Finished.");
+
+        } else {
+            // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
+            try {
+                const fallbackBump = async (url) => {
+                    // Open tab, wait, close
+                    const tab = await chrome.tabs.create({ url: url, active: false });
+                    await new Promise(r => setTimeout(r, 5000)); // Wait for load
+                    await chrome.tabs.remove(tab.id);
+                    return true;
+                };
+
+                const verifyBump = async (url) => {
+                    const upUrl = url.replace(/\/$/, '') + '/up';
+                    try {
+                        const res = await fetch(upUrl, { credentials: 'include' });
+                        if (!res.ok) throw new Error("Fetch Failed");
+                        const text = await res.text();
+                        if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
+                            throw new Error("Login/Error detected");
+                        }
+                        return true;
+                    } catch (e) {
+                        console.log("Fetch bump failed, trying Tab Fallback...", e);
+                        return await fallbackBump(upUrl);
+                    }
+                };
+
+                if (request.singleUrl) {
+                    const success = await verifyBump(request.singleUrl);
+                    if (request.id) {
+                        await fetch(`${apiBase}/api/admin/playerup`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                            body: JSON.stringify({ action: "update_bump", id: request.id, success })
+                        });
+                    }
+                } else {
+                    const listRes = await fetch(`${apiBase}/api/admin/playerup`);
+                    const data = await listRes.json();
+                    let targets = Array.isArray(data) ? data : (data.listings || []);
+                    if (request.limit > 0) targets = targets.slice(0, request.limit);
+
+                    for (const item of targets) {
+                        const success = await verifyBump(item.url);
+                        await fetch(`${apiBase}/api/admin/playerup`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                            body: JSON.stringify({ action: "update_bump", id: item.id, success })
+                        });
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
+                }
+            } catch (e) { console.error("Bump Error:", e); }
+        }
+    })();
+sendResponse({ success: true });
+return true;
     }
 
-    // SYNC DATA TO SERVER
-    if (request.action === "SYNC_TO_SERVER") {
-        (async () => {
-            const apiBase = await getApiUrl();
-            fetch(`${apiBase}/api/admin/playerup`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
-                body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
-            })
-                .then(res => res.json())
-                .then(data => sendResponse({ success: true, count: data.count }))
-                .catch(err => sendResponse({ success: false, error: err.message }));
-        })();
-        return true;
-    }
+// SYNC DATA TO SERVER
+if (request.action === "SYNC_TO_SERVER") {
+    (async () => {
+        const apiBase = await getApiUrl();
+        fetch(`${apiBase}/api/admin/playerup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
+            body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
+        })
+            .then(res => res.json())
+            .then(data => sendResponse({ success: true, count: data.count }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+    })();
+    return true;
+}
 });
 
 // ALARM SYSTEM - Keeps Service Worker alive and running tasks
