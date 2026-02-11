@@ -61,19 +61,37 @@ export default function Z2UTab() {
 
         // Robust Z2U Parsing Logic (Client-Side)
         const listings: Z2UListing[] = [];
+        const foundIds = new Set<string>();
 
-        // 1. Find all rows/items
-        const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
+        // Helper to add listing safely
+        const addListing = (id: string, partial: Partial<Z2UListing>) => {
+            if (foundIds.has(id)) return;
+            foundIds.add(id);
+            listings.push({
+                id,
+                title: partial.title || `Z2U Listing #${id}`,
+                url: partial.url || `https://www.z2u.com/products/${id}.html`,
+                platform: 'Other',
+                unit_price: partial.unit_price || "0.00",
+                stock: partial.stock || "1",
+                status: partial.status || "Active",
+                lastSync: new Date().toISOString()
+            });
+        };
+
+        // Strategy A: Row-based (Rich Data)
         const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+        const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
 
         let loopRegex = rowRegex;
+        // If strict rows aren't found, try div items, or just proceed to Strategy B
         if ((input.match(rowRegex) || []).length < 2) loopRegex = itemRegex;
 
         let match;
         while ((match = loopRegex.exec(input)) !== null) {
             const content = match[1];
-            if (!content.includes('products/') && !content.includes('data-id=') && !content.includes('manage/edit')) continue;
 
+            // Extract ID
             const idMatch = content.match(/data-id=["'](\d+)["']/)
                 || content.match(/id=["']\D*(\d+)["']/)
                 || content.match(/products\/(\d+)\.html/)
@@ -82,67 +100,68 @@ export default function Z2UTab() {
             if (!idMatch) continue;
             const id = idMatch[1];
 
+            // Extract Metadata
             let title = `Z2U Listing #${id}`;
-            const titleRegex = /<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i;
-            const tMatch = content.match(titleRegex);
-            if (tMatch) {
-                title = tMatch[1].replace(/<[^>]*>/g, '').trim();
-            } else {
-                const genericLink = content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
-                if (genericLink) title = genericLink[1].replace(/<[^>]*>/g, '').trim();
-            }
+            const tMatch = content.match(/<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i) || content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
+            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').trim();
 
             const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
             const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/value=["'](\d+)["'][^>]*name=["']stock["']/i) || content.match(/>\s*(\d+)\s*</);
 
-            const price = priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00";
-            const stock = stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1";
-            const status = (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated';
-
-            listings.push({
-                id,
-                title: title.replace(/&amp;/g, '&'),
-                url: `https://www.z2u.com/products/${id}.html`,
-                platform: 'Other', // Auto-detected by backend usually, but we send minimal
-                unit_price: price,
-                stock: stock,
-                status: status,
-                lastSync: new Date().toISOString()
+            addListing(id, {
+                title,
+                unit_price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
+                stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
+                status: (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated'
             });
         }
 
-        // Also support fallback global scan if table parsing failed entirely
+        // Strategy B: Fallback Global Link Scan (If rows failed)
         if (listings.length === 0) {
             const fallbackRegex = /<a[^>]+href=["'].*?products\/(\d+)\.html["'][^>]*>([\s\S]*?)<\/a>/gi;
             let fMatch;
             while ((fMatch = fallbackRegex.exec(input)) !== null) {
                 if (fMatch[2].includes('<img')) continue;
-                listings.push({
-                    id: fMatch[1],
+                addListing(fMatch[1], {
                     title: fMatch[2].replace(/<[^>]*>/g, '').trim(),
-                    url: `https://www.z2u.com/products/${fMatch[1]}.html`,
-                    platform: 'Other',
-                    unit_price: "0.00",
-                    stock: "1",
-                    status: "Active",
-                    lastSync: new Date().toISOString()
+                    status: "Active"
                 });
             }
         }
 
-        const unique = Array.from(new Set(listings.map(t => t.id))).map(id => listings.find(t => t.id === id)!);
+        // Strategy C: Ultra-Aggressive ID Scan (e.g. "edit?id=12345")
+        // This catches "manageList" pages where the preview link might be missing but edit buttons exist
+        if (listings.length === 0) {
+            console.log("Attempting Strategy C: Raw ID Scan");
+            // Match href=".../edit?id=123" or value="123" name="id"
+            const editIdRegex = /edit\?id=(\d+)/gi;
+            let eMatch;
+            while ((eMatch = editIdRegex.exec(input)) !== null) {
+                addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+            }
 
-        if (unique.length > 0) {
+            // Also look for data-id="123" globally
+            const dataIdRegex = /data-id=["'](\d+)["']/gi;
+            while ((eMatch = dataIdRegex.exec(input)) !== null) {
+                addListing(eMatch[1], { title: `Imported Offer #${eMatch[1]}` });
+            }
+        }
+
+        if (listings.length > 0) {
             await fetch('/api/admin/z2u', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'turbo_sync', listings: unique })
+                body: JSON.stringify({ action: 'turbo_sync', listings })
             });
-            modernAlert("Import Successful", `Processed ${unique.length} listings.`, "success");
+            modernAlert("Import Successful", `Processed ${listings.length} listings.`, "success");
             setShowManualImport(false);
             fetchListings();
         } else {
-            modernAlert("No Listings Found", "Could not parse listings. Ensure you copied the 'My Offers' page source.", "error");
+            modernAlert(
+                "No Listings Found",
+                "Could not parse listings. \n\nTip: If 'View Source' is empty, try this:\n1. Open Z2U Page\n2. Right Click on the Table > Inspect\n3. Right Click the <table> tag > Copy > Copy OuterHTML\n4. Paste that here.",
+                "error"
+            );
         }
     };
 
