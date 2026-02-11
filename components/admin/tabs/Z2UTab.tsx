@@ -51,13 +51,10 @@ export default function Z2UTab() {
     };
 
     const handleSync = () => {
-        if (cookieStatus === 'disconnected') {
-            modernAlert("Sync Guard", "Please sync your Z2U cookies via the extension icon first!", "error");
-            return;
-        }
+        // Validation removed: Stealth Sync uses active browser session directly
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_Z2U_SYNC'));
-        modernAlert("Z2U Underground Sync", "Scanning your Z2U listings in the background... No tabs needed! 🛰️", "success");
-        setTimeout(fetchListings, 15000);
+        modernAlert("Z2U Stealth Sync", "Launching background stealth window to scan listings... 🛰️", "success");
+        setTimeout(fetchListings, 15000); // Poll for results
     };
 
     const [singleIdInput, setSingleIdInput] = useState("");
