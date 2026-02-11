@@ -37,3 +37,20 @@ window.addEventListener('OFFICIALUM1_AUTH_UPDATE', (e) => {
         });
     }
 });
+
+// Listen for messages from Background Script (Feedback Loop)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.action === "Z2U_LOG") {
+        console.log(`[Z2U BACKEND]: ${msg.message}`);
+        // Optional: Dispatch event if React needs to show toast
+    }
+    if (msg.action === "Z2U_RESULT") {
+        console.log(`[Z2U FINAL]: Found ${msg.count} listings.`);
+        if (msg.count === 0) {
+            console.warn("⚠️ Zero listings found. You might need to log in or check the URL.");
+            alert("Z2U Sync: 0 listings found. Please ensure you are logged into Z2U in this browser.");
+        } else {
+            alert(`Z2U Sync Success! Found ${msg.count} listings.`);
+        }
+    }
+});
