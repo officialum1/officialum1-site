@@ -150,6 +150,28 @@ export default function PlayerUpTab() {
     const filtered = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
     const frequencies = ['Every 5 seconds', 'Every 15 seconds', 'Every 30 seconds', 'Every 1 minute', 'Every 5 minutes', 'Every 1 hour', 'Every 24 hours'];
 
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === filtered.length) setSelectedIds(new Set());
+        else setSelectedIds(new Set(filtered.map(l => l.id)));
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return;
+        if (!(await modernConfirm(`Delete ${selectedIds.size} listings?`))) return;
+
+        // Optimistic UI update
+        const toDelete = new Set(selectedIds);
+        setListings(prev => prev.filter(l => !toDelete.has(l.id)));
+        setSelectedIds(new Set());
+
+        for (const id of toDelete) {
+            fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) }).catch(() => { });
+        }
+        modernAlert("Deleted", "Selected listings removed.", "success");
+    };
+
     return (
         <div className="FadeIn p-4">
             <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
@@ -172,6 +194,11 @@ export default function PlayerUpTab() {
                     <p className="text-gray-400 text-sm mt-1">Automated listing management & scheduled bumping engine.</p>
                 </div>
                 <div className="flex gap-3">
+                    {selectedIds.size > 0 && (
+                        <button onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-red-500/20 animate-in fade-in zoom-in duration-200">
+                            🗑️ Delete ({selectedIds.size})
+                        </button>
+                    )}
                     <button onClick={handleCloudSync} className="bg-blue-600/10 text-blue-400 border border-blue-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-blue-600 hover:text-white transition-all">☁️ Cloud Sync</button>
                     <button onClick={handleCloudBump} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20 transition-all">🔥 Bump All</button>
                     <button onClick={() => { navigator.clipboard.writeText(getTurboScript()); modernAlert("Turbo Script Copied!", "Paste in PlayerUp Console.", "success"); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">⚡ Turbo Script</button>
@@ -182,10 +209,10 @@ export default function PlayerUpTab() {
             {showManualImport && (
                 <div className="mb-8 glass p-6 rounded-2xl border border-emerald-500/30 animate-in fade-in slide-in-from-top-4">
                     <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">📋 Manual Thread Importer</h3>
-                    <p className="text-sm text-gray-400 mb-4">Go to your PlayerUp Threads page, press <code className="bg-black/30 px-1 rounded">Ctrl+U</code> to view source, then <code className="bg-black/30 px-1 rounded">Ctrl+A</code> and <code className="bg-black/30 px-1 rounded">Ctrl+C</code>. Paste everything below.</p>
+                    <p className="text-sm text-gray-400 mb-4">Paste your Page HTML Source. We will ONLY import threads that have a <b>Bump Button</b> (".../up"). This filters out junk links.</p>
                     <textarea
                         className="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 focus:border-emerald-500/50 outline-none resize-y"
-                        placeholder='Paste HTML Source Code or List of URLs here...'
+                        placeholder='Paste HTML Source Code here...'
                         id="manual-import-area"
                     ></textarea>
                     <div className="flex justify-end gap-3 mt-4">
@@ -194,52 +221,32 @@ export default function PlayerUpTab() {
                             const input = (document.getElementById('manual-import-area') as HTMLTextAreaElement).value;
                             if (!input) return;
 
-                            // Robust Parsing Logic (Ultra-Simpified)
+                            // STRICT Parsing Logic: Only find /up links
                             const threads: { title: string, url: string }[] = [];
                             const playerupDomain = "https://www.playerup.com";
 
-                            // Strategy 1: Find ANY href that contains "threads/"
-                            // matches: href="threads/..." or href="/threads/..."
-                            const hrefRegex = /href=["'](\/threads\/[^"']+|threads\/[^"']+)["'][^>]*>(.*?)<\/a>/gi;
+                            // Strategy: Find hrefs ending in /up (or containing /up")
+                            // Example: href="threads/slug.123/up"
+                            const upLinkRegex = /href=["'](threads\/[^"']+\/up)["']|href=["'](\/threads\/[^"']+\/up)["']/gi;
+
                             let match;
-                            while ((match = hrefRegex.exec(input)) !== null) {
-                                let url = match[1];
-                                // Exclude non-thread pages (like navigating to threads list)
-                                if (url.includes('account/threads') || url.includes('watched/threads') || url.includes('find-threads')) continue;
+                            while ((match = upLinkRegex.exec(input)) !== null) {
+                                let rawUrl = match[1] || match[2];
+                                // transform "threads/slug.123/up" -> "https://www.playerup.com/threads/slug.123/"
+                                let cleanUrl = rawUrl.replace(/\/up$/, '');
+                                if (cleanUrl.startsWith('/')) cleanUrl = playerupDomain + cleanUrl;
+                                else cleanUrl = playerupDomain + "/" + cleanUrl;
 
-                                if (url.startsWith('/')) url = playerupDomain + url;
-                                else if (!url.startsWith('http')) url = playerupDomain + "/" + url;
+                                // Extract pseudo-title from slug
+                                // url: .../threads/my-cool-thread.123
+                                const slug = cleanUrl.split('/threads/')[1]?.split('.')[0] || "Imported Thread";
+                                const title = slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Capitalize
 
-                                let title = match[2].replace(/<[^>]*>/g, '').trim();
-                                if (title) {
-                                    threads.push({ title, url });
-                                }
+                                threads.push({ title, url: cleanUrl });
                             }
 
-                            // Strategy 2: Fallback - Raw text scan for "threads/xxxxx"
-                            if (threads.length === 0) {
-                                // Just find "threads/anything" until a space, quote, or newline
-                                const rawRegex = /(?:playerup\.com\/|\/|^)(threads\/[a-zA-Z0-9-._]+(?:\.\d+)?\/?)/gi;
-                                let m;
-                                while ((m = rawRegex.exec(input)) !== null) {
-                                    let url = m[1];
-                                    if (url.includes('account/') || url.includes('watched/')) continue;
-
-                                    if (!url.startsWith('http')) url = playerupDomain + "/" + url;
-                                    threads.push({ title: "Imported Thread", url: url.replace(/\/+/g, '/') });
-                                }
-                            }
-
-                            // Cleaning and Deduplication
-                            // 1. Fix double slashes (https://www.playerup.com//threads) -> (https://www.playerup.com/threads)
-                            const uniqueMap = new Map();
-                            threads.forEach(t => {
-                                t.url = t.url.replace('playerup.com//', 'playerup.com/');
-                                if (!uniqueMap.has(t.url)) uniqueMap.set(t.url, t);
-                                else if (t.title !== "Imported Thread") uniqueMap.set(t.url, t); // Upgrade title
-                            });
-
-                            const unique = Array.from(uniqueMap.values());
+                            // Deduplicate
+                            const unique = Array.from(new Set(threads.map(t => t.url))).map(url => threads.find(t => t.url === url)!);
 
                             if (unique.length > 0) {
                                 fetch('/api/admin/playerup', {
@@ -252,7 +259,7 @@ export default function PlayerUpTab() {
                                     fetchListings();
                                 });
                             } else {
-                                modernAlert("No Threads Found", "Could not find valid thread URLs. Ensure your links look like 'https://www.playerup.com/threads/title.12345/' or paste the full HTML source.", "error");
+                                modernAlert("No Threads Found", "Could not find any 'Bump' links. Ensure you are copying the full page source where the 'Bump' buttons are visible.", "error");
                             }
 
                         }} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
@@ -264,6 +271,13 @@ export default function PlayerUpTab() {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-white/5 text-[11px] uppercase tracking-[0.2em] text-gray-400 font-black">
+                            <th className="px-6 py-5 w-10">
+                                <input type="checkbox"
+                                    checked={selectedIds.size === filtered.length && filtered.length > 0}
+                                    onChange={handleSelectAll}
+                                    className="accent-emerald-500 w-4 h-4 cursor-pointer"
+                                />
+                            </th>
                             <th className="px-6 py-5">Status</th>
                             <th className="px-6 py-5">Account</th>
                             <th className="px-6 py-5">Thread / Title</th>
@@ -275,11 +289,24 @@ export default function PlayerUpTab() {
                     </thead>
                     <tbody className="divide-y divide-white/5 text-sm">
                         {loading && listings.length === 0 ? (
-                            <tr><td colSpan={7} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
+                            <tr><td colSpan={8} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
                         ) : filtered.length === 0 ? (
-                            <tr><td colSpan={7} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
+                            <tr><td colSpan={8} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
                         ) : filtered.map(l => (
-                            <tr key={l.id} className="hover:bg-white/[0.02] transition-colors">
+                            <tr key={l.id} className={`hover:bg-white/[0.02] transition-colors ${selectedIds.has(l.id) ? 'bg-blue-500/5' : ''}`}>
+                                <td className="px-6 py-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.has(l.id)}
+                                        onChange={() => setSelectedIds(prev => {
+                                            const next = new Set(prev);
+                                            if (next.has(l.id)) next.delete(l.id);
+                                            else next.add(l.id);
+                                            return next;
+                                        })}
+                                        className="accent-emerald-500 w-4 h-4 cursor-pointer"
+                                    />
+                                </td>
                                 <td className="px-6 py-4">
                                     <button
                                         onClick={() => handleUpdate(l, { status: l.status === 'Active' ? 'Inactive' : 'Active' })}
