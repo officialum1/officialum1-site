@@ -61,7 +61,14 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  }
+  },
+  manifest: '/manifest.json',
+  themeColor: '#00ff88',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'OfficialUM1',
+  },
 };
 
 export default function RootLayout({
