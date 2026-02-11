@@ -51,6 +51,10 @@ export default function Z2UTab() {
     };
 
     const handleSync = () => {
+        if (cookieStatus === 'disconnected') {
+            modernAlert("Sync Guard", "Please sync your Z2U cookies via the extension icon first!", "error");
+            return;
+        }
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_Z2U_SYNC'));
         modernAlert("Z2U Underground Sync", "Scanning your Z2U listings in the background... No tabs needed! 🛰️", "success");
         setTimeout(fetchListings, 15000);
@@ -198,37 +202,28 @@ export default function Z2UTab() {
             <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
                 <div>
                     <h2 className="text-2xl font-bold flex items-center gap-3">
-                        🥈 Z2U Command Center
-                        <span className="text-xs bg-orange-500/10 text-orange-400 px-3 py-1 rounded-full border border-orange-500/20 uppercase tracking-widest">{listings.length} OFFERS</span>
+                        🛰️ Z2U Command Center
+                        <span className="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest">{listings.length} OFFERS</span>
                         {cookieStatus === 'connected' ? (
-                            <div className="flex gap-2">
-                                <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                    Cookies Connected
-                                </span>
-                                <span className="text-xs bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-widest flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                    Auto-Online Active
-                                </span>
-                            </div>
+                            <span className="text-xs bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                Auto-Online Active
+                            </span>
                         ) : (
                             <span className="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded-full border border-red-500/20 uppercase tracking-widest flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                                Cookies Disconnected
+                                Connection Required
                             </span>
                         )}
                     </h2>
-                    <p className="text-gray-400 text-sm mt-1">Direct bridge to Z2U listing management.</p>
+                    <p className="text-gray-400 text-sm mt-1">Underground synchronization engine. Syncs listings and keeps you "Online" in the background.</p>
                 </div>
                 <div className="flex gap-3">
-                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
-                        📋 Manual Import
+                    <button onClick={handleSync} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all flex items-center gap-2">
+                        <span>🛰️</span> Synchronize
                     </button>
-                    <button onClick={handleSync} className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-orange-600/20 transition-all flex items-center gap-2">
-                        <span>🛰️</span> Synchronize Z2U
-                    </button>
-                    <button onClick={() => window.open('https://www.z2u.com/sell/manage', '_blank')} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
-                        Open Z2U Panel
+                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
+                        📄 Manual Import
                     </button>
                 </div>
             </div>
