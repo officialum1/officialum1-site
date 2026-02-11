@@ -53,4 +53,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             alert(`Z2U Sync Success! Found ${msg.count} listings.`);
         }
     }
+    if (msg.action === "PU_LOG") {
+        console.log(`[PLAYERUP BACKEND]: ${msg.message}`);
+    }
+    if (msg.action === "PU_RESULT") {
+        console.log(`[PLAYERUP FINAL]: Found ${msg.count} threads.`);
+        if (msg.count === 0) {
+            alert("PlayerUp Sync: 0 threads found. Please ensure you are logged into PlayerUp in this browser.");
+        } else {
+            alert(`PlayerUp Sync Success! Found ${msg.count} threads.`);
+        }
+    }
 });

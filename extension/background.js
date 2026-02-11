@@ -158,152 +158,183 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         resolve();
                     });
                 });
-            }
-        } else if (request.action === "REMOTE_SYNC") {
-            console.log("[OfficialUM1] Starting PlayerUp Crawler...");
+            } else if (request.action === "REMOTE_SYNC") {
+                const dashboardTabId = sender.tab ? sender.tab.id : null;
+                console.log("[OfficialUM1] Starting PlayerUp Stealth Sync...", dashboardTabId);
 
-            // Expanded queue to catch all variations
-            let queue = [
-                "https://www.playerup.com/accounts/-/threads",
-                "https://www.playerup.com/accounts/-/postings",
-                "https://www.playerup.com/accounts/threads",
-                "https://www.playerup.com/accounts/postings"
-            ];
-            let visited = new Set();
-            let pageCount = 0;
+                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Launching Stealth Crawler..." });
 
-            while (queue.length > 0 && pageCount < 50) {
-                const url = queue.shift();
-                if (visited.has(url)) continue;
-                visited.add(url);
-                pageCount++;
+                // Use the user's verified URL
+                const startUrl = "https://www.playerup.com/account/threads";
 
-                console.log(`[PlayerUp] Crawling Page ${pageCount}: ${url}`);
+                await new Promise((resolve) => {
+                    chrome.windows.create({ url: startUrl, state: 'minimized' }, async (win) => {
+                        const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
+                        if (!tabId) { resolve(); return; }
 
+                        // 1. Wait for content
+                        const waitForContent = () => new Promise(r => {
+                            let attempts = 0;
+                            const check = () => {
+                                if (attempts > 20) { r(false); return; }
+                                chrome.scripting.executeScript({
+                                    target: { tabId: tabId },
+                                    func: () => document.querySelectorAll('a[href*="/threads/"]').length > 0
+                                }).then(res => {
+                                    if (res && res[0] && res[0].result === true) r(true);
+                                    else { attempts++; setTimeout(check, 500); }
+                                }).catch(() => r(false));
+                            };
+                            const listener = (tid, changeInfo) => {
+                                if (tid === tabId && changeInfo.status === 'complete') {
+                                    chrome.tabs.onUpdated.removeListener(listener);
+                                    setTimeout(check, 1000);
+                                }
+                            };
+                            chrome.tabs.onUpdated.addListener(listener);
+                        });
+
+                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Acccessing PlayerUp securely..." });
+                        await waitForContent();
+
+                        // 2. Scrape Data
+                        let foundCount = 0;
+                        try {
+                            const results = await chrome.scripting.executeScript({
+                                target: { tabId: tabId },
+                                func: () => {
+                                    const threads = [];
+                                    const seen = new Set();
+
+                                    // Robust Selector for Thread Links
+                                    const links = document.querySelectorAll('a[href*="/threads/"]');
+
+                                    for (const link of links) {
+                                        let url = link.href;
+                                        let title = link.innerText.trim();
+
+                                        // Clean URL
+                                        url = url.split('?')[0];
+                                        if (url.endsWith('/')) url = url.slice(0, -1);
+
+                                        // Filters
+                                        if (
+                                            url.includes('/page-') ||
+                                            url.includes('#') ||
+                                            title.length < 5 ||
+                                            title.toLowerCase().includes('last post') ||
+                                            seen.has(url)
+                                        ) continue;
+
+                                        seen.add(url);
+                                        threads.push({ title, url });
+                                    }
+                                    return { threads, count: threads.length, url: window.location.href };
+                                }
+                            });
+
+                            if (results && results[0] && results[0].result) {
+                                const data = results[0].result;
+                                foundCount = data.count;
+
+                                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: `Found ${foundCount} threads.` });
+                                console.log(`[PlayerUp] Scraped ${foundCount} items.`);
+
+                                if (foundCount > 0) {
+                                    await fetch(`${apiBase}/api/admin/playerup`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                        body: JSON.stringify({ action: "turbo_sync", listings: data.threads })
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            console.error("PlayerUp Scrape Failed", e);
+                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Scrape Error: " + e.message });
+                        }
+
+                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_RESULT", count: foundCount });
+
+                        setTimeout(() => chrome.windows.remove(win.id), 500);
+                        resolve();
+                    });
+                });
+            } else {
+                // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
                 try {
-                    // Removed custom User-Agent to avoid Cloudflare flags
-                    const response = await fetch(url, { credentials: 'include' });
-                    if (!response.ok) continue;
-                    const html = await response.text();
-
-                    // 1. Extract Listings - Relaxed Regex
-                    // Matches href=".../threads/..." and captures URL and Title
-                    const threadRegex = /href="([^"]*\/threads\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
-                    const listings = [];
-                    let match;
-                    while ((match = threadRegex.exec(html)) !== null) {
-                        let threadUrl = match[1];
-                        const title = match[2].replace(/<[^>]*>/g, '').trim();
-
-                        // Basic filtering
-                        if (threadUrl.includes('page-') || threadUrl.includes('#') || title.length < 5) continue;
-
-                        if (threadUrl.startsWith('/')) threadUrl = "https://www.playerup.com" + threadUrl;
-                        listings.push({ url: threadUrl, title });
-                    }
-
-                    if (listings.length > 0) {
-                        await fetch(`${apiBase}/api/admin/playerup`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                            body: JSON.stringify({ action: "turbo_sync", listings })
-                        });
-                    }
-
-                    // 2. Find "Next >" Button (Robust)
-                    const nextLinkRegex = /<a[^>]+href="([^"]+)"[^>]*class="[^"]*pageNav-jump--next[^"]*"|<a[^>]+class="[^"]*pageNav-jump--next[^"]*"[^>]*href="([^"]+)"/i;
-                    const nextMatch = nextLinkRegex.exec(html);
-
-                    if (nextMatch) {
-                        let nextUrl = nextMatch[1] || nextMatch[2];
-                        if (nextUrl) {
-                            if (nextUrl.startsWith('/')) nextUrl = "https://www.playerup.com" + nextUrl;
-                            nextUrl = nextUrl.replace(/&amp;/g, '&');
-                            if (!visited.has(nextUrl)) queue.push(nextUrl);
-                        }
-                    }
-                    await new Promise(r => setTimeout(r, 1200));
-
-                } catch (e) { console.error("Page Fetch failed", url, e); }
-            }
-            console.log("[OfficialUM1] PlayerUp Sync Finished.");
-
-        } else {
-            // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
-            try {
-                const fallbackBump = async (url) => {
-                    // Open tab, wait, close
-                    const tab = await chrome.tabs.create({ url: url, active: false });
-                    await new Promise(r => setTimeout(r, 5000)); // Wait for load
-                    await chrome.tabs.remove(tab.id);
-                    return true;
-                };
-
-                const verifyBump = async (url) => {
-                    const upUrl = url.replace(/\/$/, '') + '/up';
-                    try {
-                        const res = await fetch(upUrl, { credentials: 'include' });
-                        if (!res.ok) throw new Error("Fetch Failed");
-                        const text = await res.text();
-                        if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
-                            throw new Error("Login/Error detected");
-                        }
+                    const fallbackBump = async (url) => {
+                        // Open tab, wait, close
+                        const tab = await chrome.tabs.create({ url: url, active: false });
+                        await new Promise(r => setTimeout(r, 5000)); // Wait for load
+                        await chrome.tabs.remove(tab.id);
                         return true;
-                    } catch (e) {
-                        console.log("Fetch bump failed, trying Tab Fallback...", e);
-                        return await fallbackBump(upUrl);
-                    }
-                };
+                    };
 
-                if (request.singleUrl) {
-                    const success = await verifyBump(request.singleUrl);
-                    if (request.id) {
-                        await fetch(`${apiBase}/api/admin/playerup`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                            body: JSON.stringify({ action: "update_bump", id: request.id, success })
-                        });
-                    }
-                } else {
-                    const listRes = await fetch(`${apiBase}/api/admin/playerup`);
-                    const data = await listRes.json();
-                    let targets = Array.isArray(data) ? data : (data.listings || []);
-                    if (request.limit > 0) targets = targets.slice(0, request.limit);
+                    const verifyBump = async (url) => {
+                        const upUrl = url.replace(/\/$/, '') + '/up';
+                        try {
+                            const res = await fetch(upUrl, { credentials: 'include' });
+                            if (!res.ok) throw new Error("Fetch Failed");
+                            const text = await res.text();
+                            if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
+                                throw new Error("Login/Error detected");
+                            }
+                            return true;
+                        } catch (e) {
+                            console.log("Fetch bump failed, trying Tab Fallback...", e);
+                            return await fallbackBump(upUrl);
+                        }
+                    };
 
-                    for (const item of targets) {
-                        const success = await verifyBump(item.url);
-                        await fetch(`${apiBase}/api/admin/playerup`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                            body: JSON.stringify({ action: "update_bump", id: item.id, success })
-                        });
-                        await new Promise(r => setTimeout(r, 2000));
+                    if (request.singleUrl) {
+                        const success = await verifyBump(request.singleUrl);
+                        if (request.id) {
+                            await fetch(`${apiBase}/api/admin/playerup`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                body: JSON.stringify({ action: "update_bump", id: request.id, success })
+                            });
+                        }
+                    } else {
+                        const listRes = await fetch(`${apiBase}/api/admin/playerup`);
+                        const data = await listRes.json();
+                        let targets = Array.isArray(data) ? data : (data.listings || []);
+                        if (request.limit > 0) targets = targets.slice(0, request.limit);
+
+                        for (const item of targets) {
+                            const success = await verifyBump(item.url);
+                            await fetch(`${apiBase}/api/admin/playerup`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                body: JSON.stringify({ action: "update_bump", id: item.id, success })
+                            });
+                            await new Promise(r => setTimeout(r, 2000));
+                        }
                     }
+                } catch (e) {
+                    console.error("Bump Error:", e);
                 }
-            } catch (e) {
-                console.error("Bump Error:", e);
             }
-        }
-    })();
-sendResponse({ success: true });
-return true;
+        })();
+        sendResponse({ success: true });
+        return true;
     }
 
-// SYNC DATA TO SERVER
-if (request.action === "SYNC_TO_SERVER") {
-    (async () => {
-        const apiBase = await getApiUrl();
-        fetch(`${apiBase}/api/admin/playerup`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
-            body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
-        })
-            .then(res => res.json())
-            .then(data => sendResponse({ success: true, count: data.count }))
-            .catch(err => sendResponse({ success: false, error: err.message }));
-    })();
-    return true;
-}
+    // SYNC DATA TO SERVER
+    if (request.action === "SYNC_TO_SERVER") {
+        (async () => {
+            const apiBase = await getApiUrl();
+            fetch(`${apiBase}/api/admin/playerup`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
+                body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
+            })
+                .then(res => res.json())
+                .then(data => sendResponse({ success: true, count: data.count }))
+                .catch(err => sendResponse({ success: false, error: err.message }));
+        })();
+        return true;
+    }
 });
 
 // ALARM SYSTEM - Keeps Service Worker alive and running tasks
