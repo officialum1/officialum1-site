@@ -59,7 +59,6 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { action, id, listings: bulkListings, username, limit, status, frequency } = body;
 
-        // NEW: Cloud Fetch (Uses saved cookies to fetch from server)
         if (action === 'cloud_fetch') {
             // Check both variations
             const siteKeys = ['session_cookies_www_playerup_com', 'session_cookies_playerup_com'];
@@ -75,36 +74,66 @@ export async function POST(req: NextRequest) {
 
             if (!cookies) return NextResponse.json({ success: false, error: "No cookies found. Please sync cookies via extension first." });
 
-            const target = `https://www.playerup.com/accounts/-/postings`;
+            const targets = [
+                "https://www.playerup.com/accounts/-/threads",
+                "https://www.playerup.com/accounts/-/postings"
+            ];
 
-            const response = await fetch(target, {
-                headers: {
-                    "Cookie": cookies,
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                }
-            });
-
-            if (!response.ok) {
-                return NextResponse.json({
-                    success: false,
-                    error: `PlayerUp Error (${response.status} ${response.statusText}). Try syncing cookies again.`
-                });
-            }
-
-            const html = await response.text();
-            const threadRegex = /href="([^"]*\/threads\/[^"]*)"[^>]*>([^<]+)<\/a>/g;
-            let match;
             const scrapedListings = [];
             const seen = new Set();
+            const debugLogs: string[] = [];
 
-            while ((match = threadRegex.exec(html)) !== null) {
-                let url = match[1];
-                const title = match[2].trim();
-                if (!url.startsWith('http')) url = 'https://www.playerup.com/' + url.replace(/^\//, '');
-                url = url.split('?')[0];
-                if (title && !seen.has(url) && !title.toLowerCase().includes('contact')) {
-                    scrapedListings.push({ title, url });
-                    seen.add(url);
+            for (const target of targets) {
+                try {
+                    const response = await fetch(target, {
+                        headers: {
+                            "Cookie": cookies,
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        debugLogs.push(`Blocked/Failed [${response.status}] on ${target}`);
+                        continue;
+                    }
+
+                    const html = await response.text();
+
+                    // Robust Regex: Matches <a ... href=".../threads/...">Title</a>
+                    // Handles attributes before/after href, and multiline titles
+                    const threadRegex = /<a[^>]+href="([^"]*\/threads\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+
+                    let match;
+                    let count = 0;
+                    while ((match = threadRegex.exec(html)) !== null) {
+                        let url = match[1];
+                        let title = match[2].replace(/<[^>]*>/g, '').trim(); // Remove inner tags (like <span>)
+
+                        // Normalize URL
+                        if (!url.startsWith('http')) {
+                            // Ensure leading slash for concatenation
+                            if (!url.startsWith('/')) url = '/' + url;
+                            url = 'https://www.playerup.com' + url;
+                        }
+                        url = url.split('?')[0]; // Remove query params
+
+                        // Filter junk
+                        if (
+                            title.length > 3 &&
+                            !seen.has(url) &&
+                            !title.toLowerCase().includes('contact') &&
+                            !url.includes('/page-') &&
+                            !url.includes('#')
+                        ) {
+                            scrapedListings.push({ title, url });
+                            seen.add(url);
+                            count++;
+                        }
+                    }
+                    debugLogs.push(`Scraped ${count} items from ${target}`);
+
+                } catch (e: any) {
+                    debugLogs.push(`Error fetching ${target}: ${e.message}`);
                 }
             }
 
@@ -124,7 +153,12 @@ export async function POST(req: NextRequest) {
                 }
             }
 
-            return NextResponse.json({ success: true, count: scrapedListings.length, new: newCount });
+            return NextResponse.json({
+                success: true,
+                count: scrapedListings.length,
+                new: newCount,
+                debug: debugLogs
+            });
         }
 
         // NEW: Cloud Bump All (Pings /up URL for all listings)
