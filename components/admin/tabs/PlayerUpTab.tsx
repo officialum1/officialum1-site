@@ -152,10 +152,35 @@ export default function PlayerUpTab() {
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+
+    // Reset page when filter changes
+    useEffect(() => { setCurrentPage(1); }, [activeFilter]);
+
+    const countStart = (currentPage - 1) * itemsPerPage + 1;
+    const countEnd = Math.min(currentPage * itemsPerPage, filtered.length);
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+    const paginatedListings = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     const handleSelectAll = () => {
-        if (selectedIds.size === filtered.length) setSelectedIds(new Set());
-        else setSelectedIds(new Set(filtered.map(l => l.id)));
+        const pageIds = paginatedListings.map(l => l.id);
+        const allSelected = pageIds.every(id => selectedIds.has(id));
+
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (allSelected) {
+                pageIds.forEach(id => next.delete(id));
+            } else {
+                pageIds.forEach(id => next.add(id));
+            }
+            return next;
+        });
     };
+
+    const isPageSelected = paginatedListings.length > 0 && paginatedListings.every(l => selectedIds.has(l.id));
 
     const handleBulkDelete = async () => {
         if (selectedIds.size === 0) return;
@@ -267,13 +292,13 @@ export default function PlayerUpTab() {
                 </div>
             )}
 
-            <div className="overflow-x-auto glass rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
+            <div className="overflow-x-auto glass rounded-3xl border border-white/5 shadow-2xl overflow-hidden min-h-[600px]">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-white/5 text-[11px] uppercase tracking-[0.2em] text-gray-400 font-black">
                             <th className="px-6 py-5 w-10">
                                 <input type="checkbox"
-                                    checked={selectedIds.size === filtered.length && filtered.length > 0}
+                                    checked={isPageSelected}
                                     onChange={handleSelectAll}
                                     className="accent-emerald-500 w-4 h-4 cursor-pointer"
                                 />
@@ -292,7 +317,7 @@ export default function PlayerUpTab() {
                             <tr><td colSpan={8} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
                         ) : filtered.length === 0 ? (
                             <tr><td colSpan={8} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
-                        ) : filtered.map(l => (
+                        ) : paginatedListings.map(l => (
                             <tr key={l.id} className={`hover:bg-white/[0.02] transition-colors ${selectedIds.has(l.id) ? 'bg-blue-500/5' : ''}`}>
                                 <td className="px-6 py-4">
                                     <input
@@ -372,6 +397,52 @@ export default function PlayerUpTab() {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination Controls */}
+            {filtered.length > itemsPerPage && (
+                <div className="flex justify-between items-center mt-6 px-2">
+                    <div className="text-xs text-gray-500 font-mono">
+                        Showing {countStart}-{countEnd} of {filtered.length} threads
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            className="bg-white/5 hover:bg-white/10 text-gray-300 disabled:opacity-30 disabled:hover:bg-white/5 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                        >
+                            PREV
+                        </button>
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let p = i + 1;
+                                if (totalPages > 5 && currentPage > 3) {
+                                    p = currentPage - 2 + i;
+                                    if (p > totalPages) p = totalPages - (4 - i);
+                                    if (p < 1) p = i + 1;
+                                }
+                                if (p > totalPages) return null;
+
+                                return (
+                                    <button
+                                        key={p}
+                                        onClick={() => setCurrentPage(p)}
+                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === p ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            className="bg-white/5 hover:bg-white/10 text-gray-300 disabled:opacity-30 disabled:hover:bg-white/5 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                        >
+                            NEXT
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
