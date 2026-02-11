@@ -228,18 +228,38 @@ export async function POST(req: NextRequest) {
 
         if (action === 'delete') {
             await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
-        } else if (action === 'update_bump') {
-            const success = body.success === true; // Strict true check
+        } else if (action === 'update') {
+            await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
+        } else if (action === 'get_logs') {
+            // Fetch recent logs
+            const logs = await query("SELECT * FROM activity_logs WHERE action = 'PlayerUp Bump' ORDER BY date DESC LIMIT 50");
+            return NextResponse.json({ success: true, logs });
+        }
+
+        if (action === 'update_bump') {
+            const success = body.success === true;
             const status = success ? 'success' : 'failed';
+
+            // 1. Update Listing
             if (success) {
                 await query("UPDATE playerup_listings SET lastBumped = NOW(), lastBumpStatus = ? WHERE id = ?", [status, id]);
             } else {
-                // If failed, only update status, not time (so it retries or shows error)
                 await query("UPDATE playerup_listings SET lastBumpStatus = ? WHERE id = ?", [status, id]);
             }
-        } else if (action === 'update') {
 
-            await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
+            // 2. Fetch Title for Log
+            const rows: any = await query("SELECT title, url FROM playerup_listings WHERE id = ?", [id]);
+            const title = rows[0]?.title || "Unknown Thread";
+
+            // 3. Create Log Entry
+            const logId = Date.now().toString();
+            const logDetail = success ? `Successfully bumped: ${title}` : `Failed to bump: ${title}`;
+            await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())",
+                [logId, 'System', 'PlayerUp Bump', logDetail]
+            );
+
+            // Return early as we don't need the full list
+            return NextResponse.json({ success: true });
         }
 
         const data: any = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");

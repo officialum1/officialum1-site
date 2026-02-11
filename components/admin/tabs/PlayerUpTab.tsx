@@ -152,6 +152,29 @@ export default function PlayerUpTab() {
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+    // LOGGING SYSTEM
+    const [logs, setLogs] = useState<{ date: string, details: string, action: string }[]>([]);
+
+    const fetchLogs = async () => {
+        try {
+            const res = await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'get_logs' })
+            });
+            const data = await res.json();
+            if (data.success && Array.isArray(data.logs)) {
+                setLogs(data.logs);
+            }
+        } catch (e) { console.error("Log fetch error", e); }
+    };
+
+    useEffect(() => {
+        fetchLogs();
+        const interval = setInterval(fetchLogs, 3000); // Poll every 3s
+        return () => clearInterval(interval);
+    }, []);
+
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
@@ -241,6 +264,32 @@ export default function PlayerUpTab() {
                     <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
                         📋 Manual Import
                     </button>
+                </div>
+            </div>
+
+            {/* LIVE CONSOLE LOGS */}
+            <div className="mb-8 glass-heavy rounded-xl border border-white/10 overflow-hidden flex flex-col shadow-2xl">
+                <div className="bg-black/50 px-4 py-2 border-b border-white/5 flex justify-between items-center">
+                    <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest">⚡ Real-Time Bump Logs</span>
+                    <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50 animate-pulse"></div>
+                    </div>
+                </div>
+                <div className="h-48 overflow-y-auto p-4 font-mono text-xs space-y-1 custom-scrollbar bg-black/80">
+                    {logs.length === 0 ? (
+                        <div className="text-gray-600 italic">Waiting for bump activity...</div>
+                    ) : (
+                        logs.map((log, i) => (
+                            <div key={i} className="flex gap-3">
+                                <span className="text-gray-500">[{new Date(log.date).toLocaleTimeString()}]</span>
+                                <span className={log.details.includes('Success') ? 'text-green-400' : 'text-red-400'}>
+                                    {log.details}
+                                </span >
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
