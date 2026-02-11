@@ -50,46 +50,59 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                     if (!tabId) return;
 
-                    // Helper to wait for load
-                    const waitForLoad = () => new Promise(resolve => {
+                    // Robust Wait for Content
+                    const waitForContent = () => new Promise(resolve => {
+                        let attempts = 0;
+                        const check = () => {
+                            if (attempts > 20) { resolve(false); return; } // Timeout 10s
+                            chrome.scripting.executeScript({
+                                target: { tabId: tabId },
+                                func: () => document.querySelectorAll('.item, tr[data-id], .list-item').length > 0
+                            }).then(res => {
+                                if (res && res[0] && res[0].result === true) resolve(true);
+                                else {
+                                    attempts++;
+                                    setTimeout(check, 500);
+                                }
+                            }).catch(() => resolve(false));
+                        };
+                        // Initial load wait
                         const listener = (tid, changeInfo) => {
                             if (tid === tabId && changeInfo.status === 'complete') {
                                 chrome.tabs.onUpdated.removeListener(listener);
-                                setTimeout(resolve, 2000); // Extra wait for rendering
+                                setTimeout(check, 1000);
                             }
                         };
                         chrome.tabs.onUpdated.addListener(listener);
                     });
 
-                    await waitForLoad();
+                    await waitForContent();
 
                     // Inject Scraper Script
                     try {
                         const results = await chrome.scripting.executeScript({
                             target: { tabId: tabId },
                             func: () => {
-                                // IN-BROWSER PARSING LOGIC
                                 const listings = [];
+                                const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list, .list-item'));
 
-                                // Category Discovery
-                                const catLinks = Array.from(document.querySelectorAll('a[href*="/sell/manageList"]')).map(a => a.href);
-
-                                // Current Page Parsing
-                                const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list'));
                                 for (const row of rows) {
                                     const html = row.outerHTML;
+                                    // Robust ID Matching
                                     const idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/products\/(\d+)\.html/) || html.match(/manage\/edit\?id=(\d+)/);
                                     if (!idMatch) continue;
 
                                     const id = idMatch[1];
+                                    // Avoid duplicates
+                                    if (listings.some(l => l.id === id)) continue;
+
                                     let title = `Z2U Listing #${id}`;
-                                    const tEl = row.querySelector('a[href*="products"], .title, .product-name');
+                                    const tEl = row.querySelector('a[href*="products"], .title, .product-name, h3, h4');
                                     if (tEl) title = tEl.innerText.trim();
 
                                     let price = "0.00";
-                                    const pEl = row.querySelector('.price, span:contains("$"), span:contains("USD")'); // Psuedo-selector won't work in pure JS, using regex below
-                                    const pMatch = html.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i);
-                                    if (pMatch) price = pMatch[1];
+                                    const pMatch = html.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || html.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
+                                    if (pMatch) price = pMatch[1].replace(/[^\d.]/g, '');
 
                                     let stock = "1";
                                     const sMatch = html.match(/Stock:?\s*(\d+)/i) || html.match(/>(\d+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*Actions/i);
@@ -99,27 +112,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                                     listings.push({ id, title, url: `https://www.z2u.com/products/${id}.html`, price, stock, status });
                                 }
-                                return { listings, catLinks };
+                                return { listings, count: listings.length, url: window.location.href };
                             }
                         });
 
-                        if (results && results[0] && results[0].result) {
+                        if (results && results[0]) {
                             const data = results[0].result;
-                            console.log(`[Z2U] Found ${data.listings.length} listings`);
+                            console.log(`[Z2U] Scraped ${data.count} listings from ${data.url}`);
 
                             await fetch(`${apiBase}/api/admin/z2u`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "turbo_sync", listings: data.listings })
+                                body: JSON.stringify({ action: "turbo_sync", listings: data.listings, debug_url: data.url })
                             });
-
-                            // If we found categories, we *could* navigate to them, but for "Stealth V1" let's just do the main page to be safe and fast.
                         }
                     } catch (e) {
                         console.error("Script Injection Failed", e);
                     }
 
-                    setTimeout(() => chrome.windows.remove(win.id), 1000);
+                    // Close after short delay
+                    setTimeout(() => chrome.windows.remove(win.id), 500);
                 });
             } else if (request.action === "REMOTE_SYNC") {
                 console.log("[OfficialUM1] Starting PlayerUp Crawler...");
