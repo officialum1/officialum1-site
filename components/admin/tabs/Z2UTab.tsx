@@ -20,6 +20,8 @@ export default function Z2UTab() {
     const [loading, setLoading] = useState(true);
     const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
 
+    const [showManualImport, setShowManualImport] = useState(false);
+
     useEffect(() => {
         fetchListings();
         checkCookieStatus();
@@ -52,6 +54,96 @@ export default function Z2UTab() {
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_Z2U_SYNC'));
         modernAlert("Z2U Underground Sync", "Scanning your Z2U listings in the background... No tabs needed! 🛰️", "success");
         setTimeout(fetchListings, 15000);
+    };
+
+    const handleManualImport = async (input: string) => {
+        if (!input) return;
+
+        // Robust Z2U Parsing Logic (Client-Side)
+        const listings: Z2UListing[] = [];
+
+        // 1. Find all rows/items
+        const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
+        const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+
+        let loopRegex = rowRegex;
+        if ((input.match(rowRegex) || []).length < 2) loopRegex = itemRegex;
+
+        let match;
+        while ((match = loopRegex.exec(input)) !== null) {
+            const content = match[1];
+            if (!content.includes('products/') && !content.includes('data-id=') && !content.includes('manage/edit')) continue;
+
+            const idMatch = content.match(/data-id=["'](\d+)["']/)
+                || content.match(/id=["']\D*(\d+)["']/)
+                || content.match(/products\/(\d+)\.html/)
+                || content.match(/manage\/edit\?id=(\d+)/);
+
+            if (!idMatch) continue;
+            const id = idMatch[1];
+
+            let title = `Z2U Listing #${id}`;
+            const titleRegex = /<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i;
+            const tMatch = content.match(titleRegex);
+            if (tMatch) {
+                title = tMatch[1].replace(/<[^>]*>/g, '').trim();
+            } else {
+                const genericLink = content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
+                if (genericLink) title = genericLink[1].replace(/<[^>]*>/g, '').trim();
+            }
+
+            const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
+            const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/value=["'](\d+)["'][^>]*name=["']stock["']/i) || content.match(/>\s*(\d+)\s*</);
+
+            const price = priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00";
+            const stock = stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1";
+            const status = (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated';
+
+            listings.push({
+                id,
+                title: title.replace(/&amp;/g, '&'),
+                url: `https://www.z2u.com/products/${id}.html`,
+                platform: 'Other', // Auto-detected by backend usually, but we send minimal
+                unit_price: price,
+                stock: stock,
+                status: status,
+                lastSync: new Date().toISOString()
+            });
+        }
+
+        // Also support fallback global scan if table parsing failed entirely
+        if (listings.length === 0) {
+            const fallbackRegex = /<a[^>]+href=["'].*?products\/(\d+)\.html["'][^>]*>([\s\S]*?)<\/a>/gi;
+            let fMatch;
+            while ((fMatch = fallbackRegex.exec(input)) !== null) {
+                if (fMatch[2].includes('<img')) continue;
+                listings.push({
+                    id: fMatch[1],
+                    title: fMatch[2].replace(/<[^>]*>/g, '').trim(),
+                    url: `https://www.z2u.com/products/${fMatch[1]}.html`,
+                    platform: 'Other',
+                    unit_price: "0.00",
+                    stock: "1",
+                    status: "Active",
+                    lastSync: new Date().toISOString()
+                });
+            }
+        }
+
+        const unique = Array.from(new Set(listings.map(t => t.id))).map(id => listings.find(t => t.id === id)!);
+
+        if (unique.length > 0) {
+            await fetch('/api/admin/z2u', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'turbo_sync', listings: unique })
+            });
+            modernAlert("Import Successful", `Processed ${unique.length} listings.`, "success");
+            setShowManualImport(false);
+            fetchListings();
+        } else {
+            modernAlert("No Listings Found", "Could not parse listings. Ensure you copied the 'My Offers' page source.", "error");
+        }
     };
 
     const handleDelete = async (id: string) => {
@@ -96,15 +188,33 @@ export default function Z2UTab() {
                     <p className="text-gray-400 text-sm mt-1">Direct bridge to Z2U listing management.</p>
                 </div>
                 <div className="flex gap-3">
+                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
+                        📋 Manual Import
+                    </button>
                     <button onClick={handleSync} className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-orange-600/20 transition-all flex items-center gap-2">
                         <span>🛰️</span> Synchronize Z2U
                     </button>
                     <button onClick={() => window.open('https://www.z2u.com/sell/manage', '_blank')} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
-
                         Open Z2U Panel
                     </button>
                 </div>
             </div>
+
+            {showManualImport && (
+                <div className="mb-8 glass p-6 rounded-2xl border border-emerald-500/30 animate-in fade-in slide-in-from-top-4">
+                    <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">📋 Manual Z2U Importer (Fallback)</h3>
+                    <p className="text-sm text-gray-400 mb-4">If Auto-Sync fails, go to your <b>Z2U My Offers Page</b>, right click &gt; View Page Source, copy everything, and paste it here.</p>
+                    <textarea
+                        className="w-full h-40 bg-black/40 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 focus:border-emerald-500/50 outline-none resize-y"
+                        placeholder='Paste HTML Source Code here...'
+                        id="z2u-manual-import-area"
+                    ></textarea>
+                    <div className="flex justify-end gap-3 mt-4">
+                        <button onClick={() => setShowManualImport(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+                        <button onClick={() => handleManualImport((document.getElementById('z2u-manual-import-area') as HTMLTextAreaElement).value)} className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20">Process & Import</button>
+                    </div>
+                </div>
+            )}
 
             <div className="overflow-x-auto glass rounded-3xl border border-white/5 shadow-2xl overflow-hidden">
                 <table className="w-full text-left border-collapse">
