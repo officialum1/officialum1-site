@@ -148,7 +148,7 @@ export default function PlayerUpTab() {
 })();`.trim();
 
     const filtered = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
-    const frequencies = ['Every 5 seconds', 'Every 15 seconds', 'Every 30 seconds', 'Every 1 minute', 'Every 5 minutes', 'Every 1 hour', 'Every 24 hours'];
+    const frequencies = ['Every 5 seconds', 'Every 15 seconds', 'Every 30 seconds', 'Every 1 minute', 'Every 2 minutes', 'Every 5 minutes', 'Every 10 minutes', 'Every 30 minutes', 'Every 1 hour', 'Every 2 hours', 'Every 6 hours', 'Every 12 hours', 'Every 24 hours'];
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 

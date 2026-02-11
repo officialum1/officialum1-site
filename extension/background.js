@@ -349,14 +349,21 @@ async function runAutoBumpEngine() {
         const now = Date.now();
         for (const item of activeListings) {
             const lastBump = item.lastBumped ? new Date(item.lastBumped).getTime() : 0;
-            let intervalMs = 24 * 60 * 60 * 1000;
+            let intervalMs = 24 * 60 * 60 * 1000; // Default 24h
 
-            if (item.frequency.includes('5 seconds')) intervalMs = 5000;
-            else if (item.frequency.includes('15 seconds')) intervalMs = 15000;
-            else if (item.frequency.includes('30 seconds')) intervalMs = 30000;
-            else if (item.frequency.includes('1 minute')) intervalMs = 60000;
-            else if (item.frequency.includes('5 minutes')) intervalMs = 5 * 60000;
-            else if (item.frequency.includes('1 hour')) intervalMs = 60 * 60000;
+            const freq = item.frequency.toLowerCase();
+            if (freq.includes('5 seconds')) intervalMs = 5000;
+            else if (freq.includes('15 seconds')) intervalMs = 15000;
+            else if (freq.includes('30 seconds')) intervalMs = 30000;
+            else if (freq.includes('1 minute')) intervalMs = 60000;
+            else if (freq.includes('2 minutes')) intervalMs = 120000;
+            else if (freq.includes('5 minutes')) intervalMs = 5 * 60000;
+            else if (freq.includes('10 minutes')) intervalMs = 10 * 60000;
+            else if (freq.includes('30 minutes')) intervalMs = 30 * 60000;
+            else if (freq.includes('1 hour')) intervalMs = 60 * 60000;
+            else if (freq.includes('2 hours')) intervalMs = 2 * 60 * 60000;
+            else if (freq.includes('6 hours')) intervalMs = 6 * 60 * 60000;
+            else if (freq.includes('12 hours')) intervalMs = 12 * 60 * 60000;
 
             if (now - lastBump >= intervalMs) {
                 console.log(`[OfficialUM1] Bumping: ${item.title}`);
@@ -368,8 +375,18 @@ async function runAutoBumpEngine() {
                     if (bumpRes.ok) {
                         const text = await bumpRes.text();
                         const finalUrl = bumpRes.url;
-                        if (!finalUrl.includes('login') && !text.includes('Log in') && !text.includes('error')) {
+
+                        // Strict Verification:
+                        // 1. Must not be a login page
+                        // 2. Must not contain "do not have permission" or "log in"
+                        // 3. Must not be the same as the thread URL (it should redirect)
+                        const isLogin = finalUrl.includes('login') || text.includes('Log in');
+                        const noPermission = text.includes('do not have permission') || text.includes('error_not_found');
+
+                        if (!isLogin && !noPermission) {
                             success = true;
+                        } else {
+                            console.warn(`[OfficialUM1] Bump failed for ${item.title}: Permission Denied or Login required.`);
                         }
                     }
                 } catch (e) { console.error("Bump Failure", e); }
