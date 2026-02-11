@@ -319,17 +319,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-// AUTO-BUMP ENGINE
-let _isLooping = false;
-async function startBumpLoop() {
-    if (_isLooping) return;
-    _isLooping = true;
-    console.log("[OfficialUM1] Auto-Bump Loop Started.");
-    while (true) {
-        try {
-            await runAutoBumpEngine();
-        } catch (e) { console.error("Loop Error:", e); }
-        await new Promise(r => setTimeout(r, 15000)); // Every 15s
+// ALARM SYSTEM - Keeps Service Worker alive and running tasks
+chrome.alarms.create("OFFICIALUM1_HEARTBEAT", { periodInMinutes: 1 });
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "OFFICIALUM1_HEARTBEAT") {
+        console.log("[OfficialUM1] Heartbeat Alarm Triggered 💓");
+        runAutoBumpEngine();
+        runZ2UKeepAlive();
+    }
+});
+
+// Run immediately on startup
+runAutoBumpEngine();
+runZ2UKeepAlive();
+
+async function runZ2UKeepAlive() {
+    try {
+        // Fetching these pages keeps the user "Online" on Z2U
+        await fetch("https://www.z2u.com/sell/manage", { credentials: 'include' });
+        await fetch("https://www.z2u.com/chat/list", { credentials: 'include' });
+        console.log("[OfficialUM1] Z2U Keep-Alive Ping Sent 🔔");
+    } catch (e) {
+        console.error("Z2U Keep-Alive Failed:", e);
     }
 }
 
@@ -366,57 +378,57 @@ async function runAutoBumpEngine() {
             else if (freq.includes('12 hours')) intervalMs = 12 * 60 * 60000;
 
             if (now - lastBump >= intervalMs) {
-                console.log(`[OfficialUM1] Bumping: ${item.title}`);
-                const upUrl = item.url.replace(/\/$/, '') + '/up';
-                let success = false;
-
-                try {
-                    const bumpRes = await fetch(upUrl, { credentials: 'include' });
-                    if (bumpRes.ok) {
-                        const text = await bumpRes.text();
-                        const finalUrl = bumpRes.url;
-
-                        // Strict Verification:
-                        // 1. Must not be a login page
-                        // 2. Must not contain "do not have permission" or "log in"
-                        // 3. Must not be the same as the thread URL (it should redirect)
-                        const isLogin = finalUrl.includes('login') || text.includes('Log in');
-                        const noPermission = text.includes('do not have permission') || text.includes('error_not_found');
-
-                        if (!isLogin && !noPermission) {
-                            success = true;
-                        } else {
-                            console.warn(`[OfficialUM1] Bump failed for ${item.title}: Permission Denied or Login required.`);
-                        }
-                    }
-                } catch (e) { console.error("Bump Failure", e); }
-
-                await fetch(`${apiBase}/api/admin/playerup`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                    body: JSON.stringify({ action: "update_bump", id: item.id, success })
-                });
-                await new Promise(r => setTimeout(r, 2000));
+                console.log(`[OfficialUM1] Auto-Bumping: ${item.title}`);
+                await performBumpAction(item, adminPass, apiBase);
+                // Safety delay between bumps
+                await new Promise(r => setTimeout(r, 3000));
             }
         }
     } catch (e) { console.error("Engine Error:", e); }
 }
 
-startBumpLoop();
-startZ2UKeepAlive();
+async function performBumpAction(item, adminPass, apiBase) {
+    const upUrl = item.url.replace(/\/$/, '') + '/up';
+    let success = false;
 
-async function startZ2UKeepAlive() {
-    console.log("[OfficialUM1] Z2U Keep-Alive Service Started.");
-    while (true) {
-        try {
-            // Fetching these pages keeps the user "Online" on Z2U
-            await fetch("https://www.z2u.com/sell/manage", { credentials: 'include' });
-            await fetch("https://www.z2u.com/chat/list", { credentials: 'include' });
-            console.log("[OfficialUM1] Z2U Keep-Alive Ping Sent 🔔");
-        } catch (e) {
-            console.error("Z2U Keep-Alive Failed:", e);
+    try {
+        const bumpRes = await fetch(upUrl, { credentials: 'include' });
+        if (bumpRes.ok) {
+            const text = await bumpRes.text();
+            const finalUrl = bumpRes.url;
+
+            const isLogin = finalUrl.includes('login') || text.includes('Log in');
+            const noPermission = text.includes('do not have permission') || text.includes('error_not_found');
+
+            if (!isLogin && !noPermission) {
+                success = true;
+            } else {
+                console.warn(`[OfficialUM1] Fetch bump denied. Trying Tab Fallback...`);
+                success = await fallbackBump(upUrl);
+            }
+        } else {
+            success = await fallbackBump(upUrl);
         }
-        // Ping every 3 minutes (180s)
-        await new Promise(r => setTimeout(r, 180000));
+    } catch (e) {
+        console.error("Bump Fetch failure, falling back to tab", e);
+        success = await fallbackBump(upUrl);
+    }
+
+    await fetch(`${apiBase}/api/admin/playerup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+        body: JSON.stringify({ action: "update_bump", id: item.id, success })
+    });
+}
+
+async function fallbackBump(url) {
+    // Open tab, wait for it to trigger the /up logic, close it
+    try {
+        const tab = await chrome.tabs.create({ url: url, active: false });
+        await new Promise(r => setTimeout(r, 6000)); // PlayerUp needs a few secs
+        await chrome.tabs.remove(tab.id);
+        return true;
+    } catch (e) {
+        return false;
     }
 }
