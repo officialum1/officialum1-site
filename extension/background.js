@@ -43,66 +43,62 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             if (request.action === "Z2U_SYNC") {
-                console.log("[OfficialUM1] Starting Z2U Smart Sync...");
+                console.log("[OfficialUM1] Starting Z2U Deep Sync...");
                 try {
-                    let queue = [
-                        "https://www.z2u.com/sell/manage",
-                        "https://www.z2u.com/sell/manageList?service=5"
-                    ];
-
+                    let queue = ["https://www.z2u.com/sell/manage"];
                     let visited = new Set();
                     let listings = [];
                     let pageCount = 0;
 
-                    while (queue.length > 0 && pageCount < 30) {
+                    while (queue.length > 0 && pageCount < 60) {
                         const targetUrl = queue.shift();
                         if (visited.has(targetUrl)) continue;
                         visited.add(targetUrl);
                         pageCount++;
 
                         console.log(`[Z2U] Scanning Page ${pageCount}: ${targetUrl}`);
-
-                        // Z2U often requires basic headers to not look like a robot
                         const response = await fetch(targetUrl, {
                             credentials: 'include',
-                            headers: {
-                                'Accept': 'text/html,application/xhtml+xml,application/xml',
-                                'Upgrade-Insecure-Requests': '1'
-                            }
+                            headers: { 'Upgrade-Insecure-Requests': '1' }
                         });
 
-                        if (!response.ok) {
-                            console.error(`[Z2U] Failed to fetch ${targetUrl}: ${response.status}`);
-                            continue;
-                        }
-
+                        if (!response.ok) continue;
                         const html = await response.text();
 
-                        // 1. Z2U Parsing Logic (Ultra-Resistant)
-                        if (html.includes("Log In") || html.includes("Sign In") || html.includes("login-form")) {
-                            console.error("[Z2U] Login Page Detected! Cookie might be invalid or expired.");
+                        if (html.includes("Log In") || html.includes("Sign In")) {
+                            console.error("[Z2U] Session Expired.");
                             continue;
                         }
 
-                        // Strategy A: Multi-structure Row Parsing
-                        const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
+                        // Discovery: Find all category-specific management links
+                        const catLinkRegex = /href=["']([^"']*\/sell\/manageList\?[^"']+)["']/gi;
+                        let catMatch;
+                        while ((catMatch = catLinkRegex.exec(html)) !== null) {
+                            let link = catMatch[1];
+                            if (!link.startsWith('http')) link = "https://www.z2u.com" + (link.startsWith('/') ? '' : '/') + link;
+                            if (!visited.has(link) && !queue.includes(link)) queue.push(link);
+                        }
+
+                        // Strategy A: Row-based Parsing (Table structure)
                         const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
                         let rows = html.match(rowRegex) || [];
-                        if (rows.length < 5) rows = html.match(itemRegex) || [];
 
                         for (const content of rows) {
-                            const idMatch = content.match(/data-id=["'](\d+)["']/) || content.match(/id=["']\D*(\d+)["']/) || content.match(/products\/(\d+)\.html/) || content.match(/manage\/edit\?id=(\d+)/);
+                            // ID Extraction (Looking for #123456 or products/12345.html)
+                            const idMatch = content.match(/#(\d{6,})/) || content.match(/products\/(\d+)\.html/) || content.match(/id=(\d+)/);
                             if (!idMatch) continue;
                             const id = idMatch[1];
 
-                            // Title: High Precision link-based extraction
+                            // Title: Link or descriptive text
                             let title = `Z2U Listing #${id}`;
-                            const tMatch = content.match(/<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i) || content.match(/class=["']?[^"']*(?:title|product-name)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:[^\s>]+)>/i);
-                            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').trim();
+                            const tMatch = content.match(/<a[^>]+>(.*?)<\/a>/i);
+                            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').replace(/#\d+/g, '').trim();
 
-                            // Price & Stock: Multi-pattern detection
-                            const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i) || content.match(/Unit Price:\s*([\d,]+\.?\d*)/i);
-                            const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/>(\d+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*Actions/i) || content.match(/>\s*(\d+)\s*</);
+                            // Price: Looking for number followed by currency or in span
+                            const priceMatch = content.match(/([\d,]+\.?\d*)\s*(?:USD|\$)/i) || content.match(/unit_price[^>]*>([\d.]+)/i);
+
+                            // Stock: looking for numbers under the Stock column
+                            const stockMatch = content.match(/(\d+)\s*<\/td>\s*<td[^>]*>Order Delivery/i) || content.match(/Stock:?\s*(\d+)/i) || content.match(/>(\d+)<\/td>\s*<td[^>]*>.*?<\/td>\s*<td[^>]*>Actions/i);
 
                             listings.push({
                                 id,
@@ -110,21 +106,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 url: `https://www.z2u.com/products/${id}.html`,
                                 price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
                                 stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
-                                status: (content.toLowerCase().includes('active') || content.includes('manage/offline') || content.includes('status-active')) ? 'Active' : 'Deactivated'
+                                status: (content.toLowerCase().includes('publish') || content.includes('active')) ? 'Active' : 'Deactivated'
                             });
                         }
 
-                        // Strategy B: Aggressive Global ID Scan (If no rows found or just as a safety net)
-                        if (listings.length < 10) {
-                            const globalIdRegex = /manage\/edit\?id=(\d+)|products\/(\d+)\.html/gi;
+                        // Strategy B: Link-based Discovery for pages without clear <tr>
+                        if (listings.length < 5) {
+                            const globalIdRegex = /products\/(\d+)\.html/gi;
                             let gMatch;
                             const seenIds = new Set(listings.map(l => l.id));
                             while ((gMatch = globalIdRegex.exec(html)) !== null) {
-                                const gid = gMatch[1] || gMatch[2];
+                                const gid = gMatch[1];
                                 if (gid && !seenIds.has(gid)) {
                                     listings.push({
                                         id: gid,
-                                        title: `Auto-Scanned #${gid}`,
+                                        title: `Sync Detected #${gid}`,
                                         url: `https://www.z2u.com/products/${gid}.html`,
                                         price: "0.00", stock: "1", status: "Active"
                                     });
@@ -133,30 +129,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             }
                         }
 
-                        console.log(`[Z2U] Found ${listings.length} listings so far...`);
-
-                        // 2. Find Next Page (Robust Finder)
-                        // Look for a link with text "Next", or class "next"
-                        const nextMatch = html.match(/<a[^>]+href="([^"]+)"[^>]*>[^<]*Next[^<]*<\/a>/i) || html.match(/<a[^>]+class="[^"]*next[^"]*"[^>]+href="([^"]+)"/i);
+                        // Find Next Page
+                        const nextMatch = html.match(/<a[^>]+href="([^"]+)"[^>]*>[^<]*Next[^<]*<\/a>/i) || html.match(/class="[^"]*next[^"]*"[^>]+href="([^"]+)"/i);
                         if (nextMatch) {
                             let nextUrl = nextMatch[1];
                             if (!nextUrl.startsWith('http')) nextUrl = "https://www.z2u.com" + (nextUrl.startsWith('/') ? '' : '/') + nextUrl;
                             if (!visited.has(nextUrl)) queue.push(nextUrl);
                         }
 
-                        // Batch upload every page
                         if (listings.length > 0) {
                             await fetch(`${apiBase}/api/admin/z2u`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
                                 body: JSON.stringify({ action: "turbo_sync", listings })
                             });
-                            // Clear batch to avoid re-sending
-                            listings = [];
+                            listings = []; // Reset for next page/category
                         }
-                        await new Promise(r => setTimeout(r, 2000));
+                        await new Promise(r => setTimeout(r, 1500));
                     }
-                    console.log("[OfficialUM1] Z2U Sync Complete.");
+                    console.log("[OfficialUM1] Z2U Deep Sync Complete.");
                 } catch (e) { console.error("Z2U Sync Error:", e); }
 
             } else if (request.action === "REMOTE_SYNC") {
