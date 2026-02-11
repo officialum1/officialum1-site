@@ -245,28 +245,28 @@ export default function PlayerUpTab() {
             </div>
 
             {selectedIds.size > 0 && (
-                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 glass-heavy border border-white/10 px-8 py-5 rounded-3xl shadow-3xl z-[100] flex items-center gap-8 animate-in slide-in-from-bottom-8">
+                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 glass-heavy border border-white/20 px-10 py-6 rounded-[32px] shadow-[0_30px_100px_rgba(0,0,0,0.8)] z-[100] flex items-center gap-10 animate-in slide-in-from-bottom-12 duration-500">
                     <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Bulk Actions</span>
-                        <span className="text-lg font-black text-white">{selectedIds.size} Selected</span>
+                        <span className="text-[10px] text-emerald-400 font-black uppercase tracking-[0.2em]">Bulk Selection</span>
+                        <span className="text-2xl font-black text-white">{selectedIds.size} <span className="text-xs text-gray-400 font-medium">THREADS</span></span>
                     </div>
 
-                    <div className="h-10 w-px bg-white/10"></div>
+                    <div className="h-12 w-px bg-white/10"></div>
 
-                    <div className="flex gap-3">
-                        <button onClick={() => handleBulkAction('status', 'Active')} className="bg-green-600/20 text-green-400 border border-green-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-600 hover:text-white transition-all">Activate</button>
-                        <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all">Deactivate</button>
+                    <div className="flex gap-4">
+                        <button onClick={() => handleBulkAction('status', 'Active')} className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 active:scale-95">Activate</button>
+                        <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Deactivate</button>
 
                         <div className="relative group">
-                            <button className="bg-white/5 text-gray-300 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2">
+                            <button className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
                                 Frequency ▾
                             </button>
-                            <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all py-2 max-h-60 overflow-y-auto">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 glass-heavy border border-white/10 rounded-3xl shadow-3xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all py-3 max-h-72 overflow-y-auto custom-scrollbar">
                                 {frequencies.map(f => (
                                     <button
                                         key={f}
                                         onClick={() => handleBulkAction('frequency', f)}
-                                        className="w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-white/5 hover:text-white"
+                                        className="w-full text-left px-5 py-3 text-xs text-gray-400 hover:bg-white/5 hover:text-white font-bold transition-all"
                                     >
                                         {f}
                                     </button>
@@ -274,12 +274,12 @@ export default function PlayerUpTab() {
                             </div>
                         </div>
 
-                        <button onClick={() => handleBulkAction('delete')} className="bg-white/5 text-gray-400 hover:text-red-500 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">Delete</button>
+                        <button onClick={() => handleBulkAction('delete')} className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Delete</button>
                     </div>
 
-                    <div className="h-10 w-px bg-white/10"></div>
+                    <div className="h-12 w-px bg-white/10"></div>
 
-                    <button onClick={() => setSelectedIds(new Set())} className="text-xs text-gray-400 hover:text-white font-bold">Cancel</button>
+                    <button onClick={() => setSelectedIds(new Set())} className="text-xs text-gray-500 hover:text-white font-black uppercase tracking-widest transition-all">Cancel</button>
                 </div>
             )}
 

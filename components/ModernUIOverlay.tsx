@@ -353,29 +353,49 @@ export default function ModernUIOverlay() {
 
                 /* TOAST STYLES */
                 .modern-toast {
-                    background: rgba(15, 15, 20, 0.9);
-                    backdrop-filter: blur(15px);
-                    border-radius: 16px;
-                    padding: 16px 20px;
+                    background: rgba(20, 20, 30, 0.95);
+                    backdrop-filter: blur(25px);
+                    -webkit-backdrop-filter: blur(25px);
+                    border-radius: 20px;
+                    padding: 18px 24px;
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    border: 1px solid rgba(255, 255, 255, 0.05);
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-                    minWidth: 280px;
-                    max-width: 400px;
+                    gap: 16px;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px rgba(0, 255, 136, 0.05);
+                    min-width: 320px;
+                    max-width: 500px;
+                    position: relative;
+                    overflow: hidden;
                 }
 
-                .modern-toast.info { border-left: 4px solid #00ff88; }
-                .modern-toast.success { border-left: 4px solid #00ff88; }
-                .modern-toast.error { border-left: 4px solid #ff4444; }
+                .modern-toast::before {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+                    transform: translateX(-100%);
+                    animation: toast-shimmer 3s infinite;
+                }
 
-                .toast-icon { font-size: 1.2rem; }
+                @keyframes toast-shimmer {
+                    100% { transform: translateX(100%); }
+                }
+
+                .modern-toast.info { border-left: 6px solid #00c3ff; }
+                .modern-toast.success { border-left: 6px solid #00ff88; }
+                .modern-toast.error { border-left: 6px solid #ff4444; }
+
+                .toast-icon { 
+                    font-size: 1.5rem; 
+                    filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+                }
                 .toast-message { 
-                    color: #fff; 
-                    font-size: 0.9rem; 
-                    font-weight: 500; 
+                    color: #ffffff; 
+                    font-size: 1rem; 
+                    font-weight: 700; 
                     line-height: 1.4;
+                    letter-spacing: 0.01em;
                 }
             `}</style>
         </>

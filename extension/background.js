@@ -78,74 +78,59 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         const html = await response.text();
 
-                        // 1. Z2U Parsing Logic (Refined for "Fix Issue")
+                        // 1. Z2U Parsing Logic (Ultra-Resistant)
                         if (html.includes("Log In") || html.includes("Sign In") || html.includes("login-form")) {
                             console.error("[Z2U] Login Page Detected! Cookie might be invalid or expired.");
-                            // Attempt to notify UI? 
                             continue;
                         }
 
-                        // Debug: Log first 200 chars to ensure we got HTML
-                        console.log(`[Z2U] Page Preview: ${html.substring(0, 100).replace(/\n/g, ' ')}...`);
-
-                        // Find valid rows (tr or div with product info)
-                        // Relaxed: match ANY container that has a product link
+                        // Strategy A: Multi-structure Row Parsing
                         const itemRegex = /<(?:tr|div)[^>]*class=["']?[^"']*(?:item|row|list)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:tr|div)>/gi;
-                        // Fallback: standard table rows
                         const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+                        let rows = html.match(rowRegex) || [];
+                        if (rows.length < 5) rows = html.match(itemRegex) || [];
 
-                        let loopRegex = rowRegex;
-                        // Check if we find matches with rowRegex, if not try itemRegex
-                        if ((html.match(rowRegex) || []).length < 2) loopRegex = itemRegex;
-
-                        let match;
-                        while ((match = loopRegex.exec(html)) !== null) {
-                            const content = match[1];
-
-                            // Critical Indicator: Must have a product link or ID
-                            if (!content.includes('products/') && !content.includes('data-id=') && !content.includes('manage/edit')) continue;
-
-                            // ID Extraction
-                            const idMatch = content.match(/data-id=["'](\d+)["']/)
-                                || content.match(/id=["']\D*(\d+)["']/)
-                                || content.match(/products\/(\d+)\.html/)
-                                || content.match(/manage\/edit\?id=(\d+)/);
-
+                        for (const content of rows) {
+                            const idMatch = content.match(/data-id=["'](\d+)["']/) || content.match(/id=["']\D*(\d+)["']/) || content.match(/products\/(\d+)\.html/) || content.match(/manage\/edit\?id=(\d+)/);
                             if (!idMatch) continue;
                             const id = idMatch[1];
 
+                            // Title: High Precision link-based extraction
                             let title = `Z2U Listing #${id}`;
-                            // Title Extraction: Look for the product link anchor text
-                            // Regex: <a href="...products/..." ... > TITLE </a>
-                            const titleRegex = /<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i;
-                            const tMatch = content.match(titleRegex);
-                            if (tMatch) {
-                                title = tMatch[1].replace(/<[^>]*>/g, '').trim();
-                            } else {
-                                // Fallback: look for ANY meaningful link valid for a title
-                                const genericLink = content.match(/<a[^>]*class=["'][^"']*title[^"']*["'][^>]*>([\s\S]*?)<\/a>/i);
-                                if (genericLink) title = genericLink[1].replace(/<[^>]*>/g, '').trim();
-                            }
+                            const tMatch = content.match(/<a[^>]+href=["'][^"']*products\/\d+\.html["'][^>]*>([\s\S]*?)<\/a>/i) || content.match(/class=["']?[^"']*(?:title|product-name)[^"']*["']?[^>]*>([\s\S]*?)<\/(?:[^\s>]+)>/i);
+                            if (tMatch) title = tMatch[1].replace(/<[^>]*>/g, '').trim();
 
-                            if (title.length < 3) title = `Listing ${id}`; // Safety
-
-                            // Price & Stock
-                            const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
-                            const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/value=["'](\d+)["'][^>]*name=["']stock["']/i) || content.match(/>\s*(\d+)\s*</);
-
-                            const price = priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00";
-                            const stock = stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1";
-
-                            const status = (content.toLowerCase().includes('active') || content.includes('manage/offline')) ? 'Active' : 'Deactivated';
+                            // Price & Stock: Multi-pattern detection
+                            const priceMatch = content.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || content.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i) || content.match(/Unit Price:\s*([\d,]+\.?\d*)/i);
+                            const stockMatch = content.match(/Stock:?\s*(\d+)/i) || content.match(/>(\d+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*Actions/i) || content.match(/>\s*(\d+)\s*</);
 
                             listings.push({
                                 id,
-                                title: title.replace(/&amp;/g, '&'),
+                                title: title.replace(/&amp;/g, '&') || `Listing ${id}`,
                                 url: `https://www.z2u.com/products/${id}.html`,
-                                price,
-                                stock,
-                                status
+                                price: priceMatch ? priceMatch[1].replace(/[^\d.]/g, '') : "0.00",
+                                stock: stockMatch ? stockMatch[1].replace(/[^\d]/g, '') : "1",
+                                status: (content.toLowerCase().includes('active') || content.includes('manage/offline') || content.includes('status-active')) ? 'Active' : 'Deactivated'
                             });
+                        }
+
+                        // Strategy B: Aggressive Global ID Scan (If no rows found or just as a safety net)
+                        if (listings.length < 10) {
+                            const globalIdRegex = /manage\/edit\?id=(\d+)|products\/(\d+)\.html/gi;
+                            let gMatch;
+                            const seenIds = new Set(listings.map(l => l.id));
+                            while ((gMatch = globalIdRegex.exec(html)) !== null) {
+                                const gid = gMatch[1] || gMatch[2];
+                                if (gid && !seenIds.has(gid)) {
+                                    listings.push({
+                                        id: gid,
+                                        title: `Auto-Scanned #${gid}`,
+                                        url: `https://www.z2u.com/products/${gid}.html`,
+                                        price: "0.00", stock: "1", status: "Active"
+                                    });
+                                    seenIds.add(gid);
+                                }
+                            }
                         }
 
                         console.log(`[Z2U] Found ${listings.length} listings so far...`);
