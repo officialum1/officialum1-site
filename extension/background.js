@@ -322,17 +322,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // ALARM SYSTEM - Keeps Service Worker alive and running tasks
 chrome.alarms.create("OFFICIALUM1_HEARTBEAT", { periodInMinutes: 1 });
 
+let _isRunningFastLoop = false;
+
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "OFFICIALUM1_HEARTBEAT") {
-        console.log("[OfficialUM1] Heartbeat Alarm Triggered 💓");
-        runAutoBumpEngine();
-        runZ2UKeepAlive();
+        console.log("[OfficialUM1] Heartbeat Alarm Triggered 💓 - Ensuring Fast Loop is active.");
+        startFastLoop();
     }
 });
 
+// Fast Loop: Runs every 10 seconds to support 5s/15s/30s/1m frequencies
+async function startFastLoop() {
+    if (_isRunningFastLoop) return;
+    _isRunningFastLoop = true;
+
+    // We run for about 55 seconds, then yield so the next alarm can take over
+    const startTime = Date.now();
+    while (Date.now() - startTime < 55000) {
+        try {
+            await runAutoBumpEngine();
+            await runZ2UKeepAlive();
+        } catch (e) { console.error("Fast Loop Error:", e); }
+
+        await new Promise(r => setTimeout(r, 10000)); // 10s precision
+    }
+
+    _isRunningFastLoop = false;
+}
+
 // Run immediately on startup
-runAutoBumpEngine();
-runZ2UKeepAlive();
+startFastLoop();
 
 async function runZ2UKeepAlive() {
     try {

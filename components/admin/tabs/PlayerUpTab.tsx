@@ -182,19 +182,25 @@ export default function PlayerUpTab() {
 
     const isPageSelected = paginatedListings.length > 0 && paginatedListings.every(l => selectedIds.has(l.id));
 
-    const handleBulkDelete = async () => {
-        if (selectedIds.size === 0) return;
-        if (!(await modernConfirm(`Delete ${selectedIds.size} listings?`))) return;
+    const handleBulkAction = async (action: string, value?: string) => {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) return;
 
-        // Optimistic UI update
-        const toDelete = new Set(selectedIds);
-        setListings(prev => prev.filter(l => !toDelete.has(l.id)));
-        setSelectedIds(new Set());
-
-        for (const id of toDelete) {
-            fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) }).catch(() => { });
+        setLoading(true);
+        try {
+            await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'bulk', ids, subAction: action, value })
+            });
+            await fetchListings();
+            setSelectedIds(new Set());
+            modernAlert("Bulk Action Success", `Applied ${action} to ${ids.length} threads.`, "success");
+        } catch (e) {
+            modernAlert("Bulk Action Failed");
+        } finally {
+            setLoading(false);
         }
-        modernAlert("Deleted", "Selected listings removed.", "success");
     };
 
     return (
@@ -219,17 +225,63 @@ export default function PlayerUpTab() {
                     <p className="text-gray-400 text-sm mt-1">Automated listing management & scheduled bumping engine.</p>
                 </div>
                 <div className="flex gap-3">
-                    {selectedIds.size > 0 && (
-                        <button onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-red-500/20 animate-in fade-in zoom-in duration-200">
-                            🗑️ Delete ({selectedIds.size})
-                        </button>
-                    )}
-                    <button onClick={handleCloudSync} className="bg-blue-600/10 text-blue-400 border border-blue-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-blue-600 hover:text-white transition-all">☁️ Cloud Sync</button>
-                    <button onClick={handleCloudBump} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20 transition-all">🔥 Bump All</button>
-                    <button onClick={() => { navigator.clipboard.writeText(getTurboScript()); modernAlert("Turbo Script Copied!", "Paste in PlayerUp Console.", "success"); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/20 hover:scale-[1.02] transition-all">⚡ Turbo Script</button>
-                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-5 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">📋 Manual Import</button>
+                    <button onClick={handleCloudSync} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all flex items-center gap-2">
+                        <span>☁️</span> Cloud Sync
+                    </button>
+                    <button onClick={handleCloudBump} className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-orange-600/20 transition-all">
+                        🔥 Bump All
+                    </button>
+                    <button onClick={() => {
+                        const script = getTurboScript();
+                        navigator.clipboard.writeText(script);
+                        modernAlert("Turbo Script Copied!", "1. Go to PlayerUp My Threads\n2. Open Console (F12)\n3. Paste & Enter manually.", "success");
+                    }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-purple-600/20 transition-all">
+                        ⚡ Turbo Script
+                    </button>
+                    <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
+                        📋 Manual Import
+                    </button>
                 </div>
             </div>
+
+            {selectedIds.size > 0 && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 glass-heavy border border-white/10 px-8 py-5 rounded-3xl shadow-3xl z-[100] flex items-center gap-8 animate-in slide-in-from-bottom-8">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Bulk Actions</span>
+                        <span className="text-lg font-black text-white">{selectedIds.size} Selected</span>
+                    </div>
+
+                    <div className="h-10 w-px bg-white/10"></div>
+
+                    <div className="flex gap-3">
+                        <button onClick={() => handleBulkAction('status', 'Active')} className="bg-green-600/20 text-green-400 border border-green-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-600 hover:text-white transition-all">Activate</button>
+                        <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all">Deactivate</button>
+
+                        <div className="relative group">
+                            <button className="bg-white/5 text-gray-300 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2">
+                                Frequency ▾
+                            </button>
+                            <div className="absolute bottom-full left-0 mb-2 w-48 bg-gray-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all py-2 max-h-60 overflow-y-auto">
+                                {frequencies.map(f => (
+                                    <button
+                                        key={f}
+                                        onClick={() => handleBulkAction('frequency', f)}
+                                        className="w-full text-left px-4 py-2 text-xs text-gray-400 hover:bg-white/5 hover:text-white"
+                                    >
+                                        {f}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button onClick={() => handleBulkAction('delete')} className="bg-white/5 text-gray-400 hover:text-red-500 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">Delete</button>
+                    </div>
+
+                    <div className="h-10 w-px bg-white/10"></div>
+
+                    <button onClick={() => setSelectedIds(new Set())} className="text-xs text-gray-400 hover:text-white font-bold">Cancel</button>
+                </div>
+            )}
 
             {showManualImport && (
                 <div className="mb-8 glass p-6 rounded-2xl border border-emerald-500/30 animate-in fade-in slide-in-from-top-4">

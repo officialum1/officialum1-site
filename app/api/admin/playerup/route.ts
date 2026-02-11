@@ -213,6 +213,19 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        if (action === 'bulk') {
+            const { ids, subAction, value } = body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) return NextResponse.json({ error: "No IDs" });
+
+            if (subAction === 'status') {
+                await query(`UPDATE playerup_listings SET status = ? WHERE id IN (${ids.map(() => '?').join(',')})`, [value, ...ids]);
+            } else if (subAction === 'frequency') {
+                await query(`UPDATE playerup_listings SET frequency = ? WHERE id IN (${ids.map(() => '?').join(',')})`, [value, ...ids]);
+            } else if (subAction === 'delete') {
+                await query(`DELETE FROM playerup_listings WHERE id IN (${ids.map(() => '?').join(',')})`, ids);
+            }
+        }
+
         if (action === 'delete') {
             await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
         } else if (action === 'update_bump') {
