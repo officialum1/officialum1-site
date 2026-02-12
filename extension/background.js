@@ -252,31 +252,72 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 func: () => {
                                     const threads = [];
                                     const seen = new Set();
+                                    const debugLog = [];
 
-                                    // Robust Selector for Thread Links
-                                    const links = document.querySelectorAll('a[href*="/threads/"]');
+                                    // Strategy 1: Standard Forum List (e.g. /forums/...)
+                                    const listItems = document.querySelectorAll('.discussionListItem, .node .nodeText .nodeTitle a');
 
-                                    for (const link of links) {
-                                        let url = link.href;
-                                        let title = link.innerText.trim();
+                                    // Strategy 2: Store/Inventory View (e.g. /account/postings)
+                                    // Looks for table rows with specific data
+                                    const gridRows = document.querySelectorAll('.dataGrid tr.dataRow, .dataTable tr');
 
-                                        // Clean URL
-                                        url = url.split('?')[0];
-                                        if (url.endsWith('/')) url = url.slice(0, -1);
+                                    debugLog.push(`Found ${listItems.length} list items, ${gridRows.length} grid rows.`);
 
-                                        // Filters
-                                        if (
-                                            url.includes('/page-') ||
-                                            url.includes('#') ||
-                                            title.length < 5 ||
-                                            title.toLowerCase().includes('last post') ||
-                                            seen.has(url)
-                                        ) continue;
+                                    // Process List Items
+                                    listItems.forEach(item => {
+                                        const link = item.querySelector('.title a, .PreviewTooltip') || item;
+                                        if (link && link.href && link.href.includes('/threads/')) {
+                                            let url = link.href.split('?')[0].split('#')[0];
+                                            let title = link.innerText.trim();
+                                            if (!seen.has(url) && title.length > 3) {
+                                                seen.add(url);
+                                                threads.push({ title, url, source: 'forum' });
+                                            }
+                                        }
+                                    });
 
-                                        seen.add(url);
-                                        threads.push({ title, url });
+                                    // Process Grid Rows
+                                    gridRows.forEach(row => {
+                                        const link = row.querySelector('a[href*="/threads/"]');
+                                        if (link) {
+                                            let url = link.href.split('?')[0].split('#')[0];
+                                            let title = link.innerText.trim();
+
+                                            // Fallback title from row text if link text is generic "View"
+                                            if (title.toLowerCase() === 'view' || title === '') {
+                                                const titleCell = row.querySelector('td:nth-child(2), td.title');
+                                                if (titleCell) title = titleCell.innerText.trim();
+                                            }
+
+                                            if (!seen.has(url) && title.length > 3) {
+                                                seen.add(url);
+                                                threads.push({ title, url, source: 'grid' });
+                                            }
+                                        }
+                                    });
+
+                                    // Strategy 3: Brute Force all thread links (fallback)
+                                    if (threads.length === 0) {
+                                        debugLog.push("Zero generic items found. Brute forcing links...");
+                                        const allLinks = document.querySelectorAll('a[href*="/threads/"]');
+                                        allLinks.forEach(link => {
+                                            // Exclude obviously value-less links
+                                            if (link.innerText.length < 5 || link.innerText.includes('Last Post')) return;
+                                            let url = link.href.split('?')[0];
+                                            if (!seen.has(url)) {
+                                                seen.add(url);
+                                                threads.push({ title: link.innerText.trim(), url, source: 'brute' });
+                                            }
+                                        });
                                     }
-                                    return { threads, count: threads.length, url: window.location.href };
+
+                                    return {
+                                        threads,
+                                        count: threads.length,
+                                        url: window.location.href,
+                                        title: document.title,
+                                        debug: debugLog.join(' | ')
+                                    };
                                 }
                             });
 
@@ -284,7 +325,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 const data = results[0].result;
                                 foundCount = data.count;
 
-                                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: `Found ${foundCount} threads.` });
+                                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: `Found ${foundCount} threads. Debug: ${data.debug || 'N/A'}` });
                                 console.log(`[PlayerUp] Scraped ${foundCount} items.`);
 
                                 if (foundCount > 0) {
