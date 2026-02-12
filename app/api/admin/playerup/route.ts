@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
                     const newId = Date.now() + Math.random().toString(36).substr(2, 9);
                     const platform = detectPlatform(item.title, item.url);
                     await query(
-                        "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt, status, frequency, username) VALUES (?, ?, ?, ?, NULL, NOW(), 'Inactive', 'Every 24 hours', 'officialum1')",
+                        "INSERT IGNORE INTO playerup_listings (id, title, url, platform, lastBumped, createdAt, status, frequency, username, autoBump) VALUES (?, ?, ?, ?, NULL, NOW(), 'Inactive', 'Every 24 hours', 'officialum1', FALSE)",
                         [newId, item.title, item.url, platform]
                     );
                     newCount++;
@@ -229,8 +229,8 @@ export async function POST(req: NextRequest) {
 
                         await query(
                             `INSERT IGNORE INTO playerup_listings 
-                            (id, title, url, platform, lastBumped, createdAt, status, frequency, username) 
-                            VALUES (?, ?, ?, ?, NULL, NOW(), 'Active', 'Every 24 hours', 'officialum1')`,
+                            (id, title, url, platform, lastBumped, createdAt, status, frequency, username, autoBump) 
+                            VALUES (?, ?, ?, ?, NULL, NOW(), 'Active', 'Every 24 hours', 'officialum1', FALSE)`,
                             // Default to 'Active' so they start bumping immediately if needed
                             [newId, title, item.url, platform]
                         );
