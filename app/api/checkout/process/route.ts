@@ -289,6 +289,7 @@ export async function POST(req: Request) {
                         if (stockRows.length >= safeQuantity) {
                             let combinedCreds = "";
                             const soldIds = [];
+                            const itemsList = [];
 
                             for (const stock of stockRows) {
                                 await query("UPDATE inventory SET status = 'Sold' WHERE id = ?", [stock.id]);
@@ -297,12 +298,19 @@ export async function POST(req: Request) {
                                 const line = `${creds.email || creds.username}:${creds.password}${creds.extraInfo ? ` (${creds.extraInfo})` : ''}`;
                                 combinedCreds += line + "\n";
                                 soldIds.push(stock.id);
+                                itemsList.push({
+                                    email: creds.email || '',
+                                    user: creds.username || '',
+                                    pass: creds.password || '',
+                                    extra: creds.extraInfo || '',
+                                    image: stock.image || ''
+                                });
                             }
 
                             // Create Delivery Token
                             const token = Math.random().toString(36).substring(2, 10);
                             await query("INSERT INTO deliveries (token, orderId, itemName, details) VALUES (?, ?, ?, ?)",
-                                [token, orderId, pName, JSON.stringify({ accounts: combinedCreds, inventoryIds: soldIds })]);
+                                [token, orderId, pName, JSON.stringify({ accounts: combinedCreds, inventoryIds: soldIds, items: itemsList })]);
 
                             // Mark Complete
                             await query("UPDATE orders SET status = 'completed', delivery_details = ? WHERE orderId = ?", [combinedCreds, orderId]);

@@ -268,7 +268,7 @@ export default function DeliveryPage() {
                                             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px', textAlign: 'left' }}>
                                                 <thead>
                                                     <tr style={{ fontSize: '0.7rem', color: '#444', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                                                        <th style={{ padding: '0 1.5rem' }}>ID</th>
+                                                        <th style={{ padding: '0 1.5rem' }}>Item</th>
                                                         {bulkAccounts.some(a => a.email) && <th style={{ padding: '0 1.5rem' }}>Email Address</th>}
                                                         <th style={{ padding: '0 1.5rem' }}>Login Name</th>
                                                         <th style={{ padding: '0 1.5rem' }}>Security Password</th>
@@ -278,7 +278,16 @@ export default function DeliveryPage() {
                                                 <tbody>
                                                     {bulkAccounts.map((acc: any, i: number) => (
                                                         <tr key={i} className="row-item">
-                                                            <td style={{ padding: '1.2rem 1.5rem', color: '#333', fontSize: '0.8rem' }}>{i + 1}</td>
+                                                            <td style={{ padding: '1.2rem 1.5rem' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                                                    {acc.image ? (
+                                                                        <img src={acc.image} alt="" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.05)' }} />
+                                                                    ) : (
+                                                                        <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>📦</div>
+                                                                    )}
+                                                                    <span style={{ color: '#888', fontSize: '0.8rem' }}>#{i + 1}</span>
+                                                                </div>
+                                                            </td>
                                                             {bulkAccounts.some(a => a.email) && (
                                                                 <td style={{ padding: '1.2rem 1.5rem' }}>
                                                                     <div style={{ color: '#00ff88', fontFamily: 'monospace', fontWeight: '600' }}>{acc.email || '---'}</div>
@@ -349,6 +358,23 @@ export default function DeliveryPage() {
                                                 </div>
                                             ) : (
                                                 <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                                    {order.details.image && (
+                                                        <div className="credential-field" style={{ marginBottom: '1.5rem' }}>
+                                                            <div style={{ marginBottom: '1rem' }}>
+                                                                <label style={{ fontSize: '0.7rem', color: '#444', letterSpacing: '2px', fontWeight: '700', textTransform: 'uppercase' }}>Visual Confirmation</label>
+                                                            </div>
+                                                            <div style={{ borderRadius: '28px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)', position: 'relative' }}>
+                                                                <img
+                                                                    src={order.details.image}
+                                                                    alt="Delivery Screenshot"
+                                                                    style={{ width: '100%', height: 'auto', display: 'block', cursor: 'zoom-in' }}
+                                                                    onClick={() => window.open(order.details.image, '_blank')}
+                                                                />
+                                                                <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.65rem', color: '#fff' }}>Click to enlarge</div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
                                                     {order.details.username && (
                                                         <div className="credential-field">
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -447,7 +473,7 @@ export default function DeliveryPage() {
                 )}
 
                 {reviewSubmitted && (
-                    <div style={{ marginTop: '3rem', textAlign: 'center', color: '#00ff88', padding: '3rem', background: 'rgba(0,255,136,0.03)', borderRadius: '32px', border: '1px solid rgba(0,255,136,0.1)' }} className="fade-in">
+                    <div style={{ marginTop: '3rem', textAlign: 'center', color: '#00ff88', padding: '3rem', background: 'rgba(0,255,136,0.3)', borderRadius: '32px', border: '1px solid rgba(0,255,136,0.1)' }} className="fade-in">
                         <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>🌑</span>
                         <div style={{ fontWeight: '800', fontSize: '1.5rem' }}>Transmission Successful</div>
                         <p style={{ color: '#444', marginTop: '0.5rem' }}>Your feedback has been integrated into our system.</p>

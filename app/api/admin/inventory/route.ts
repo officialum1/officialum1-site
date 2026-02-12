@@ -193,7 +193,8 @@ export async function POST(request: Request) {
                         email: details.email || '',
                         user: details.username || '',
                         pass: details.password || '',
-                        extra: details.extraInfo || ''
+                        extra: details.extraInfo || '',
+                        image: item.image || ''
                     });
 
                     // Format: "email:username:password" (Only include email/username if they exist and are different)
@@ -247,6 +248,7 @@ export async function POST(request: Request) {
                     // Ensure details has a consistent structure with inventoryIds
                     const deliveryDetails = {
                         ...details,
+                        image: item.image || '',
                         inventoryIds: [body.inventoryId]
                     };
 
