@@ -233,15 +233,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 });
             } else if (request.action === "REMOTE_SYNC") {
                 const dashboardTabId = sender.tab ? sender.tab.id : null;
-                console.log("[OfficialUM1] Starting PlayerUp Stealth Sync...", dashboardTabId);
+                const targetUrl = request.detail && request.detail.url ? request.detail.url : (request.url || "https://www.playerup.com/account/threads");
+                const isSingle = targetUrl.includes('/threads/');
 
-                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Launching Stealth Crawler..." });
-
-                // Use the user's verified URL
-                const startUrl = "https://www.playerup.com/account/threads";
+                console.log("[OfficialUM1] PlayerUp Sync... Target:", targetUrl);
+                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: isSingle ? "Analyzing Single Thread..." : "Launching Stealth Crawler..." });
 
                 await new Promise((resolve) => {
-                    chrome.windows.create({ url: startUrl, state: 'minimized' }, async (win) => {
+                    chrome.windows.create({ url: targetUrl, state: 'minimized' }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
 
@@ -279,6 +278,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                     const threads = [];
                                     const seen = new Set();
                                     const debugLog = [];
+
+                                    // Strategy 0: Single Thread
+                                    const h1 = document.querySelector('h1.titleText, h1');
+                                    if (window.location.href.includes('/threads/') && h1 && !window.location.href.includes('/account/')) {
+                                        threads.push({ title: h1.innerText.trim(), url: window.location.href.split('?')[0].split('#')[0], source: 'single' });
+                                    }
 
                                     // Strategy 1: Standard Forum List (e.g. /forums/...)
                                     const listItems = document.querySelectorAll('.discussionListItem, .node .nodeText .nodeTitle a');

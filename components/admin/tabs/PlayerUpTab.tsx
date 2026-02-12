@@ -70,6 +70,26 @@ export default function PlayerUpTab() {
         }
     };
 
+    const [importUrl, setImportUrl] = useState('');
+
+    const handleImportSingle = async () => {
+        if (!importUrl.includes('playerup.com/threads')) {
+            modernAlert("Invalid URL", "Please enter a valid PlayerUp thread URL.", "error");
+            return;
+        }
+        setLoading(true);
+        try {
+            // Trigger extension to scrape this specific URL
+            window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC', { detail: { url: importUrl } }));
+            modernAlert("Importing...", "The extension is scanning this thread. Please wait...", "success");
+            setImportUrl('');
+        } catch (e) {
+            modernAlert("Import Failed", String(e), "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleCloudSync = async () => {
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
         modernAlert("Cloud Sync Initiated", "The extension is now scanning PlayerUp in the background. Please wait for the success alert.", "success");
@@ -264,6 +284,33 @@ export default function PlayerUpTab() {
                     </button>
                 </div>
             </div>
+
+            {showManualImport && (
+                <div className="mb-8 bg-gray-900/50 border border-emerald-500/20 p-6 rounded-2xl animate-fade-in-down">
+                    <h3 className="text-emerald-400 font-bold mb-4 flex items-center gap-2">
+                        <span className="text-xl">📥</span> Import Single Thread
+                    </h3>
+                    <div className="flex gap-4">
+                        <input
+                            type="text"
+                            placeholder="https://www.playerup.com/threads/..."
+                            className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 outline-none transition-all"
+                            value={importUrl}
+                            onChange={(e) => setImportUrl(e.target.value)}
+                        />
+                        <button
+                            onClick={handleImportSingle}
+                            disabled={loading}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Scanning...' : 'Import Now'}
+                        </button>
+                    </div>
+                    <p className="text-gray-500 text-xs mt-2 pl-2">
+                        * Supports standard thread URLs. The item will be scraped and added to your database automatically.
+                    </p>
+                </div>
+            )}
 
             {/* LIVE CONSOLE LOGS */}
             <div className="mb-8 glass-heavy rounded-xl border border-white/10 overflow-hidden flex flex-col shadow-2xl">
