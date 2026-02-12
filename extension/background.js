@@ -74,7 +74,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                 // Try Primary URL: https://www.z2u.com/sell/manageList
                 // Fallback URL: https://www.z2u.com/product/manage/index
-                const primaryUrl = 'https://www.z2u.com/sell/manageList';
+                // Prioritize the user's specific category URL
+                const primaryUrl = 'https://www.z2u.com/sell/manageList?service=5&game=15132';
                 const fallbackUrl = 'https://www.z2u.com/product/manage/index';
 
                 await new Promise((resolve) => {
@@ -300,9 +301,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         if (link && link.href && link.href.includes('/threads/')) {
                                             let url = link.href.split('?')[0].split('#')[0];
                                             let title = link.innerText.trim();
+
+                                            // Determine Status
+                                            let status = 'Active';
+                                            const lowerTitle = title.toLowerCase();
+                                            if (lowerTitle.includes('[sold]') || lowerTitle.includes('sold -') || lowerTitle.includes('[closed]')) {
+                                                status = 'Inactive';
+                                            }
+                                            // Check for prefix labels if available
+                                            const prefix = item.querySelector('.prefix');
+                                            if (prefix && (prefix.innerText.includes('Sold') || prefix.innerText.includes('Closed'))) {
+                                                status = 'Inactive';
+                                            }
+
                                             if (!seen.has(url) && title.length > 3) {
                                                 seen.add(url);
-                                                threads.push({ title, url, source: 'forum' });
+                                                threads.push({ title, url, source: 'forum', status });
                                             }
                                         }
                                     });
@@ -320,9 +334,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                                 if (titleCell) title = titleCell.innerText.trim();
                                             }
 
+                                            // Determine Status
+                                            let status = 'Active';
+                                            const rowText = row.innerText.toLowerCase();
+                                            if (rowText.includes('sold') || rowText.includes('closed') || rowText.includes('inactive')) {
+                                                status = 'Inactive';
+                                            }
+                                            if (row.classList.contains('im-sold') || row.classList.contains('im-closed')) status = 'Inactive';
+                                            if (row.querySelector('img[src*="sold"]')) status = 'Inactive';
+
                                             if (!seen.has(url) && title.length > 3) {
                                                 seen.add(url);
-                                                threads.push({ title, url, source: 'grid' });
+                                                threads.push({ title, url, source: 'grid', status });
                                             }
                                         }
                                     });
