@@ -121,12 +121,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                     func: () => {
                                         const title = document.title;
                                         const bodyText = document.body.innerText.toLowerCase();
-                                        const isLogin = title.toLowerCase().includes("login") || bodyText.includes("sign in") || bodyText.includes("welcome back");
+                                        const currentUrl = window.location.href;
+                                        const isLogin = currentUrl.includes('login') || title.toLowerCase().includes("login") || bodyText.includes("sign in") || bodyText.includes("welcome back");
                                         const htmlLen = document.body.innerHTML.length;
+                                        const snippet = document.body.innerText.substring(0, 500).replace(/\s+/g, ' ');
 
                                         const listings = [];
                                         // Broad selector to catch any list-like element
-                                        const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list-item, .table-row, li.gl-item'));
+                                        const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list-item, .table-row, li.gl-item, li.item'));
 
                                         // Debug info
                                         const rowCount = rows.length;
@@ -184,16 +186,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                                             listings.push({ id, title, url: `https://www.z2u.com/products/${id}.html`, price, stock, status });
                                         }
-                                        return { listings, count: listings.length, url: window.location.href, title, isLogin, htmlLen, rowCount, firstRowHTML };
+                                        return { listings, count: listings.length, url: window.location.href, title, isLogin, htmlLen, rowCount, firstRowHTML, snippet };
                                     }
                                 });
 
                                 if (results && results[0] && results[0].result) {
                                     const data = results[0].result;
-                                    lastDebug = `[${mode}] Title: ${data.title}. Login? ${data.isLogin}. Rows: ${data.rowCount}. Sample: ${data.firstRowHTML || 'N/A'}`;
+                                    lastDebug = `[${mode}] URL: ${data.url}. Title: ${data.title}. Login? ${data.isLogin}. Rows: ${data.rowCount}. Snippet: ${data.snippet}`;
 
                                     if (dashboardTabId) {
-                                        if (data.isLogin) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "⚠️ LOGIN DETECTED. Please log in to Z2U!" });
+                                        if (data.isLogin) {
+                                            chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "⚠️ LOGIN DETECTED. Please log in to Z2U!" });
+                                            chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: `URL: ${data.url}` });
+                                        }
                                         else chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: `Scanned ${mode}: ${data.count} items found.` });
                                     }
 
@@ -245,7 +250,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
 
-                        // 1. Wait for content
+                        let allThreads = [];
+                        let pageCount = 0;
+                        const maxPages = isSingle ? 1 : 3; // Scrape up to 3 pages if not a single thread
+
+                        // 1. Wait for content function
                         const waitForContent = () => new Promise(r => {
                             let attempts = 0;
                             const check = () => {
@@ -268,134 +277,128 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         });
 
                         if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Acccessing PlayerUp securely..." });
-                        await waitForContent();
 
-                        // 2. Scrape Data
-                        let foundCount = 0;
-                        try {
-                            const results = await chrome.scripting.executeScript({
-                                target: { tabId: tabId },
-                                func: () => {
-                                    const threads = [];
-                                    const seen = new Set();
-                                    const debugLog = [];
+                        let totalFound = 0;
 
-                                    // Strategy 0: Single Thread
-                                    const h1 = document.querySelector('h1.titleText, h1');
-                                    if (window.location.href.includes('/threads/') && h1 && !window.location.href.includes('/account/')) {
-                                        threads.push({ title: h1.innerText.trim(), url: window.location.href.split('?')[0].split('#')[0], source: 'single' });
-                                    }
+                        while (pageCount < maxPages) {
+                            pageCount++;
+                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: isSingle ? "Deep Scanning..." : `Scanning Page ${pageCount}...` });
 
-                                    // Strategy 1: Standard Forum List (e.g. /forums/...)
-                                    const listItems = document.querySelectorAll('.discussionListItem, .node .nodeText .nodeTitle a');
+                            await waitForContent();
 
-                                    // Strategy 2: Store/Inventory View (e.g. /account/postings)
-                                    // Looks for table rows with specific data
-                                    const gridRows = document.querySelectorAll('.dataGrid tr.dataRow, .dataTable tr');
+                            try {
+                                const results = await chrome.scripting.executeScript({
+                                    target: { tabId: tabId },
+                                    func: () => {
+                                        const threads = [];
+                                        const seen = new Set();
+                                        const debugLog = [];
 
-                                    debugLog.push(`Found ${listItems.length} list items, ${gridRows.length} grid rows.`);
-
-                                    // Process List Items
-                                    listItems.forEach(item => {
-                                        const link = item.querySelector('.title a, .PreviewTooltip') || item;
-                                        if (link && link.href && link.href.includes('/threads/')) {
-                                            let url = link.href.split('?')[0].split('#')[0];
-                                            let title = link.innerText.trim();
-
-                                            // Determine Status
-                                            let status = 'Active';
-                                            const lowerTitle = title.toLowerCase();
-                                            if (lowerTitle.includes('[sold]') || lowerTitle.includes('sold -') || lowerTitle.includes('[closed]')) {
-                                                status = 'Inactive';
-                                            }
-                                            // Check for prefix labels if available
-                                            const prefix = item.querySelector('.prefix');
-                                            if (prefix && (prefix.innerText.includes('Sold') || prefix.innerText.includes('Closed'))) {
-                                                status = 'Inactive';
-                                            }
-
-                                            if (!seen.has(url) && title.length > 3) {
-                                                seen.add(url);
-                                                threads.push({ title, url, source: 'forum', status });
-                                            }
+                                        // Strategy 0: Single Thread
+                                        const h1 = document.querySelector('h1.titleText, h1');
+                                        if (window.location.href.includes('/threads/') && h1 && !window.location.href.includes('/account/')) {
+                                            threads.push({ title: h1.innerText.trim(), url: window.location.href.split('?')[0].split('#')[0], source: 'single', status: 'Active' });
                                         }
-                                    });
 
-                                    // Process Grid Rows
-                                    gridRows.forEach(row => {
-                                        const link = row.querySelector('a[href*="/threads/"]');
-                                        if (link) {
-                                            let url = link.href.split('?')[0].split('#')[0];
-                                            let title = link.innerText.trim();
+                                        // Strategy 1: Standard Forum List
+                                        const listItems = document.querySelectorAll('.discussionListItem, .node .nodeText .nodeTitle a');
+                                        listItems.forEach(item => {
+                                            const link = item.querySelector('.title a, .PreviewTooltip') || item;
+                                            if (link && link.href && link.href.includes('/threads/')) {
+                                                let url = link.href.split('?')[0].split('#')[0];
+                                                let title = link.innerText.trim();
 
-                                            // Fallback title from row text if link text is generic "View"
-                                            if (title.toLowerCase() === 'view' || title === '') {
-                                                const titleCell = row.querySelector('td:nth-child(2), td.title');
-                                                if (titleCell) title = titleCell.innerText.trim();
-                                            }
+                                                // Status
+                                                let status = 'Active';
+                                                const lowerTitle = title.toLowerCase();
+                                                const prefix = item.querySelector('.prefix');
+                                                if (lowerTitle.includes('[sold]') || lowerTitle.includes('sold -') || lowerTitle.includes('[closed]') || (prefix && (prefix.innerText.includes('Sold') || prefix.innerText.includes('Closed')))) {
+                                                    status = 'Inactive';
+                                                }
 
-                                            // Determine Status
-                                            let status = 'Active';
-                                            const rowText = row.innerText.toLowerCase();
-                                            if (rowText.includes('sold') || rowText.includes('closed') || rowText.includes('inactive')) {
-                                                status = 'Inactive';
-                                            }
-                                            if (row.classList.contains('im-sold') || row.classList.contains('im-closed')) status = 'Inactive';
-                                            if (row.querySelector('img[src*="sold"]')) status = 'Inactive';
-
-                                            if (!seen.has(url) && title.length > 3) {
-                                                seen.add(url);
-                                                threads.push({ title, url, source: 'grid', status });
-                                            }
-                                        }
-                                    });
-
-                                    // Strategy 3: Brute Force all thread links (fallback)
-                                    if (threads.length === 0) {
-                                        debugLog.push("Zero generic items found. Brute forcing links...");
-                                        const allLinks = document.querySelectorAll('a[href*="/threads/"]');
-                                        allLinks.forEach(link => {
-                                            // Exclude obviously value-less links
-                                            if (link.innerText.length < 5 || link.innerText.includes('Last Post')) return;
-                                            let url = link.href.split('?')[0];
-                                            if (!seen.has(url)) {
-                                                seen.add(url);
-                                                threads.push({ title: link.innerText.trim(), url, source: 'brute' });
+                                                if (!seen.has(url) && title.length > 3) {
+                                                    seen.add(url);
+                                                    threads.push({ title, url, source: 'forum', status });
+                                                }
                                             }
                                         });
+
+                                        // Strategy 2: Grid Rows
+                                        const gridRows = document.querySelectorAll('.dataGrid tr.dataRow, .dataTable tr');
+                                        gridRows.forEach(row => {
+                                            const link = row.querySelector('a[href*="/threads/"]');
+                                            if (link) {
+                                                let url = link.href.split('?')[0].split('#')[0];
+                                                let title = link.innerText.trim();
+                                                if (title.toLowerCase() === 'view' || title === '') {
+                                                    const titleCell = row.querySelector('td:nth-child(2), td.title');
+                                                    if (titleCell) title = titleCell.innerText.trim();
+                                                }
+                                                // Status
+                                                let status = 'Active';
+                                                const rowText = row.innerText.toLowerCase();
+                                                if (rowText.includes('sold') || rowText.includes('closed') || rowText.includes('inactive')) status = 'Inactive';
+                                                if (row.classList.contains('im-sold') || row.classList.contains('im-closed') || row.querySelector('img[src*="sold"]')) status = 'Inactive';
+
+                                                if (!seen.has(url) && title.length > 3) {
+                                                    seen.add(url);
+                                                    threads.push({ title, url, source: 'grid', status });
+                                                }
+                                            }
+                                        });
+
+                                        // Strategy 3: Usage (only if needed)
+                                        if (threads.length === 0) {
+                                            debugLog.push("Zero generic items found. Brute forcing links...");
+                                            const allLinks = document.querySelectorAll('a[href*="/threads/"]');
+                                            allLinks.forEach(link => {
+                                                if (link.innerText.length < 5 || link.innerText.includes('Last Post')) return;
+                                                let url = link.href.split('?')[0];
+                                                if (!seen.has(url)) {
+                                                    seen.add(url);
+                                                    let status = 'Active';
+                                                    if (link.innerText.toLowerCase().includes('sold')) status = 'Inactive';
+                                                    threads.push({ title: link.innerText.trim(), url, source: 'brute', status });
+                                                }
+                                            });
+                                        }
+
+                                        return { threads, count: threads.length, url: window.location.href, title: document.title, debug: debugLog.join(' | ') };
                                     }
+                                });
 
-                                    return {
-                                        threads,
-                                        count: threads.length,
-                                        url: window.location.href,
-                                        title: document.title,
-                                        debug: debugLog.join(' | ')
-                                    };
+                                if (results && results[0] && results[0].result) {
+                                    const data = results[0].result;
+                                    totalFound += data.count;
+                                    if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: `Found ${data.count} threads on Page ${pageCount}.` });
+
+                                    if (data.count > 0) {
+                                        await fetch(`${apiBase}/api/admin/playerup`, {
+                                            method: "POST", headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                            body: JSON.stringify({ action: "turbo_sync", listings: data.threads })
+                                        });
+                                    }
                                 }
-                            });
+                            } catch (e) { console.error("PlayerUp Scrape Failed", e); }
 
-                            if (results && results[0] && results[0].result) {
-                                const data = results[0].result;
-                                foundCount = data.count;
+                            if (isSingle) break;
 
-                                if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: `Found ${foundCount} threads. Debug: ${data.debug || 'N/A'}` });
-                                console.log(`[PlayerUp] Scraped ${foundCount} items.`);
-
-                                if (foundCount > 0) {
-                                    await fetch(`${apiBase}/api/admin/playerup`, {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                        body: JSON.stringify({ action: "turbo_sync", listings: data.threads })
-                                    });
-                                }
-                            }
-                        } catch (e) {
-                            console.error("PlayerUp Scrape Failed", e);
-                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Scrape Error: " + e.message });
+                            // Pagination
+                            try {
+                                const nextRes = await chrome.scripting.executeScript({
+                                    target: { tabId }, func: () => {
+                                        const anchors = Array.from(document.querySelectorAll('a'));
+                                        const next = anchors.find(a => a.innerText.includes('Next >') || a.innerText === 'Next');
+                                        return next ? next.href : null;
+                                    }
+                                });
+                                if (nextRes && nextRes[0].result) {
+                                    await chrome.tabs.update(tabId, { url: nextRes[0].result });
+                                } else break;
+                            } catch (e) { break; }
                         }
 
-                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_RESULT", count: foundCount });
+                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_RESULT", count: totalFound });
 
                         setTimeout(() => chrome.windows.remove(win.id), 500);
                         resolve();
