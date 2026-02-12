@@ -83,6 +83,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         if (!tabId) { resolve(); return; }
 
                         let foundCount = 0;
+                        let lastDebug = "";
 
                         // Reusable Scraper Logic
                         const runScraper = async (mode) => {
@@ -112,15 +113,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             await waitForContent();
 
                             // 2. Scrape
+                            let debugInfo = "";
                             try {
                                 const results = await chrome.scripting.executeScript({
                                     target: { tabId: tabId },
                                     func: () => {
+                                        const title = document.title;
+                                        const bodyText = document.body.innerText.toLowerCase();
+                                        const isLogin = title.toLowerCase().includes("login") || bodyText.includes("sign in") || bodyText.includes("welcome back");
+                                        const htmlLen = document.body.innerHTML.length;
+
                                         const listings = [];
-                                        const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list, .list-item'));
+                                        const rows = Array.from(document.querySelectorAll('tr[data-id], .item, .row, .list-item, .table-row'));
+
+                                        // Debug row count
+                                        const rowCount = rows.length;
+
                                         for (const row of rows) {
                                             const html = row.outerHTML;
                                             const idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/products\/(\d+)\.html/) || html.match(/manage\/edit\?id=(\d+)/);
+
                                             if (!idMatch) continue;
                                             const id = idMatch[1];
                                             if (listings.some(l => l.id === id)) continue;
@@ -128,6 +140,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                             let title = `Z2U Listing #${id}`;
                                             const tEl = row.querySelector('a[href*="products"], .title, .product-name, h3, h4');
                                             if (tEl) title = tEl.innerText.trim();
+                                            else {
+                                                const matchTitle = html.match(/>([^<]{5,50})<\//);
+                                                if (matchTitle) title = matchTitle[1];
+                                            }
 
                                             let price = "0.00";
                                             const pMatch = html.match(/(?:\$|USD)\s*([\d,]+\.?\d*)/i) || html.match(/class=["']price["'][^>]*>([\s\S]*?)<\/span>/i);
@@ -141,12 +157,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                                             listings.push({ id, title, url: `https://www.z2u.com/products/${id}.html`, price, stock, status });
                                         }
-                                        return { listings, count: listings.length, url: window.location.href };
+                                        return { listings, count: listings.length, url: window.location.href, title, isLogin, htmlLen, rowCount };
                                     }
                                 });
 
                                 if (results && results[0] && results[0].result) {
                                     const data = results[0].result;
+                                    lastDebug = `[${mode}] Title: ${data.title}. Login? ${data.isLogin}. HTML: ${data.htmlLen}. Rows: ${data.rowCount}`;
+
+                                    if (dashboardTabId) {
+                                        if (data.isLogin) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "⚠️ LOGIN DETECTED. Please log in to Z2U!" });
+                                        else chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: `Scanned ${mode}: ${data.count} items found.` });
+                                    }
+
                                     if (data.count > 0) {
                                         return data; // Success return Object
                                     }
@@ -176,7 +199,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             });
                         }
 
-                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_RESULT", count: foundCount });
+                        if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_RESULT", count: foundCount, debug: lastDebug });
 
                         setTimeout(() => chrome.windows.remove(win.id), 500);
                         resolve();

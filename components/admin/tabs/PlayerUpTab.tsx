@@ -72,29 +72,15 @@ export default function PlayerUpTab() {
 
     const handleCloudSync = async () => {
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_REMOTE_SYNC'));
-        modernAlert("Deep Sync Started", "Scanning PlayerUp for all possible threads (20 pages depth). This may take 60s... 🛰️", "success");
+        modernAlert("Cloud Sync Initiated", "The extension is now scanning PlayerUp in the background. Please wait for the success alert.", "success");
 
-        // Refresh every 10s for the first minute to show progress
+        // Polling to update UI as items come in
         let count = 0;
         const interval = setInterval(() => {
             fetchListings();
             count++;
             if (count > 6) clearInterval(interval);
         }, 10000);
-
-        try {
-            const res = await fetch('/api/admin/playerup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cloud_fetch' }) });
-            const data = await res.json();
-
-            if (data.success) {
-                const logs = data.debug && Array.isArray(data.debug) ? data.debug.join('\n') : '';
-                modernAlert("Sync Complete", `Found ${data.count} threads (${data.new} new).\n\n${logs}`, "success");
-            } else {
-                modernAlert("Sync Failed", data.error || "Unknown error", "error");
-            }
-        } catch (e) {
-            modernAlert("Sync Error", "Network or Server Error", "error");
-        }
     };
 
 
