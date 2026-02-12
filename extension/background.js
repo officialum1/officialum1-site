@@ -124,25 +124,51 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         const htmlLen = document.body.innerHTML.length;
 
                                         const listings = [];
-                                        const rows = Array.from(document.querySelectorAll('tr[data-id], .item, .row, .list-item, .table-row'));
+                                        // Broad selector to catch any list-like element
+                                        const rows = Array.from(document.querySelectorAll('tr, .item, .row, .list-item, .table-row, li.gl-item'));
 
-                                        // Debug row count
+                                        // Debug info
                                         const rowCount = rows.length;
+                                        let firstRowHTML = rowCount > 0 ? rows[0].outerHTML.substring(0, 150) : "N/A";
 
                                         for (const row of rows) {
                                             const html = row.outerHTML;
-                                            const idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/products\/(\d+)\.html/) || html.match(/manage\/edit\?id=(\d+)/);
+
+                                            // Strategy 1: Data Attributes or ID Match
+                                            let idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/value=["'](\d+)["']/);
+
+                                            // Strategy 2: Link Analysis (href="/products/123.html" or "manage?id=123")
+                                            if (!idMatch) {
+                                                const links = row.querySelectorAll('a[href]');
+                                                for (const link of links) {
+                                                    const href = link.getAttribute('href');
+                                                    const match = href.match(/products\/(\d+)\.html/) || href.match(/id=(\d+)/);
+                                                    if (match) {
+                                                        idMatch = match;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            // Strategy 3: Text Analysis (listing ID in text)
+                                            if (!idMatch) {
+                                                const text = row.innerText;
+                                                // Look for "ID: 12345" pattern often found in footer of items
+                                                idMatch = text.match(/ID:?\s*(\d{5,})/);
+                                            }
 
                                             if (!idMatch) continue;
+
                                             const id = idMatch[1];
                                             if (listings.some(l => l.id === id)) continue;
 
                                             let title = `Z2U Listing #${id}`;
-                                            const tEl = row.querySelector('a[href*="products"], .title, .product-name, h3, h4');
+                                            const tEl = row.querySelector('a[href*="products"], .title, .product-name, h3, h4, .gl-name');
                                             if (tEl) title = tEl.innerText.trim();
                                             else {
-                                                const matchTitle = html.match(/>([^<]{5,50})<\//);
-                                                if (matchTitle) title = matchTitle[1];
+                                                // Fallback: Use text content of the second cell/div
+                                                const cells = row.querySelectorAll('td, div');
+                                                if (cells.length > 1 && cells[1].innerText.length > 5) title = cells[1].innerText.trim();
                                             }
 
                                             let price = "0.00";
@@ -157,13 +183,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                                             listings.push({ id, title, url: `https://www.z2u.com/products/${id}.html`, price, stock, status });
                                         }
-                                        return { listings, count: listings.length, url: window.location.href, title, isLogin, htmlLen, rowCount };
+                                        return { listings, count: listings.length, url: window.location.href, title, isLogin, htmlLen, rowCount, firstRowHTML };
                                     }
                                 });
 
                                 if (results && results[0] && results[0].result) {
                                     const data = results[0].result;
-                                    lastDebug = `[${mode}] Title: ${data.title}. Login? ${data.isLogin}. HTML: ${data.htmlLen}. Rows: ${data.rowCount}`;
+                                    lastDebug = `[${mode}] Title: ${data.title}. Login? ${data.isLogin}. Rows: ${data.rowCount}. Sample: ${data.firstRowHTML || 'N/A'}`;
 
                                     if (dashboardTabId) {
                                         if (data.isLogin) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "⚠️ LOGIN DETECTED. Please log in to Z2U!" });
