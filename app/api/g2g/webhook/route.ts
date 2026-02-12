@@ -75,7 +75,7 @@ export async function POST(request: Request) {
             const orderId = payload.order_id;
             const status = payload.order_status || 'Paid';
             const productName = payload.product_name || '';
-            const amount = payload.total_price || 0;
+            const amount = parseFloat(payload.total_price || payload.total_amount || payload.amount || 0);
 
             // Insert or Update G2G Order
             await query(`
@@ -84,6 +84,7 @@ export async function POST(request: Request) {
                 ON DUPLICATE KEY UPDATE 
                 event_type = VALUES(event_type),
                 status = VALUES(status),
+                amount = VALUES(amount),
                 raw_payload = VALUES(raw_payload),
                 updated_at = CURRENT_TIMESTAMP
             `, [

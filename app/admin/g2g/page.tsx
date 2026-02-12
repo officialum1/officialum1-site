@@ -274,7 +274,7 @@ function G2GDashboard() {
                                                     </div>
                                                     <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px', borderLeft: '3px solid #00ff88' }}>
                                                         <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Est. Income</span>
-                                                        <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || 0) * 0.95).toFixed(2)}</span>
+                                                        <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || g2gOrderData.total_amount || 0) * 0.95).toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -546,7 +546,28 @@ function G2GDashboard() {
                             <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                     <h3 style={{ margin: 0 }}>📋 Tracked Listings</h3>
-                                    <button onClick={fetchData} className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>Refresh List</button>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <button
+                                            onClick={async () => {
+                                                setG2GLoading(true);
+                                                try {
+                                                    const res = await fetch('/api/admin/g2g?action=sync_offers');
+                                                    if (res.ok) {
+                                                        const data = await res.json();
+                                                        alert(`Synced ${data.updated} offers with G2G!`);
+                                                        fetchData();
+                                                    } else alert('Sync failed');
+                                                } catch { alert('Network error'); }
+                                                finally { setG2GLoading(false); }
+                                            }}
+                                            className="btn"
+                                            style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)', fontSize: '0.8rem' }}
+                                            disabled={g2gLoading}
+                                        >
+                                            {g2gLoading ? 'Syncing...' : '🔄 Sync Global Prices'}
+                                        </button>
+                                        <button onClick={fetchData} className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}>Refresh View</button>
+                                    </div>
                                 </div>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>

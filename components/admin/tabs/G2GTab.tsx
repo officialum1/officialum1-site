@@ -154,7 +154,7 @@ export default function G2GTab({
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.85rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Buyer:</span><span style={{ color: '#fff' }}>{g2gOrderData.buyer_name || 'N/A'}</span></div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Item Qty:</span><span style={{ color: '#fff' }}>{g2gOrderData.quantity}</span></div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Price:</span><span style={{ color: '#00ccff' }}>{g2gOrderData.unit_price} {g2gOrderData.currency}</span></div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Price:</span><span style={{ color: '#00ccff' }}>{g2gOrderData.unit_price || g2gOrderData.amount || g2gOrderData.total_price || 'N/A'} {g2gOrderData.currency}</span></div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#888' }}>Status:</span><span style={{ color: '#00ff88', fontWeight: 'bold' }}>{(g2gOrderData.status || 'NEW').toUpperCase()}</span></div>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@ export default function G2GTab({
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
                                                 <span style={{ display: 'block', fontSize: '0.7rem', color: '#666' }}>ESTIMATED PROFIT</span>
-                                                <span style={{ fontSize: '1.4rem', color: '#00ff88', fontWeight: 'bold' }}>+${(Number(g2gOrderData.amount || 0) * 0.95).toFixed(2)}</span>
+                                                <span style={{ fontSize: '1.4rem', color: '#00ff88', fontWeight: 'bold' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || g2gOrderData.total_amount || 0) * 0.95).toFixed(2)}</span>
                                             </div>
                                         </div>
 
@@ -278,7 +278,7 @@ export default function G2GTab({
                                                 </div>
                                                 <div className="glass" style={{ padding: '0.8rem 1rem', borderRadius: '12px', borderLeft: '3px solid #00ff88' }}>
                                                     <span style={{ display: 'block', fontSize: '0.6rem', color: '#666', textTransform: 'uppercase' }}>Est. Income</span>
-                                                    <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || 0) * 0.95).toFixed(2)}</span>
+                                                    <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.1rem' }}>+${(Number(g2gOrderData.amount || g2gOrderData.total_price || g2gOrderData.total_amount || 0) * 0.95).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         </div>

@@ -13,6 +13,24 @@ export async function GET(request: Request) {
         if (action === 'get_order') {
             if (!orderId) return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
             const result = await makeG2GRequest('GET', `/orders/${orderId}`);
+
+            // Sync with local DB if success
+            if (result.status === 200 && result.data?.payload) {
+                const payload = result.data.payload;
+                const amount = parseFloat(payload.total_price || payload.total_amount || payload.amount || 0);
+                if (amount > 0) {
+                    await query(`
+                        INSERT INTO g2g_orders (order_id, product_name, amount, status, raw_payload)
+                        VALUES (?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE 
+                        amount = VALUES(amount),
+                        status = VALUES(status),
+                        raw_payload = VALUES(raw_payload),
+                        updated_at = CURRENT_TIMESTAMP
+                    `, [orderId, payload.product_name || '', amount, payload.order_status || 'Paid', JSON.stringify(payload)]);
+                }
+            }
+
             // Return 200 even on error so frontend can parse the error message without console 404s
             return NextResponse.json(result.data, { status: 200 });
         }
@@ -70,12 +88,36 @@ export async function GET(request: Request) {
             return NextResponse.json(result.data, { status: result.status });
         }
 
+        if (action === 'sync_offers') {
+            try {
+                const offers: any = await query("SELECT offer_id FROM g2g_offers");
+                let updatedCount = 0;
+                for (const offer of offers) {
+                    const res = await makeG2GRequest('GET', `/products/${offer.offer_id}`);
+                    if (res.status === 200) {
+                        const payload = res.data.payload || res.data;
+                        if (payload.unit_price) {
+                            await query(`
+                                UPDATE g2g_offers 
+                                SET unit_price = ?, api_qty = ?, updated_at = CURRENT_TIMESTAMP
+                                WHERE offer_id = ?
+                            `, [payload.unit_price, payload.api_qty || 0, offer.offer_id]);
+                            updatedCount++;
+                        }
+                    }
+                }
+                return NextResponse.json({ success: true, updated: updatedCount });
+            } catch (e: any) {
+                return NextResponse.json({ error: e.message }, { status: 500 });
+            }
+        }
+
         if (action === 'get_stats') {
             try {
                 const stats: any = await query(`
                     SELECT 
                         SUM(amount) as totalRevenue,
-                        SUM(profit) as totalProfit,
+                        SUM(CASE WHEN profit != 0 THEN profit ELSE amount * 0.95 END) as totalProfit,
                         COUNT(*) as totalOrders
                     FROM g2g_orders
                 `);
