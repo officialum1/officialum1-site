@@ -136,9 +136,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                                         for (const row of rows) {
                                             const html = row.outerHTML;
+                                            // Skip header/control rows
+                                            if (row.innerText.includes('Select All') || row.innerText.includes('Batch sort')) continue;
 
                                             // Strategy 1: Data Attributes or ID Match
-                                            let idMatch = html.match(/data-id=["'](\d+)["']/) || html.match(/id=["']\D*(\d+)["']/) || html.match(/value=["'](\d+)["']/);
+                                            // Prioritize longer numbers (5+ digits)
+                                            let idMatch = html.match(/data-id=["'](\d{5,})["']/) || html.match(/id=["']\D*(\d{5,})["']/) || html.match(/value=["'](\d{5,})["']/);
+
+                                            // Fallback: Check specific inputs
+                                            if (!idMatch) {
+                                                const inputs = row.querySelectorAll('input[name="ids[]"], input[type="checkbox"], input[name="id"]');
+                                                for (const input of inputs) {
+                                                    if (input.value && input.value.length > 5 && /^\d+$/.test(input.value)) {
+                                                        idMatch = [null, input.value];
+                                                        break;
+                                                    }
+                                                }
+                                            }
 
                                             // Strategy 2: Link Analysis (href="/products/123.html" or "manage?id=123")
                                             if (!idMatch) {
@@ -153,16 +167,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                                 }
                                             }
 
-                                            // Strategy 3: Text Analysis (listing ID in text)
+                                            // Strategy 3: Text Content (ID: 12345)
                                             if (!idMatch) {
                                                 const text = row.innerText;
-                                                // Look for "ID: 12345" pattern often found in footer of items
                                                 idMatch = text.match(/ID:?\s*(\d{5,})/);
                                             }
 
                                             if (!idMatch) continue;
 
                                             const id = idMatch[1];
+                                            if (id.length < 5) continue; // Ignore junk IDs
                                             if (listings.some(l => l.id === id)) continue;
 
                                             let title = `Z2U Listing #${id}`;
@@ -383,19 +397,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                             if (isSingle) break;
 
-                            // Pagination
+                            // Pagination Logic
                             try {
                                 const nextRes = await chrome.scripting.executeScript({
-                                    target: { tabId }, func: () => {
-                                        const anchors = Array.from(document.querySelectorAll('a'));
-                                        const next = anchors.find(a => a.innerText.includes('Next >') || a.innerText === 'Next');
+                                    target: { tabId },
+                                    func: () => {
+                                        // 1. Link Tag (Best Practice)
+                                        const linkNext = document.querySelector('link[rel="next"]');
+                                        if (linkNext) return linkNext.href;
+
+                                        // 2. Common XenForo/Forum Class Names
+                                        const navNext = document.querySelector('.PageNav a.text:last-child, .pageNav-jump--next, a[rel="next"]');
+                                        if (navNext) return navNext.href;
+
+                                        // 3. Text Content (Robust Fallback)
+                                        const anchors = Array.from(document.querySelectorAll('a[href]'));
+                                        const next = anchors.find(a => {
+                                            const t = a.innerText.trim().toLowerCase();
+                                            return t.includes('next >') || t === 'next' || t.includes('next page');
+                                        });
                                         return next ? next.href : null;
                                     }
                                 });
+
                                 if (nextRes && nextRes[0].result) {
-                                    await chrome.tabs.update(tabId, { url: nextRes[0].result });
-                                } else break;
-                            } catch (e) { break; }
+                                    const nextUrl = nextRes[0].result;
+                                    if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "Moving to Next Page..." });
+
+                                    await chrome.tabs.update(tabId, { url: nextUrl });
+                                    // Wait for page load initiation
+                                    await new Promise(r => setTimeout(r, 2500));
+                                } else {
+                                    if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: "No more pages found." });
+                                    break;
+                                }
+                            } catch (e) {
+                                console.error("Pagination Failed", e);
+                                break;
+                            }
                         }
 
                         if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_RESULT", count: totalFound });
