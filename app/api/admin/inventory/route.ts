@@ -124,13 +124,14 @@ export async function POST(request: Request) {
                     account_username: detailsObj.username,
                     account_password: detailsObj.password,
                     account_region: body.region || null,
-                    account_level: body.level || null
+                    account_level: body.level || null,
+                    image: body.image || null
                 };
 
                 await conn.execute(
-                    `INSERT INTO inventory (id, name, platform, purchasePrice, status, accountDetails, account_email, account_username, account_password, account_region, account_level) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails, newItem.account_email, newItem.account_username, newItem.account_password, newItem.account_region, newItem.account_level]
+                    `INSERT INTO inventory (id, name, platform, purchasePrice, status, accountDetails, account_email, account_username, account_password, account_region, account_level, image) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [newItem.id, newItem.name, newItem.platform, newItem.purchasePrice, newItem.status, newItem.accountDetails, newItem.account_email, newItem.account_username, newItem.account_password, newItem.account_region, newItem.account_level, newItem.image]
                 );
 
                 // Restock Announcement
@@ -546,7 +547,7 @@ export async function POST(request: Request) {
         }
 
         if (action === 'update_item') {
-            const { itemId, name, platform, purchasePrice, credentials, tag } = body;
+            const { itemId, name, platform, purchasePrice, credentials, tag, image } = body;
 
             // Parse credentials (user:pass:email:extra)
             let username = '', password = '', email = '', extra = '';
@@ -569,9 +570,9 @@ export async function POST(request: Request) {
 
             await query(
                 `UPDATE inventory 
-                 SET name = ?, platform = ?, purchasePrice = ?, accountDetails = ?, account_email = ?, account_username = ?, account_password = ?
+                 SET name = ?, platform = ?, purchasePrice = ?, accountDetails = ?, account_email = ?, account_username = ?, account_password = ?, image = ?
                  WHERE id = ?`,
-                [name, platform, Number(purchasePrice), JSON.stringify(detailsObj), email, username, password, itemId]
+                [name, platform, Number(purchasePrice), JSON.stringify(detailsObj), email, username, password, image || null, itemId]
             );
 
             // Log

@@ -72,7 +72,8 @@ export default function StockTab({
             platform: item.platform,
             purchasePrice: item.purchasePrice,
             credentials,
-            tag: item.tag || '' // Assuming tag might be added later or is part of details
+            tag: item.tag || '',
+            image: item.image || ''
         });
         setShowEditItem(true);
     };
@@ -92,7 +93,8 @@ export default function StockTab({
                     platform: editingItem.platform,
                     purchasePrice: editingItem.purchasePrice,
                     credentials: editingItem.credentials,
-                    tag: editingItem.tag
+                    tag: editingItem.tag,
+                    image: editingItem.image
                 })
             });
 
@@ -108,6 +110,22 @@ export default function StockTab({
         } catch (e) {
             alert('❌ Network Error');
         }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            if (isEdit) {
+                setEditingItem((prev: any) => ({ ...prev, image: base64String }));
+            } else {
+                setNewItem({ ...newItem, image: base64String });
+            }
+        };
+        reader.readAsDataURL(file);
     };
 
     return (
@@ -198,7 +216,14 @@ export default function StockTab({
                                         ACTIVE
                                     </div>
                                     <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
-                                    <div style={{ fontSize: '0.85rem', color: '#888', marginBottom: '1.5rem' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
+                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        {activeItems[0]?.image ? (
+                                            <img src={activeItems[0].image} alt="" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>📦</div>
+                                        )}
+                                        <div style={{ fontSize: '0.85rem', color: '#888' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
+                                    </div>
 
                                     <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
                                         <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#00ff88', lineHeight: '1' }}>{inStock}</div>
@@ -229,8 +254,17 @@ export default function StockTab({
                                 {filteredInventory.map((item: any) => (
                                     <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                         <td style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: '500' }}>{item.name}</div>
-                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>{item.account_email || item.account_username}</div>
+                                            <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                                                {item.image ? (
+                                                    <img src={item.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>📦</div>
+                                                )}
+                                                <div>
+                                                    <div style={{ fontWeight: '500' }}>{item.name}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#666' }}>{item.account_email || item.account_username}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td style={{ padding: '1rem' }}>{item.platform}</td>
                                         <td style={{ padding: '1rem', color: '#ccc' }}>{item.purchasePrice ? `$${item.purchasePrice}` : '***'}</td>
@@ -294,6 +328,29 @@ export default function StockTab({
                             <div style={{ gridColumn: 'span 2' }}>
                                 <label>Account Credentials</label>
                                 <textarea className="input-field" value={newItem.credentials || ''} onChange={e => setNewItem({ ...newItem, credentials: e.target.value })} style={{ width: '100%', height: '100px' }} placeholder="user:pass:email" />
+                            </div>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label>Product Image (Optional)</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleFileChange(e, false)}
+                                        className="input-field"
+                                        style={{ flex: 1 }}
+                                    />
+                                    {newItem.image && (
+                                        <div style={{ position: 'relative' }}>
+                                            <img src={newItem.image} alt="Preview" style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #333' }} />
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewItem({ ...newItem, image: '' })}
+                                                style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', width: '15px', height: '15px', fontSize: '10px', cursor: 'pointer' }}
+                                            >✕</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <input className="input-field" value={newItem.image || ''} onChange={e => setNewItem({ ...newItem, image: e.target.value })} style={{ width: '100%', marginTop: '0.5rem' }} placeholder="Or paste image URL..." />
                             </div>
                             <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                                 <button type="button" onClick={() => setShowAddInv(false)} className="btn btn-outline">Cancel</button>
@@ -362,6 +419,35 @@ export default function StockTab({
                                     value={editingItem.credentials || ''}
                                     onChange={e => setEditingItem({ ...editingItem, credentials: e.target.value })}
                                     style={{ width: '100%', height: '100px', fontFamily: 'monospace' }}
+                                />
+                            </div>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label>Product Image (Optional)</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleFileChange(e, true)}
+                                        className="input-field"
+                                        style={{ flex: 1 }}
+                                    />
+                                    {editingItem.image && (
+                                        <div style={{ position: 'relative' }}>
+                                            <img src={editingItem.image} alt="Preview" style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #333' }} />
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingItem({ ...editingItem, image: '' })}
+                                                style={{ position: 'absolute', top: '-5px', right: '-5px', background: 'red', color: 'white', borderRadius: '50%', border: 'none', width: '15px', height: '15px', fontSize: '10px', cursor: 'pointer' }}
+                                            >✕</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <input
+                                    className="input-field"
+                                    value={editingItem.image || ''}
+                                    onChange={e => setEditingItem({ ...editingItem, image: e.target.value })}
+                                    style={{ width: '100%', marginTop: '0.5rem' }}
+                                    placeholder="Or paste image URL..."
                                 />
                             </div>
                             <div style={{ gridColumn: 'span 2', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>

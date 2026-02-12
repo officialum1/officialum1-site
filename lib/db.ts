@@ -232,6 +232,7 @@ export async function initDB(force = false) {
     try { await query("ALTER TABLE inventory ADD COLUMN account_password VARCHAR(255)"); } catch (e) { }
     try { await query("ALTER TABLE inventory ADD COLUMN account_region VARCHAR(50)"); } catch (e) { }
     try { await query("ALTER TABLE inventory ADD COLUMN account_level VARCHAR(50)"); } catch (e) { }
+    try { await query("ALTER TABLE inventory ADD COLUMN image LONGTEXT"); } catch (e) { }
     try { await query("ALTER TABLE inventory ADD COLUMN account_meta JSON"); } catch (e) { }
 
     // 2. Transactions (Balance History)
