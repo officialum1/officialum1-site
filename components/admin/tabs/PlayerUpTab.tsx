@@ -350,8 +350,8 @@ export default function PlayerUpTab() {
                     <div className="h-12 w-px bg-white/10"></div>
 
                     <div className="flex gap-4">
-                        <button onClick={() => handleBulkAction('status', 'Active')} className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 active:scale-95">Activate</button>
-                        <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Deactivate</button>
+                        <button onClick={() => handleBulkAction('status', 'Active')} className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 active:scale-95">Mark Selling</button>
+                        <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Mark Sold</button>
                         <button onClick={() => handleBulkAction('autoBump', '1')} className="bg-purple-500 hover:bg-purple-400 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-500/20 active:scale-95">Bump ON</button>
                         <button onClick={() => handleBulkAction('autoBump', '0')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Bump OFF</button>
 
@@ -486,9 +486,9 @@ export default function PlayerUpTab() {
                                 <td className="px-6 py-4">
                                     <button
                                         onClick={() => handleUpdate(l, { status: l.status === 'Active' ? 'Inactive' : 'Active' })}
-                                        className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase border tracking-tighter transition-all ${l.status === 'Active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}
+                                        className={`px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase border tracking-tighter transition-all ${l.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}
                                     >
-                                        {l.status}
+                                        {l.status === 'Active' ? 'SELLING' : 'SOLD'}
                                     </button>
                                 </td>
                                 <td className="px-6 py-4 text-center">
