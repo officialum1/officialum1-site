@@ -584,7 +584,7 @@ async function runAutoBumpEngine() {
         if (!listRes.ok) return;
         const listings = await listRes.json();
         const activeListings = (Array.isArray(listings) ? listings : (listings.listings || []))
-            .filter(l => l.status === 'Active');
+            .filter(l => l.status === 'Active' && (l.autoBump === 1 || l.autoBump === true));
 
         const now = Date.now();
         for (const item of activeListings) {

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     try {
         await initDB();
         const body = await req.json();
-        const { action, id, listings: bulkListings, username, limit, status, frequency } = body;
+        const { action, id, listings: bulkListings, username, limit, status, frequency, autoBump } = body;
 
         if (action === 'cloud_fetch') {
             // Check both variations
@@ -255,6 +255,9 @@ export async function POST(req: NextRequest) {
                 await query(`UPDATE playerup_listings SET status = ? WHERE id IN (${ids.map(() => '?').join(',')})`, [value, ...ids]);
             } else if (subAction === 'frequency') {
                 await query(`UPDATE playerup_listings SET frequency = ? WHERE id IN (${ids.map(() => '?').join(',')})`, [value, ...ids]);
+            } else if (subAction === 'autoBump') {
+                const val = value === '1' || value === 'true';
+                await query(`UPDATE playerup_listings SET autoBump = ? WHERE id IN (${ids.map(() => '?').join(',')})`, [val, ...ids]);
             } else if (subAction === 'delete') {
                 await query(`DELETE FROM playerup_listings WHERE id IN (${ids.map(() => '?').join(',')})`, ids);
             }
@@ -263,7 +266,11 @@ export async function POST(req: NextRequest) {
         if (action === 'delete') {
             await query("DELETE FROM playerup_listings WHERE id = ?", [id]);
         } else if (action === 'update') {
-            await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
+            if (autoBump !== undefined) {
+                await query("UPDATE playerup_listings SET autoBump = ? WHERE id = ?", [autoBump, id]);
+            } else {
+                await query("UPDATE playerup_listings SET status = ?, frequency = ?, username = ? WHERE id = ?", [status, frequency, username, id]);
+            }
         } else if (action === 'get_logs') {
             // Fetch recent logs
             const logs = await query("SELECT * FROM activity_logs WHERE action = 'PlayerUp Bump' ORDER BY date DESC LIMIT 50");

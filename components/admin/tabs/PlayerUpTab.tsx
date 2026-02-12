@@ -15,7 +15,9 @@ interface Listing {
     status: string;
     frequency: string;
     username: string;
+    autoBump: boolean;
 }
+
 
 export default function PlayerUpTab() {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -45,8 +47,8 @@ export default function PlayerUpTab() {
         try {
             const res = await fetch('/api/admin/playerup');
             const data = await res.json();
-            if (Array.isArray(data)) setListings(data);
-            else if (data && data.listings) setListings(data.listings);
+            if (Array.isArray(data)) setListings(data.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
+            else if (data && data.listings) setListings(data.listings.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
         } catch (e) {
             console.error(e);
         } finally {
@@ -350,6 +352,8 @@ export default function PlayerUpTab() {
                     <div className="flex gap-4">
                         <button onClick={() => handleBulkAction('status', 'Active')} className="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20 active:scale-95">Activate</button>
                         <button onClick={() => handleBulkAction('status', 'Inactive')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Deactivate</button>
+                        <button onClick={() => handleBulkAction('autoBump', '1')} className="bg-purple-500 hover:bg-purple-400 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-500/20 active:scale-95">Bump ON</button>
+                        <button onClick={() => handleBulkAction('autoBump', '0')} className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all active:scale-95">Bump OFF</button>
 
                         <div className="relative group">
                             <button className="bg-white/5 text-white border border-white/10 hover:bg-white/10 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2">
@@ -450,6 +454,7 @@ export default function PlayerUpTab() {
                                 />
                             </th>
                             <th className="px-6 py-5">Status</th>
+                            <th className="px-6 py-5">Auto Bump</th>
                             <th className="px-6 py-5">Account</th>
                             <th className="px-6 py-5">Thread / Title</th>
                             <th className="px-6 py-5 text-center">Type</th>
@@ -460,9 +465,9 @@ export default function PlayerUpTab() {
                     </thead>
                     <tbody className="divide-y divide-white/5 text-sm">
                         {loading && listings.length === 0 ? (
-                            <tr><td colSpan={8} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
+                            <tr><td colSpan={9} className="text-center py-20 text-gray-500 animate-pulse">Syncing with encrypted database...</td></tr>
                         ) : filtered.length === 0 ? (
-                            <tr><td colSpan={8} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
+                            <tr><td colSpan={9} className="text-center py-20 text-gray-500">No listings found. Synchronize to begin.</td></tr>
                         ) : paginatedListings.map(l => (
                             <tr key={l.id} className={`hover:bg-white/[0.02] transition-colors ${selectedIds.has(l.id) ? 'bg-blue-500/5' : ''}`}>
                                 <td className="px-6 py-4">
@@ -485,6 +490,14 @@ export default function PlayerUpTab() {
                                     >
                                         {l.status}
                                     </button>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div
+                                        onClick={() => handleUpdate(l, { autoBump: !l.autoBump })}
+                                        className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors mx-auto ${l.autoBump ? 'bg-emerald-500' : 'bg-white/10'}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${l.autoBump ? 'translate-x-6' : 'translate-x-0'}`} />
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <button

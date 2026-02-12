@@ -682,6 +682,7 @@ export async function initDB(force = false) {
     `);
 
     try { await query("ALTER TABLE playerup_listings ADD COLUMN lastBumpStatus VARCHAR(20) DEFAULT 'pending'"); } catch (e) { }
+    try { await query("ALTER TABLE playerup_listings ADD COLUMN autoBump BOOLEAN DEFAULT TRUE"); } catch (e) { }
 
 
     // 21. Z2U Listings
