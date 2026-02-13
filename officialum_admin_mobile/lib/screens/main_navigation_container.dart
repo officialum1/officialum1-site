@@ -5,6 +5,9 @@ import 'orders_screen.dart';
 import 'g2g_hub_screen.dart';
 import 'web_module_screen.dart';
 
+import 'record_sale_screen.dart';
+import 'automation_screen.dart';
+
 class MainNavigationContainer extends StatefulWidget {
   const MainNavigationContainer({super.key});
 
@@ -25,6 +28,8 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     if (_selectedIndex == 1) return const InventoryScreen();
     if (_selectedIndex == 2) return const OrdersScreen();
     if (_selectedIndex == 3) return const G2GHubScreen();
+    if (_selectedIndex == 27) return const RecordSaleScreen();
+    if (_selectedIndex == 28) return const AutomationScreen();
     
     if (_currentWebUrl != null) {
       return WebModuleScreen(
@@ -94,7 +99,8 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   const Divider(color: Colors.white12, height: 30),
                   
                   _buildSectionHeader('SALES & CRM'),
-                  _buildDrawerItem('Sales', Icons.attach_money, 10, url: '$baseUrl?tab=sell'),
+                  _buildDrawerItem('Record Sale', Icons.add_shopping_cart, 27),
+                  _buildDrawerItem('Sales History', Icons.history, 10, url: '$baseUrl?tab=sell'),
                   _buildDrawerItem('Leads', Icons.people_outline, 11, url: '$baseUrl?tab=leads'),
                   _buildDrawerItem('Buyers', Icons.person_outline, 12, url: '$baseUrl?tab=users'),
                   _buildDrawerItem('Sellers', Icons.storefront_outlined, 13, url: '$baseUrl?tab=sellers'),
@@ -105,7 +111,8 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
                   _buildSectionHeader('CONTENT & TOOLS'),
                   _buildDrawerItem('Website', Icons.language, 16, url: 'https://officialum1.com'),
-                  _buildDrawerItem('Marketing', Icons.campaign_outlined, 17, url: '$baseUrl?tab=marketing'),
+                  _buildDrawerItem('Auto-Bumping', Icons.auto_mode, 28),
+                  _buildDrawerItem('PlayerUp Threads', Icons.trending_up, 7, url: '$baseUrl?tab=playerup'),
                   _buildDrawerItem('Intelligence', Icons.insights, 18, url: '$baseUrl?tab=intel'),
                   _buildDrawerItem('Tools', Icons.build_outlined, 19, url: '$baseUrl?tab=tools'),
                   _buildDrawerItem('KB/FAQ', Icons.help_outline, 20, url: '$baseUrl?tab=kb'),

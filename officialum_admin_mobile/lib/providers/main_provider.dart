@@ -103,4 +103,36 @@ class MainProvider with ChangeNotifier {
     }
     return false;
   }
+
+  Future<bool> recordSale(Map<String, dynamic> data) async {
+    try {
+      final res = await _api.post('/admin/inventory', {
+        'action': 'record_sale',
+        ...data,
+      });
+      if (res.statusCode == 200) {
+        fetchStats();
+        fetchProducts();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Error recording sale: $e');
+    }
+    return false;
+  }
+
+  Future<Map<String, dynamic>> bumpThreads() async {
+    try {
+      final res = await _api.post('/admin/playerup', {
+        'action': 'cloud_bump_all',
+        'limit': 10
+      });
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body);
+      }
+    } catch (e) {
+      debugPrint('Error bumping threads: $e');
+    }
+    return {'success': false, 'error': 'Connection error'};
+  }
 }

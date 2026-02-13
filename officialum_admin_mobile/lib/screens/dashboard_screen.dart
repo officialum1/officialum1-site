@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/main_provider.dart';
 import '../providers/auth_provider.dart';
+import 'record_sale_screen.dart';
+import 'automation_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -70,6 +72,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 32),
             const Text(
+              'QUICK ACTIONS',
+              style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 2),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    label: 'RECORD SALE',
+                    icon: Icons.add_shopping_cart,
+                    color: const Color(0xFF00FF88),
+                    onTap: () {
+                      // We need a way to navigate from here. 
+                      // For now, let's assume MainNavigationContainer handles it via global state 
+                      // or just push the screen directly.
+                      Navigator.push(context, MaterialPageRoute(builder: (c) => const RecordSaleScreen()));
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionButton(
+                    label: 'BUMP THREADS',
+                    icon: Icons.rocket_launch,
+                    color: const Color(0xFF00CCFF),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (c) => const AutomationScreen()));
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            const Text(
               'QUICK TIPS',
               style: TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 2),
             ),
@@ -133,6 +169,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           )
         ],
+      ),
+    );
+  }
+  Widget _buildActionButton({required String label, required IconData icon, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(15),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: color.withOpacity(0.1)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          ],
+        ),
       ),
     );
   }
