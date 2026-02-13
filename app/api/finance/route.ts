@@ -35,6 +35,25 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: true });
         }
 
+        if (body.action === 'transfer_funds') {
+            const { fromPlatform, toPlatform, amount, currency, description, staffName } = body;
+            const now = Date.now();
+
+            // 1. Withdrawal from Source
+            await query(
+                "INSERT INTO transactions (id, type, platform, amount, description, processedBy, currency, date) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())",
+                [`xfer_out_${now}`, 'transfer_out', fromPlatform, amount, description || `Transfer to ${toPlatform}`, staffName || 'Admin', currency]
+            );
+
+            // 2. Deposit to Destination
+            await query(
+                "INSERT INTO transactions (id, type, platform, amount, description, processedBy, currency, date) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())",
+                [`xfer_in_${now}`, 'transfer_in', toPlatform, amount, description || `Transfer from ${fromPlatform}`, staffName || 'Admin', currency]
+            );
+
+            return NextResponse.json({ success: true });
+        }
+
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (e: any) {

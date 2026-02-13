@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/main_provider.dart';
 import 'main_navigation_container.dart';
+import 'financial_transaction_screen.dart';
 
 class FinanceScreen extends StatefulWidget {
   const FinanceScreen({super.key});
@@ -72,14 +73,35 @@ class _FinanceScreenState extends State<FinanceScreen> {
                   ),
 
                   const SizedBox(height: 40),
-                  _buildSectionHeader('FINANCIAL PERFORMANCE'),
+                  _buildSectionHeader('MONTHLY PERFORMANCE'),
                   const SizedBox(height: 15),
-                  _buildStatRow('Total Net Profit', '\$${stats['totalProfit']?.toString() ?? '0'}', const Color(0xFF00FF88)),
-                  _buildStatRow('Total Revenue', '\$${stats['totalVolume']?.toString() ?? '0'}', Colors.white),
+                  _buildStatRow('Current Month Revenue', '\$${stats['currentMonth']?['revenue']?.toString() ?? '0'}', Colors.white),
+                  _buildStatRow('Current Month Profit', '\$${stats['currentMonth']?['profit']?.toString() ?? '0'}', const Color(0xFF00FF88)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Divider(color: Colors.white12),
+                  ),
+                  _buildStatRow('Last Month Revenue', '\$${stats['lastMonth']?['revenue']?.toString() ?? '0'}', Colors.white60),
+                  _buildStatRow('Last Month Profit', '\$${stats['lastMonth']?['profit']?.toString() ?? '0'}', const Color(0xFF00FF88).withOpacity(0.6)),
+
+                  const SizedBox(height: 40),
+                  _buildSectionHeader('WORKSPACE ASSETS'),
+                  const SizedBox(height: 15),
                   _buildStatRow('Stock Value (Assets)', '\$${stats['stockValue']?.toString() ?? '0'}', Colors.blue),
+                  
+                  const SizedBox(height: 40),
+                  _buildSectionHeader('LIFETIME OVERVIEW'),
+                  const SizedBox(height: 15),
+                  _buildStatRow('Lifetime Revenue', '\$${stats['lifetime']?['revenue']?.toString() ?? '0'}', Colors.white38),
+                  _buildStatRow('Lifetime Orders', '${stats['lifetime']?['orders']?.toString() ?? '0'}', Colors.white38),
                 ],
               ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => const FinancialTransactionScreen())),
+        backgroundColor: const Color(0xFF00FF88),
+        child: const Icon(Icons.swap_horiz, color: Colors.black),
+      ),
     );
   }
 

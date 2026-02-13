@@ -74,7 +74,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
                 _buildStatCard(
-                  title: 'TOTAL REVENUE',
+                  title: 'REVENUE (CURRENT MONTH)',
                   value: '\$${stats?['totalRevenue'] is num ? (stats?['totalRevenue'] as num).toStringAsFixed(2) : stats?['totalRevenue']?.toString() ?? '0.00'}',
                   icon: Icons.payments,
                   color: Colors.white,
@@ -90,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 const SizedBox(height: 6),
                 _buildStatCard(
-              title: 'NET PROFIT 🛡️',
+              title: 'PROFIT (CURRENT MONTH) 🛡️',
               value: '\$${stats?['totalProfit'] is num ? (stats?['totalProfit'] as num).toStringAsFixed(2) : stats?['totalProfit']?.toString() ?? '0.00'}',
               icon: Icons.shield,
               color: const Color(0xFF00FF88),
@@ -98,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
             _buildStatCard(
-              title: 'LIFETIME ORDERS',
+              title: 'ORDERS (CURRENT MONTH)',
               value: stats?['totalOrders']?.toString() ?? '0',
               icon: Icons.shopping_basket,
               color: const Color(0xFF00CCFF),

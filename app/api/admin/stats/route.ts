@@ -6,43 +6,81 @@ export async function GET(request: Request) {
     if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
-        let transStats: any = [{ totalRevenue: 0, totalProfit: 0, totalOrders: 0 }];
-        let webOrders: any = [{ webRevenue: 0, webCount: 0 }];
-        let g2gStats: any = [{ g2gRevenue: 0, g2gCount: 0 }];
-        let stockStats: any = [{ stockValue: 0 }];
-        let walletRows: any = [];
+        // Date Ranges (Fixed strings for MySQL)
+        const now = new Date();
+        const curMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
 
-        // 1. Transaction Stats (Direct & Manual Sales)
-        try {
-            transStats = await query(`
+        // Calculate last month strings
+        let lmYear = now.getFullYear();
+        let lmMonth = now.getMonth(); // previous month index
+        if (lmMonth === 0) { // If January, last month is Dec of prev year
+            lmMonth = 12;
+            lmYear--;
+        }
+        const lastMonthStr = `${lmYear}-${String(lmMonth).padStart(2, '0')}-01`;
+        const lastMonthEndStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`; // Start of current is end of last
+
+        // Helper to fetch stats for a range (STRICTLY FROM TRANSACTIONS to match Web UI)
+        const getRangeStats = async (startStr: string, endStr?: string) => {
+            const dateFilter = endStr ? "AND date >= ? AND date < ?" : "AND date >= ?";
+            const params = endStr ? [startStr, endStr] : [startStr];
+
+            const t = await query(`
                 SELECT 
-                    COALESCE(SUM(amount), 0) as totalRevenue,
-                    COALESCE(SUM(amount - cost), 0) as totalProfit,
-                    COUNT(*) as totalOrders
-                FROM transactions
-                WHERE type = 'sale'
-                AND currency = 'USD'
-            `) as any;
-        } catch (e) { console.error("Stats Error (Trans):", e); }
+                    COALESCE(SUM(amount), 0) as rev,
+                    COALESCE(SUM(amount - cost), 0) as prof,
+                    COUNT(*) as count
+                FROM transactions WHERE type = 'sale' AND currency = 'USD' ${dateFilter}
+            `, params) as any[];
 
-        // 2. Wallet Breakdown
-        try {
-            walletRows = await query(`
-                SELECT 
-                    platform,
-                    SUM(CASE 
-                        WHEN type IN ('sale', 'deposit', 'bonus', 'adjustment', 'manual_adjustment') THEN amount 
-                        WHEN type IN ('expense', 'purchase', 'payout', 'transfer_out') THEN -amount
-                        ELSE 0 END) as balance
-                FROM transactions
-                GROUP BY platform
-            `) as any;
-        } catch (e) { console.error("Stats Error (Wallets):", e); }
+            const tr = t[0] || { rev: 0, prof: 0, count: 0 };
 
-        const wallets: any = {
-            z2u: 0, g2g: 0, meezan: 0, ubl: 0, binance: 0, redotpay: 0, skrill: 0
+            return {
+                revenue: Number(tr.rev),
+                profit: Number(tr.prof),
+                orders: Number(tr.count)
+            };
         };
 
+        const currentMonth = await getRangeStats(curMonthStr);
+        const lastMonth = await getRangeStats(lastMonthStr, lastMonthEndStr);
+
+        // --- LIFETIME STATS (Strictly Transactions) ---
+        let lifetime: any = { revenue: 0, profit: 0, orders: 0 };
+        try {
+            const rows = await query(`
+                SELECT 
+                    COALESCE(SUM(amount), 0) as rev, 
+                    COALESCE(SUM(amount - cost), 0) as prof, 
+                    COUNT(*) as count 
+                FROM transactions 
+                WHERE type = 'sale' AND currency = 'USD'
+            `) as any[];
+            if (rows.length) {
+                lifetime = {
+                    revenue: Number(rows[0].rev),
+                    profit: Number(rows[0].prof),
+                    orders: Number(rows[0].count)
+                };
+            }
+        } catch (e) { }
+
+        // Wallet Breakdown (Keep as is, it's already transaction based)
+        let walletRows: any[] = [];
+        try {
+            walletRows = await query(`
+                    SELECT 
+                        platform,
+                        SUM(CASE 
+                            WHEN type IN ('sale', 'deposit', 'bonus', 'adjustment', 'manual_adjustment', 'transfer_in') THEN amount 
+                            WHEN type IN ('expense', 'purchase', 'payout', 'transfer_out') THEN -amount
+                            ELSE 0 END) as balance
+                    FROM transactions
+                    GROUP BY platform
+                `) as any[];
+        } catch (e) { }
+
+        const wallets: any = { z2u: 0, g2g: 0, meezan: 0, ubl: 0, binance: 0, redotpay: 0, skrill: 0 };
         walletRows.forEach((row: any) => {
             const p = row.platform?.toLowerCase() || '';
             if (p.includes('z2u')) wallets.z2u = Number(row.balance);
@@ -54,55 +92,28 @@ export async function GET(request: Request) {
             else if (p.includes('skrill')) wallets.skrill = Number(row.balance);
         });
 
-        // 3. Web Store Stats
+        // Stock Value
+        let stockVal = 0;
         try {
-            webOrders = await query(`
-                SELECT 
-                    COALESCE(SUM(CAST(amount AS DECIMAL(10,2))), 0) as webRevenue,
-                    COUNT(*) as webCount
-                FROM orders
-                WHERE status = 'paid' OR status = 'completed'
-            `) as any;
-        } catch (e) { console.error("Stats Error (Web):", e); }
-
-        // 4. G2G Stats
-        try {
-            g2gStats = await query(`
-                SELECT 
-                    COALESCE(SUM(amount), 0) as g2gRevenue,
-                    COUNT(*) as g2gCount
-                FROM g2g_orders
-            `) as any;
-        } catch (e) { console.error("Stats Error (G2G):", e); }
-
-        // 5. Stock Asset Value
-        try {
-            stockStats = await query(`
-                SELECT COALESCE(SUM(purchasePrice), 0) as stockValue 
-                FROM inventory 
-                WHERE status = 'In Stock'
-            `) as any;
-        } catch (e) { console.error("Stats Error (Stock):", e); }
-
-        const combinedRevenue = Number(transStats[0].totalRevenue) + Number(webOrders[0].webRevenue) + Number(g2gStats[0].g2gRevenue);
-        const combinedOrders = Number(transStats[0].totalOrders) + Number(webOrders[0].webCount) + Number(g2gStats[0].g2gCount);
-        const combinedProfit = Number(transStats[0].totalProfit) + (Number(webOrders[0].webRevenue) * 0.95) + (Number(g2gStats[0].g2gRevenue) * 0.95);
+            const rows = await query(`SELECT COALESCE(SUM(purchasePrice), 0) as val FROM inventory WHERE status = 'In Stock'`) as any[];
+            if (rows.length) stockVal = Number(rows[0].val);
+        } catch (e) { }
 
         return NextResponse.json({
             success: true,
-            totalRevenue: combinedRevenue,
-            totalProfit: combinedProfit,
-            totalOrders: combinedOrders,
-            totalVolume: combinedRevenue, // Alias for mobile app
-            stockValue: Number(stockStats[0].stockValue),
+            totalRevenue: currentMonth.revenue,
+            totalProfit: currentMonth.profit,
+            totalOrders: currentMonth.orders,
+            totalVolume: currentMonth.revenue,
+            currentMonth,
+            lastMonth,
+            lifetime: lifetime,
+            stockValue: stockVal,
             wallets,
-            breakdown: {
-                direct: transStats[0].totalRevenue,
-                website: webOrders[0].webRevenue,
-                g2g: g2gStats[0].g2gRevenue
-            },
             timestamp: new Date().toISOString()
         });
+
+
     } catch (error: any) {
         console.error('Stats API Error:', error);
         return NextResponse.json({
@@ -115,3 +126,4 @@ export async function GET(request: Request) {
         });
     }
 }
+

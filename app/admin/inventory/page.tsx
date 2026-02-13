@@ -121,7 +121,15 @@ function AdminDashboard() {
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
     const [copiedId, setCopiedId] = useState<any>(null);
     const [showAddFunds, setShowAddFunds] = useState(false);
-    const [fundForm, setFundForm] = useState({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
+    const [fundForm, setFundForm] = useState({
+        actionType: 'adjustment',
+        platform: 'Meezan',
+        fromPlatform: 'Binance',
+        toPlatform: 'RedotPay',
+        amount: '',
+        currency: 'PKR',
+        description: ''
+    });
 
     // Bulk Import State
     const [bulkData, setBulkData] = useState('');
@@ -613,13 +621,21 @@ function AdminDashboard() {
             // Wallets Breakdown (Keeps native currency)
             if (!newStats.wallets) newStats.wallets = { z2u: 0, g2g: 0, meezan: 0, ubl: 0, binance: 0, redotpay: 0, skrill: 0 };
 
-            if (t.platform === 'Z2U') newStats.wallets.z2u += amount;
-            else if (['G2G', 'PlayerUp'].includes(t.platform)) newStats.wallets.g2g += amount;
-            else if (t.platform === 'Meezan') newStats.wallets.meezan += amount;
-            else if (['UBL', 'EasyPaisa', 'JazzCash'].includes(t.platform)) newStats.wallets.ubl += amount;
-            else if (t.platform === 'Binance') newStats.wallets.binance += amount;
-            else if (t.platform === 'RedotPay') newStats.wallets.redotpay += amount;
-            else if (t.platform === 'Skrill') newStats.wallets.skrill += amount;
+            // Determine if we should add or subtract based on type
+            let multiplier = 1;
+            if (['expense', 'purchase', 'payout', 'transfer_out'].includes(type)) {
+                multiplier = -1;
+            }
+
+            const val = amount * multiplier;
+
+            if (t.platform === 'Z2U') newStats.wallets.z2u += val;
+            else if (['G2G', 'PlayerUp'].includes(t.platform)) newStats.wallets.g2g += val;
+            else if (t.platform === 'Meezan') newStats.wallets.meezan += val;
+            else if (['UBL', 'EasyPaisa', 'JazzCash'].includes(t.platform)) newStats.wallets.ubl += val;
+            else if (t.platform === 'Binance') newStats.wallets.binance += val;
+            else if (t.platform === 'RedotPay') newStats.wallets.redotpay += val;
+            else if (t.platform === 'Skrill') newStats.wallets.skrill += val;
 
             // Only count actual Sales for Revenue and Profit calculation
             if (type === 'sale') {
@@ -1500,13 +1516,23 @@ function AdminDashboard() {
 
     const handleAddFunds = async (e: React.FormEvent) => {
         e.preventDefault();
+        const action = fundForm.actionType === 'transfer' ? 'transfer_funds' : 'add_funds';
+
         await fetch('/api/finance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add_funds', ...fundForm, staffName: 'Admin' })
+            body: JSON.stringify({ action, ...fundForm, staffName: currentUser?.name || 'Admin' })
         });
         setShowAddFunds(false);
-        setFundForm({ platform: 'Meezan', amount: '', currency: 'PKR', description: '' });
+        setFundForm({
+            actionType: 'adjustment',
+            platform: 'Meezan',
+            fromPlatform: 'Binance',
+            toPlatform: 'RedotPay',
+            amount: '',
+            currency: 'PKR',
+            description: ''
+        });
         fetchData();
     };
 

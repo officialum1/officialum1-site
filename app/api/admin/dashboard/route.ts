@@ -9,9 +9,15 @@ export async function GET() {
 
         // 1. Revenue & Orders (This Month)
         const revenueRows = await query(`
-            SELECT SUM(amount) as totalDisplay, COUNT(*) as count 
-            FROM orders 
-            WHERE status IN ('paid', 'completed') AND date >= ?
+            SELECT 
+                SUM(CASE 
+                    WHEN CAST(o.amount AS DECIMAL(10,2)) > 0 THEN CAST(o.amount AS DECIMAL(10,2))
+                    ELSE CAST(p.price AS DECIMAL(10,2))
+                END * o.quantity) as totalDisplay, 
+                COUNT(*) as count 
+            FROM orders o
+            LEFT JOIN products p ON o.productId = p.id
+            WHERE o.status IN ('paid', 'completed') AND o.date >= ?
         `, [startOfMonth]) as any[];
         const revenueMonth = revenueRows[0]?.totalDisplay || 0;
         const ordersMonth = revenueRows[0]?.count || 0;

@@ -193,7 +193,6 @@ export default function FinanceTab({
                 </table>
             </div>
 
-            {/* Modernized Add Funds Modal */}
             {showAddFunds && (
                 <div style={{
                     position: 'fixed',
@@ -220,9 +219,11 @@ export default function FinanceTab({
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                             <div>
                                 <h2 style={{ margin: 0, fontSize: '1.6rem', color: '#00ff88', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                    <span>💸</span> Finance Adjustment
+                                    <span>💸</span> {fundForm.actionType === 'transfer' ? 'Wallet Transfer' : 'Finance Adjustment'}
                                 </h2>
-                                <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '4px' }}>Manually adjust account or bank balances.</p>
+                                <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '4px' }}>
+                                    {fundForm.actionType === 'transfer' ? 'Move funds between internal wallets.' : 'Manually adjust account or bank balances.'}
+                                </p>
                             </div>
                             <button
                                 onClick={() => setShowAddFunds(false)}
@@ -242,41 +243,83 @@ export default function FinanceTab({
                             >×</button>
                         </div>
 
-                        <form onSubmit={handleAddFunds} style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem' }}>
-                            <div className="form-group">
-                                <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Platform / Bank Account</label>
-                                <select className="input-field" value={fundForm.platform} onChange={e => {
-                                    const p = e.target.value;
-                                    const c = ['Meezan', 'UBL', 'EasyPaisa', 'JazzCash'].includes(p) ? 'PKR' : 'USD';
-                                    setFundForm({ ...fundForm, platform: p, currency: c });
-                                }} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
-                                    <option value="Meezan">Meezan Bank 🇵🇰</option>
-                                    <option value="UBL">UBL (United Bank Limited) 🇵🇰</option>
-                                    <option value="EasyPaisa">EasyPaisa / JazzCash 📱</option>
-                                    <option value="Z2U">Z2U Marketplace 🇺🇸</option>
-                                    <option value="PlayerUp">PlayerUp 🇺🇸</option>
-                                    <option value="G2G">G2G Marketplace 🇺🇸</option>
-                                    <option value="Binance">Binance (USDT) 💎</option>
-                                    <option value="RedotPay">RedotPay Card 💳</option>
-                                    <option value="Skrill">Skrill Wallet 🟣</option>
-                                    <option value="Direct">Cash / Manual Other 💰</option>
-                                </select>
-                            </div>
+                        {/* Mode Toggle */}
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '2rem', padding: '5px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setFundForm({ ...fundForm, actionType: 'adjustment' })}
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: fundForm.actionType !== 'transfer' ? '#00ff88' : 'transparent', color: fundForm.actionType !== 'transfer' ? '#000' : '#888', fontWeight: 'bold', cursor: 'pointer' }}
+                            >Adjustment</button>
+                            <button
+                                type="button"
+                                onClick={() => setFundForm({ ...fundForm, actionType: 'transfer' })}
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: fundForm.actionType === 'transfer' ? '#00ff88' : 'transparent', color: fundForm.actionType === 'transfer' ? '#000' : '#888', fontWeight: 'bold', cursor: 'pointer' }}
+                            >Internal Transfer</button>
+                        </div>
+
+                        <form onSubmit={handleAddFunds} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+
+                            {fundForm.actionType === 'transfer' ? (
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontSize: '0.8rem' }}>From Wallet</label>
+                                        <select className="input-field" value={fundForm.fromPlatform} onChange={e => setFundForm({ ...fundForm, fromPlatform: e.target.value })} style={{ width: '100%', height: '50px', borderRadius: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff' }}>
+                                            <option value="Meezan">Meezan 🇵🇰</option>
+                                            <option value="UBL">UBL/EasyPaisa 📱</option>
+                                            <option value="Z2U">Z2U 🇺🇸</option>
+                                            <option value="G2G">G2G 🎮</option>
+                                            <option value="Binance">Binance 💎</option>
+                                            <option value="RedotPay">RedotPay 💳</option>
+                                            <option value="Skrill">Skrill 🟣</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label style={{ display: 'block', marginBottom: '0.5rem', color: '#ccc', fontSize: '0.8rem' }}>To Wallet</label>
+                                        <select className="input-field" value={fundForm.toPlatform} onChange={e => setFundForm({ ...fundForm, toPlatform: e.target.value })} style={{ width: '100%', height: '50px', borderRadius: '10px', background: '#0a0a0a', border: '1px solid #333', color: '#fff' }}>
+                                            <option value="RedotPay">RedotPay 💳</option>
+                                            <option value="Binance">Binance 💎</option>
+                                            <option value="Z2U">Z2U 🇺🇸</option>
+                                            <option value="G2G">G2G 🎮</option>
+                                            <option value="Meezan">Meezan 🇵🇰</option>
+                                            <option value="UBL">UBL/EasyPaisa 📱</option>
+                                            <option value="Skrill">Skrill 🟣</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="form-group">
+                                    <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Platform / Bank Account</label>
+                                    <select className="input-field" value={fundForm.platform} onChange={e => {
+                                        const p = e.target.value;
+                                        const c = ['Meezan', 'UBL', 'EasyPaisa', 'JazzCash'].includes(p) ? 'PKR' : 'USD';
+                                        setFundForm({ ...fundForm, platform: p, currency: c });
+                                    }} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
+                                        <option value="Meezan">Meezan Bank 🇵🇰</option>
+                                        <option value="UBL">UBL (United Bank Limited) 🇵🇰</option>
+                                        <option value="EasyPaisa">EasyPaisa / JazzCash 📱</option>
+                                        <option value="Z2U">Z2U Marketplace 🇺🇸</option>
+                                        <option value="PlayerUp">PlayerUp 🇺🇸</option>
+                                        <option value="G2G">G2G Marketplace 🇺🇸</option>
+                                        <option value="Binance">Binance (USDT) 💎</option>
+                                        <option value="RedotPay">RedotPay Card 💳</option>
+                                        <option value="Skrill">Skrill Wallet 🟣</option>
+                                        <option value="Direct">Cash / Manual Other 💰</option>
+                                    </select>
+                                </div>
+                            )}
 
                             <div style={{ display: 'flex', gap: '1.2rem' }}>
                                 <div style={{ flex: 2 }}>
                                     <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Amount</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <input
-                                            type="number"
-                                            required
-                                            className="input-field"
-                                            value={fundForm.amount}
-                                            onChange={e => setFundForm({ ...fundForm, amount: e.target.value })}
-                                            placeholder="e.g. 5000 or -50"
-                                            style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
-                                        />
-                                    </div>
+                                    <input
+                                        type="number"
+                                        required
+                                        className="input-field"
+                                        value={fundForm.amount}
+                                        onChange={e => setFundForm({ ...fundForm, amount: e.target.value })}
+                                        placeholder="e.g. 500 or -50"
+                                        style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
+                                    />
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Currency</label>
@@ -292,7 +335,7 @@ export default function FinanceTab({
                                 <input
                                     type="text"
                                     className="input-field"
-                                    placeholder="Briefly explain this adjustment..."
+                                    placeholder="Briefly explain this..."
                                     value={fundForm.description}
                                     onChange={e => setFundForm({ ...fundForm, description: e.target.value })}
                                     style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}
@@ -307,8 +350,10 @@ export default function FinanceTab({
                                 >Cancel</button>
                                 <button
                                     type="submit"
-                                    style={{ flex: 2, height: '54px', borderRadius: '14px', background: 'linear-gradient(90deg, #00ff88, #00c3ff)', color: '#000', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '1rem', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
-                                >Save Transaction</button>
+                                    style={{ flex: 2, height: '54px', borderRadius: '14px', background: 'linear-gradient(90deg, #00ff88, #00c3ff)', color: '#000', border: 'none', fontWeight: '800', cursor: 'pointer', fontSize: '1rem', boxShadow: fundForm.actionType === 'transfer' ? '0 0 20px rgba(0,195,255,0.3)' : '0 0 20px rgba(0,255,136,0.3)' }}
+                                >
+                                    {fundForm.actionType === 'transfer' ? 'Confirm Transfer' : 'Save Adjustment'}
+                                </button>
                             </div>
                         </form>
                     </div>

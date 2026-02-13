@@ -484,4 +484,17 @@ class MainProvider with ChangeNotifier {
     } catch (e) { debugPrint('Add Content Error: $e'); }
     return false;
   }
+
+  Future<bool> executeFinanceAction(String action, Map<String, dynamic> data) async {
+    try {
+      final res = await _api.post('/finance', {'action': action, ...data});
+      if (res.statusCode == 200) {
+        fetchStats();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Finance Action Error: $e');
+    }
+    return false;
+  }
 }

@@ -9,7 +9,9 @@ export async function GET() {
     try {
         // Fetch Orders + Product Names
         const orders = await query(`
-            SELECT o.*, p.name as product_name, p.platform, u.email as user_email
+            SELECT o.*, p.name as product_name, p.platform, p.price as product_price,
+                   COALESCE(NULLIF(o.amount, '0'), p.price) as price,
+                   u.email as user_email
             FROM orders o 
             LEFT JOIN products p ON o.productId = p.id 
             LEFT JOIN users u ON o.userId = u.id
