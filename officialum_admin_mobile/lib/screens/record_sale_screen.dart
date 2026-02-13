@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/main_provider.dart';
 
+import 'package:flutter/services.dart';
+
 class RecordSaleScreen extends StatefulWidget {
   const RecordSaleScreen({super.key});
 
@@ -36,7 +38,7 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
 
     setState(() => _isSubmitting = true);
 
-    final success = await context.read<MainProvider>().recordSale({
+    final response = await context.read<MainProvider>().recordSale({
       'mode': _mode,
       'platform': _platform,
       'inventoryId': _mode == 'single' ? _selectedInventoryId : null,
@@ -44,17 +46,73 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
       'quantity': _quantity,
       'salePrice': _salePrice,
       'description': _description,
-      'staffName': 'Admin', // In reality, get from AuthProvider
+      'staffName': 'Admin',
     });
 
     setState(() => _isSubmitting = false);
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sale recorded successfully!'), backgroundColor: Colors.green));
-      Navigator.pop(context);
+    if (response != null && response['success'] == true) {
+      final token = response['delivery']?['token'];
+      final deliveryUrl = token != null ? 'https://officialum1.com/delivery/$token' : null;
+
+      _showSuccessDialog(deliveryUrl);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to record sale.'), backgroundColor: Colors.red));
     }
+  }
+
+  void _showSuccessDialog(String? url) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF111111),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Column(
+          children: [
+             Icon(Icons.check_circle, color: Color(0xFF00FF88), size: 50),
+             SizedBox(height: 10),
+             Text('SALE RECORDED', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('The sale has been successfully saved to history and stock updated.', 
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, fontSize: 13)
+            ),
+            if (url != null) ...[
+              const SizedBox(height: 20),
+              const Text('DELIVERY LINK', style: TextStyle(color: Color(0xFF00FF88), fontSize: 10, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(10)),
+                child: Text(url, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              ),
+            ]
+          ],
+        ),
+        actions: [
+          if (url != null)
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: url));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied to clipboard!')));
+              },
+              child: const Text('COPY LINK', style: TextStyle(color: Color(0xFF00FF88))),
+            ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Go back to dashboard
+            },
+            child: const Text('DONE', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

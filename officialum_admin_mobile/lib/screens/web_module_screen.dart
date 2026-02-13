@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'main_navigation_container.dart';
 
 class WebModuleScreen extends StatefulWidget {
   final String title;
@@ -23,9 +25,7 @@ class _WebModuleScreenState extends State<WebModuleScreen> {
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
+          onProgress: (int progress) {},
           onPageStarted: (String url) {
             setState(() {
               _isLoading = true;
@@ -36,10 +36,10 @@ class _WebModuleScreenState extends State<WebModuleScreen> {
               _isLoading = false;
             });
             
-            // Inject dark mode or clean up header if needed
+            // Clean up web UI (hide navs, hide sidebar, hide footer)
             _controller.runJavaScript("""
               const style = document.createElement('style');
-              style.innerHTML = 'nav, footer, .sidebar { display: none !important; } body { padding-top: 0 !important; }';
+              style.innerHTML = 'nav, footer, .sidebar, #sidebar-nav { display: none !important; } .main-content { margin-left: 0 !important; width: 100% !important; } body { padding-top: 0 !important; }';
               document.head.appendChild(style);
             """);
           },
@@ -48,8 +48,28 @@ class _WebModuleScreenState extends State<WebModuleScreen> {
             return NavigationDecision.navigate;
           },
         ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+      );
+
+    _initCookieAndLoad();
+  }
+
+  Future<void> _initCookieAndLoad() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    
+    if (token != null) {
+      final cookieManager = WebViewCookieManager();
+      await cookieManager.setCookie(
+        WebViewCookie(
+          name: 'admin_token',
+          value: 'authenticated_session_v1', // The hardcoded token we use for now
+          domain: 'officialum1.com',
+          path: '/',
+        ),
+      );
+    }
+    
+    _controller.loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -63,7 +83,7 @@ class _WebModuleScreenState extends State<WebModuleScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFF00FF88)),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => MainNavigationContainer.scaffoldKey.currentState?.openDrawer(),
           ),
         ),
         actions: [

@@ -7,8 +7,10 @@ import 'web_module_screen.dart';
 
 import 'record_sale_screen.dart';
 import 'automation_screen.dart';
+import 'playerup_hub_screen.dart';
 
 class MainNavigationContainer extends StatefulWidget {
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   const MainNavigationContainer({super.key});
 
   @override
@@ -30,6 +32,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
     if (_selectedIndex == 3) return const G2GHubScreen();
     if (_selectedIndex == 27) return const RecordSaleScreen();
     if (_selectedIndex == 28) return const AutomationScreen();
+    if (_selectedIndex == 7) return const PlayerUpHubScreen();
     
     if (_currentWebUrl != null) {
       return WebModuleScreen(
@@ -45,7 +48,10 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   void _selectModule(int index, {String? title, String? url}) {
     setState(() {
       _selectedIndex = index;
-      if (index >= 4) {
+      // List of native screen indices
+      final nativeIndices = [0, 1, 2, 3, 7, 27, 28];
+      
+      if (!nativeIndices.contains(index)) {
         _currentWebTitle = title;
         _currentWebUrl = url;
       } else {
@@ -59,6 +65,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: MainNavigationContainer.scaffoldKey,
       drawer: _buildDrawer(),
       body: _getScreen(),
     );
@@ -92,7 +99,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   _buildDrawerItem('Orders', Icons.local_shipping_outlined, 2),
                   _buildDrawerItem('Bundles', Icons.inventory_outlined, 6, url: '$baseUrl?tab=bundle'),
                   _buildDrawerItem('G2G Center', Icons.sports_esports_outlined, 3),
-                  _buildDrawerItem('PlayerUp', Icons.trending_up, 7, url: '$baseUrl?tab=playerup'),
+                  _buildDrawerItem('PlayerUp Hub', Icons.trending_up, 7),
                   _buildDrawerItem('Z2U Hub', Icons.workspace_premium, 8, url: '$baseUrl?tab=z2u'),
                   _buildDrawerItem('Promos', Icons.label_important_outline, 9, url: '$baseUrl?tab=promos'),
                   
@@ -112,7 +119,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   _buildSectionHeader('CONTENT & TOOLS'),
                   _buildDrawerItem('Website', Icons.language, 16, url: 'https://officialum1.com'),
                   _buildDrawerItem('Auto-Bumping', Icons.auto_mode, 28),
-                  _buildDrawerItem('PlayerUp Threads', Icons.trending_up, 7, url: '$baseUrl?tab=playerup'),
+                  _buildDrawerItem('PlayerUp Web', Icons.language, 30, url: '$baseUrl?tab=playerup'),
                   _buildDrawerItem('Intelligence', Icons.insights, 18, url: '$baseUrl?tab=intel'),
                   _buildDrawerItem('Tools', Icons.build_outlined, 19, url: '$baseUrl?tab=tools'),
                   _buildDrawerItem('KB/FAQ', Icons.help_outline, 20, url: '$baseUrl?tab=kb'),
@@ -126,6 +133,8 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   _buildDrawerItem('Staff', Icons.badge_outlined, 24, url: '$baseUrl?tab=hr'),
                   _buildDrawerItem('Logs', Icons.list_alt, 25, url: '$baseUrl?tab=logs'),
                   _buildDrawerItem('Settings', Icons.settings_outlined, 26, url: '$baseUrl?tab=settings'),
+                  
+                  const SizedBox(height: 50), // Added bottom padding for clickability
                 ],
               ),
             ),

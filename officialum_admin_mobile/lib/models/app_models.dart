@@ -84,3 +84,38 @@ class G2GOrder {
     );
   }
 }
+
+class PlayerUpListing {
+  final String id;
+  final String title;
+  final String url;
+  final String platform;
+  final String? lastBumped;
+  final String status;
+  final String frequency;
+  final bool autoBump;
+
+  PlayerUpListing({
+    required this.id,
+    required this.title,
+    required this.url,
+    required this.platform,
+    this.lastBumped,
+    required this.status,
+    required this.frequency,
+    required this.autoBump,
+  });
+
+  factory PlayerUpListing.fromJson(Map<String, dynamic> json) {
+    return PlayerUpListing(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      url: json['url'] ?? '',
+      platform: json['platform'] ?? 'Social',
+      lastBumped: json['lastBumped'],
+      status: json['status'] ?? 'Inactive',
+      frequency: json['frequency'] ?? 'Every 24 hours',
+      autoBump: json['autoBump'] == 1 || json['autoBump'] == true,
+    );
+  }
+}

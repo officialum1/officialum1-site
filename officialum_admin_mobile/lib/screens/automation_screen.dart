@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:workmanager/workmanager.dart';
 import '../providers/main_provider.dart';
+import 'main_navigation_container.dart';
 
 class AutomationScreen extends StatefulWidget {
   const AutomationScreen({super.key});
@@ -67,7 +68,7 @@ class _AutomationScreenState extends State<AutomationScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFF00FF88)),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => MainNavigationContainer.scaffoldKey.currentState?.openDrawer(),
           ),
         ),
       ),

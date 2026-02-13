@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/main_provider.dart';
+import 'main_navigation_container.dart';
 import '../models/app_models.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFF00FF88)),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => MainNavigationContainer.scaffoldKey.currentState?.openDrawer(),
           ),
         ),
         actions: [

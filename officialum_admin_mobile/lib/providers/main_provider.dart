@@ -9,20 +9,24 @@ class MainProvider with ChangeNotifier {
   List<Product> _products = [];
   List<Order> _orders = [];
   List<G2GOrder> _g2gOrders = [];
+  List<PlayerUpListing> _playerUpListings = [];
   Map<String, dynamic>? _stats;
 
   bool _isLoadingProducts = false;
   bool _isLoadingOrders = false;
   bool _isLoadingG2G = false;
+  bool _isLoadingPlayerUp = false;
 
   List<Product> get products => _products;
   List<Order> get orders => _orders;
   List<G2GOrder> get g2gOrders => _g2gOrders;
+  List<PlayerUpListing> get playerUpListings => _playerUpListings;
   Map<String, dynamic>? get stats => _stats;
 
   bool get isLoadingProducts => _isLoadingProducts;
   bool get isLoadingOrders => _isLoadingOrders;
   bool get isLoadingG2G => _isLoadingG2G;
+  bool get isLoadingPlayerUp => _isLoadingPlayerUp;
 
   Future<void> fetchStats() async {
     try {
@@ -104,7 +108,7 @@ class MainProvider with ChangeNotifier {
     return false;
   }
 
-  Future<bool> recordSale(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>?> recordSale(Map<String, dynamic> data) async {
     try {
       final res = await _api.post('/admin/inventory', {
         'action': 'record_sale',
@@ -113,12 +117,12 @@ class MainProvider with ChangeNotifier {
       if (res.statusCode == 200) {
         fetchStats();
         fetchProducts();
-        return true;
+        return jsonDecode(res.body);
       }
     } catch (e) {
       debugPrint('Error recording sale: $e');
     }
-    return false;
+    return null;
   }
 
   Future<Map<String, dynamic>> bumpThreads() async {
@@ -134,5 +138,22 @@ class MainProvider with ChangeNotifier {
       debugPrint('Error bumping threads: $e');
     }
     return {'success': false, 'error': 'Connection error'};
+  }
+
+  Future<void> fetchPlayerUpListings() async {
+    _isLoadingPlayerUp = true;
+    notifyListeners();
+    try {
+      final res = await _api.get('/admin/playerup');
+      if (res.statusCode == 200) {
+        final List data = jsonDecode(res.body);
+        _playerUpListings = data.map((item) => PlayerUpListing.fromJson(item)).toList();
+      }
+    } catch (e) {
+      debugPrint('Error fetching PlayerUp listings: $e');
+    } finally {
+      _isLoadingPlayerUp = false;
+      notifyListeners();
+    }
   }
 }

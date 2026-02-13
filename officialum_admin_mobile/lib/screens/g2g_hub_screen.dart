@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/main_provider.dart';
+import 'main_navigation_container.dart';
 import '../models/app_models.dart';
 import '../widgets/g2g_fulfillment_dialog.dart';
 import '../services/api_service.dart';
@@ -28,6 +29,7 @@ class _G2GHubScreenState extends State<G2GHubScreen> {
     final orders = provider.g2gOrders;
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text('G2G DELIVERY HUB', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16)),
         backgroundColor: Colors.transparent,
@@ -35,7 +37,7 @@ class _G2GHubScreenState extends State<G2GHubScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFF00CCFF)),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => MainNavigationContainer.scaffoldKey.currentState?.openDrawer(),
           ),
         ),
         actions: [

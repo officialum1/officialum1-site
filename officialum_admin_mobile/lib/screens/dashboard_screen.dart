@@ -4,6 +4,7 @@ import '../providers/main_provider.dart';
 import '../providers/auth_provider.dart';
 import 'record_sale_screen.dart';
 import 'automation_screen.dart';
+import 'main_navigation_container.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -33,7 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xFF00FF88)),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => MainNavigationContainer.scaffoldKey.currentState?.openDrawer(),
           ),
         ),
         actions: [
