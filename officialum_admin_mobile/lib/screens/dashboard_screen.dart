@@ -28,6 +28,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('DASHBOARD', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Color(0xFF00FF88)),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () => context.read<AuthProvider>().logout(),

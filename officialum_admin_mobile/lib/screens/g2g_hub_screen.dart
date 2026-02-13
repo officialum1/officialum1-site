@@ -32,6 +32,12 @@ class _G2GHubScreenState extends State<G2GHubScreen> {
         title: const Text('G2G DELIVERY HUB', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Color(0xFF00CCFF)),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
