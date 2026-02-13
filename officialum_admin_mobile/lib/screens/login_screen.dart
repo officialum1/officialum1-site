@@ -11,22 +11,33 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _error;
 
   Future<void> _handleLogin() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        _error = 'Please enter both email and password';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
-    final success = await context.read<AuthProvider>().login(_passwordController.text);
+    final success = await context.read<AuthProvider>().login(
+      _emailController.text,
+      _passwordController.text,
+    );
     
     if (!success) {
       setState(() {
         _isLoading = false;
-        _error = 'Incorrect Password';
+        _error = 'Invalid Credentials';
       });
     }
   }
@@ -88,6 +99,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
                 
+                // Email Input
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  child: TextField(
+                    controller: _emailController,
+                    style: const TextStyle(fontSize: 16),
+                    decoration: InputDecoration(
+                      hintText: 'Admin Email / Username',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                      prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF00FF88)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                    ),
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
                 // Password Input
                 Container(
                   decoration: BoxDecoration(
@@ -98,13 +132,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 18, letterSpacing: 8),
+                    style: const TextStyle(fontSize: 16),
                     decoration: InputDecoration(
-                      hintText: '••••••••',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), letterSpacing: 8),
+                      hintText: 'Password',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF00FF88)),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                     ),
                     onSubmitted: (_) => _handleLogin(),
                   ),

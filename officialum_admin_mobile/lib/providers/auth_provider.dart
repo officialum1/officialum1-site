@@ -27,17 +27,19 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String password) async {
+  Future<bool> login(String email, String password) async {
     try {
-      final response = await _api.post('/admin/login', {'password': password});
+      final response = await _api.post('/admin/login', {
+        'email': email,
+        'password': password,
+      });
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
-          // In your Next.js auth, it sets a cookie. We might need to handle 
-          // success specifically if the server doesn't return a token in body
-          // But for native, usually we'd expect a token. 
-          // Since the website uses cookies, we will treat 'success' as authed.
           await _storage.write(key: 'auth_token', value: 'authenticated_session_v1');
+          await _storage.write(key: 'user_email', value: email);
+          await _storage.write(key: 'user_role', value: data['role'] ?? 'admin');
+          
           _isAuthenticated = true;
           notifyListeners();
           return true;
