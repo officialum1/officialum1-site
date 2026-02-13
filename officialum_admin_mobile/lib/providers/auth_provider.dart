@@ -9,9 +9,11 @@ class AuthProvider with ChangeNotifier {
   final _api = ApiService();
   bool _isAuthenticated = false;
   bool _isLoading = true;
+  Map<String, dynamic>? _user;
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
+  Map<String, dynamic>? get user => _user;
 
   AuthProvider() {
     _checkAuth();
@@ -20,7 +22,9 @@ class AuthProvider with ChangeNotifier {
   Future<void> _checkAuth() async {
     String? token = await _storage.read(key: 'auth_token');
     if (token != null) {
-      // Potentially verify token with a ping to the server
+      String? email = await _storage.read(key: 'user_email');
+      String? role = await _storage.read(key: 'user_role');
+      _user = {'email': email, 'role': role, 'name': email?.split('@')[0]};
       _isAuthenticated = true;
     }
     _isLoading = false;
@@ -41,6 +45,7 @@ class AuthProvider with ChangeNotifier {
         await _storage.write(key: 'user_email', value: email);
         await _storage.write(key: 'user_role', value: data['role'] ?? 'admin');
         
+        _user = {'email': email, 'role': data['role'] ?? 'admin', 'name': email.split('@')[0]};
         _isAuthenticated = true;
         notifyListeners();
         return null; // Success
@@ -54,6 +59,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
+    _user = null;
     _isAuthenticated = false;
     notifyListeners();
   }
