@@ -167,6 +167,8 @@ export async function POST(request: Request) {
             let soldInventoryIds: string[] = [];
             let combinedDetailsText = "";
 
+            let totalCost = 0;
+
             // --- BULK SALE LOGIC ---
             if (body.mode === 'bulk') {
                 const { productName, quantity } = body;
@@ -203,6 +205,7 @@ export async function POST(request: Request) {
                         loginPart = `${details.email}:${details.username}`;
                     }
 
+                    totalCost += Number(item.purchasePrice || 0);
                     const line = `${loginPart}:${details.password}${details.extraInfo ? `:${details.extraInfo}` : ''}`;
                     combinedDetailsText += line + "\n";
                 }
@@ -259,6 +262,8 @@ export async function POST(request: Request) {
                         proofImage: body.proofImage || null
                     };
 
+                    totalCost = Number(item.purchasePrice || 0);
+
                     await query(
                         "INSERT INTO deliveries (token, orderId, itemName, details, proofImage) VALUES (?, ?, ?, ?, ?)",
                         [token, transactionId, item.name, JSON.stringify(deliveryDetails), body.proofImage || null]
@@ -274,12 +279,13 @@ export async function POST(request: Request) {
                 amount: Number(body.salePrice),
                 description: body.description || (body.mode === 'bulk' ? `Bulk Sale: ${body.quantity}x ${body.productName}` : 'Direct Sale'),
                 processedBy: body.staffName || 'Admin',
-                inventoryId: soldInventoryIds.length === 1 ? soldInventoryIds[0] : 'bulk' // Store 'bulk' or single ID
+                inventoryId: soldInventoryIds.length === 1 ? soldInventoryIds[0] : 'bulk',
+                quantity: body.mode === 'bulk' ? parseInt(body.quantity || '1') : 1
             };
 
             await query(
-                "INSERT INTO transactions (id, type, platform, amount, description, processedBy, inventoryId) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                [newTransaction.id, newTransaction.type, newTransaction.platform, newTransaction.amount, newTransaction.description, newTransaction.processedBy, newTransaction.inventoryId]
+                "INSERT INTO transactions (id, type, platform, amount, description, processedBy, inventoryId, cost, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [newTransaction.id, newTransaction.type, newTransaction.platform, newTransaction.amount, newTransaction.description, newTransaction.processedBy, newTransaction.inventoryId, totalCost, newTransaction.quantity]
             );
 
             // Log

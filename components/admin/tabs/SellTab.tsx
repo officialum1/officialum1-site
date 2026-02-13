@@ -59,7 +59,7 @@ export default function SellTab({
                                     const id = e.target.value;
                                     const item = inventory.find(i => i.id === id);
                                     if (item) {
-                                        setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform, salePrice: item.purchasePrice ? String(Number(item.purchasePrice) * 1.5) : '' });
+                                        setNewSale({ ...newSale, inventoryId: id, description: item.name, platform: item.platform, salePrice: item.purchasePrice ? String(item.purchasePrice) : '' });
                                     } else {
                                         setNewSale({ ...newSale, inventoryId: '' });
                                     }

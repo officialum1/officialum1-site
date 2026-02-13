@@ -245,9 +245,15 @@ export async function initDB(force = false) {
             description TEXT,
             processedBy VARCHAR(100),
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            inventoryId VARCHAR(50)
+            inventoryId VARCHAR(50),
+            cost DECIMAL(10,2) DEFAULT 0.00,
+            quantity INT DEFAULT 1
         )
     `);
+
+    // Migration: Add cost & quantity columns if missing
+    try { await query("ALTER TABLE transactions ADD COLUMN cost DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
+    try { await query("ALTER TABLE transactions ADD COLUMN quantity INT DEFAULT 1"); } catch (e) { }
 
     // Activity Logs (Internal Audit Trail)
     await query(`

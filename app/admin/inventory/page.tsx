@@ -605,52 +605,63 @@ function AdminDashboard() {
             const date = t.date ? new Date(t.date) : new Date();
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-            // Platform Stats
-            if (t.platform === 'Z2U') newStats.z2u += amount;
-            else if (t.platform === 'PlayerUp') newStats.playerup += amount;
-            else if (t.platform === 'Direct') newStats.direct += amount;
-            else if (t.platform === 'G2G') newStats.g2g += amount;
-            newStats.total += amount;
+            // Platform Stats (Separate by Currency)
+            const isPKR = t.currency === 'PKR' || ['Meezan', 'UBL'].includes(t.platform);
 
-            // Wallets Breakdown
+            if (!isPKR) {
+                if (t.platform === 'Z2U') newStats.z2u += amount;
+                else if (t.platform === 'PlayerUp') newStats.playerup += amount;
+                else if (t.platform === 'Direct') newStats.direct += amount;
+                else if (t.platform === 'G2G') newStats.g2g += amount;
+                newStats.total += amount;
+            }
+
+            // Wallets Breakdown (Keeps native currency)
             if (!newStats.wallets) newStats.wallets = { z2u: 0, g2g: 0, meezan: 0, ubl: 0 };
 
             if (t.platform === 'Z2U') newStats.wallets.z2u += amount;
             else if (['G2G', 'PlayerUp'].includes(t.platform)) newStats.wallets.g2g += amount;
             else if (t.platform === 'Meezan') newStats.wallets.meezan += amount;
-            else if (t.platform === 'UBL' || t.platform === 'Direct') newStats.wallets.ubl += amount; // Group Direct with UBL/Other for now or separate? FinanceTab groups UBL/Other.
+            else if (t.platform === 'UBL' || t.platform === 'Direct') newStats.wallets.ubl += amount;
 
-            // Profit Calculation
-            let cost = 0;
-            let productName = t.description || 'Adjustment';
-            if (t.inventoryId) {
-                const item = inventoryList.find(i => i.id === t.inventoryId);
-                if (item) {
-                    cost = Number(item.purchasePrice || 0);
-                    productName = item.name;
+            // Profit Calculation (Only for USD-based transactions/sales)
+            if (!isPKR) {
+                let cost = Number(t.cost || 0);
+                let productName = t.description || 'Adjustment';
+
+                // Fallback for legacy data (single sales only)
+                if (cost === 0 && t.inventoryId && t.inventoryId !== 'bulk') {
+                    const item = inventoryList.find(i => i.id === t.inventoryId);
+                    if (item) {
+                        cost = Number(item.purchasePrice || 0);
+                        productName = item.name;
+                    }
+                }
+                const profit = amount - cost;
+                newStats.profit += profit;
+
+                // Monthly breakdown
+                if (!newStats.monthlyProfit[monthKey]) newStats.monthlyProfit[monthKey] = 0;
+                newStats.monthlyProfit[monthKey] += profit;
+
+                // Product breakdown
+                if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
+                newStats.productProfit[productName] += profit;
+
+                // Product Volume (Only count actual items sold)
+                if (t.type === 'sale') {
+                    if (!newStats.productVolume[productName]) newStats.productVolume[productName] = 0;
+                    newStats.productVolume[productName] += Number(t.quantity || 1);
                 }
             }
-            const profit = amount - cost;
-            newStats.profit += profit;
 
-            // Monthly breakdown
-            if (!newStats.monthlyProfit[monthKey]) newStats.monthlyProfit[monthKey] = 0;
-            newStats.monthlyProfit[monthKey] += profit;
-
-            // Product breakdown
-            if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
-            newStats.productProfit[productName] += profit;
-
-            // Product Volume
-            if (!newStats.productVolume[productName]) newStats.productVolume[productName] = 0;
-            newStats.productVolume[productName] += 1;
-
-            // Department Stats
-            const staff = staffList.find(e => e.name === t.processedBy);
-            const dept = staff ? staff.department : (t.processedBy === 'Admin' ? 'Admin' : 'Unknown');
-
-            if (!newStats.deptBreakdown[dept]) newStats.deptBreakdown[dept] = 0;
-            newStats.deptBreakdown[dept] += amount;
+            // Department Stats (USD-based performance)
+            if (!isPKR) {
+                const staff = staffList.find(e => e.name === t.processedBy);
+                const dept = staff ? staff.department : (t.processedBy === 'Admin' ? 'Admin' : 'Unknown');
+                if (!newStats.deptBreakdown[dept]) newStats.deptBreakdown[dept] = 0;
+                newStats.deptBreakdown[dept] += amount;
+            }
         });
 
         if (newStats.total > 0) newStats.margin = (newStats.profit / newStats.total) * 100;

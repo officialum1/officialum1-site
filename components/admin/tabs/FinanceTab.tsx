@@ -48,11 +48,11 @@ export default function FinanceTab({
                     <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
                         <span style={{ color: '#ccc' }}>Meezan Bank</span>
-                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'Meezan').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
+                        <span style={{ fontWeight: 'bold' }}>₨ {(stats.wallets?.meezan || 0).toLocaleString()}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: '#ccc' }}>UBL / Other</span>
-                        <span style={{ fontWeight: 'bold' }}>₨ {balanceHistory.filter((t: any) => t.platform === 'UBL').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toLocaleString()}</span>
+                        <span style={{ fontWeight: 'bold' }}>₨ {(stats.wallets?.ubl || 0).toLocaleString()}</span>
                     </div>
                 </div>
 
@@ -61,11 +61,11 @@ export default function FinanceTab({
                     <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
                         <span style={{ color: '#ccc' }}>Z2U</span>
-                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => t.platform === 'Z2U').reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
+                        <span style={{ fontWeight: 'bold' }}>$ {(stats.wallets?.z2u || 0).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
-                        <span style={{ fontWeight: 'bold' }}>$ {balanceHistory.filter((t: any) => ['PlayerUp', 'G2G'].includes(t.platform)).reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0).toFixed(2)}</span>
+                        <span style={{ fontWeight: 'bold' }}>$ {(stats.wallets?.g2g || 0).toFixed(2)}</span>
                     </div>
                 </div>
             </div>
