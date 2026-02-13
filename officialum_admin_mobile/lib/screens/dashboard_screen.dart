@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../providers/main_provider.dart';
 import '../providers/auth_provider.dart';
 import 'record_sale_screen.dart';
@@ -50,14 +51,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            _buildStatCard(
-              title: 'TOTAL REVENUE',
-              value: '\$${stats?['totalRevenue'] is num ? (stats?['totalRevenue'] as num).toStringAsFixed(2) : stats?['totalRevenue']?.toString() ?? '0.00'}',
-              icon: Icons.payments,
-              color: Colors.white,
-            ),
-            const SizedBox(height: 16),
-            _buildStatCard(
+            if (stats == null && !context.watch<MainProvider>().isLoadingStats)
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.2)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.redAccent),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Unable to connect to OfficialUM1 API. Please check your connection or login again.',
+                        style: TextStyle(color: Colors.redAccent, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+                _buildStatCard(
+                  title: 'TOTAL REVENUE',
+                  value: '\$${stats?['totalRevenue'] is num ? (stats?['totalRevenue'] as num).toStringAsFixed(2) : stats?['totalRevenue']?.toString() ?? '0.00'}',
+                  icon: Icons.payments,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 10),
+                if (stats?['timestamp'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10, bottom: 16),
+                    child: Text(
+                      'LAST SYNC: ${DateFormat('HH:mm:ss').format(DateTime.parse(stats!['timestamp']))}',
+                      style: const TextStyle(color: Colors.white12, fontSize: 9, letterSpacing: 1),
+                    ),
+                  ),
+                const SizedBox(height: 6),
+                _buildStatCard(
               title: 'NET PROFIT 🛡️',
               value: '\$${stats?['totalProfit'] is num ? (stats?['totalProfit'] as num).toStringAsFixed(2) : stats?['totalProfit']?.toString() ?? '0.00'}',
               icon: Icons.shield,

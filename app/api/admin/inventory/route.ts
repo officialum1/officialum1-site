@@ -10,8 +10,13 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const role = searchParams.get('role');
+    const action = searchParams.get('action');
 
     try {
+        if (action === 'get_tickets') {
+            const tickets = await query("SELECT * FROM tickets ORDER BY created_at DESC");
+            return ApiResponse.success(tickets);
+        }
         if (type === 'balance') {
             let transactions: any[] = [];
             const email = searchParams.get('email');
@@ -680,6 +685,12 @@ export async function POST(request: Request) {
 
                 return ApiResponse.success({ success: true });
             });
+        }
+
+        if (action === 'resolve_ticket') {
+            const { id, resolution } = body;
+            await query("UPDATE tickets SET status = ? WHERE id = ?", [resolution, id]);
+            return ApiResponse.success({ success: true });
         }
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

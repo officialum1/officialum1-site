@@ -4,6 +4,8 @@ import '../providers/main_provider.dart';
 import 'main_navigation_container.dart';
 import '../models/app_models.dart';
 
+import '../widgets/add_edit_stock_dialog.dart';
+
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
@@ -42,7 +44,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
             icon: const Icon(Icons.refresh),
           ),
           IconButton(
-            onPressed: () {}, // Add product placeholder
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => const AddEditStockDialog(),
+              );
+            },
             icon: const Icon(Icons.add_circle, color: Color(0xFF00FF88)),
           ),
         ],

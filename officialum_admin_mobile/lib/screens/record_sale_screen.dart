@@ -18,17 +18,23 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
   String? _selectedInventoryId;
   String _productName = '';
   String _quantity = '1';
-  String _salePrice = '';
-  String _description = '';
   bool _isSubmitting = false;
 
-  final List<String> _platforms = ['Z2U', 'G2G', 'Direct', 'PlayerUp', 'Reddit', 'Other'];
+  final List<String> _platforms = ['Z2U', 'G2G', 'Direct', 'PlayerUp', 'Binance', 'RedotPay', 'Skrill', 'Reddit', 'Other'];
+  String? _paymentReceived;
+
+  final Map<String, List<String>> _bankOptions = {
+    'Direct': ['Meezan', 'UBL', 'EasyPaisa', 'JazzCash', 'RedotPay', 'Binance', 'Skrill', 'Cash'],
+  };
+
+  final _priceController = TextEditingController();
+  final _descController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MainProvider>().fetchProducts();
+      context.read<MainProvider>().fetchInventory();
     });
   }
 
@@ -40,12 +46,13 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
 
     final response = await context.read<MainProvider>().recordSale({
       'mode': _mode,
-      'platform': _platform,
+      'platform': _platform == 'Direct' && _paymentReceived != null ? _paymentReceived : _platform,
+      'paymentReceived': _paymentReceived,
       'inventoryId': _mode == 'single' ? _selectedInventoryId : null,
       'productName': _mode == 'bulk' ? _productName : null,
       'quantity': _quantity,
-      'salePrice': _salePrice,
-      'description': _description,
+      'salePrice': _priceController.text,
+      'description': _descController.text,
       'staffName': 'Admin',
     });
 
@@ -68,11 +75,11 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF111111),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Column(
+        title: Column(
           children: [
-             Icon(Icons.check_circle, color: Color(0xFF00FF88), size: 50),
-             SizedBox(height: 10),
-             Text('SALE RECORDED', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1)),
+             const Icon(Icons.check_circle, color: Color(0xFF00FF88), size: 50),
+             const SizedBox(height: 10),
+             const Text('SALE RECORDED', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ],
         ),
         content: Column(
@@ -117,7 +124,7 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final products = context.watch<MainProvider>().products.where((p) => p.stock > 0).toList();
+    final inventory = context.watch<MainProvider>().inventory.where((i) => i.status == 'In Stock').toList();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -125,6 +132,7 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
         title: const Text('RECORD NEW SALE', style: TextStyle(fontSize: 14, letterSpacing: 2, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -153,6 +161,19 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
                 onChanged: (v) => setState(() => _platform = v!),
               ),
               const SizedBox(height: 20),
+              
+              if (_platform == 'Direct') ...[
+                _buildLabel('PAYMENT RECEIVED TO'),
+                DropdownButtonFormField<String>(
+                  value: _paymentReceived,
+                  dropdownColor: const Color(0xFF1A1A1A),
+                  decoration: _inputDecoration('Select Bank/Wallet...'),
+                  items: _bankOptions['Direct']!.map((p) => DropdownMenuItem(value: p, child: Text(p, style: const TextStyle(color: Colors.white)))).toList(),
+                  onChanged: (v) => setState(() => _paymentReceived = v),
+                  validator: (v) => _platform == 'Direct' && v == null ? 'Required' : null,
+                ),
+                const SizedBox(height: 20),
+              ],
 
               if (_mode == 'single') ...[
                 _buildLabel('SELECT ITEM FROM STOCK'),
@@ -160,20 +181,31 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
                   value: _selectedInventoryId,
                   dropdownColor: const Color(0xFF1A1A1A),
                   decoration: _inputDecoration('Select an item...'),
-                  items: products.map((p) => DropdownMenuItem(
-                    value: p.id, 
-                    child: Text('${p.name} ($p.platform)', style: const TextStyle(color: Colors.white, fontSize: 12))
+                  items: inventory.map((i) => DropdownMenuItem(
+                    value: i.id, 
+                    child: Text('${i.name} (ID: ${i.id.length > 4 ? i.id.substring(i.id.length - 4) : i.id})', style: const TextStyle(color: Colors.white, fontSize: 12))
                   )).toList(),
-                  onChanged: (v) => setState(() => _selectedInventoryId = v),
-                  validator: (v) => v == null ? 'Please select an item' : null,
+                  onChanged: (v) {
+                    final item = inventory.firstWhere((i) => i.id == v);
+                    setState(() {
+                      _selectedInventoryId = v;
+                      _descController.text = item.name;
+                      _platform = item.platform;
+                      _priceController.text = item.purchasePrice.toString();
+                    });
+                  },
+                  validator: (v) => _mode == 'single' && v == null ? 'Please select an item' : null,
                 ),
               ] else ...[
                 _buildLabel('PRODUCT NAME'),
                 TextFormField(
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration('e.g. Netflix Premium'),
-                  onSaved: (v) => _productName = v ?? '',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  onChanged: (v) {
+                    _productName = v;
+                    _descController.text = 'Bulk: $_quantity x $v';
+                  },
+                  validator: (v) => _mode == 'bulk' && v!.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 20),
                 _buildLabel('QUANTITY'),
@@ -182,28 +214,31 @@ class _RecordSaleScreenState extends State<RecordSaleScreen> {
                   keyboardType: TextInputType.number,
                   decoration: _inputDecoration('1'),
                   initialValue: '1',
-                  onSaved: (v) => _quantity = v ?? '1',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  onChanged: (v) {
+                    _quantity = v;
+                    _descController.text = 'Bulk: $v x $_productName';
+                  },
+                  validator: (v) => _mode == 'bulk' && v!.isEmpty ? 'Required' : null,
                 ),
               ],
 
               const SizedBox(height: 20),
               _buildLabel('SALE PRICE (USD)'),
               TextFormField(
+                controller: _priceController,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.number,
                 decoration: _inputDecoration('0.00'),
-                onSaved: (v) => _salePrice = v ?? '',
                 validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
 
               const SizedBox(height: 20),
               _buildLabel('DESCRIPTION / NOTES'),
               TextFormField(
+                controller: _descController,
                 style: const TextStyle(color: Colors.white),
                 maxLines: 3,
                 decoration: _inputDecoration('Details for history...'),
-                onSaved: (v) => _description = v ?? '',
               ),
 
               const SizedBox(height: 40),

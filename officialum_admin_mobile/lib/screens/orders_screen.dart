@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../providers/main_provider.dart';
 import 'main_navigation_container.dart';
 import '../models/app_models.dart';
+import '../widgets/web_fulfillment_dialog.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -124,10 +125,28 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 order.date != '' ? DateFormat('MMM dd, HH:mm').format(DateTime.parse(order.date)) : 'Recently',
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
               ),
-              Text(
-                '\$${order.amount.toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-              ),
+              if (order.status.toLowerCase() == 'pending' || order.status.toLowerCase() == 'paid')
+                ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => WebFulfillmentDialog(orderId: order.id),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00FF88),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    minimumSize: const Size(0, 0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('SHIP NOW', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                )
+              else
+                Text(
+                  '\$${order.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+                ),
             ],
           ),
         ],

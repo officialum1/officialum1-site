@@ -708,5 +708,33 @@ export async function initDB(force = false) {
         )
     `);
 
+    // 22. G2G Integration Tables
+    await query(`
+        CREATE TABLE IF NOT EXISTS g2g_orders (
+            order_id VARCHAR(100) PRIMARY KEY,
+            product_name VARCHAR(255),
+            amount DECIMAL(10,2) DEFAULT 0.00,
+            profit DECIMAL(10,2) DEFAULT 0.00,
+            status VARCHAR(50) DEFAULT 'Paid',
+            raw_payload LONGTEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    `);
+
+    await query(`
+        CREATE TABLE IF NOT EXISTS g2g_offers (
+            offer_id VARCHAR(100) PRIMARY KEY,
+            product_id VARCHAR(50),
+            product_name VARCHAR(255),
+            unit_price DECIMAL(10,2) DEFAULT 0.00,
+            currency VARCHAR(10) DEFAULT 'USD',
+            api_qty INT DEFAULT 0,
+            auto_sync BOOLEAN DEFAULT TRUE,
+            last_checked TIMESTAMP NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    `);
+
     isInitialized = true;
 }
