@@ -321,7 +321,13 @@ export default function StockTab({
                     <div className="glass" style={{ padding: '2rem', marginBottom: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.2)', marginTop: '2rem' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>Add Inventory Stock</h3>
                         <form onSubmit={handleAddInventory} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                            <div><label>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}><option value="Z2U">Z2U</option><option value="PlayerUp">PlayerUp</option><option value="G2G">G2G</option><option value="Direct">Direct Sale</option></select></div>
+                            <div><label>Platform</label><select className="input-field" value={newItem.platform} onChange={e => setNewItem({ ...newItem, platform: e.target.value })} style={{ width: '100%', background: '#111', color: '#fff' }}>                                    <option value="Z2U">Z2U</option>
+                                <option value="PlayerUp">PlayerUp</option>
+                                <option value="G2G">G2G</option>
+                                <option value="Direct">Direct Sale</option>
+                                <option value="Binance">Binance</option>
+                                <option value="RedotPay">RedotPay</option>
+                                <option value="Skrill">Skrill</option></select></div>
                             <div><label>Item Name</label><input type="text" className="input-field" required value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} placeholder="Product Title" style={{ width: '100%' }} /></div>
                             <div><label>Inventory Tag</label><input type="text" className="input-field" value={newItem.tag || ''} onChange={e => setNewItem({ ...newItem, tag: e.target.value })} placeholder="#tag" style={{ width: '100%' }} /></div>
                             <div><label>Purchase Price</label><input type="number" required className="input-field" value={newItem.purchasePrice} onChange={e => setNewItem({ ...newItem, purchasePrice: e.target.value })} style={{ width: '100%' }} /></div>
@@ -377,6 +383,9 @@ export default function StockTab({
                                     <option value="PlayerUp">PlayerUp</option>
                                     <option value="G2G">G2G</option>
                                     <option value="Direct">Direct Sale</option>
+                                    <option value="Binance">Binance</option>
+                                    <option value="RedotPay">RedotPay</option>
+                                    <option value="Skrill">Skrill</option>
                                 </select>
                             </div>
                             <div>
@@ -469,6 +478,9 @@ export default function StockTab({
                                     <option value="PlayerUp">PlayerUp</option>
                                     <option value="G2G">G2G</option>
                                     <option value="Direct">Direct Sale</option>
+                                    <option value="Binance">Binance</option>
+                                    <option value="RedotPay">RedotPay</option>
+                                    <option value="Skrill">Skrill</option>
                                 </select>
                             </div>
                             <div>

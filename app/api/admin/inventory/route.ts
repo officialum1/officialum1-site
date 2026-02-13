@@ -162,6 +162,8 @@ export async function POST(request: Request) {
         }
 
         if (action === 'record_sale') {
+            // Migration: Ensure currency exists
+            try { await query("ALTER TABLE transactions ADD COLUMN currency VARCHAR(10) DEFAULT 'USD'"); } catch (e) { }
             const transactionId = `trans_${Date.now()}`;
             let deliveryData = null;
             let soldInventoryIds: string[] = [];
@@ -277,6 +279,7 @@ export async function POST(request: Request) {
                 type: 'sale',
                 platform: body.platform,
                 amount: Number(body.salePrice),
+                currency: body.currency || 'USD',
                 description: body.description || (body.mode === 'bulk' ? `Bulk Sale: ${body.quantity}x ${body.productName}` : 'Direct Sale'),
                 processedBy: body.staffName || 'Admin',
                 inventoryId: soldInventoryIds.length === 1 ? soldInventoryIds[0] : 'bulk',
@@ -284,8 +287,8 @@ export async function POST(request: Request) {
             };
 
             await query(
-                "INSERT INTO transactions (id, type, platform, amount, description, processedBy, inventoryId, cost, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [newTransaction.id, newTransaction.type, newTransaction.platform, newTransaction.amount, newTransaction.description, newTransaction.processedBy, newTransaction.inventoryId, totalCost, newTransaction.quantity]
+                "INSERT INTO transactions (id, type, platform, amount, currency, description, processedBy, inventoryId, cost, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [newTransaction.id, newTransaction.type, newTransaction.platform, newTransaction.amount, newTransaction.currency, newTransaction.description, newTransaction.processedBy, newTransaction.inventoryId, totalCost, newTransaction.quantity]
             );
 
             // Log

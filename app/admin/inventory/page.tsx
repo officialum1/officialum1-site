@@ -115,7 +115,7 @@ function AdminDashboard() {
     }>({ name: '', platform: 'Z2U', purchasePrice: '' });
     const [showAddPost, setShowAddPost] = useState(false);
     const [newPost, setNewPost] = useState<{ content: string; platforms: string[] }>({ content: '', platforms: ['All'] });
-    const [newSale, setNewSale] = useState({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
+    const [newSale, setNewSale] = useState({ description: '', platform: 'Z2U', paymentReceived: '', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
     const [sellMode, setSellMode] = useState<'single' | 'bulk'>('single');
     const [deliveryLink, setDeliveryLink] = useState('');
     const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -588,7 +588,7 @@ function AdminDashboard() {
             z2u: 0, playerup: 0, direct: 0, g2g: 0, total: 0, profit: 0, margin: 0,
             stockValue: 0, deptBreakdown: {} as any,
             monthlyProfit: {} as any, productProfit: {} as any, productVolume: {} as any,
-            wallets: { z2u: 0, g2g: 0, meezan: 0, ubl: 0 } as any
+            wallets: { z2u: 0, g2g: 0, meezan: 0, ubl: 0, binance: 0, redotpay: 0, skrill: 0 } as any
         };
 
         // Calculate Stock Assets
@@ -604,59 +604,69 @@ function AdminDashboard() {
             const amount = Number(t.amount);
             const date = t.date ? new Date(t.date) : new Date();
             const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const type = t.type || 'sale';
 
-            // Platform Stats (Separate by Currency)
-            const isPKR = t.currency === 'PKR' || ['Meezan', 'UBL'].includes(t.platform);
-
-            if (!isPKR) {
-                if (t.platform === 'Z2U') newStats.z2u += amount;
-                else if (t.platform === 'PlayerUp') newStats.playerup += amount;
-                else if (t.platform === 'Direct') newStats.direct += amount;
-                else if (t.platform === 'G2G') newStats.g2g += amount;
-                newStats.total += amount;
-            }
+            // Platform Stats (Separate by Currency or Account Type)
+            // Fix: Identify PKR specifically by currency or known PKR accounts
+            const isPKR = t.currency === 'PKR' || (t.currency !== 'USD' && ['Meezan', 'UBL', 'EasyPaisa', 'JazzCash'].includes(t.platform));
 
             // Wallets Breakdown (Keeps native currency)
-            if (!newStats.wallets) newStats.wallets = { z2u: 0, g2g: 0, meezan: 0, ubl: 0 };
+            if (!newStats.wallets) newStats.wallets = { z2u: 0, g2g: 0, meezan: 0, ubl: 0, binance: 0, redotpay: 0, skrill: 0 };
 
             if (t.platform === 'Z2U') newStats.wallets.z2u += amount;
             else if (['G2G', 'PlayerUp'].includes(t.platform)) newStats.wallets.g2g += amount;
             else if (t.platform === 'Meezan') newStats.wallets.meezan += amount;
-            else if (t.platform === 'UBL' || t.platform === 'Direct') newStats.wallets.ubl += amount;
+            else if (['UBL', 'EasyPaisa', 'JazzCash'].includes(t.platform)) newStats.wallets.ubl += amount;
+            else if (t.platform === 'Binance') newStats.wallets.binance += amount;
+            else if (t.platform === 'RedotPay') newStats.wallets.redotpay += amount;
+            else if (t.platform === 'Skrill') newStats.wallets.skrill += amount;
 
-            // Profit Calculation (Only for USD-based transactions/sales)
-            if (!isPKR) {
-                let cost = Number(t.cost || 0);
-                let productName = t.description || 'Adjustment';
-
-                // Fallback for legacy data (single sales only)
-                if (cost === 0 && t.inventoryId && t.inventoryId !== 'bulk') {
-                    const item = inventoryList.find(i => i.id === t.inventoryId);
-                    if (item) {
-                        cost = Number(item.purchasePrice || 0);
-                        productName = item.name;
+            // Only count actual Sales for Revenue and Profit calculation
+            if (type === 'sale') {
+                if (!isPKR) {
+                    if (t.platform === 'Z2U') newStats.z2u += amount;
+                    else if (t.platform === 'PlayerUp') newStats.playerup += amount;
+                    else if (t.platform === 'G2G') newStats.g2g += amount;
+                    else if (['Binance', 'RedotPay', 'Skrill'].includes(t.platform)) {
+                        // These are platforms now
+                        if (!newStats.deptBreakdown['ThirdParty']) newStats.deptBreakdown['ThirdParty'] = 0;
                     }
-                }
-                const profit = amount - cost;
-                newStats.profit += profit;
+                    else newStats.direct += amount; // Fallback for direct sales to banks
 
-                // Monthly breakdown
-                if (!newStats.monthlyProfit[monthKey]) newStats.monthlyProfit[monthKey] = 0;
-                newStats.monthlyProfit[monthKey] += profit;
+                    newStats.total += amount;
 
-                // Product breakdown
-                if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
-                newStats.productProfit[productName] += profit;
+                    // Profit Calculation (Sale Price - Cost)
+                    let cost = Number(t.cost || 0);
+                    let productName = t.description || 'Unknown Product';
 
-                // Product Volume (Only count actual items sold)
-                if (t.type === 'sale') {
+                    // Fallback for legacy data/missing cost (search in inventory)
+                    if (cost === 0 && t.inventoryId && t.inventoryId !== 'bulk') {
+                        const item = inventoryList.find(i => i.id === t.inventoryId);
+                        if (item) {
+                            cost = Number(item.purchasePrice || 0);
+                            productName = item.name;
+                        }
+                    }
+
+                    const profitLine = amount - cost;
+                    newStats.profit += profitLine;
+
+                    // Monthly breakdown
+                    if (!newStats.monthlyProfit[monthKey]) newStats.monthlyProfit[monthKey] = 0;
+                    newStats.monthlyProfit[monthKey] += profitLine;
+
+                    // Product breakdown
+                    if (!newStats.productProfit[productName]) newStats.productProfit[productName] = 0;
+                    newStats.productProfit[productName] += profitLine;
+
+                    // Product Volume
                     if (!newStats.productVolume[productName]) newStats.productVolume[productName] = 0;
                     newStats.productVolume[productName] += Number(t.quantity || 1);
                 }
             }
 
             // Department Stats (USD-based performance)
-            if (!isPKR) {
+            if (!isPKR && type === 'sale') {
                 const staff = staffList.find(e => e.name === t.processedBy);
                 const dept = staff ? staff.department : (t.processedBy === 'Admin' ? 'Admin' : 'Unknown');
                 if (!newStats.deptBreakdown[dept]) newStats.deptBreakdown[dept] = 0;
@@ -1466,12 +1476,17 @@ function AdminDashboard() {
 
     const handleRecordSale = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Use the bank/wallet name as the platform for Direct sales to update correct wallet
+        const finalPlatform = (newSale.platform === 'Direct' && newSale.paymentReceived) ? newSale.paymentReceived : newSale.platform;
+
         await fetch('/api/admin/inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'record_sale',
                 ...newSale,
+                platform: finalPlatform, // Use the specific wallet
                 staffName: currentUser?.name || currentUser?.email || 'Admin',
                 mode: sellMode, // 'single' or 'bulk'
                 quantity: newSale.quantity, // For bulk
@@ -1479,7 +1494,7 @@ function AdminDashboard() {
             })
         });
         modernAlert("Sale recorded successfully!");
-        setNewSale({ description: '', platform: 'Z2U', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
+        setNewSale({ description: '', platform: 'Z2U', paymentReceived: '', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
         fetchData();
     };
 

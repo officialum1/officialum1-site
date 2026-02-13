@@ -46,12 +46,12 @@ export default function FinanceTab({
                 {/* PKR Wallet */}
                 <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,255,136,0.2)' }}>
                     <h3 style={{ color: '#00ff88', marginBottom: '1rem' }}>🇵🇰 PKR Wallets</h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
                         <span style={{ color: '#ccc' }}>Meezan Bank</span>
                         <span style={{ fontWeight: 'bold' }}>₨ {(stats.wallets?.meezan || 0).toLocaleString()}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#ccc' }}>UBL / Other</span>
+                        <span style={{ color: '#ccc' }}>UBL / EasyPaisa / JazzCash</span>
                         <span style={{ fontWeight: 'bold' }}>₨ {(stats.wallets?.ubl || 0).toLocaleString()}</span>
                     </div>
                 </div>
@@ -59,13 +59,23 @@ export default function FinanceTab({
                 {/* USD Wallet */}
                 <div className="glass" style={{ padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(0,100,255,0.2)' }}>
                     <h3 style={{ color: '#4dacff', marginBottom: '1rem' }}>🇺🇸 USD Accounts</h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>
-                        <span style={{ color: '#ccc' }}>Z2U</span>
-                        <span style={{ fontWeight: 'bold' }}>$ {(stats.wallets?.z2u || 0).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: '#ccc' }}>PlayerUp / G2G</span>
-                        <span style={{ fontWeight: 'bold' }}>$ {(stats.wallets?.g2g || 0).toFixed(2)}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#666' }}>Z2U / Marketplace</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>$ {(stats.wallets?.z2u || 0).toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#666' }}>G2G / PlayerUp</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>$ {(stats.wallets?.g2g || 0).toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#666' }}>Binance (USDT)</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#f3ba2f' }}>$ {(stats.wallets?.binance || 0).toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#666' }}>RedotPay / Skrill</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#ff0000' }}>$ {((stats.wallets?.redotpay || 0) + (stats.wallets?.skrill || 0)).toFixed(2)}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -237,15 +247,18 @@ export default function FinanceTab({
                                 <label style={{ display: 'block', marginBottom: '0.8rem', color: '#ccc', fontSize: '0.9rem', fontWeight: '500' }}>Platform / Bank Account</label>
                                 <select className="input-field" value={fundForm.platform} onChange={e => {
                                     const p = e.target.value;
-                                    const c = (p === 'Meezan' || p === 'UBL') ? 'PKR' : 'USD';
+                                    const c = ['Meezan', 'UBL', 'EasyPaisa', 'JazzCash'].includes(p) ? 'PKR' : 'USD';
                                     setFundForm({ ...fundForm, platform: p, currency: c });
                                 }} style={{ width: '100%', height: '54px', borderRadius: '14px', background: '#0a0a0a', border: '1px solid #333', color: '#fff', padding: '0 1rem' }}>
                                     <option value="Meezan">Meezan Bank 🇵🇰</option>
                                     <option value="UBL">UBL (United Bank Limited) 🇵🇰</option>
+                                    <option value="EasyPaisa">EasyPaisa / JazzCash 📱</option>
                                     <option value="Z2U">Z2U Marketplace 🇺🇸</option>
                                     <option value="PlayerUp">PlayerUp 🇺🇸</option>
                                     <option value="G2G">G2G Marketplace 🇺🇸</option>
+                                    <option value="Binance">Binance (USDT) 💎</option>
                                     <option value="RedotPay">RedotPay Card 💳</option>
+                                    <option value="Skrill">Skrill Wallet 🟣</option>
                                     <option value="Direct">Cash / Manual Other 💰</option>
                                 </select>
                             </div>

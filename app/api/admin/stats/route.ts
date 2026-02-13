@@ -13,7 +13,8 @@ export async function GET(request: Request) {
                 COALESCE(SUM(amount - cost), 0) as totalProfit,
                 COUNT(*) as totalOrders
             FROM transactions
-            WHERE platform NOT IN ('Meezan', 'UBL')
+            WHERE type = 'sale'
+            AND currency = 'USD'
         `);
 
         // Also include Website Orders (from 'orders' table) if not already in transactions

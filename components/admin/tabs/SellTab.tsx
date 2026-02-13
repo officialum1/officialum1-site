@@ -124,13 +124,45 @@ export default function SellTab({
 
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
                         <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Description / Order ID</label><input placeholder="Description" value={newSale.description} onChange={e => setNewSale({ ...newSale, description: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
-                        <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>
-                            <select value={newSale.platform} onChange={e => setNewSale({ ...newSale, platform: e.target.value })} className="input-field" style={{ width: '100%' }}>
+                        <div>
+                            <label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Platform</label>
+                            <select
+                                value={newSale.platform}
+                                onChange={e => setNewSale({ ...newSale, platform: e.target.value })}
+                                className="input-field"
+                                style={{ width: '100%' }}
+                            >
                                 <option value="Z2U">Z2U</option>
                                 <option value="PlayerUp">PlayerUp</option>
                                 <option value="G2G">G2G</option>
                                 <option value="Direct">Direct</option>
-                            </select></div>
+                                <option value="Binance">Binance</option>
+                                <option value="RedotPay">RedotPay</option>
+                                <option value="Skrill">Skrill</option>
+                            </select>
+                        </div>
+                        {newSale.platform === 'Direct' && (
+                            <div>
+                                <label style={{ color: '#00ff88', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>💰 Payment Received To</label>
+                                <select
+                                    value={newSale.paymentReceived}
+                                    onChange={e => setNewSale({ ...newSale, paymentReceived: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', borderColor: '#00ff88' }}
+                                    required={newSale.platform === 'Direct'}
+                                >
+                                    <option value="">-- Select Bank/Wallet --</option>
+                                    <option value="Meezan">Meezan Bank 🇵🇰 (PKR)</option>
+                                    <option value="UBL">UBL Bank 🇵🇰 (PKR)</option>
+                                    <option value="EasyPaisa">EasyPaisa 📱 (PKR)</option>
+                                    <option value="JazzCash">JazzCash 📱 (PKR)</option>
+                                    <option value="RedotPay">RedotPay 💳 (USD)</option>
+                                    <option value="Binance">Binance 💎 (USD/USDT)</option>
+                                    <option value="Skrill">Skrill 🟣 (USD)</option>
+                                    <option value="Cash">Cash / Other 💵</option>
+                                </select>
+                            </div>
+                        )}
                         <div><label style={{ color: '#888', display: 'block', marginBottom: '0.5rem' }}>Sale Price ($)</label><input type="number" placeholder="0.00" value={newSale.salePrice} onChange={e => setNewSale({ ...newSale, salePrice: e.target.value })} className="input-field" required style={{ width: '100%' }} /></div>
                     </div>
 
