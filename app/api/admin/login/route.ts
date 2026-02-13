@@ -12,10 +12,13 @@ if (!DEFAULT_ADMIN_PASSWORD) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        const email = (body.email || '').trim().toLowerCase();
+        const password = body.password;
 
         let isValid = false;
         let userRole = 'admin';
+
+        console.log(`🔍 Admin Login Attempt: "${email}"`);
 
         // 1. MASTER ADMIN CHECK (If email is 'admin' or empty)
         if (!email || email === 'admin') {
@@ -30,33 +33,32 @@ export async function POST(request: NextRequest) {
                 }
             } catch (e) { }
 
-            if (isDefault) {
-                if (storedPass && password === storedPass) isValid = true;
-            } else if (storedPass) {
-                const isMatch = await bcrypt.compare(password, storedPass).catch(() => false);
-                if (isMatch) {
+            if (storedPass) {
+                const isMatch = await bcrypt.compare(password, storedPass).catch(() => password === storedPass);
+                if (isMatch || password === storedPass) {
                     isValid = true;
-                } else if (password === storedPass) {
-                    isValid = true;
-                    const newHash = await bcrypt.hash(password, 10);
-                    await query("UPDATE settings SET setting_value = ? WHERE setting_key = 'admin_password'", [newHash]);
+                    console.log("✅ Master Admin check passed");
                 }
             }
         }
 
-        // 2. STAFF / EMPLOYEE CHECK
+        // 2. STAFF / EMPLOYEE / USER CHECK
         if (!isValid && email) {
-            const employees: any = await query("SELECT * FROM employees WHERE email = ? OR username = ?", [email, email]);
+            // Check Employees first
+            const employees: any = await query("SELECT * FROM employees WHERE LOWER(email) = ? OR LOWER(username) = ?", [email, email]);
             if (employees.length > 0) {
                 const emp = employees[0];
                 const isMatch = await bcrypt.compare(password, emp.password).catch(() => password === emp.password);
-                if (isMatch) {
+                if (isMatch || password === emp.password) {
                     isValid = true;
-                    userRole = emp.role || 'staff';
+                    userRole = emp.role || 'seller';
+                    console.log(`✅ Employee check passed: ${emp.email}`);
                 }
-            } else {
-                // 3. USER TABLE CHECK (For other admins/sellers)
-                const users: any = await query("SELECT * FROM users WHERE email = ? OR username = ?", [email, email]);
+            }
+
+            // Check Users table
+            if (!isValid) {
+                const users: any = await query("SELECT * FROM users WHERE LOWER(email) = ? OR LOWER(username) = ?", [email, email]);
                 if (users.length > 0) {
                     const user = users[0];
                     const isHashMatch = await bcrypt.compare(password, user.password).catch(() => false);
@@ -65,13 +67,14 @@ export async function POST(request: NextRequest) {
                     if ((isHashMatch || isPlainMatch) && (user.role === 'admin' || user.role === 'seller')) {
                         isValid = true;
                         userRole = user.role;
+                        console.log(`✅ User table check passed: ${user.email} (Role: ${userRole})`);
                     }
                 }
             }
         }
 
         if (isValid) {
-            console.log(`✅ Login Success: ${email || 'admin'} as ${userRole}`);
+            console.log(`🚀 Login SUCCESS: ${email || 'admin'} as ${userRole}`);
             const response = NextResponse.json({ success: true, role: userRole });
             const cookieStore = await cookies();
             cookieStore.set('admin_token', 'authenticated_session_v1', {
@@ -83,18 +86,14 @@ export async function POST(request: NextRequest) {
             return response;
         }
 
-        console.log(`❌ Login Failed: ${email || 'admin'} - No matching credentials found.`);
+        console.log(`❌ Login FAILED: ${email || 'admin'} - No matching credentials.`);
         return NextResponse.json({
             success: false,
             message: 'Invalid credentials',
-            debug: {
-                hasEmail: !!email,
-                isMasterAttempt: !email || email === 'admin',
-                stage: !isValid ? 'Verification Failed' : 'Success'
-            }
+            debug: { email, hasPass: !!password, isMaster: !email || email === 'admin' }
         }, { status: 401 });
     } catch (error: any) {
-        console.error('🔥 Login Error:', error);
+        console.error('🔥 Login Critical Error:', error);
         return NextResponse.json({ success: false, error: 'Server error', details: error.message }, { status: 500 });
     }
 }

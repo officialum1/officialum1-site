@@ -30,8 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final success = await context.read<AuthProvider>().login(
-      _emailController.text,
-      _passwordController.text,
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
     );
     
     if (!success) {
