@@ -12,69 +12,87 @@ if (!DEFAULT_ADMIN_PASSWORD) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const email = (body.email || '').trim().toLowerCase();
+        const inputEmail = (body.email || '').trim().toLowerCase();
         const password = body.password;
 
         let isValid = false;
         let userRole = 'admin';
 
-        console.log(`🔍 Admin Login Attempt: "${email}"`);
+        console.log(`🔍 Admin Login Attempt: "${inputEmail}"`);
 
-        // 1. MASTER ADMIN CHECK (If email is 'admin' or empty)
-        if (!email || email === 'admin') {
-            let storedPass = DEFAULT_ADMIN_PASSWORD;
-            let isDefault = true;
+        // 1. MASTER ADMIN & SYSTEM USER CHECK
+        if (!inputEmail || inputEmail === 'admin' || inputEmail === 'officialum1') {
+            let storedMasterPass = DEFAULT_ADMIN_PASSWORD;
 
             try {
                 const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'admin_password'");
                 if (rows.length > 0 && rows[0].setting_value) {
-                    storedPass = rows[0].setting_value;
-                    isDefault = false;
+                    storedMasterPass = rows[0].setting_value;
                 }
             } catch (e) { }
 
-            if (storedPass) {
-                const isMatch = await bcrypt.compare(password, storedPass).catch(() => password === storedPass);
-                if (isMatch || password === storedPass) {
+            if (storedMasterPass) {
+                const isMatch = await bcrypt.compare(password, storedMasterPass).catch(() => password === storedMasterPass);
+                // Simple equality check too in case of plain text migration
+                if (isMatch || password === storedMasterPass) {
                     isValid = true;
-                    console.log("✅ Master Admin check passed");
+                    console.log("✅ Master Password check passed");
                 }
             }
         }
 
-        // 2. STAFF / EMPLOYEE / USER CHECK
-        if (!isValid && email) {
-            // Check Employees first
-            const employees: any = await query("SELECT * FROM employees WHERE LOWER(email) = ? OR LOWER(username) = ?", [email, email]);
+        // 2. COMPREHENSIVE TABLE SEARCH (Employees -> Users)
+        if (!isValid && inputEmail) {
+            // Check Employees Table
+            const employees: any = await query("SELECT * FROM employees WHERE LOWER(email) = ? OR LOWER(username) = ?", [inputEmail, inputEmail]);
             if (employees.length > 0) {
-                const emp = employees[0];
-                const isMatch = await bcrypt.compare(password, emp.password).catch(() => password === emp.password);
-                if (isMatch || password === emp.password) {
-                    isValid = true;
-                    userRole = emp.role || 'seller';
-                    console.log(`✅ Employee check passed: ${emp.email}`);
+                for (const emp of employees) {
+                    const isHashMatch = await bcrypt.compare(password, emp.password).catch(() => false);
+                    const isPlainMatch = password === emp.password;
+                    if (isHashMatch || isPlainMatch) {
+                        isValid = true;
+                        userRole = emp.position === 'Admin' ? 'admin' : 'seller';
+                        console.log(`✅ Employee match: ${emp.email}`);
+                        break;
+                    }
                 }
             }
 
-            // Check Users table
+            // Check Users Table (Only for Admin/Seller roles)
             if (!isValid) {
-                const users: any = await query("SELECT * FROM users WHERE LOWER(email) = ? OR LOWER(username) = ?", [email, email]);
+                const users: any = await query("SELECT * FROM users WHERE LOWER(email) = ? OR LOWER(username) = ?", [inputEmail, inputEmail]);
                 if (users.length > 0) {
-                    const user = users[0];
-                    const isHashMatch = await bcrypt.compare(password, user.password).catch(() => false);
-                    const isPlainMatch = password === user.password;
+                    for (const user of users) {
+                        const isHashMatch = await bcrypt.compare(password, user.password).catch(() => false);
+                        const isPlainMatch = password === user.password;
+                        if ((isHashMatch || isPlainMatch) && (user.role === 'admin' || user.role === 'seller')) {
+                            isValid = true;
+                            userRole = user.role;
+                            console.log(`✅ User match: ${user.email} (Role: ${userRole})`);
+                            break;
+                        }
+                    }
+                }
+            }
 
-                    if ((isHashMatch || isPlainMatch) && (user.role === 'admin' || user.role === 'seller')) {
+            // 3. Last Resort Fallback: If input was 'admin', check the user with admin role
+            if (!isValid && inputEmail === 'admin') {
+                const admins: any = await query("SELECT * FROM users WHERE role = 'admin' LIMIT 1");
+                if (admins.length > 0) {
+                    const admin = admins[0];
+                    const isHashMatch = await bcrypt.compare(password, admin.password).catch(() => false);
+                    const isPlainMatch = password === admin.password;
+                    if (isHashMatch || isPlainMatch) {
                         isValid = true;
-                        userRole = user.role;
-                        console.log(`✅ User table check passed: ${user.email} (Role: ${userRole})`);
+                        userRole = 'admin';
+                        console.log(`✅ Admin user-table fallback match: ${admin.email}`);
                     }
                 }
             }
         }
 
         if (isValid) {
-            console.log(`🚀 Login SUCCESS: ${email || 'admin'} as ${userRole}`);
+            console.log(`🚀 Login SUCCESS: ${inputEmail || 'admin'} as ${userRole}`);
             const response = NextResponse.json({ success: true, role: userRole });
             const cookieStore = await cookies();
             cookieStore.set('admin_token', 'authenticated_session_v1', {
@@ -86,14 +104,15 @@ export async function POST(request: NextRequest) {
             return response;
         }
 
-        console.log(`❌ Login FAILED: ${email || 'admin'} - No matching credentials.`);
+        console.log(`❌ Login FAILED: ${inputEmail || 'admin'}`);
         return NextResponse.json({
             success: false,
             message: 'Invalid credentials',
-            debug: { email, hasPass: !!password, isMaster: !email || email === 'admin' }
+            debug: { email: inputEmail, hasPass: !!password }
         }, { status: 401 });
+
     } catch (error: any) {
-        console.error('🔥 Login Critical Error:', error);
+        console.error('🔥 Login Error:', error);
         return NextResponse.json({ success: false, error: 'Server error', details: error.message }, { status: 500 });
     }
 }
