@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/app_models.dart';
 import '../services/api_service.dart';
+import 'dart:async';
 
 class MainProvider with ChangeNotifier {
   final _api = ApiService();
@@ -21,8 +23,27 @@ class MainProvider with ChangeNotifier {
   List<Category> _categories = [];
   List<Lead> _leads = [];
   List<Staff> _staff = [];
+  Timer? _updateTimer;
 
   bool _isLoadingProducts = false;
+
+  MainProvider() {
+    _startPeriodicUpdates();
+  }
+
+  void _startPeriodicUpdates() {
+    _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (_stats != null) {
+        fetchStats();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateTimer?.cancel();
+    super.dispose();
+  }
   bool _isLoadingOrders = false;
   bool _isLoadingG2G = false;
   bool _isLoadingPlayerUp = false;
