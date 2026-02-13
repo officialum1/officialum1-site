@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (isValid) {
+            console.log(`✅ Login Success: ${email || 'admin'} as ${userRole}`);
             const response = NextResponse.json({ success: true, role: userRole });
             const cookieStore = await cookies();
             cookieStore.set('admin_token', 'authenticated_session_v1', {
@@ -82,9 +83,18 @@ export async function POST(request: NextRequest) {
             return response;
         }
 
-        return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
+        console.log(`❌ Login Failed: ${email || 'admin'} - No matching credentials found.`);
+        return NextResponse.json({
+            success: false,
+            message: 'Invalid credentials',
+            debug: {
+                hasEmail: !!email,
+                isMasterAttempt: !email || email === 'admin',
+                stage: !isValid ? 'Verification Failed' : 'Success'
+            }
+        }, { status: 401 });
+    } catch (error: any) {
+        console.error('🔥 Login Error:', error);
+        return NextResponse.json({ success: false, error: 'Server error', details: error.message }, { status: 500 });
     }
 }
