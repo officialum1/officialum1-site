@@ -99,6 +99,62 @@ export async function GET(request: Request) {
             if (rows.length) stockVal = Number(rows[0].val);
         } catch (e) { }
 
+        // --- PRODUCT PROFIT (STRICTLY FROM TRANSACTIONS) ---
+        let productProfit: any[] = [];
+        try {
+            productProfit = await query(`
+                SELECT 
+                    description as name, 
+                    SUM(amount - cost) as profit
+                FROM transactions 
+                WHERE type = 'sale' AND currency = 'USD'
+                GROUP BY description
+                ORDER BY profit DESC
+                LIMIT 10
+            `) as any[];
+        } catch (e) { }
+
+        // --- TOP SELLING (STRICTLY FROM TRANSACTIONS) ---
+        let productVolume: any[] = [];
+        try {
+            productVolume = await query(`
+                SELECT 
+                    description as name, 
+                    COUNT(*) as count
+                FROM transactions 
+                WHERE type = 'sale' AND currency = 'USD'
+                GROUP BY description
+                ORDER BY count DESC
+                LIMIT 10
+            `) as any[];
+        } catch (e) { }
+
+        // --- MONTHLY BREAKDOWN (LIFETIME) ---
+        let monthlyBreakdown: any[] = [];
+        try {
+            monthlyBreakdown = await query(`
+                SELECT 
+                    DATE_FORMAT(date, '%Y-%m') as month,
+                    SUM(amount - cost) as profit,
+                    SUM(amount) as revenue
+                FROM transactions 
+                WHERE type = 'sale' AND currency = 'USD'
+                GROUP BY DATE_FORMAT(date, '%Y-%m')
+                ORDER BY month DESC
+                LIMIT 12
+            `) as any[];
+        } catch (e) { }
+
+        // --- RECENT TRANSACTIONS ---
+        let recentTransactions: any[] = [];
+        try {
+            recentTransactions = await query(`
+                SELECT * FROM transactions 
+                ORDER BY date DESC 
+                LIMIT 20
+            `) as any[];
+        } catch (e) { }
+
         return NextResponse.json({
             success: true,
             totalRevenue: currentMonth.revenue,
@@ -110,6 +166,10 @@ export async function GET(request: Request) {
             lifetime: lifetime,
             stockValue: stockVal,
             wallets,
+            productProfit,
+            productVolume,
+            monthlyBreakdown,
+            recentTransactions,
             timestamp: new Date().toISOString()
         });
 
