@@ -29,15 +29,19 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
 
-    final success = await context.read<AuthProvider>().login(
+    final error = await context.read<AuthProvider>().login(
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
     
-    if (!success) {
+    if (error != null) {
       setState(() {
         _isLoading = false;
-        _error = 'Invalid Credentials';
+        _error = error;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
