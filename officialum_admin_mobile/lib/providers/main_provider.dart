@@ -26,10 +26,9 @@ class MainProvider with ChangeNotifier {
 
   Future<void> fetchStats() async {
     try {
-      final res = await _api.get('/admin/g2g?action=get_stats');
+      final res = await _api.get('/admin/stats');
       if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        _stats = data[0];
+        _stats = jsonDecode(res.body);
         notifyListeners();
       }
     } catch (e) {

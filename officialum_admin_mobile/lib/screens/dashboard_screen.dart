@@ -49,14 +49,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             _buildStatCard(
               title: 'TOTAL REVENUE',
-              value: '\$${stats?['totalRevenue']?.toString() ?? '0'}',
+              value: '\$${stats?['totalRevenue'] is num ? (stats?['totalRevenue'] as num).toStringAsFixed(2) : stats?['totalRevenue']?.toString() ?? '0.00'}',
               icon: Icons.payments,
               color: Colors.white,
             ),
             const SizedBox(height: 16),
             _buildStatCard(
               title: 'NET PROFIT 🛡️',
-              value: '\$${stats?['totalProfit']?.toString() ?? '0'}',
+              value: '\$${stats?['totalProfit'] is num ? (stats?['totalProfit'] as num).toStringAsFixed(2) : stats?['totalProfit']?.toString() ?? '0.00'}',
               icon: Icons.shield,
               color: const Color(0xFF00FF88),
               isGradient: true,
