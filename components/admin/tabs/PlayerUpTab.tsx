@@ -154,7 +154,7 @@ export default function PlayerUpTab() {
     let baseUrl = window.location.href.split('?')[0].split('/page-')[0];
     if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
     let page = 1, total = 0;
-    while(page <= 50) {
+    while(page <= 100) {
         const html = await (await fetch(page === 1 ? baseUrl : baseUrl + "/page-" + page)).text();
         const doc = new DOMParser().parseFromString(html, "text/html");
         const links = [...doc.querySelectorAll('.structItem-title a, a[href*="/threads/"]')];

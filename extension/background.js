@@ -266,7 +266,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                         let allThreads = [];
                         let pageCount = 0;
-                        const maxPages = isSingle ? 1 : 3; // Scrape up to 3 pages if not a single thread
+                        const maxPages = isSingle ? 1 : 100; // Scrape up to 100 pages if not a single thread
 
                         // 1. Wait for content function
                         const waitForContent = () => new Promise(r => {
