@@ -584,7 +584,12 @@ async function runAutoBumpEngine() {
         if (!listRes.ok) return;
         const listings = await listRes.json();
         const activeListings = (Array.isArray(listings) ? listings : (listings.listings || []))
-            .filter(l => l.status === 'Active' && (l.autoBump === 1 || l.autoBump === true));
+            .filter(l =>
+                l.status === 'Active' &&
+                (l.autoBump === 1 || l.autoBump === true) &&
+                (l.limitReached === 0 || l.limitReached === false) &&
+                (l.dailyBumpCount < 4 || !l.dailyBumpCount)
+            );
 
         const now = Date.now();
         for (const item of activeListings) {
@@ -644,22 +649,43 @@ async function performBumpAction(item, adminPass, apiBase) {
                     const results = await chrome.scripting.executeScript({
                         target: { tabId: tabId },
                         func: () => {
+                            const bodyText = document.body.innerText;
+                            // Check for the exact error message the user provided
+                            if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
+                                return "LIMIT_REACHED";
+                            }
+
                             const btn = document.querySelector('a.UpControl.UpButtonView') || document.getElementById('upButtonCountdown');
                             if (btn) {
-                                btn.click();
-                                return true;
+                                if (btn.innerText.includes("UP") || btn.id === 'upButtonCountdown') {
+                                    btn.click();
+                                    return "CLICKED";
+                                }
+                                return "ALREADY_BUMPED_TIMER";
                             }
-                            return false;
+                            return "NOT_FOUND";
                         }
                     });
 
-                    if (results && results[0] && results[0].result === true) {
-                        success = true;
-                        console.log("[OfficialUM1] Bump Clicked Successfully!");
-                        // Wait for action to register
-                        await new Promise(r => setTimeout(r, 2000));
-                    } else {
-                        console.warn("[OfficialUM1] Bump button not found on page.");
+                    if (results && results[0]) {
+                        const res = results[0].result;
+                        if (res === "CLICKED") {
+                            success = true;
+                            console.log("[OfficialUM1] Bump Clicked Successfully!");
+                            await new Promise(r => setTimeout(r, 2000));
+                        } else if (res === "LIMIT_REACHED") {
+                            console.warn("[OfficialUM1] Daily Bump Limit Reached!");
+                            // Send custom status to server
+                            await fetch(`${apiBase}/api/admin/playerup`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                body: JSON.stringify({ action: "update_bump", id: item.id, success: false, limitReached: true })
+                            });
+                            resolve(false);
+                            return;
+                        } else {
+                            console.warn("[OfficialUM1] Bump not available:", res);
+                        }
                     }
                 } catch (e) {
                     console.error("Bump Script Failed", e);

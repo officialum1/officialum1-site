@@ -178,24 +178,44 @@ export async function POST(req: NextRequest) {
             }
 
             const listings: any = await query(sql, params);
+            const today = new Date().toISOString().split('T')[0];
             let bumpCount = 0;
 
-            // We do this in a background-style loop
             for (const item of listings) {
+                // Skip if limit reached
+                if (item.limitReached || (item.dailyBumpCount >= 4 && item.lastResetDate === today)) continue;
+
                 try {
-                    // PlayerUp bumps are triggered by visiting the /up URL with a session
-                    await fetch(`${item.url.replace(/\/$/, '')}/up`, {
+                    const upUrl = `${item.url.replace(/\/$/, '')}/up`;
+                    const res = await fetch(upUrl, {
                         headers: {
                             "Cookie": cookies,
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                         }
                     });
 
-                    await query("UPDATE playerup_listings SET lastBumped = NOW() WHERE id = ?", [item.id]);
-                    bumpCount++;
+                    let limitReached = false;
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text.includes("reached todays max bumping limit") || text.includes("4 bump(s) per day")) {
+                            limitReached = true;
+                        }
+                    }
 
-                    // Tiny delay to be safe
-                    await new Promise(r => setTimeout(r, 300));
+                    if (limitReached) {
+                        await query("UPDATE playerup_listings SET limitReached = TRUE, lastBumpStatus = 'limit_reached' WHERE id = ?", [item.id]);
+                        continue;
+                    }
+
+                    // Update count and timestamp
+                    if (item.lastResetDate !== today) {
+                        await query("UPDATE playerup_listings SET lastBumped = NOW(), dailyBumpCount = 1, lastResetDate = ?, lastBumpStatus = 'success', limitReached = FALSE WHERE id = ?", [today, item.id]);
+                    } else {
+                        await query("UPDATE playerup_listings SET lastBumped = NOW(), dailyBumpCount = dailyBumpCount + 1, lastBumpStatus = 'success', limitReached = FALSE WHERE id = ?", [item.id]);
+                    }
+
+                    bumpCount++;
+                    await new Promise(r => setTimeout(r, 500));
                 } catch (e) {
                     console.error(`Failed to bump ${item.url}`, e);
                 }
@@ -279,14 +299,28 @@ export async function POST(req: NextRequest) {
 
         if (action === 'update_bump') {
             const success = body.success === true;
-            const status = success ? 'success' : 'failed';
+            const limitReached = body.limitReached === true;
+            const status = success ? 'success' : (limitReached ? 'limit_reached' : 'failed');
 
-            // 1. Update Listing
-            if (success) {
-                await query("UPDATE playerup_listings SET lastBumped = NOW(), lastBumpStatus = ? WHERE id = ?", [status, id]);
+            // 1. Fetch current listing to check reset
+            const currentRows: any = await query("SELECT dailyBumpCount, lastResetDate FROM playerup_listings WHERE id = ?", [id]);
+            const current = currentRows[0];
+            const today = new Date().toISOString().split('T')[0];
+
+            let queryStr = "";
+            const queryParams = [];
+
+            if (!current || current.lastResetDate !== today) {
+                // Reset for today
+                queryStr = "UPDATE playerup_listings SET lastBumped = IF(?, NOW(), lastBumped), lastBumpStatus = ?, dailyBumpCount = IF(?, 1, 0), lastResetDate = ?, limitReached = ? WHERE id = ?";
+                queryParams.push(success, status, success, today, limitReached, id);
             } else {
-                await query("UPDATE playerup_listings SET lastBumpStatus = ? WHERE id = ?", [status, id]);
+                // Update today's count
+                queryStr = "UPDATE playerup_listings SET lastBumped = IF(?, NOW(), lastBumped), lastBumpStatus = ?, dailyBumpCount = dailyBumpCount + IF(?, 1, 0), limitReached = ? WHERE id = ?";
+                queryParams.push(success, status, success, limitReached, id);
             }
+
+            await query(queryStr, queryParams);
 
             // 2. Fetch Title for Log
             const rows: any = await query("SELECT title, url FROM playerup_listings WHERE id = ?", [id]);
@@ -294,12 +328,17 @@ export async function POST(req: NextRequest) {
 
             // 3. Create Log Entry
             const logId = Date.now().toString();
-            const logDetail = success ? `Successfully bumped: ${title}` : `Failed to bump: ${title}`;
+            let logDetail = "";
+            if (limitReached) {
+                logDetail = `Bumping limit reached for: ${title} (4/4 bumps done)`;
+            } else {
+                logDetail = success ? `Successfully bumped: ${title}` : `Failed to bump: ${title}`;
+            }
+
             await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())",
                 [logId, 'System', 'PlayerUp Bump', logDetail]
             );
 
-            // Return early as we don't need the full list
             return NextResponse.json({ success: true });
         }
 

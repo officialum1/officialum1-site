@@ -9,8 +9,11 @@ interface Listing {
     url: string;
     platform: string;
     lastBumped: string | null;
-    lastBumpStatus?: 'pending' | 'success' | 'failed';
+    lastBumpStatus?: 'pending' | 'success' | 'failed' | 'limit_reached';
     createdAt: string;
+    dailyBumpCount: number;
+    lastResetDate: string | null;
+    limitReached: boolean;
 
     status: string;
     frequency: string;
@@ -167,7 +170,17 @@ export default function PlayerUpTab() {
     alert("Sync Finished! Total: " + total);
 })();`.trim();
 
-    const filtered = activeFilter === 'All' ? listings : listings.filter(l => l.platform === activeFilter);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filtered = listings.filter(l => {
+        const matchesFilter = activeFilter === 'All' || l.platform === activeFilter;
+        const matchesSearch = !searchQuery ||
+            l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.username.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesFilter && matchesSearch;
+    });
+
     const frequencies = ['Every 5 seconds', 'Every 15 seconds', 'Every 30 seconds', 'Every 1 minute', 'Every 2 minutes', 'Every 5 minutes', 'Every 10 minutes', 'Every 30 minutes', 'Every 1 hour', 'Every 2 hours', 'Every 6 hours', 'Every 12 hours', 'Every 24 hours'];
 
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -199,8 +212,8 @@ export default function PlayerUpTab() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 20;
 
-    // Reset page when filter changes
-    useEffect(() => { setCurrentPage(1); }, [activeFilter]);
+    // Reset page when filter or search changes
+    useEffect(() => { setCurrentPage(1); }, [activeFilter, searchQuery]);
 
     const countStart = (currentPage - 1) * itemsPerPage + 1;
     const countEnd = Math.min(currentPage * itemsPerPage, filtered.length);
@@ -284,6 +297,38 @@ export default function PlayerUpTab() {
                     <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
                         📋 Manual Import
                     </button>
+                </div>
+            </div>
+
+            {/* FILTER & SEARCH BAR */}
+            <div className="flex flex-wrap items-center gap-4 mb-8 bg-white/5 p-4 rounded-2xl border border-white/10">
+                <div className="flex-1 min-w-[300px] relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Search threads, IDs or accounts..."
+                        className="w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:border-cyan-500/50 outline-none transition-all placeholder:text-gray-600"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+                    {['All', ...Array.from(new Set(listings.map(l => l.platform)))].map(platform => (
+                        <button
+                            key={platform}
+                            onClick={() => setActiveFilter(platform)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${activeFilter === platform
+                                ? 'bg-cyan-500 text-black border-cyan-400 shadow-lg shadow-cyan-500/20'
+                                : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white'
+                                }`}
+                        >
+                            {platform !== 'All' && (
+                                <img src={getPlatformIcon(platform)} className="w-4 h-4 object-contain" alt="" />
+                            )}
+                            {platform}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -459,6 +504,7 @@ export default function PlayerUpTab() {
                             <th className="px-6 py-5">Thread / Title</th>
                             <th className="px-6 py-5 text-center">Type</th>
                             <th className="px-6 py-5">Frequency</th>
+                            <th className="px-6 py-5 text-center">Daily (4 Max)</th>
                             <th className="px-6 py-5 text-center">Last Bump</th>
                             <th className="px-6 py-5 text-right">Actions</th>
                         </tr>
@@ -523,13 +569,33 @@ export default function PlayerUpTab() {
                                         {frequencies.map(f => <option key={f} value={f}>{f}</option>)}
                                     </select>
                                 </td>
+                                <td className="px-6 py-4 text-center">
+                                    <div className="flex flex-col items-center gap-1">
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4].map(num => (
+                                                <div
+                                                    key={num}
+                                                    className={`w-2.5 h-2.5 rounded-full border ${(l.dailyBumpCount >= num)
+                                                        ? 'bg-orange-500 border-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.4)]'
+                                                        : 'bg-white/5 border-white/10'
+                                                        }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <span className={`text-[10px] font-black tracking-widest ${l.limitReached ? 'text-orange-400' : 'text-gray-500'}`}>
+                                            {l.dailyBumpCount || 0} / 4
+                                        </span>
+                                    </div>
+                                </td>
                                 <td className="px-6 py-4 text-center whitespace-nowrap">
-                                    <div className={`text-xs font-mono font-bold ${l.lastBumpStatus === 'failed' ? 'text-red-400' : 'text-emerald-400'}`}>
+                                    <div className={`text-xs font-mono font-bold ${l.lastBumpStatus === 'failed' ? 'text-red-400' : (l.lastBumpStatus === 'limit_reached' ? 'text-orange-400' : 'text-emerald-400')}`}>
                                         {l.lastBumped ? new Date(l.lastBumped).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '[Off]'}
                                     </div>
                                     <div className="text-[10px] text-gray-500 mt-1 uppercase font-bold flex items-center justify-center gap-1.5">
                                         {l.lastBumpStatus === 'failed' ? (
                                             <span className="text-red-500/80">❌ FAILED</span>
+                                        ) : l.lastBumpStatus === 'limit_reached' ? (
+                                            <span className="text-orange-500/80">⚠️ LIMIT HIT</span>
                                         ) : (l.lastBumpStatus === 'success' || l.lastBumped) ? (
                                             <span className="text-emerald-500/80">✅ SUCCESS</span>
                                         ) : (
