@@ -622,70 +622,102 @@ async function runAutoBumpEngine() {
 
 async function performBumpAction(item, adminPass, apiBase) {
     const threadUrl = item.url;
-    // URL transformation: .../threads/slug.123/ -> .../threads/slug.123/up
-    const bumpUrl = threadUrl.replace(/\/$/, '') + '/up';
     let success = false;
     let limitReached = false;
     let errorDetail = "";
 
-    console.log(`[OfficialUM1] 👻 Ghost Bumping: ${item.title}`);
+    console.log(`[OfficialUM1] Starting Invisible Browser Bump: ${item.title}`);
 
     try {
-        // We use fetch with credentials 'include' which uses the extension's cookie permissions
-        const res = await fetch(bumpUrl, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Upgrade-Insecure-Requests': '1',
-                'Referer': threadUrl, // Crucial for some systems
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'same-origin'
-            }
+        await new Promise((resolve) => {
+            // Create a tiny, off-screen popup window to avoid the 403 error
+            // This ensures full session/security compatibility while staying invisible
+            chrome.windows.create({
+                url: threadUrl,
+                type: 'popup',
+                focused: false,
+                left: -2000,
+                top: -2000,
+                width: 400,
+                height: 400,
+                state: 'normal'
+            }, async (win) => {
+                const tabId = win.tabs[0].id;
+
+                // Wait for the page to load and the security checks to pass
+                const checkStatus = async () => {
+                    try {
+                        const results = await chrome.scripting.executeScript({
+                            target: { tabId: tabId },
+                            func: () => {
+                                const bodyText = document.body.innerText;
+                                if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
+                                    return "LIMIT_REACHED";
+                                }
+
+                                const btn = document.querySelector('a.UpControl.UpButtonView') || document.getElementById('upButtonCountdown');
+                                if (btn) {
+                                    if (btn.innerText.includes("UP") || btn.id === 'upButtonCountdown') {
+                                        btn.click();
+                                        return "SUCCESS";
+                                    }
+                                    return "WAITING_TIMER";
+                                }
+                                if (document.body.innerHTML.toLowerCase().includes('log in')) return "LOGIN_REQUIRED";
+                                return "NOT_FOUND";
+                            }
+                        });
+
+                        if (results && results[0]) {
+                            const res = results[0].result;
+                            if (res === "SUCCESS") {
+                                success = true;
+                                return true;
+                            } else if (res === "LIMIT_REACHED") {
+                                limitReached = true;
+                                return true;
+                            } else if (res === "LOGIN_REQUIRED") {
+                                errorDetail = "Login Required";
+                                return true;
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Script injection failed", e);
+                    }
+                    return false;
+                };
+
+                // Poll for up to 15 seconds
+                let attempts = 0;
+                const interval = setInterval(async () => {
+                    const done = await checkStatus();
+                    attempts++;
+                    if (done || attempts > 5) {
+                        clearInterval(interval);
+                        chrome.windows.remove(win.id);
+                        resolve();
+                    }
+                }, 3000);
+            });
         });
 
-        const text = await res.text();
-        const lowText = text.toLowerCase();
-
-        // Detect states from the HTML response
-        if (lowText.includes("reached todays max bumping limit") || lowText.includes("4 bump(s) per day")) {
-            limitReached = true;
-            console.warn(`[OfficialUM1] Limit Reached for ${item.title}`);
-        } else if (lowText.includes("thread has been bumped") || lowText.includes("success") || res.status === 200 || res.redirected) {
-            // PlayerUp usually redirects back to the thread on success OR returns 200 for the 'up' endpoint
-            success = true;
-            console.log(`[OfficialUM1] Ghost Bump Success: ${item.title} (Status: ${res.status})`);
-        } else if (lowText.includes("log in") || lowText.includes("login") || lowText.includes("sign up")) {
-            errorDetail = "LOGIN_REQUIRED";
-            console.error(`[OfficialUM1] Login Required for ${item.title}`);
-        } else if (lowText.includes("must wait") || lowText.includes("remaining")) {
-            errorDetail = "ON_TIMER";
-            console.log(`[OfficialUM1] Still on timer for ${item.title}`);
-        } else {
-            errorDetail = `ERR_${res.status}`;
-            console.warn(`[OfficialUM1] Failed with status ${res.status} for ${item.title}`);
-        }
-
     } catch (e) {
-        console.error(`[OfficialUM1] Ghost Bump Error:`, e);
+        console.error("Invisible Bump Process Failed", e);
         errorDetail = e.message;
     }
 
-    // Always update server
-    try {
-        await fetch(`${apiBase}/api/admin/playerup`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-            body: JSON.stringify({
-                action: "update_bump",
-                id: item.id,
-                success,
-                limitReached,
-                error: errorDetail
-            })
-        });
-    } catch (e) { console.error("Failed to update server logs", e); }
+    // Update Server
+    await fetch(`${apiBase}/api/admin/playerup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+        body: JSON.stringify({
+            action: "update_bump",
+            id: item.id,
+            success: success,
+            limitReached: limitReached,
+            error: errorDetail
+        })
+    });
 
     return success;
 }
