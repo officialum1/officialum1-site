@@ -797,9 +797,12 @@ async function performPostAction(data, adminPass, apiBase) {
 
                             // 4. Inject visual indicator
                             const banner = document.createElement('div');
-                            banner.innerHTML = "✨ OFFICIALUM1 TURBO POSTER: FIELDS FILLED ✨";
-                            banner.style.cssText = "position:fixed; top:0; left:0; width:100%; background:#22c55e; color:white; text-align:center; padding:15px; font-weight:bold; z-index:2147483647; font-family:sans-serif; border-bottom:3px solid #166534;";
+                            banner.innerHTML = "✨ OFFICIALUM1 REDDIT AUTOMATION: FIELDS FILLED ✨";
+                            banner.style.cssText = "position:fixed; top:0; left:0; width:100%; background:#f97316; color:white; text-align:center; padding:15px; font-weight:bold; z-index:2147483647; font-family:sans-serif; border-bottom:3px solid #c2410c; box-shadow:0 0 20px rgba(0,0,0,0.5);";
                             document.body.appendChild(banner);
+
+                            // Scroll to Title Field to ensure visibility
+                            titleField.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
                             // 5. Try Submit
                             const submitBtn = document.querySelector('button.button--primary, button[type="submit"]');
