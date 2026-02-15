@@ -657,69 +657,51 @@ async function performBumpAction(item, adminPass, apiBase) {
                         const results = await chrome.scripting.executeScript({
                             target: { tabId: tabId },
                             func: () => {
-                                const bodyText = document.body.innerText;
+                                const bodyText = document.body.innerText || "";
                                 const bodyHtml = (document.body.innerHTML || "").toLowerCase();
 
-                                if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
-                                    // 🚀 LIMIT REACHED - TRY REPLY BUMP (INFINITE BUMP)
-                                    const editor = document.querySelector('.fr-element, .js-editor, .redactor-editor');
-                                    const textArea = document.querySelector('textarea[name="message"]');
-                                    const submitBtn = document.querySelector('button.button--primary, button.js-quickReply--button, .js-submitReply');
-
-                                    if ((editor || textArea) && submitBtn) {
-                                        const msgs = [
-                                            "Still available! Premium quality. DM or visit site.",
-                                            "BUMP! Stock updated. Check OfficialUM1 Store.",
-                                            "Available for instant delivery. Contact on Telegram @OfficialUM1.",
-                                            "Premium Accounts in stock. Fast service guaranteed.",
-                                            "Daily update: Current listings active and ready!"
-                                        ];
-                                        const msg = msgs[Math.floor(Math.random() * msgs.length)];
-
-                                        if (editor) {
-                                            editor.focus(); editor.innerText = msg;
-                                            editor.dispatchEvent(new Event('input', { bubbles: true }));
-                                        } else if (textArea) {
-                                            textArea.value = msg;
-                                        }
-
-                                        setTimeout(() => submitBtn.click(), 1000);
-                                        return "REPLY_SUCCESS";
-                                    }
-                                    return "LIMIT_REACHED";
-                                }
-
-                                // 🔍 DEEP BUTTON SEARCH
-                                // (Reusing bodyText/bodyHtml declared above)
-
-                                // 1. Check for Cloudflare / Security blocks
+                                // 1. Security/Block Check
                                 if (bodyHtml.includes("checking your browser") || bodyHtml.includes("cloudflare") || bodyHtml.includes("v-check")) return "BLOCKED_SECURITY";
 
-                                // 2. Standard Selectors
-                                let btn = document.querySelector('a.UpControl.UpButtonView') ||
+                                // 2. Identify Elements
+                                const editor = document.querySelector('.fr-element, .js-editor, .redactor-editor');
+                                const textArea = document.querySelector('textarea[name="message"]');
+                                const replyBtn = document.querySelector('button.button--primary, button.js-quickReply--button, .js-submitReply');
+                                const canReply = !!(editor || textArea) && !!replyBtn;
+
+                                // 3. Mode: Direct Bump
+                                let upBtn = document.querySelector('a.UpControl.UpButtonView') ||
                                     document.getElementById('upButtonCountdown') ||
                                     document.querySelector('[id*="upButton"]') ||
                                     document.querySelector('.UpButtonView');
 
-                                // 3. Text-based Link Search (Fallback)
-                                if (!btn) {
+                                if (!upBtn) {
                                     const allLinks = Array.from(document.getElementsByTagName('a'));
-                                    btn = allLinks.find(a => a.innerText.trim().toUpperCase() === "UP");
+                                    upBtn = allLinks.find(a => a.innerText.trim().toUpperCase() === "UP");
                                 }
 
-                                if (btn) {
-                                    const txt = btn.innerText.trim().toUpperCase();
-                                    if (txt === "UP" || btn.id === 'upButtonCountdown') {
-                                        btn.click();
+                                if (upBtn) {
+                                    const txt = upBtn.innerText.trim().toUpperCase();
+                                    if (txt === "UP" || upBtn.id === 'upButtonCountdown') {
+                                        upBtn.click();
                                         return "SUCCESS";
                                     }
                                     return "WAITING_TIMER";
                                 }
 
-                                // 4. Status Checks
-                                if (bodyHtml.includes('log in') || bodyHtml.includes('sign in')) return "LOGIN_REQUIRED";
-                                if (bodyText.length < 500) return "PAGE_EMPTY"; // Page didn't load content properly
+                                // 4. Mode: Reply Bump (If limit hit OR button missing)
+                                if (canReply) {
+                                    const msgs = ["BUMP! Still available.", "Active and selling! DM for info.", "Stock updated. Fast delivery.", "Premium accounts ready.", "Trust the process. Online now."];
+                                    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                                    if (editor) { editor.focus(); editor.innerText = msg; editor.dispatchEvent(new Event('input', { bubbles: true })); }
+                                    else if (textArea) { textArea.value = msg; }
+                                    setTimeout(() => replyBtn.click(), 1000);
+                                    return "REPLY_SUCCESS";
+                                }
 
+                                // 5. Status Checks
+                                if (bodyHtml.includes('log in') || bodyHtml.includes('sign in')) return "LOGIN_REQUIRED";
+                                if (bodyText.length < 500) return "PAGE_EMPTY";
                                 return "NOT_FOUND";
                             }
                         });
@@ -740,6 +722,10 @@ async function performBumpAction(item, adminPass, apiBase) {
                             } else if (res === "WAITING_TIMER") {
                                 errorDetail = "Wait Timer Active (Cooldown)";
                                 // We don't return true because we might want to wait a few more seconds if the page is still loading
+                            } else if (res === "BLOCKED_SECURITY") {
+                                errorDetail = "Blocked by Cloudflare/Security";
+                            } else if (res === "PAGE_EMPTY") {
+                                errorDetail = "Page Loaded Empty (Slow Connection)";
                             } else if (res === "NOT_FOUND") {
                                 errorDetail = "Bump button not found on page";
                             }
