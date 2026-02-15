@@ -1,6 +1,13 @@
 import { query } from './db';
 
 export async function runCloudBump(limit: number = 0) {
+    // 🔥 MASTER SWITCH CHECK
+    const statusRows: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'playerup_bump_enabled'");
+    if (statusRows[0]?.setting_value === 'false') {
+        console.log("[Auto-Cloud] Bumping is PAUSED. Skipping.");
+        return { success: false, error: "Paused" };
+    }
+
     console.log("[Auto-Cloud] Starting Scheduled Bump...");
 
     // 1. Get Cookies

@@ -478,6 +478,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     } else {
                         const listRes = await fetch(`${apiBase}/api/admin/playerup`);
                         const data = await listRes.json();
+                        if (data.isPaused) {
+                            console.log("[OfficialUM1] Bumping is PAUSED globally. Skipping.");
+                            return;
+                        }
                         let targets = Array.isArray(data) ? data : (data.listings || []);
                         if (request.limit > 0) targets = targets.slice(0, request.limit);
 
@@ -576,8 +580,12 @@ async function runAutoBumpEngine() {
     try {
         const listRes = await fetch(`${apiBase}/api/admin/playerup`);
         if (!listRes.ok) return;
-        const listings = await listRes.json();
-        const activeListings = (Array.isArray(listings) ? listings : (listings.listings || []))
+        const data = await listRes.json();
+        if (data.isPaused) {
+            console.log("[OfficialUM1] Bumping is PAUSED. Skipping run.");
+            return;
+        }
+        const activeListings = (Array.isArray(data) ? data : (data.listings || []))
             .filter(l =>
                 l.status === 'Active' &&
                 (l.autoBump === 1 || l.autoBump === true) &&

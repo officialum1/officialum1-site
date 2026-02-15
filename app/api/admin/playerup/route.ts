@@ -40,7 +40,10 @@ export async function GET() {
     try {
         await initDB();
         const listings = await query("SELECT * FROM playerup_listings ORDER BY createdAt DESC");
-        return NextResponse.json(listings, {
+        const statusRow: any = await query("SELECT setting_value FROM settings WHERE setting_key = 'playerup_bump_enabled'");
+        const isPaused = statusRow[0]?.setting_value === 'false';
+
+        return NextResponse.json({ listings, isPaused }, {
             headers: { 'Access-Control-Allow-Origin': '*' }
         });
     } catch (e) {
@@ -59,6 +62,12 @@ export async function POST(req: NextRequest) {
         await initDB();
         const body = await req.json();
         const { action, id, listings: bulkListings, username, limit, status, frequency, autoBump } = body;
+
+        if (action === 'toggle_pause') {
+            const newState = body.pause === true ? 'false' : 'true';
+            await query("INSERT INTO settings (setting_key, setting_value) VALUES ('playerup_bump_enabled', ?) ON DUPLICATE KEY UPDATE setting_value = ?", [newState, newState]);
+            return NextResponse.json({ success: true, isPaused: body.pause === true });
+        }
 
         if (action === 'cloud_fetch') {
             // Check both variations

@@ -29,6 +29,7 @@ export default function PlayerUpTab() {
     const [activeFilter, setActiveFilter] = useState('All');
     const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
     const [showManualImport, setShowManualImport] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
 
 
     useEffect(() => {
@@ -58,8 +59,12 @@ export default function PlayerUpTab() {
         try {
             const res = await fetch('/api/admin/playerup');
             const data = await res.json();
-            if (Array.isArray(data)) setListings(data.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
-            else if (data && data.listings) setListings(data.listings.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
+            if (data && data.listings) {
+                setListings(data.listings.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
+                setIsPaused(data.isPaused === true);
+            } else if (Array.isArray(data)) {
+                setListings(data.map((l: any) => ({ ...l, autoBump: l.autoBump === 1 || l.autoBump === true })));
+            }
         } catch (e) {
             console.error(e);
         } finally {
@@ -118,6 +123,10 @@ export default function PlayerUpTab() {
 
 
     const handleCloudBump = async () => {
+        if (isPaused) {
+            modernAlert("System Paused", "You cannot bump while the system is STOPPED. Please click 'Start Bumping' first.", "error");
+            return;
+        }
         const countStr = prompt("Bump limit? (0 for ALL)", "10");
         if (countStr === null) return;
         const limit = parseInt(countStr) || 0;
@@ -139,7 +148,31 @@ export default function PlayerUpTab() {
 
     const [bumpingIds, setBumpingIds] = useState<Set<string>>(new Set());
 
+    const handleTogglePause = async () => {
+        const actionText = isPaused ? "Resume" : "Stop";
+        if (!(await modernConfirm(`${actionText} all bumping? This affects both the server and extension.`))) return;
+
+        try {
+            const res = await fetch('/api/admin/playerup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'toggle_pause', pause: !isPaused })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsPaused(!isPaused);
+                modernAlert(isPaused ? "Bumping Resumed!" : "Bumping Stopped!", `The system will now ${isPaused ? 'resume' : 'pause'} all sequences.`, "success");
+            }
+        } catch (e) {
+            modernAlert("Failed to toggle status");
+        }
+    };
+
     const handleManualBump = async (listing: Listing) => {
+        if (isPaused) {
+            modernAlert("System Paused", "You cannot bump while the system is STOPPED. Please click 'Start Bumping' first.", "error");
+            return;
+        }
         setBumpingIds(prev => new Set(prev).add(listing.id));
         window.dispatchEvent(new CustomEvent('OFFICIALUM1_SINGLE_BUMP', {
             detail: { url: listing.url, id: listing.id }
@@ -291,6 +324,12 @@ export default function PlayerUpTab() {
                 <div className="flex gap-3">
                     <button onClick={handleCloudSync} className="bg-white/5 text-white border border-white/10 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10 transition-all flex items-center gap-2">
                         <span>☁️</span> Cloud Sync
+                    </button>
+                    <button
+                        onClick={handleTogglePause}
+                        className={`${isPaused ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'} text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl transition-all flex items-center gap-2`}
+                    >
+                        {isPaused ? '▶️ Start Bumping' : '🛑 Stop Bumping'}
                     </button>
                     <button onClick={handleCloudBump} className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-orange-600/20 transition-all">
                         🔥 Bump All
