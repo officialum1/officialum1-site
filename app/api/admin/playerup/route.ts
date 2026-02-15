@@ -332,7 +332,16 @@ export async function POST(req: NextRequest) {
             if (limitReached) {
                 logDetail = `Bumping limit reached for: ${title} (4/4 bumps done)`;
             } else {
-                logDetail = success ? `Successfully bumped: ${title}` : `Failed to bump: ${title}`;
+                const error = body.error;
+                if (success) {
+                    logDetail = `Successfully bumped: ${title}`;
+                } else if (error === 'LOGIN_REQUIRED') {
+                    logDetail = `Failed: LOGIN REQUIRED for PlayerUp (Cookies expired?)`;
+                } else if (error === 'BTN_NOT_FOUND') {
+                    logDetail = `Failed: Bump button not found on page for: ${title}`;
+                } else {
+                    logDetail = `Failed to bump: ${title}`;
+                }
             }
 
             await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())",

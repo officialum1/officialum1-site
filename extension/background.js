@@ -613,8 +613,8 @@ async function runAutoBumpEngine() {
             if (now - lastBump >= intervalMs) {
                 console.log(`[OfficialUM1] Auto-Bumping: ${item.title}`);
                 await performBumpAction(item, adminPass, apiBase);
-                // Safety delay between bumps
-                await new Promise(r => setTimeout(r, 3000));
+                // Safety delay between bumps (Increased to 5s for OS window stability)
+                await new Promise(r => setTimeout(r, 5000));
             }
         }
     } catch (e) { console.error("Engine Error:", e); }
@@ -632,15 +632,17 @@ async function performBumpAction(item, adminPass, apiBase) {
                 const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                 if (!tabId) { resolve(false); return; }
 
-                // Wait for load
+                // Wait for load - Give more time for PlayerUp/Cloudflare
                 const waitForLoad = () => new Promise(r => {
                     const listener = (tid, changeInfo) => {
                         if (tid === tabId && changeInfo.status === 'complete') {
                             chrome.tabs.onUpdated.removeListener(listener);
-                            setTimeout(r, 2000);
+                            setTimeout(r, 5000); // Wait 5s for JS to settle
                         }
                     };
                     chrome.tabs.onUpdated.addListener(listener);
+                    // Absolute fallback if complete event doesn't fire
+                    setTimeout(r, 15000);
                 });
                 await waitForLoad();
 
@@ -649,8 +651,14 @@ async function performBumpAction(item, adminPass, apiBase) {
                     const results = await chrome.scripting.executeScript({
                         target: { tabId: tabId },
                         func: () => {
+                            const html = document.body.innerHTML.toLowerCase();
                             const bodyText = document.body.innerText;
-                            // Check for the exact error message the user provided
+
+                            if (html.includes('log in') || html.includes('login') || html.includes('sign up')) {
+                                return "LOGIN_REQUIRED";
+                            }
+
+                            // Rate limit detection
                             if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
                                 return "LIMIT_REACHED";
                             }
@@ -661,9 +669,9 @@ async function performBumpAction(item, adminPass, apiBase) {
                                     btn.click();
                                     return "CLICKED";
                                 }
-                                return "ALREADY_BUMPED_TIMER";
+                                return "ON_TIMER";
                             }
-                            return "NOT_FOUND";
+                            return "BTN_NOT_FOUND";
                         }
                     });
 
@@ -684,7 +692,15 @@ async function performBumpAction(item, adminPass, apiBase) {
                             resolve(false);
                             return;
                         } else {
-                            console.warn("[OfficialUM1] Bump not available:", res);
+                            console.warn("[OfficialUM1] Bump Result:", res);
+                            // Send error detail to server if not just a timer
+                            if (res !== "ON_TIMER") {
+                                await fetch(`${apiBase}/api/admin/playerup`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+                                    body: JSON.stringify({ action: "update_bump", id: item.id, success: false, error: res })
+                                });
+                            }
                         }
                     }
                 } catch (e) {
