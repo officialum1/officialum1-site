@@ -640,8 +640,8 @@ async function performBumpAction(item, adminPass, apiBase) {
                 focused: false,
                 left: -9999,
                 top: -9999,
-                width: 1,
-                height: 1
+                width: 1024,
+                height: 768
             }, async (win) => {
                 if (chrome.runtime.lastError || !win || !win.tabs || !win.tabs[0]) {
                     const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : "Window creation blocked";
