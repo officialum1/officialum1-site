@@ -9,8 +9,13 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const key = searchParams.get('key');
 
-    // Security Check: Match Admin Password
-    if (key !== process.env.ADMIN_PASSWORD && authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
+    // Security Check: Vercel Cron Secret or Admin Password
+    const isCronAuthorized =
+        (key === process.env.ADMIN_PASSWORD) ||
+        (authHeader === `Bearer ${process.env.ADMIN_PASSWORD}`) ||
+        (authHeader === `Bearer ${process.env.CRON_SECRET}`);
+
+    if (!isCronAuthorized) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

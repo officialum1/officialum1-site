@@ -1,0 +1,8 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/playerup",
+            "schedule": "0 */4 * * *"
+        }
+    ]
+}
