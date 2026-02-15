@@ -626,23 +626,23 @@ async function performBumpAction(item, adminPass, apiBase) {
     let limitReached = false;
     let errorDetail = "";
 
-    console.log(`[OfficialUM1] Starting Invisible Browser Bump: ${item.title}`);
+    console.log(`[OfficialUM1] Starting Stealth Window Bump: ${item.title}`);
 
     try {
         await new Promise((resolve) => {
-            // Create a tiny, off-screen popup window to avoid the 403 error
-            // This ensures full session/security compatibility while staying invisible
+            // Using 'minimized' state instead of off-screen coordinates to bypass boundary restrictions
             chrome.windows.create({
                 url: threadUrl,
                 type: 'popup',
                 focused: false,
-                left: -2000,
-                top: -2000,
-                width: 400,
-                height: 400,
-                state: 'normal'
+                state: 'minimized'
             }, async (win) => {
-                const tabId = win.tabs[0].id;
+                const tabId = win && win.tabs && win.tabs[0] ? win.tabs[0].id : null;
+                if (!tabId) {
+                    errorDetail = "Window/Tab creation failed";
+                    resolve();
+                    return;
+                }
 
                 // Wait for the page to load and the security checks to pass
                 const checkStatus = async () => {
@@ -687,37 +687,45 @@ async function performBumpAction(item, adminPass, apiBase) {
                     return false;
                 };
 
-                // Poll for up to 15 seconds
+                // Poll for up to 20 seconds (PlayerUp can be slow)
                 let attempts = 0;
                 const interval = setInterval(async () => {
                     const done = await checkStatus();
                     attempts++;
-                    if (done || attempts > 5) {
+                    // After 6 attempts (18s) or Success/Limit hit, close window
+                    if (done || attempts > 6) {
                         clearInterval(interval);
-                        chrome.windows.remove(win.id);
-                        resolve();
+                        // Small delay to let the click register
+                        setTimeout(() => {
+                            chrome.windows.remove(win.id, () => {
+                                if (chrome.runtime.lastError) { /* ignore already closed */ }
+                            });
+                            resolve();
+                        }, 2000);
                     }
                 }, 3000);
             });
         });
 
     } catch (e) {
-        console.error("Invisible Bump Process Failed", e);
+        console.error("Stealth Bump Process Failed", e);
         errorDetail = e.message;
     }
 
     // Update Server
-    await fetch(`${apiBase}/api/admin/playerup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-        body: JSON.stringify({
-            action: "update_bump",
-            id: item.id,
-            success: success,
-            limitReached: limitReached,
-            error: errorDetail
-        })
-    });
+    try {
+        await fetch(`${apiBase}/api/admin/playerup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+            body: JSON.stringify({
+                action: "update_bump",
+                id: item.id,
+                success: success,
+                limitReached: limitReached,
+                error: errorDetail
+            })
+        });
+    } catch (e) { console.error("Log update failed", e); }
 
     return success;
 }
