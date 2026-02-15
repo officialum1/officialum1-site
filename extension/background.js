@@ -658,6 +658,8 @@ async function performBumpAction(item, adminPass, apiBase) {
                             target: { tabId: tabId },
                             func: () => {
                                 const bodyText = document.body.innerText;
+                                const bodyHtml = (document.body.innerHTML || "").toLowerCase();
+
                                 if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
                                     // 🚀 LIMIT REACHED - TRY REPLY BUMP (INFINITE BUMP)
                                     const editor = document.querySelector('.fr-element, .js-editor, .redactor-editor');
@@ -687,15 +689,37 @@ async function performBumpAction(item, adminPass, apiBase) {
                                     return "LIMIT_REACHED";
                                 }
 
-                                const btn = document.querySelector('a.UpControl.UpButtonView') || document.getElementById('upButtonCountdown');
+                                // 🔍 DEEP BUTTON SEARCH
+                                // (Reusing bodyText/bodyHtml declared above)
+
+                                // 1. Check for Cloudflare / Security blocks
+                                if (bodyHtml.includes("checking your browser") || bodyHtml.includes("cloudflare") || bodyHtml.includes("v-check")) return "BLOCKED_SECURITY";
+
+                                // 2. Standard Selectors
+                                let btn = document.querySelector('a.UpControl.UpButtonView') ||
+                                    document.getElementById('upButtonCountdown') ||
+                                    document.querySelector('[id*="upButton"]') ||
+                                    document.querySelector('.UpButtonView');
+
+                                // 3. Text-based Link Search (Fallback)
+                                if (!btn) {
+                                    const allLinks = Array.from(document.getElementsByTagName('a'));
+                                    btn = allLinks.find(a => a.innerText.trim().toUpperCase() === "UP");
+                                }
+
                                 if (btn) {
-                                    if (btn.innerText.includes("UP") || btn.id === 'upButtonCountdown') {
+                                    const txt = btn.innerText.trim().toUpperCase();
+                                    if (txt === "UP" || btn.id === 'upButtonCountdown') {
                                         btn.click();
                                         return "SUCCESS";
                                     }
                                     return "WAITING_TIMER";
                                 }
-                                if (document.body.innerHTML.toLowerCase().includes('log in')) return "LOGIN_REQUIRED";
+
+                                // 4. Status Checks
+                                if (bodyHtml.includes('log in') || bodyHtml.includes('sign in')) return "LOGIN_REQUIRED";
+                                if (bodyText.length < 500) return "PAGE_EMPTY"; // Page didn't load content properly
+
                                 return "NOT_FOUND";
                             }
                         });
