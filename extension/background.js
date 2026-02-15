@@ -81,11 +81,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                 if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "Opening stealth window..." });
 
-                // Try Primary URL: https://www.z2u.com/sell/manageList
-                // Fallback URL: https://www.z2u.com/product/manage/index
-                // Prioritize the user's specific category URL
-                const primaryUrl = 'https://www.z2u.com/sell/manageList?service=5&game=15132';
-                const fallbackUrl = 'https://www.z2u.com/product/manage/index';
+                const primaryUrl = 'https://www.z2u.com/sell/manage';
+                const altUrl = 'https://www.z2u.com/sell/manageList?service=5&game=15132';
+                const legacyUrl = 'https://www.z2u.com/product/manage/index';
 
                 await new Promise((resolve) => {
                     chrome.windows.create({
@@ -111,10 +109,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             const waitForContent = () => new Promise(r => {
                                 let attempts = 0;
                                 const check = () => {
-                                    if (attempts > 15) { r(false); return; }
+                                    if (attempts > 30) { r(false); return; }
                                     chrome.scripting.executeScript({
                                         target: { tabId: tabId },
-                                        func: () => document.querySelectorAll('tr[data-id], .item, .list-item').length > 0
+                                        func: () => document.querySelectorAll('tr[data-id], .item, .row, .list-item, .table-row, li.gl-item, li.item, .product-item, div[data-id]').length > 0
                                     }).then(res => {
                                         if (res && res[0] && res[0].result === true) r(true);
                                         else { attempts++; setTimeout(check, 500); }
@@ -241,14 +239,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             return null; // Failed
                         };
 
-                        // TRY 1: Primary URL
-                        let data = await runScraper("Standard Dashboard");
+                        // 🔥 DEEP SEARCH: Try all candidate URLs
+                        let data = await runScraper("Account Center");
 
-                        if (!data) {
-                            // FAIL: Try Fallback
-                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "Standard URL empty. Trying fallback..." });
-                            await chrome.tabs.update(tabId, { url: fallbackUrl });
-                            data = await runScraper("Legacy Dashboard");
+                        if (!data || data.count === 0) {
+                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "Trying Alternative URL..." });
+                            await chrome.tabs.update(tabId, { url: altUrl });
+                            data = await runScraper("Category Hub");
+                        }
+
+                        if (!data || data.count === 0) {
+                            if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "Z2U_LOG", message: "Trying Legacy Manager..." });
+                            await chrome.tabs.update(tabId, { url: legacyUrl });
+                            data = await runScraper("Standard View");
                         }
 
                         if (data && data.listings.length > 0) {
