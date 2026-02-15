@@ -1,3 +1,4 @@
+// Database Connection Hub - v2.0 (Forced Sync)
 import mysql from 'mysql2/promise';
 
 const pool = mysql.createPool({
