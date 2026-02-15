@@ -638,10 +638,10 @@ async function performBumpAction(item, adminPass, apiBase) {
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                 'Upgrade-Insecure-Requests': '1',
+                'Referer': threadUrl, // Crucial for some systems
                 'Sec-Fetch-Dest': 'document',
                 'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1'
+                'Sec-Fetch-Site': 'same-origin'
             }
         });
 
@@ -652,10 +652,10 @@ async function performBumpAction(item, adminPass, apiBase) {
         if (lowText.includes("reached todays max bumping limit") || lowText.includes("4 bump(s) per day")) {
             limitReached = true;
             console.warn(`[OfficialUM1] Limit Reached for ${item.title}`);
-        } else if (lowText.includes("thread has been bumped") || lowText.includes("success") || res.redirected) {
-            // PlayerUp usually redirects back to the thread on success
+        } else if (lowText.includes("thread has been bumped") || lowText.includes("success") || res.status === 200 || res.redirected) {
+            // PlayerUp usually redirects back to the thread on success OR returns 200 for the 'up' endpoint
             success = true;
-            console.log(`[OfficialUM1] Ghost Bump Success: ${item.title}`);
+            console.log(`[OfficialUM1] Ghost Bump Success: ${item.title} (Status: ${res.status})`);
         } else if (lowText.includes("log in") || lowText.includes("login") || lowText.includes("sign up")) {
             errorDetail = "LOGIN_REQUIRED";
             console.error(`[OfficialUM1] Login Required for ${item.title}`);
@@ -663,9 +663,8 @@ async function performBumpAction(item, adminPass, apiBase) {
             errorDetail = "ON_TIMER";
             console.log(`[OfficialUM1] Still on timer for ${item.title}`);
         } else {
-            // If we can't find clear success/fail, it might have failed
-            errorDetail = "UNCERTAIN_RESPONSE";
-            console.warn(`[OfficialUM1] Uncertain response for ${item.title}`);
+            errorDetail = `ERR_${res.status}`;
+            console.warn(`[OfficialUM1] Failed with status ${res.status} for ${item.title}`);
         }
 
     } catch (e) {
