@@ -622,107 +622,73 @@ async function runAutoBumpEngine() {
 
 async function performBumpAction(item, adminPass, apiBase) {
     const threadUrl = item.url;
+    // URL transformation: .../threads/slug.123/ -> .../threads/slug.123/up
+    const bumpUrl = threadUrl.replace(/\/$/, '') + '/up';
     let success = false;
+    let limitReached = false;
+    let errorDetail = "";
 
-    console.log(`[OfficialUM1] Starting Stealth Bump for: ${item.title}`);
+    console.log(`[OfficialUM1] 👻 Ghost Bumping: ${item.title}`);
 
     try {
-        await new Promise((resolve) => {
-            chrome.windows.create({ url: threadUrl, state: 'minimized' }, async (win) => {
-                const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
-                if (!tabId) { resolve(false); return; }
-
-                // Wait for load - Give more time for PlayerUp/Cloudflare
-                const waitForLoad = () => new Promise(r => {
-                    const listener = (tid, changeInfo) => {
-                        if (tid === tabId && changeInfo.status === 'complete') {
-                            chrome.tabs.onUpdated.removeListener(listener);
-                            setTimeout(r, 5000); // Wait 5s for JS to settle
-                        }
-                    };
-                    chrome.tabs.onUpdated.addListener(listener);
-                    // Absolute fallback if complete event doesn't fire
-                    setTimeout(r, 15000);
-                });
-                await waitForLoad();
-
-                // Inject Click Script
-                try {
-                    const results = await chrome.scripting.executeScript({
-                        target: { tabId: tabId },
-                        func: () => {
-                            const html = document.body.innerHTML.toLowerCase();
-                            const bodyText = document.body.innerText;
-
-                            if (html.includes('log in') || html.includes('login') || html.includes('sign up')) {
-                                return "LOGIN_REQUIRED";
-                            }
-
-                            // Rate limit detection
-                            if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
-                                return "LIMIT_REACHED";
-                            }
-
-                            const btn = document.querySelector('a.UpControl.UpButtonView') || document.getElementById('upButtonCountdown');
-                            if (btn) {
-                                if (btn.innerText.includes("UP") || btn.id === 'upButtonCountdown') {
-                                    btn.click();
-                                    return "CLICKED";
-                                }
-                                return "ON_TIMER";
-                            }
-                            return "BTN_NOT_FOUND";
-                        }
-                    });
-
-                    if (results && results[0]) {
-                        const res = results[0].result;
-                        if (res === "CLICKED") {
-                            success = true;
-                            console.log("[OfficialUM1] Bump Clicked Successfully!");
-                            await new Promise(r => setTimeout(r, 2000));
-                        } else if (res === "LIMIT_REACHED") {
-                            console.warn("[OfficialUM1] Daily Bump Limit Reached!");
-                            // Send custom status to server
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "update_bump", id: item.id, success: false, limitReached: true })
-                            });
-                            resolve(false);
-                            return;
-                        } else {
-                            console.warn("[OfficialUM1] Bump Result:", res);
-                            // Send error detail to server if not just a timer
-                            if (res !== "ON_TIMER") {
-                                await fetch(`${apiBase}/api/admin/playerup`, {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                    body: JSON.stringify({ action: "update_bump", id: item.id, success: false, error: res })
-                                });
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Bump Script Failed", e);
-                }
-
-                setTimeout(() => {
-                    chrome.windows.remove(win.id);
-                    resolve(success);
-                }, 1000);
-            });
+        // We use fetch with credentials 'include' which uses the extension's cookie permissions
+        const res = await fetch(bumpUrl, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1'
+            }
         });
 
+        const text = await res.text();
+        const lowText = text.toLowerCase();
+
+        // Detect states from the HTML response
+        if (lowText.includes("reached todays max bumping limit") || lowText.includes("4 bump(s) per day")) {
+            limitReached = true;
+            console.warn(`[OfficialUM1] Limit Reached for ${item.title}`);
+        } else if (lowText.includes("thread has been bumped") || lowText.includes("success") || res.redirected) {
+            // PlayerUp usually redirects back to the thread on success
+            success = true;
+            console.log(`[OfficialUM1] Ghost Bump Success: ${item.title}`);
+        } else if (lowText.includes("log in") || lowText.includes("login") || lowText.includes("sign up")) {
+            errorDetail = "LOGIN_REQUIRED";
+            console.error(`[OfficialUM1] Login Required for ${item.title}`);
+        } else if (lowText.includes("must wait") || lowText.includes("remaining")) {
+            errorDetail = "ON_TIMER";
+            console.log(`[OfficialUM1] Still on timer for ${item.title}`);
+        } else {
+            // If we can't find clear success/fail, it might have failed
+            errorDetail = "UNCERTAIN_RESPONSE";
+            console.warn(`[OfficialUM1] Uncertain response for ${item.title}`);
+        }
+
     } catch (e) {
-        console.error("Bump Window process failed", e);
+        console.error(`[OfficialUM1] Ghost Bump Error:`, e);
+        errorDetail = e.message;
     }
 
-    await fetch(`${apiBase}/api/admin/playerup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-        body: JSON.stringify({ action: "update_bump", id: item.id, success })
-    });
+    // Always update server
+    try {
+        await fetch(`${apiBase}/api/admin/playerup`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
+            body: JSON.stringify({
+                action: "update_bump",
+                id: item.id,
+                success,
+                limitReached,
+                error: errorDetail
+            })
+        });
+    } catch (e) { console.error("Failed to update server logs", e); }
+
+    return success;
 }
 
 // Remove fallbackBump as it's no longer needed or used
