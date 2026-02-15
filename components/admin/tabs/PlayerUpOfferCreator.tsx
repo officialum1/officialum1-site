@@ -13,6 +13,8 @@ export default function PlayerUpOfferCreator() {
     const [postKarma, setPostKarma] = useState(1200);
     const [commentKarma, setCommentKarma] = useState(5);
     const [ageString, setAgeString] = useState('2 years');
+    const [ownership, setOwnership] = useState('Original Owner');
+    const [delivery, setDelivery] = useState('Instant Delivery');
 
     const [postMin, setPostMin] = useState(100);
     const [postMax, setPostMax] = useState(2400);
@@ -29,8 +31,8 @@ export default function PlayerUpOfferCreator() {
 
     // REAL-TIME SYNC: Update description whenever title, price or stats change
     useEffect(() => {
-        updateDescription(posterTitle, postKarma, commentKarma, ageString, posterPrice);
-    }, [posterTitle, postKarma, commentKarma, ageString, posterPrice]);
+        updateDescription(posterTitle, postKarma, commentKarma, ageString, posterPrice, ownership, delivery);
+    }, [posterTitle, postKarma, commentKarma, ageString, posterPrice, ownership, delivery]);
 
     const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -42,7 +44,7 @@ export default function PlayerUpOfferCreator() {
         return `${years} year${years > 1 ? 's' : ''} ${months} month${months > 1 ? 's' : ''}`;
     };
 
-    const updateDescription = (t: string, pk: number, ck: number, age: string, price: string) => {
+    const updateDescription = (t: string, pk: number, ck: number, age: string, price: string, own: string, del: string) => {
         const descriptionText = `[CENTER][B][COLOR=yellow][SIZE=7]✨ Welcome to Officialum1 Premium Store ✨[/SIZE][/COLOR][/B]
 [COLOR=deepskyblue][SIZE=6]Your Trusted Source for High-Quality Reddit Accounts[/SIZE][/COLOR]
 
@@ -51,6 +53,8 @@ export default function PlayerUpOfferCreator() {
 [COLOR=green]✅ ${pk} Post Karma – Reliable and verified Reddit account![/COLOR]  
 [COLOR=orange]✅ ${ck} Comment Karma – Light thread activity![/COLOR]  
 [COLOR=green]✅ Account Age: ${age} – Aged for authenticity and safety![/COLOR]  
+[COLOR=cyan]✅ Ownership: ${own} – 100% secure and traceable![/COLOR]
+[COLOR=white]✅ Delivery: ${del} – Fast and reliable service![/COLOR]
 [COLOR=gold]💰 Price: Only $${price}![/COLOR]
 
 [B][COLOR=magenta][SIZE=5]💳 Secure Payment Methods[/SIZE][/COLOR][/B]  
@@ -104,7 +108,12 @@ export default function PlayerUpOfferCreator() {
                     title: posterTitle,
                     price: posterPrice,
                     description: posterDescription,
-                    categoryUrl: posterCategoryUrl
+                    categoryUrl: posterCategoryUrl,
+                    postKarma,
+                    commentKarma,
+                    ageString,
+                    ownership,
+                    delivery
                 }
             }));
 
@@ -159,6 +168,21 @@ export default function PlayerUpOfferCreator() {
                                     <input type="number" value={ageMin} onChange={e => setAgeMin(parseInt(e.target.value))} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white" placeholder="Min" />
                                     <input type="number" value={ageMax} onChange={e => setAgeMax(parseInt(e.target.value))} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white" placeholder="Max" />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-gray-500 uppercase font-black mb-2 block">Ownership Status</label>
+                                <select value={ownership} onChange={e => setOwnership(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
+                                    <option>Original Owner (OO)</option>
+                                    <option>Reseller (Safe)</option>
+                                    <option>Aged Repost</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-[10px] text-gray-500 uppercase font-black mb-2 block">Delivery Method</label>
+                                <select value={delivery} onChange={e => setDelivery(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white">
+                                    <option>Instant Delivery</option>
+                                    <option>Manual Delivery (1-12h)</option>
+                                </select>
                             </div>
                         </div>
 

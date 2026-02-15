@@ -743,7 +743,7 @@ async function performBumpAction(item, adminPass, apiBase) {
 async function fallbackBump(url) { return false; }
 
 async function performPostAction(data, adminPass, apiBase) {
-    const { title, price, description, categoryUrl } = data;
+    const { title, price, description, categoryUrl, postKarma, commentKarma, ageString, ownership, delivery } = data;
     console.log("[OfficialUM1] Executing Auto-Post for:", title);
 
     return new Promise((resolve) => {
@@ -765,7 +765,7 @@ async function performPostAction(data, adminPass, apiBase) {
                 try {
                     const results = await chrome.scripting.executeScript({
                         target: { tabId: tabId },
-                        func: (t, p, d) => {
+                        func: (t, p, d, meta) => {
                             const titleField = document.querySelector('input[name="title"]');
                             if (!titleField) return "WAITING";
 
@@ -785,11 +785,51 @@ async function performPostAction(data, adminPass, apiBase) {
                                 if (txt) txt.value = d;
                             }
 
-                            // 3. Fill Price (Custom Field lookup)
+                            // 3. Fill Metadata (Karma, Age, Ownership)
+                            const findAndSelect = (labelText, value) => {
+                                const rows = Array.from(document.querySelectorAll('dl.formRow, .formRow'));
+                                for (const row of rows) {
+                                    if (row.innerText.toLowerCase().includes(labelText.toLowerCase())) {
+                                        const select = row.querySelector('select');
+                                        if (select) {
+                                            // Try to find matching option
+                                            const options = Array.from(select.options);
+                                            let bestOption = null;
+
+                                            // Handle Karma Ranges (e.g. if pk=1200, match "1k - 5k")
+                                            for (const opt of options) {
+                                                if (opt.text.toLowerCase().includes(value.toString().toLowerCase())) {
+                                                    bestOption = opt.value;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (bestOption) {
+                                                select.value = bestOption;
+                                                select.dispatchEvent(new Event('change', { bubbles: true }));
+                                            } else if (options.length > 1) {
+                                                // Fallback to first valid option if no match
+                                                select.selectedIndex = 1;
+                                                select.dispatchEvent(new Event('change', { bubbles: true }));
+                                            }
+                                            return true;
+                                        }
+                                    }
+                                }
+                                return false;
+                            };
+
+                            findAndSelect("Post Karma", meta.postKarma);
+                            findAndSelect("Comment Karma", meta.commentKarma);
+                            findAndSelect("Age", meta.ageString);
+                            findAndSelect("Ownership", meta.ownership);
+                            findAndSelect("Delivery", meta.delivery);
+
+                            // 4. Fill Price
                             const inputs = document.querySelectorAll('input, select');
                             for (const input of inputs) {
                                 const rowText = input.closest('dl, .formRow')?.innerText.toLowerCase() || "";
-                                if (input.name.includes('custom_fields') && (rowText.includes('price') || rowText.includes('amount'))) {
+                                if (input.name && input.name.includes('custom_fields') && (rowText.includes('price') || rowText.includes('amount'))) {
                                     input.value = p;
                                     input.dispatchEvent(new Event('input', { bubbles: true }));
                                 }
@@ -812,7 +852,7 @@ async function performPostAction(data, adminPass, apiBase) {
                             }
                             return "FILLED_NO_BTN";
                         },
-                        args: [title, price, description]
+                        args: [title, price, description, { postKarma, commentKarma, ageString, ownership, delivery }]
                     });
 
                     if (results && results[0] && (results[0].result === "POSTED" || results[0].result === "FILLED_NO_BTN")) {
