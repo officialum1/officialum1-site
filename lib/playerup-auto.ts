@@ -48,21 +48,33 @@ export async function runCloudBump(limit: number = 0) {
         if (item.dailyBumpCount >= 4 && item.lastResetDate === today) continue;
 
         try {
+            const headers = {
+                "Cookie": cookies,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+                "Referer": item.url,
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+                "Sec-Fetch-User": "?1",
+                "Upgrade-Insecure-Requests": "1",
+                "DNT": "1"
+            };
+
             const upUrl = `${item.url.replace(/\/$/, '')}/up`;
-            const res = await fetch(upUrl, {
-                headers: {
-                    "Cookie": cookies,
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                }
-            });
+            const res = await fetch(upUrl, { headers });
 
             let limitReached = false;
             let success = false;
+            let errorCode = res.status;
 
             if (res.ok) {
                 const text = await res.text();
                 if (text.includes("reached todays max bumping limit") || text.includes("4 bump(s) per day")) {
                     limitReached = true;
+                } else if (text.toLowerCase().includes("log in") || text.toLowerCase().includes("login")) {
+                    errorCode = 401; // Fake code for login required
                 } else {
                     success = true;
                 }
@@ -84,8 +96,10 @@ export async function runCloudBump(limit: number = 0) {
                 logDetail = `Auto-Cloud: Successfully bumped ${item.title}`;
             } else if (limitReached) {
                 logDetail = `Auto-Cloud Skipped: Limit reached for ${item.title}`;
+            } else if (errorCode === 401) {
+                logDetail = `Auto-Cloud Failed: LOGIN REQUIRED for ${item.title}`;
             } else {
-                logDetail = `Auto-Cloud Failed: Site responded with error for ${item.title}`;
+                logDetail = `Auto-Cloud Failed: Site blocked server (Status: ${errorCode}) for ${item.title}`;
             }
 
             await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())", [logId, 'System', 'PlayerUp Bump', logDetail]);
