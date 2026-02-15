@@ -88,7 +88,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 const fallbackUrl = 'https://www.z2u.com/product/manage/index';
 
                 await new Promise((resolve) => {
-                    chrome.windows.create({ url: primaryUrl, state: 'minimized' }, async (win) => {
+                    chrome.windows.create({
+                        url: primaryUrl,
+                        state: 'minimized',
+                        left: -3000,
+                        top: -3000,
+                        width: 100,
+                        height: 100
+                    }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
 
@@ -269,7 +276,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (dashboardTabId) chrome.tabs.sendMessage(dashboardTabId, { action: "PU_LOG", message: isSingle ? "Analyzing Single Thread..." : "Launching Stealth Crawler..." });
 
                 await new Promise((resolve) => {
-                    chrome.windows.create({ url: targetUrl, state: 'minimized' }, async (win) => {
+                    chrome.windows.create({
+                        url: targetUrl,
+                        state: 'minimized',
+                        left: -3000,
+                        top: -3000,
+                        width: 100,
+                        height: 100
+                    }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
 
@@ -452,42 +466,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         resolve();
                     });
                 });
-            } else {
-                // BUMPING LOGIC (Hybrid: Fetch -> Tab Fallback)
+            } else if (request.action === "REMOTE_BUMP") {
                 try {
-                    const fallbackBump = async (url) => {
-                        // Open tab, wait, close
-                        const tab = await chrome.tabs.create({ url: url, active: false });
-                        await new Promise(r => setTimeout(r, 5000)); // Wait for load
-                        await chrome.tabs.remove(tab.id);
-                        return true;
-                    };
-
-                    const verifyBump = async (url) => {
-                        const upUrl = url.replace(/\/$/, '') + '/up';
-                        try {
-                            const res = await fetch(upUrl, { credentials: 'include' });
-                            if (!res.ok) throw new Error("Fetch Failed");
-                            const text = await res.text();
-                            if (res.url.includes('login') || text.includes('Log in') || text.includes('error')) {
-                                throw new Error("Login/Error detected");
-                            }
-                            return true;
-                        } catch (e) {
-                            console.log("Fetch bump failed, trying Tab Fallback...", e);
-                            return await fallbackBump(upUrl);
-                        }
-                    };
-
                     if (request.singleUrl) {
-                        const success = await verifyBump(request.singleUrl);
-                        if (request.id) {
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "update_bump", id: request.id, success })
-                            });
-                        }
+                        await performBumpAction({ id: request.id, url: request.singleUrl, title: "Requested Thread" }, adminPass, apiBase);
                     } else {
                         const listRes = await fetch(`${apiBase}/api/admin/playerup`);
                         const data = await listRes.json();
@@ -495,17 +477,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         if (request.limit > 0) targets = targets.slice(0, request.limit);
 
                         for (const item of targets) {
-                            const success = await verifyBump(item.url);
-                            await fetch(`${apiBase}/api/admin/playerup`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json", "X-Admin-Password": adminPass },
-                                body: JSON.stringify({ action: "update_bump", id: item.id, success })
-                            });
-                            await new Promise(r => setTimeout(r, 2000));
+                            await performBumpAction(item, adminPass, apiBase);
+                            // Brief pause between requests
+                            await new Promise(r => setTimeout(r, 3000));
                         }
                     }
                 } catch (e) {
-                    console.error("Bump Error:", e);
+                    console.error("Bump Command Error:", e);
                 }
             }
         })();
@@ -641,12 +619,16 @@ async function performBumpAction(item, adminPass, apiBase) {
 
     try {
         await new Promise((resolve) => {
-            // Using 'minimized' state instead of off-screen coordinates to bypass boundary restrictions
+            // Using 'minimized' AND off-screen coordinates to ensure 100% stealth
             chrome.windows.create({
                 url: threadUrl,
                 type: 'popup',
                 focused: false,
-                state: 'minimized'
+                state: 'minimized',
+                left: -3000,
+                top: -3000,
+                width: 100,
+                height: 100
             }, async (win) => {
                 const tabId = win && win.tabs && win.tabs[0] ? win.tabs[0].id : null;
                 if (!tabId) {
