@@ -90,7 +90,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 await new Promise((resolve) => {
                     chrome.windows.create({
                         url: primaryUrl,
-                        state: 'minimized'
+                        type: 'popup',
+                        focused: false,
+                        left: -9999,
+                        top: -9999,
+                        width: 1,
+                        height: 1
                     }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
@@ -274,7 +279,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 await new Promise((resolve) => {
                     chrome.windows.create({
                         url: targetUrl,
-                        state: 'minimized'
+                        type: 'popup',
+                        focused: false,
+                        left: -9999,
+                        top: -9999,
+                        width: 1,
+                        height: 1
                     }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
@@ -611,14 +621,14 @@ async function performBumpAction(item, adminPass, apiBase) {
 
     try {
         await new Promise((resolve) => {
-            // 🛰️ GOD-MODE STEALTH CREATION
+            // 🛰️ GOD-MODE STEALTH (Off-screen + 1x1 size)
+            // Note: Cannot combine 'minimized' state with coordinates/size in Chrome
             chrome.windows.create({
                 url: threadUrl,
                 type: 'popup',
                 focused: false,
-                state: 'minimized',
-                left: 9999,
-                top: 9999,
+                left: -9999,
+                top: -9999,
                 width: 1,
                 height: 1
             }, async (win) => {
