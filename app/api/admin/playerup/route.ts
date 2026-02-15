@@ -1,4 +1,4 @@
-
+// PlayerUp Management API - Stable Version
 import { NextRequest, NextResponse } from 'next/server';
 import { query, initDB } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
