@@ -29,6 +29,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 chrome.cookies.getAll({ domain: baseDomain }, async (cookies) => {
                     const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
                     const apiBase = await getApiUrl();
+                    console.log(`[OfficialUM1 Sync] Sending cookies to: ${apiBase}/api/admin/settings`);
 
                     try {
                         const res = await fetch(`${apiBase}/api/admin/settings`, {
@@ -37,15 +38,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             body: JSON.stringify({ action: "save_session", site: baseDomain, cookies: cookieString })
                         });
 
-                        // Try to parse JSON if possible, else just check ok
-                        let data;
-                        try { data = await res.json(); } catch (e) { data = {}; }
+                        const data = await res.json().catch(() => ({}));
+                        console.log(`[OfficialUM1 Sync] Server Response: ${res.status}`, data);
 
                         if (res.ok) sendResponse({ success: true });
-                        else sendResponse({ success: false, error: data.error || 'Server Error' });
+                        else {
+                            console.error(`[OfficialUM1 Sync] Auth Failed: ${res.status} ${data.error || ''}`);
+                            sendResponse({ success: false, error: data.error || 'Server Error' });
+                        }
 
                     } catch (e) {
-                        console.error("Cookie Sync Error", e);
+                        console.error("[OfficialUM1 Sync] Connection/Network Error:", e);
                         sendResponse({ success: false, error: e.message });
                     }
                 });

@@ -32,9 +32,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminPass
         }, (response) => {
             if (response && response.success) {
-                logDiv.innerHTML += `<div style="color:#ffaa00">> Session Saved on OfficialUM1!</div>`;
+                logDiv.innerHTML += `<div style="color:#00ff88">> Session Saved on OfficialUM1!</div>`;
             } else {
-                logDiv.innerHTML += `<div style="color:red">> Auth Failed or Network Error.</div>`;
+                const err = (response && response.error) ? response.error : "Unknown Error";
+                logDiv.innerHTML += `<div style="color:#ff6666">> Error: ${err}</div>`;
+                logDiv.innerHTML += `<div style="color:gray; font-size:10px">Check console for details.</div>`;
             }
         });
     });

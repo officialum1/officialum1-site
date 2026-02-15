@@ -31,6 +31,7 @@ const DocumentsTab = dynamic(() => import('@/components/admin/tabs/DocumentsTab'
 const VerificationTab = dynamic(() => import('@/components/admin/tabs/VerificationTab'), { ssr: false });
 const SellersTab = dynamic(() => import('@/components/admin/tabs/SellersTab'), { ssr: false });
 const PlayerUpTab = dynamic(() => import('@/components/admin/tabs/PlayerUpTab'), { ssr: false });
+const PlayerUpOfferCreator = dynamic(() => import('@/components/admin/tabs/PlayerUpOfferCreator'), { ssr: false });
 const Z2UTab = dynamic(() => import('@/components/admin/tabs/Z2UTab'), { ssr: false });
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
@@ -472,6 +473,11 @@ function AdminDashboard() {
                 case 'finance':
                 case 'sell':
                 case 'payments':
+                case 'playerup':
+                case 'playerup_creator':
+                    fetch('/api/admin/playerup')
+                        .then(res => res.json())
+                        .then(data => setStats(prev => ({ ...prev, playerup_count: Array.isArray(data) ? data.length : (data.listings?.length || 0) })));
                     const invRes = await fetch(`/api/admin/inventory?type=inventory&role=${role}&email=${email}`);
                     const balRes = await fetch(`/api/admin/inventory?type=balance&role=${role}&email=${email}`);
 
@@ -1593,6 +1599,7 @@ function AdminDashboard() {
                                     { id: 'bundle', label: '📦 Bundles', perm: 'inventory' },
                                     { id: 'g2g_hub', label: '🎮 G2G Center', perm: 'orders', onClick: () => router.push('/admin/g2g') },
                                     { id: 'playerup', label: '🆙 PlayerUp', perm: 'playerup' },
+                                    { id: 'playerup_creator', label: '✍️ PlayerUp Creator', perm: 'playerup' },
                                     { id: 'z2u', label: '🥈 Z2U Center', perm: 'z2u' },
 
                                     { id: 'promos', label: '🏷️ Promos', perm: 'inventory' },
@@ -1920,6 +1927,10 @@ function AdminDashboard() {
                     {/* PLAYERUP TAB */}
                     {activeTab === 'playerup' && (
                         <PlayerUpTab />
+                    )}
+
+                    {activeTab === 'playerup_creator' && (
+                        <PlayerUpOfferCreator />
                     )}
 
                     {/* Z2U TAB */}
