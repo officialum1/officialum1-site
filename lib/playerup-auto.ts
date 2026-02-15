@@ -19,6 +19,17 @@ export async function runCloudBump(limit: number = 0) {
         return { success: false, error: "No cookies" };
     }
 
+    // 🔥 KEEP-ALIVE: Ping the dashboard to show as "Online/Active"
+    try {
+        await fetch("https://www.playerup.com/accounts/-/threads", {
+            headers: {
+                "Cookie": cookies,
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+        });
+        console.log("[Auto-Cloud] Status Ping: Account marked as Active.");
+    } catch (e) { }
+
     // 2. Fetch Listings
     let sql = "SELECT id, title, url, dailyBumpCount, lastResetDate, limitReached FROM playerup_listings WHERE status = 'Active' ORDER BY lastBumped ASC";
     const params: any[] = [];
