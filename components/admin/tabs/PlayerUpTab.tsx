@@ -44,6 +44,12 @@ export default function PlayerUpTab() {
             if (settings['session_cookies_playerup_com'] && settings['session_cookies_playerup_com'].length > 20) {
                 setCookieStatus('connected');
             }
+
+            // 🔥 LAZY CRON TRIGGER
+            // Every time the admin opens this tab, we hit the cron endpoint 
+            // to ensure background tasks are running.
+            fetch(`/api/cron/playerup?key=${settings['admin_password'] || ''}`).catch(() => { });
+
         } catch (e) { console.error("Cookie check failed", e); }
     };
 
@@ -376,7 +382,7 @@ export default function PlayerUpTab() {
                         icon: '📈', color: 'text-emerald-400'
                     },
                     { label: 'Limit Hits', value: logs.filter(l => l.details.includes('limit reached') || l.details.includes('Skipped')).length, icon: '🛑', color: 'text-red-400' },
-                    { label: 'Cloud Status', value: 'Connected', icon: '☁️', color: 'text-cyan-400' },
+                    { label: 'Auto-Cloud', value: 'Active (Lazy)', icon: '🤖', color: 'text-cyan-400' },
                 ].map((stat, i) => (
                     <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all group">
                         <div className="flex items-center justify-between mb-2">

@@ -611,12 +611,16 @@ async function performBumpAction(item, adminPass, apiBase) {
 
     try {
         await new Promise((resolve) => {
-            // Improved Stealth Window Creation
+            // 🛰️ GOD-MODE STEALTH CREATION
             chrome.windows.create({
                 url: threadUrl,
                 type: 'popup',
                 focused: false,
-                state: 'minimized'
+                state: 'minimized',
+                left: 9999,
+                top: 9999,
+                width: 1,
+                height: 1
             }, async (win) => {
                 if (chrome.runtime.lastError || !win || !win.tabs || !win.tabs[0]) {
                     const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : "Window creation blocked";
@@ -701,13 +705,13 @@ async function performBumpAction(item, adminPass, apiBase) {
                     return false;
                 };
 
-                // Poll for up to 20 seconds (PlayerUp can be slow)
+                // Poll for up to 45 seconds (Ensuring 'Never Fail' even on slow connections)
                 let attempts = 0;
                 const interval = setInterval(async () => {
                     const done = await checkStatus();
                     attempts++;
-                    // After 10 attempts (30s) or Success/Limit hit, close window
-                    if (done || attempts > 10) {
+                    // After 15 attempts (~30-45s) or Success/Limit hit, close window
+                    if (done || attempts > 15) {
                         clearInterval(interval);
                         // Small delay to let the click register
                         setTimeout(() => {
@@ -715,9 +719,9 @@ async function performBumpAction(item, adminPass, apiBase) {
                                 if (chrome.runtime.lastError) { /* ignore already closed */ }
                             });
                             resolve();
-                        }, 2000);
+                        }, 3000);
                     }
-                }, 3000);
+                }, 2000);
             });
         });
 

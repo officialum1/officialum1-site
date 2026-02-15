@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, initDB } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+import { runCloudBump } from '@/lib/playerup-auto';
 
 function detectPlatform(title: string, url: string) {
     const t = title.toLowerCase();
@@ -163,65 +164,8 @@ export async function POST(req: NextRequest) {
 
         // NEW: Cloud Bump All (Pings /up URL for all listings)
         if (action === 'cloud_bump_all') {
-            const siteKey = 'session_cookies_www_playerup_com';
-            const rows: any = await query("SELECT setting_value FROM settings WHERE setting_key = ?", [siteKey]);
-            const cookies = rows[0]?.setting_value;
-
-            if (!cookies) return NextResponse.json({ success: false, error: "No session cookies. Sync via extension first." });
-
-            let sql = "SELECT id, url FROM playerup_listings ORDER BY lastBumped ASC, createdAt DESC";
-            const params: any[] = [];
-
-            if (limit && limit > 0) {
-                sql += " LIMIT ?";
-                params.push(limit);
-            }
-
-            const listings: any = await query(sql, params);
-            const today = new Date().toISOString().split('T')[0];
-            let bumpCount = 0;
-
-            for (const item of listings) {
-                // Skip if limit reached
-                if (item.limitReached || (item.dailyBumpCount >= 4 && item.lastResetDate === today)) continue;
-
-                try {
-                    const upUrl = `${item.url.replace(/\/$/, '')}/up`;
-                    const res = await fetch(upUrl, {
-                        headers: {
-                            "Cookie": cookies,
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                        }
-                    });
-
-                    let limitReached = false;
-                    if (res.ok) {
-                        const text = await res.text();
-                        if (text.includes("reached todays max bumping limit") || text.includes("4 bump(s) per day")) {
-                            limitReached = true;
-                        }
-                    }
-
-                    if (limitReached) {
-                        await query("UPDATE playerup_listings SET limitReached = TRUE, lastBumpStatus = 'limit_reached' WHERE id = ?", [item.id]);
-                        continue;
-                    }
-
-                    // Update count and timestamp
-                    if (item.lastResetDate !== today) {
-                        await query("UPDATE playerup_listings SET lastBumped = NOW(), dailyBumpCount = 1, lastResetDate = ?, lastBumpStatus = 'success', limitReached = FALSE WHERE id = ?", [today, item.id]);
-                    } else {
-                        await query("UPDATE playerup_listings SET lastBumped = NOW(), dailyBumpCount = dailyBumpCount + 1, lastBumpStatus = 'success', limitReached = FALSE WHERE id = ?", [item.id]);
-                    }
-
-                    bumpCount++;
-                    await new Promise(r => setTimeout(r, 500));
-                } catch (e) {
-                    console.error(`Failed to bump ${item.url}`, e);
-                }
-            }
-
-            return NextResponse.json({ success: true, bumped: bumpCount });
+            const result = await runCloudBump(limit || 0);
+            return NextResponse.json(result);
         }
 
         if (action === 'manual_bump') {
