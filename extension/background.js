@@ -55,7 +55,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     // REMOTE DASHBOARD COMMANDS
-    if (request.action === "REMOTE_SYNC" || request.action === "REMOTE_BUMP" || request.action === "Z2U_SYNC") {
+    if (request.action === "REMOTE_SYNC" || request.action === "REMOTE_BUMP" || request.action === "Z2U_SYNC" || request.action === "POST_THREAD") {
         (async () => {
             const res = await getStorage(['admin_pass']);
             const adminPass = request.adminPass || res.admin_pass;
@@ -63,6 +63,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             if (!adminPass) {
                 console.error("[OfficialUM1] Missing Admin Password.");
+                return;
+            }
+
+            if (request.action === "POST_THREAD") {
+                console.log("[OfficialUM1] Starting Quick Post Process...", request.data.title);
+                await performPostAction(request.data, adminPass, apiBase);
                 return;
             }
 
@@ -732,3 +738,92 @@ async function performBumpAction(item, adminPass, apiBase) {
 
 // Remove fallbackBump as it's no longer needed or used
 async function fallbackBump(url) { return false; }
+
+async function performPostAction(data, adminPass, apiBase) {
+    const { title, price, description, categoryUrl } = data;
+    console.log("[OfficialUM1] Executing Auto-Post for:", title);
+
+    return new Promise((resolve) => {
+        chrome.windows.create({
+            url: categoryUrl,
+            type: 'popup',
+            focused: true,
+            width: 1100,
+            height: 900,
+            state: 'normal'
+        }, (win) => {
+            const tabId = win && win.tabs && win.tabs[0] ? win.tabs[0].id : null;
+            if (!tabId) { resolve(); return; }
+
+            // Polling approach to wait for the specific form elements
+            let attempts = 0;
+            const interval = setInterval(async () => {
+                attempts++;
+                try {
+                    const results = await chrome.scripting.executeScript({
+                        target: { tabId: tabId },
+                        func: (t, p, d) => {
+                            const titleField = document.querySelector('input[name="title"]');
+                            if (!titleField) return "WAITING";
+
+                            // 1. Fill Title
+                            titleField.value = t;
+                            titleField.dispatchEvent(new Event('input', { bubbles: true }));
+                            titleField.dispatchEvent(new Event('change', { bubbles: true }));
+
+                            // 2. Fill Message
+                            const editor = document.querySelector('.fr-element, .redactor-editor, .js-editor');
+                            if (editor) {
+                                editor.focus();
+                                editor.innerText = d;
+                                editor.dispatchEvent(new Event('input', { bubbles: true }));
+                            } else {
+                                const txt = document.querySelector('textarea[name="message"]');
+                                if (txt) txt.value = d;
+                            }
+
+                            // 3. Fill Price (Custom Field lookup)
+                            const inputs = document.querySelectorAll('input, select');
+                            for (const input of inputs) {
+                                const rowText = input.closest('dl, .formRow')?.innerText.toLowerCase() || "";
+                                if (input.name.includes('custom_fields') && (rowText.includes('price') || rowText.includes('amount'))) {
+                                    input.value = p;
+                                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                                }
+                            }
+
+                            // 4. Inject visual indicator
+                            const banner = document.createElement('div');
+                            banner.innerHTML = "✨ OFFICIALUM1 TURBO POSTER: FIELDS FILLED ✨";
+                            banner.style.cssText = "position:fixed; top:0; left:0; width:100%; background:#22c55e; color:white; text-align:center; padding:15px; font-weight:bold; z-index:2147483647; font-family:sans-serif; border-bottom:3px solid #166534;";
+                            document.body.appendChild(banner);
+
+                            // 5. Try Submit
+                            const submitBtn = document.querySelector('button.button--primary, button[type="submit"]');
+                            if (submitBtn) {
+                                setTimeout(() => submitBtn.click(), 1000);
+                                return "POSTED";
+                            }
+                            return "FILLED_NO_BTN";
+                        },
+                        args: [title, price, description]
+                    });
+
+                    if (results && results[0] && (results[0].result === "POSTED" || results[0].result === "FILLED_NO_BTN")) {
+                        clearInterval(interval);
+                        // Stay open for 8 seconds to show the user it worked, then close.
+                        setTimeout(() => {
+                            chrome.windows.remove(win.id, () => { if (chrome.runtime.lastError) { } });
+                            resolve();
+                        }, 8000);
+                    }
+                } catch (e) { console.error("Post Script Error", e); }
+
+                if (attempts > 10) {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 3000);
+        });
+    });
+}

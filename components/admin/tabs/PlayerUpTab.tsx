@@ -29,11 +29,58 @@ export default function PlayerUpTab() {
     const [activeFilter, setActiveFilter] = useState('All');
     const [cookieStatus, setCookieStatus] = useState<'connected' | 'disconnected'>('disconnected');
     const [showManualImport, setShowManualImport] = useState(false);
+    const [showPoster, setShowPoster] = useState(false);
+    const [posterTitle, setPosterTitle] = useState('');
+    const [posterPrice, setPosterPrice] = useState('50');
+    const [posterDescription, setPosterDescription] = useState('Best quality account. Fast delivery. Contact on Telegram @OfficialUM1');
+    const [posterCategoryUrl, setPosterCategoryUrl] = useState('');
+
+    useEffect(() => {
+        // Load poster settings from local storage if available
+        const savedUrl = localStorage.getItem('playerup_poster_url');
+        const savedPrice = localStorage.getItem('playerup_poster_price');
+        const savedDesc = localStorage.getItem('playerup_poster_desc');
+        if (savedUrl) setPosterCategoryUrl(savedUrl);
+        if (savedPrice) setPosterPrice(savedPrice);
+        if (savedDesc) setPosterDescription(savedDesc);
+    }, []);
 
     useEffect(() => {
         fetchListings();
         checkCookieStatus();
     }, []);
+
+    const handleTurboPost = async () => {
+        if (!posterTitle || !posterCategoryUrl) {
+            modernAlert("Missing Info", "Please enter a title and the category URL.", "error");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Save settings for next time
+            localStorage.setItem('playerup_poster_url', posterCategoryUrl);
+            localStorage.setItem('playerup_poster_price', posterPrice);
+            localStorage.setItem('playerup_poster_desc', posterDescription);
+
+            // Send to extension to handle the browser automation
+            window.dispatchEvent(new CustomEvent('OFFICIALUM1_POST_THREAD', {
+                detail: {
+                    title: posterTitle,
+                    price: posterPrice,
+                    description: posterDescription,
+                    categoryUrl: posterCategoryUrl
+                }
+            }));
+
+            modernAlert("Posting Started", "The thread is being created in the background. 🛰️", "success");
+            setPosterTitle(''); // Clear title for next one
+        } catch (e) {
+            console.error(e);
+            modernAlert("Error", "Failed to start posting process.", "error");
+        }
+        setLoading(false);
+    };
 
     const checkCookieStatus = async () => {
         try {
@@ -294,11 +341,80 @@ export default function PlayerUpTab() {
                     }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-xl shadow-purple-600/20 transition-all">
                         ⚡ Turbo Script
                     </button>
+                    <button onClick={() => setShowPoster(!showPoster)} className="bg-cyan-600/10 text-cyan-400 border border-cyan-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-cyan-600 hover:text-white transition-all">
+                        🚀 Turbo Poster
+                    </button>
                     <button onClick={() => setShowManualImport(!showManualImport)} className="bg-emerald-600/10 text-emerald-400 border border-emerald-600/30 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-600 hover:text-white transition-all">
                         📋 Manual Import
                     </button>
                 </div>
             </div>
+
+            {showPoster && (
+                <div className="mb-8 bg-gray-900/50 border border-cyan-500/20 p-6 rounded-2xl animate-fade-in-down">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 className="text-cyan-400 font-bold flex items-center gap-2">
+                                <span className="text-xl">🚀</span> Turbo Offer Generator
+                            </h3>
+                            <p className="text-gray-500 text-xs mt-1">Type title only &rarr; Hit Post &rarr; Done.</p>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex flex-col">
+                                <label className="text-[10px] text-gray-500 uppercase font-black mb-1">Price ($)</label>
+                                <input
+                                    type="text"
+                                    value={posterPrice}
+                                    onChange={(e) => setPosterPrice(e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-xs text-white focus:border-cyan-500 outline-none w-20"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-[10px] text-gray-500 uppercase font-black mb-1">Forum Create URL</label>
+                                <input
+                                    type="text"
+                                    placeholder="https://www.playerup.com/forums/.../create-thread"
+                                    value={posterCategoryUrl}
+                                    onChange={(e) => setPosterCategoryUrl(e.target.value)}
+                                    className="bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-xs text-white focus:border-cyan-500 outline-none w-64"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="flex flex-col gap-4">
+                            <label className="text-[10px] text-gray-500 uppercase font-black">Offer Title (Type here to post)</label>
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Selling: Reddit Account 5000 Karma Aged 3 Years"
+                                    className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:border-cyan-500 outline-none transition-all text-sm font-bold"
+                                    value={posterTitle}
+                                    onChange={(e) => setPosterTitle(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleTurboPost()}
+                                />
+                                <button
+                                    onClick={handleTurboPost}
+                                    disabled={loading || !posterTitle}
+                                    className="bg-cyan-500 hover:bg-cyan-400 text-black px-8 rounded-xl font-black text-xs uppercase tracking-widest transition-all disabled:opacity-30"
+                                >
+                                    {loading ? 'Posting...' : 'POST NOW'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[10px] text-gray-500 uppercase font-black">Description Template</label>
+                            <textarea
+                                className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs text-gray-400 focus:border-cyan-500 outline-none h-24 resize-none"
+                                value={posterDescription}
+                                onChange={(e) => setPosterDescription(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* FILTER & SEARCH BAR */}
             <div className="flex flex-wrap items-center gap-4 mb-8 bg-white/5 p-4 rounded-2xl border border-white/10">

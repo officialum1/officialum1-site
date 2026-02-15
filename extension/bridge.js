@@ -29,6 +29,14 @@ window.addEventListener('OFFICIALUM1_SINGLE_BUMP', (e) => {
     });
 });
 
+window.addEventListener('OFFICIALUM1_POST_THREAD', (e) => {
+    console.log("📡 Quick Post Signal Received: " + e.detail.title);
+    chrome.runtime.sendMessage({
+        action: "POST_THREAD",
+        data: e.detail
+    });
+});
+
 window.addEventListener('OFFICIALUM1_AUTH_UPDATE', (e) => {
     console.log("📡 Auth Update Signal Received...");
     if (e.detail.pass) {
