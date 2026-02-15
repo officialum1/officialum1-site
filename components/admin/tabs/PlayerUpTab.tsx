@@ -362,6 +362,32 @@ export default function PlayerUpTab() {
                 </div>
             )}
 
+            {/* ANALYTICS QUICK-VIEW */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {[
+                    { label: 'Total Bumps (24h)', value: logs.filter(l => new Date().getTime() - new Date(l.date).getTime() < 86400000).length, icon: '🔥', color: 'text-orange-400' },
+                    {
+                        label: 'Success Rate',
+                        value: (() => {
+                            const last24 = logs.filter(l => new Date().getTime() - new Date(l.date).getTime() < 86400000);
+                            const success = last24.filter(l => l.details.includes('Successfully')).length;
+                            return last24.length > 0 ? Math.round((success / last24.length) * 100) + '%' : '0%';
+                        })(),
+                        icon: '📈', color: 'text-emerald-400'
+                    },
+                    { label: 'Limit Hits', value: logs.filter(l => l.details.includes('limit reached') || l.details.includes('Skipped')).length, icon: '🛑', color: 'text-red-400' },
+                    { label: 'Cloud Status', value: 'Connected', icon: '☁️', color: 'text-cyan-400' },
+                ].map((stat, i) => (
+                    <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all group">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
+                            <span className="text-xl group-hover:scale-120 transition-transform">{stat.icon}</span>
+                        </div>
+                        <div className={`text-2xl font-black ${stat.color}`}>{stat.value}</div>
+                    </div>
+                ))}
+            </div>
+
             {/* LIVE CONSOLE LOGS */}
             <div className="mb-8 glass-heavy rounded-xl border border-white/10 overflow-hidden flex flex-col shadow-2xl">
                 <div className="bg-black/50 px-4 py-2 border-b border-white/5 flex justify-between items-center">

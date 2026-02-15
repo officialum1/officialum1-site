@@ -376,7 +376,11 @@ export async function POST(req: NextRequest) {
             const extError = body.error;
 
             if (success) {
-                logDetail = `Successfully bumped: ${title}`;
+                if (extError?.includes("Reply Bump")) {
+                    logDetail = `Successfully bumped (REPLY): ${title}`;
+                } else {
+                    logDetail = `Successfully bumped: ${title}`;
+                }
             } else if (limitReached) {
                 logDetail = `Skipped: Bumping limit reached for ${title}`;
             } else if (extError) {

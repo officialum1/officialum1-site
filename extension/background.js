@@ -90,11 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 await new Promise((resolve) => {
                     chrome.windows.create({
                         url: primaryUrl,
-                        state: 'minimized',
-                        left: -3000,
-                        top: -3000,
-                        width: 100,
-                        height: 100
+                        state: 'minimized'
                     }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
@@ -278,11 +274,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 await new Promise((resolve) => {
                     chrome.windows.create({
                         url: targetUrl,
-                        state: 'minimized',
-                        left: -3000,
-                        top: -3000,
-                        width: 100,
-                        height: 100
+                        state: 'minimized'
                     }, async (win) => {
                         const tabId = win.tabs && win.tabs.length > 0 ? win.tabs[0].id : null;
                         if (!tabId) { resolve(); return; }
@@ -619,23 +611,20 @@ async function performBumpAction(item, adminPass, apiBase) {
 
     try {
         await new Promise((resolve) => {
-            // Using 'minimized' AND off-screen coordinates to ensure 100% stealth
+            // Improved Stealth Window Creation
             chrome.windows.create({
                 url: threadUrl,
                 type: 'popup',
                 focused: false,
-                state: 'minimized',
-                left: -3000,
-                top: -3000,
-                width: 100,
-                height: 100
+                state: 'minimized'
             }, async (win) => {
-                const tabId = win && win.tabs && win.tabs[0] ? win.tabs[0].id : null;
-                if (!tabId) {
-                    errorDetail = "Window/Tab creation failed";
+                if (chrome.runtime.lastError || !win || !win.tabs || !win.tabs[0]) {
+                    const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : "Window creation blocked";
+                    errorDetail = `Creation failed: ${err}`;
                     resolve();
                     return;
                 }
+                const tabId = win.tabs[0].id;
 
                 // Wait for the page to load and the security checks to pass
                 const checkStatus = async () => {
@@ -645,6 +634,31 @@ async function performBumpAction(item, adminPass, apiBase) {
                             func: () => {
                                 const bodyText = document.body.innerText;
                                 if (bodyText.includes("reached todays max bumping limit") || bodyText.includes("4 bump(s) per day")) {
+                                    // 🚀 LIMIT REACHED - TRY REPLY BUMP (INFINITE BUMP)
+                                    const editor = document.querySelector('.fr-element, .js-editor, .redactor-editor');
+                                    const textArea = document.querySelector('textarea[name="message"]');
+                                    const submitBtn = document.querySelector('button.button--primary, button.js-quickReply--button, .js-submitReply');
+
+                                    if ((editor || textArea) && submitBtn) {
+                                        const msgs = [
+                                            "Still available! Premium quality. DM or visit site.",
+                                            "BUMP! Stock updated. Check OfficialUM1 Store.",
+                                            "Available for instant delivery. Contact on Telegram @OfficialUM1.",
+                                            "Premium Accounts in stock. Fast service guaranteed.",
+                                            "Daily update: Current listings active and ready!"
+                                        ];
+                                        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+                                        if (editor) {
+                                            editor.focus(); editor.innerText = msg;
+                                            editor.dispatchEvent(new Event('input', { bubbles: true }));
+                                        } else if (textArea) {
+                                            textArea.value = msg;
+                                        }
+
+                                        setTimeout(() => submitBtn.click(), 1000);
+                                        return "REPLY_SUCCESS";
+                                    }
                                     return "LIMIT_REACHED";
                                 }
 
@@ -663,8 +677,9 @@ async function performBumpAction(item, adminPass, apiBase) {
 
                         if (results && results[0]) {
                             const res = results[0].result;
-                            if (res === "SUCCESS") {
+                            if (res === "SUCCESS" || res === "REPLY_SUCCESS") {
                                 success = true;
+                                if (res === "REPLY_SUCCESS") errorDetail = "Success (Reply Bump)";
                                 return true;
                             } else if (res === "LIMIT_REACHED") {
                                 limitReached = true;
