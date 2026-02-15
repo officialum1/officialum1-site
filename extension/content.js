@@ -45,13 +45,46 @@ async function startBumpProcess(limit = 0) {
         try {
             const upUrl = url.endsWith('/') ? url + 'up' : url + '/up';
             const res = await fetch(upUrl);
-            if (res.ok) {
-                bumped++;
-                // Tell our server we bumped it so the dashboard updates
-                chrome.runtime.sendMessage({ action: "SYNC_TO_SERVER", listings: [{ url, title: "BUMPED" }], type: "BUMP_UPDATE" });
+            const text = await res.text();
+
+            let status = 'success';
+            let error = '';
+
+            if (!res.ok) {
+                status = 'failed';
+                error = `HTTP ${res.status}`;
+            } else {
+                const lowerText = text.toLowerCase();
+                if (lowerText.includes("reached todays max bumping limit") || lowerText.includes("4 bump(s) per day")) {
+                    status = 'limit_reached';
+                    error = 'Daily limit reached';
+                } else if (lowerText.includes("log in") || lowerText.includes("sign in")) {
+                    status = 'failed';
+                    error = 'Login required';
+                } else if (lowerText.includes("already bumped") || lowerText.includes("you must wait")) {
+                    status = 'failed';
+                    error = 'Wait Timer (Cooldown)';
+                }
             }
-        } catch (e) { console.error(e); }
-        await new Promise(r => setTimeout(r, 800)); // Safety delay
+
+            if (status === 'success') bumped++;
+
+            // Tell our server we bumped it so the dashboard updates
+            chrome.runtime.sendMessage({
+                action: "SYNC_TO_SERVER",
+                listings: [{ url, status, error }],
+                type: "BUMP_UPDATE"
+            });
+
+        } catch (e) {
+            console.error(e);
+            chrome.runtime.sendMessage({
+                action: "SYNC_TO_SERVER",
+                listings: [{ url, status: 'failed', error: e.message }],
+                type: "BUMP_UPDATE"
+            });
+        }
+        await new Promise(r => setTimeout(r, 1500)); // Increased safety delay
     }
 
     chrome.runtime.sendMessage({ action: "SYNC_PROGRESS", text: `✅ Finished! Bumped ${bumped} threads.` });

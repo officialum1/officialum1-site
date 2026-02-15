@@ -224,6 +224,50 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true, bumped: bumpCount });
         }
 
+        if (action === 'manual_bump') {
+            const today = new Date().toISOString().split('T')[0];
+            if (Array.isArray(bulkListings)) {
+                for (const item of bulkListings) {
+                    const { url, status, error } = item;
+                    if (!url) continue;
+
+                    // 1. Find listing by URL (case-insensitive and stripping protocol/trailing slash)
+                    const normalize = (u: string) => u.toLowerCase().replace(/https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+                    const nUrl = normalize(url);
+
+                    const rows: any = await query(`SELECT id, title, dailyBumpCount, lastResetDate FROM playerup_listings WHERE LOWER(REPLACE(REPLACE(REPLACE(url, 'https://', ''), 'http://', ''), 'www.', '')) LIKE ?`, [`%${nUrl}%`]);
+                    const listing = rows[0];
+
+                    if (listing) {
+                        const success = status === 'success';
+                        const limitReached = status === 'limit_reached';
+                        const dbStatus = success ? 'success' : (limitReached ? 'limit_reached' : 'failed');
+
+                        // 2. Update Listing
+                        if (listing.lastResetDate !== today) {
+                            await query("UPDATE playerup_listings SET lastBumped = IF(?, NOW(), lastBumped), dailyBumpCount = IF(?, 1, 0), lastResetDate = ?, lastBumpStatus = ?, limitReached = ? WHERE id = ?", [success, success, today, dbStatus, limitReached, listing.id]);
+                        } else {
+                            await query("UPDATE playerup_listings SET lastBumped = IF(?, NOW(), lastBumped), dailyBumpCount = dailyBumpCount + IF(?, 1, 0), lastBumpStatus = ?, limitReached = ? WHERE id = ?", [success, success, dbStatus, limitReached, listing.id]);
+                        }
+
+                        // 3. Create Log
+                        const logId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                        let logDetail = "";
+                        if (success) {
+                            logDetail = `Successfully bumped: ${listing.title}`;
+                        } else if (limitReached) {
+                            logDetail = `Skipped: Daily limit hit (4/4) for ${listing.title}`;
+                        } else {
+                            logDetail = `Manual Bump ${error || 'Failed'} for ${listing.title}`;
+                        }
+
+                        await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())", [logId, 'System', 'PlayerUp Bump', logDetail]);
+                    }
+                }
+            }
+            return NextResponse.json({ success: true });
+        }
+
         // Action for Turbo Sync
         if (action === 'turbo_sync' || action === 'bulk_import') {
             console.log(`[PlayerUp] Received ${bulkListings?.length} listings for import.`);
@@ -329,19 +373,16 @@ export async function POST(req: NextRequest) {
             // 3. Create Log Entry
             const logId = Date.now().toString();
             let logDetail = "";
-            if (limitReached) {
-                logDetail = `Bumping limit reached for: ${title} (4/4 bumps done)`;
+            const extError = body.error;
+
+            if (success) {
+                logDetail = `Successfully bumped: ${title}`;
+            } else if (limitReached) {
+                logDetail = `Skipped: Bumping limit reached for ${title}`;
+            } else if (extError) {
+                logDetail = `Failed: ${extError} for ${title}`;
             } else {
-                const error = body.error;
-                if (success) {
-                    logDetail = `Successfully bumped: ${title}`;
-                } else if (error === 'LOGIN_REQUIRED') {
-                    logDetail = `Failed: LOGIN REQUIRED for PlayerUp (Cookies expired?)`;
-                } else if (error === 'BTN_NOT_FOUND') {
-                    logDetail = `Failed: Bump button not found on page for: ${title}`;
-                } else {
-                    logDetail = `Failed to bump: ${title}`;
-                }
+                logDetail = `Failed to bump: ${title}`;
             }
 
             await query("INSERT INTO activity_logs (id, user, action, details, date) VALUES (?, ?, ?, ?, NOW())",

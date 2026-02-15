@@ -517,10 +517,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "SYNC_TO_SERVER") {
         (async () => {
             const apiBase = await getApiUrl();
+            const action = request.type === 'BUMP_UPDATE' ? 'manual_bump' : 'turbo_sync';
+
             fetch(`${apiBase}/api/admin/playerup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "X-Admin-Password": request.adminPass },
-                body: JSON.stringify({ action: "turbo_sync", listings: request.listings })
+                body: JSON.stringify({ action, listings: request.listings })
             })
                 .then(res => res.json())
                 .then(data => sendResponse({ success: true, count: data.count }))
@@ -684,10 +686,16 @@ async function performBumpAction(item, adminPass, apiBase) {
                                 return true;
                             } else if (res === "LIMIT_REACHED") {
                                 limitReached = true;
+                                errorDetail = "Daily limit reached (4/4)";
                                 return true;
                             } else if (res === "LOGIN_REQUIRED") {
-                                errorDetail = "Login Required";
+                                errorDetail = "Login Required (Cookies Expired)";
                                 return true;
+                            } else if (res === "WAITING_TIMER") {
+                                errorDetail = "Wait Timer Active (Cooldown)";
+                                // We don't return true because we might want to wait a few more seconds if the page is still loading
+                            } else if (res === "NOT_FOUND") {
+                                errorDetail = "Bump button not found on page";
                             }
                         }
                     } catch (e) {
@@ -701,8 +709,8 @@ async function performBumpAction(item, adminPass, apiBase) {
                 const interval = setInterval(async () => {
                     const done = await checkStatus();
                     attempts++;
-                    // After 6 attempts (18s) or Success/Limit hit, close window
-                    if (done || attempts > 6) {
+                    // After 10 attempts (30s) or Success/Limit hit, close window
+                    if (done || attempts > 10) {
                         clearInterval(interval);
                         // Small delay to let the click register
                         setTimeout(() => {
