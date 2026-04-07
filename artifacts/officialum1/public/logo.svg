@@ -1,0 +1,12 @@
+<svg width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="36" height="36" rx="9" x="0" y="2" fill="url(#lg)"/>
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6b93ff"/>
+      <stop offset="100%" stop-color="#3a5fd4"/>
+    </linearGradient>
+  </defs>
+  <text x="18" y="26" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="900" text-anchor="middle" fill="white" letter-spacing="-0.5">U1</text>
+  <text x="47" y="27" font-family="system-ui,-apple-system,sans-serif" font-size="17" font-weight="700" fill="#4f7af5" letter-spacing="-0.3">Official</text>
+  <text x="104" y="27" font-family="system-ui,-apple-system,sans-serif" font-size="17" font-weight="700" fill="#1e293b" letter-spacing="-0.3">UM1</text>
+</svg>

@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm --filter @workspace/officialum1 run build",
+  "outputDirectory": "artifacts/officialum1/dist",
+  "rewrites": [
+    { "source": "/((?!api/|assets/).*)", "destination": "/index.html" }
+  ]
+}

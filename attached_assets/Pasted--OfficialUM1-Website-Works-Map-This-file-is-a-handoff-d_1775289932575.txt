@@ -1,0 +1,837 @@
+# OfficialUM1 Website Works Map
+
+This file is a handoff document for rebuilding the current OfficialUM1 website with the same feature set, page structure, and operational scope, but with a cleaner theme and a less messy implementation.
+
+This document is based on the current root app in this repository:
+
+- Main app root: `app/`, `components/`, `lib/`, `data/`
+- Main runtime: Next.js App Router
+- Main database layer: MySQL through `lib/db.ts`
+
+Important repo note:
+
+- There is also a nested `officialum1-site-main/` directory in this repository.
+- For rebuild purposes, treat the root app as the primary website unless you intentionally want to compare both copies.
+
+## 1. What This Website Is
+
+OfficialUM1 is not only a marketing website. It is a combined:
+
+- digital services agency website
+- digital product marketplace
+- account/inventory storefront
+- checkout and payment system
+- customer dashboard and delivery vault
+- membership and referral platform
+- support and review system
+- US business formation funnel
+- admin operations panel
+- staff panel
+- marketplace automation hub for G2G, PlayerUp, and Z2U
+
+In plain terms, the site blends three businesses into one UI:
+
+1. An agency site selling web/SEO/social services
+2. A marketplace selling digital accounts, bundles, and memberships
+3. An operations back office to manage products, inventory, orders, staff, content, and external marketplace listings
+
+## 2. Current Product Roles
+
+The current code supports these user roles and access patterns:
+
+- Guest visitor
+- Buyer
+- Seller or staff-like operator
+- Admin
+- HR/admin operator for employee management
+
+Role behavior in the current implementation:
+
+- Buyer auth is mostly stored in `localStorage` as `buyer_user`
+- Staff auth is stored in `localStorage` as `staff_user`
+- Admin route protection is handled in `middleware.ts` using the `admin_token` cookie and an optional login gate cookie
+- Some server-side APIs still trust user identifiers from the client
+
+For the rebuild, keep the role model, but replace the auth approach with proper server-side sessions.
+
+## 3. Main Visual and UX Structure
+
+The website is built around a long-form premium landing/storefront shell:
+
+- Floating navbar
+- Hero section
+- Featured product highlights
+- Business formation section
+- Services section
+- Pricing section
+- Work/projects section
+- Lead capture or audit section
+- Footer with newsletter
+
+Global shell behavior comes from `app/layout.tsx` and includes:
+
+- cart sidebar
+- compare floating bar
+- cookie banner
+- loyalty banner
+- scroll progress
+- dynamic sales pulse
+- sticky mobile CTA
+- live tracker
+- toast notifications
+- Google Analytics script
+- structured data / SEO metadata
+
+Shared shell files:
+
+- `app/layout.tsx`
+- `components/Navbar.tsx`
+- `components/Footer.tsx`
+- `app/context/CartContext.tsx`
+- `app/context/WishlistContext.tsx`
+- `app/context/CompareContext.tsx`
+
+Navbar structure:
+
+- Services
+- Shop
+- Track Order
+- Reviews
+- Rentals
+- Blog
+- Knowledge Base
+- About
+- US Business Hub
+- Admin link when admin/staff user is present
+- Seller Center link when seller user is present
+- search
+- notifications
+- wishlist
+- cart
+
+Footer structure:
+
+- newsletter signup
+- services links
+- company links
+- resource links
+- legal links
+- contact/location footer line
+
+## 4. Core Business Modules
+
+The current site has these major feature modules:
+
+- Agency marketing and lead generation
+- Product catalog and account marketplace
+- Cart, compare, wishlist, checkout
+- Multi-gateway payments
+- Order success and delivery token pages
+- Membership plans and VIP gated products
+- Referral and affiliate system
+- Support tickets
+- Reviews and testimonials
+- Knowledge base and blog
+- Business formation wizard using Corporate Tools
+- Admin mega panel
+- Staff dashboard
+- HR employee management
+- G2G / PlayerUp / Z2U operations
+
+## 5. Storage Model
+
+The current implementation uses a mixed storage model.
+
+### Primary relational storage in MySQL
+
+`lib/db.ts` initializes and uses MySQL tables such as:
+
+- `users`
+- `products`
+- `orders`
+- `tickets`
+- `ticket_replies`
+- `settings`
+- `blogs`
+- `newsletter`
+- `testimonials`
+- `inventory`
+- `transactions`
+- `activity_logs`
+- `leads`
+- `carts`
+- `cart_items`
+- `wishlists`
+- `employees`
+- `deliveries`
+- `social_posts`
+- `builder_requests`
+- `wallet_transactions`
+- `knowledge_base`
+- `kb_history`
+- `reviews`
+- `notifications`
+- `live_traffic`
+- `coupons`
+- `payouts`
+- `categories`
+- `market_intel`
+- `verification_requests`
+- `documents`
+- `playerup_listings`
+- `z2u_listings`
+- `z2u_bump_logs`
+- `g2g_orders`
+- `g2g_offers`
+- `whatsapp_messages`
+
+### JSON file backed content and legacy data
+
+There are also file-based datasets under `data/`:
+
+- `balance_history.json`
+- `deliveries.json`
+- `domain_metrics.json`
+- `employees.json`
+- `inventory.json`
+- `leads.json`
+- `messages.json`
+- `orders.json`
+- `pages.json`
+- `posts.json`
+- `products.json`
+- `projects.json`
+- `promocodes.json`
+- `rentals.json`
+- `services.json`
+- `settings.json`
+- `social_posts.json`
+- `testimonials.json`
+- `tickets.json`
+- `users.json`
+
+Important implementation note:
+
+- Commerce and accounts are mainly DB-driven now
+- Some content and website management is still JSON-backed
+- Legal pages use `data/pages.json` through `/api/pages`
+- Services, projects, rentals, and messages also use file-backed APIs
+
+For the rebuild, use one clean content strategy:
+
+- either DB-backed CMS-style content tables
+- or a clean structured content layer
+- avoid mixing core content across DB and flat JSON files
+
+## 6. Public Page Inventory
+
+The table below is the main public and buyer-facing route map.
+
+| Route | Purpose | Main data source or API | Notes |
+|---|---|---|---|
+| `/` | Homepage and brand landing page | Shared components, stats widgets | Uses hero, featured products, business section, services, pricing, work, audit, footer |
+| `/about` | About and brand story | Static page content | Brand story, trust, founder/business identity |
+| `/services` | Agency services page | Service-focused presentation | Main services sales page |
+| `/services/form-business` | US business formation wizard | `/api/admin/corptools` | Corporate Tools-powered multi-step company formation flow |
+| `/work` | Work/projects showcase wrapper | `WorkSection` | Portfolio-style page |
+| `/blog` | Blog listing | `/api/blogs` | Featured article plus grid |
+| `/blog/[slug]` | Individual blog article | Direct DB query to `blogs` | Also loads related product by category |
+| `/help` | Help center | `/api/kb` | Searchable help center |
+| `/help/[slug]` | Help center article | Direct DB query to `knowledge_base` | Increments views |
+| `/kb` | Knowledge base landing | Direct DB query to `knowledge_base` | Server-rendered grouped KB |
+| `/kb/[slug]` | Individual KB article | Direct DB query to `knowledge_base` | Related articles + article schema |
+| `/faq` | FAQ page | `/api/kb` plus hardcoded FAQs | Search/filter FAQ experience |
+| `/contact` | Contact / lead form | `/api/contact` | Submits contact message |
+| `/backlink-checker` | SEO tool landing | Backlink checker component | Lead magnet style tool page |
+| `/tools/password-generator` | Utility tool page | Client-side only | Free tool with CTA back to shop/services |
+| `/store` | Rentals / pre-ranked sites | `/api/rentals` | Marketplace for rentable assets |
+| `/shop` | Main product marketplace | `/api/products`, `/api/notifications` | Search, filters, wishlist, compare, add to cart, restock notify |
+| `/shop/[id]` | Product detail page | Direct DB query to `products` | Product detail, bundle support, schema markup |
+| `/shop/compare` | Product comparison page | Compare context | Side-by-side compare UI |
+| `/shop/review` | Post-order review form | `/api/user/review` | Review by `orderId` query param |
+| `/wishlist` | Saved items page | Wishlist context | Client-side wishlist display |
+| `/bundles` | Build-your-own bundle page | `/api/products` | Pick 3-5 products and add discounted items to cart |
+| `/checkout` | Checkout page | `/api/products`, `/api/coupons`, `/api/admin/settings`, `/api/leads`, `/api/checkout/process` | Supports single product, cart, or membership checkout |
+| `/order-success` | Payment success screen | `localStorage` last order, analytics | Purchase confirmation and upsell |
+| `/my-orders` | Customer order history | `/api/orders`, `/api/tickets/create` | Order list and issue reporting |
+| `/delivery/[token]` | Secure delivery vault | `/api/delivery/[token]`, `/api/reviews` | Shows credentials, details, copy, export, feedback |
+| `/reviews` | Public review wall | `/api/reviews/global`, `/api/testimonials` | Live review stream and testimonial submit |
+| `/share-experience` | Testimonial submit page | `/api/testimonials` | Simplified review/testimonial form |
+| `/builder` | Custom account build request | `/api/builder/submit` | VIP-style custom request flow |
+| `/membership` | Membership pricing page | Checkout links only | Silver/Gold or similar member plans |
+| `/refer` | Referral and affiliate page | `/api/referral/leaderboard` | Shows referral link and leaderboard |
+| `/login` | Buyer login | `/api/auth/login` | Stores `buyer_user` in `localStorage` |
+| `/register` | Buyer registration | `/api/auth/register` | Supports referral code from query string |
+| `/forgot-password` | Password reset request | `/api/auth/forgot-password` | Email-based reset request |
+| `/verify-email` | Email verification page | `/api/auth/verify` | Token verification flow |
+| `/verify` | Public document verification page | Query string only | Static verification display route |
+| `/dashboard` | Buyer dashboard | `/api/dashboard` | Wallet, referrals, orders, deliveries, verification, notifications |
+| `/dashboard/verification` | Buyer KYC / identity verification | `/api/upload`, `/api/user/verify-identity` | Upload document and selfie, submit request |
+| `/dashboard/seller` | Seller view | `/api/dashboard/seller` | Sales and listing overview; links to seller pages not fully present in repo |
+| `/support` | Buyer support center | `/api/tickets` | Ticket list, create, reply |
+| `/privacy` | Privacy page | `/api/pages?page=privacy` | Legal content loaded from `data/pages.json` |
+| `/terms` | Terms page | `/api/pages?page=terms` | Legal content loaded from `data/pages.json` |
+| `/staff/login` | Staff login | `/api/staff/login` | Stores `staff_user` in `localStorage` |
+| `/staff/dashboard` | Staff dashboard | `/api/staff/profile`, `/api/admin/inventory`, `/api/leads`, `/api/social` | Internal operator dashboard with multiple tabs |
+| `/hr` | HR board | `/api/hr/employees` | Protected internal route for employee management |
+
+## 7. Protected and Admin Page Inventory
+
+### Standalone admin routes
+
+| Route | Purpose | Main data source or API | Notes |
+|---|---|---|---|
+| `/admin/login` | Admin login | `/api/admin/login` | Also protected by login gate logic in `middleware.ts` |
+| `/admin/dashboard` | Executive admin dashboard | `/api/admin/dashboard`, `/api/admin/live-traffic` | KPI, order, and activity overview |
+| `/admin/blogs` | Blog manager | `/api/blogs`, `/api/admin/generate-blog` | Blog CRUD plus AI generation |
+| `/admin/buyers` | Buyer-focused admin page | Internal admin shell routing | Tied into user management flow |
+| `/admin/coupons` | Coupon manager | `/api/admin/coupons` | Create, toggle, delete coupons |
+| `/admin/g2g` | G2G command center | `/api/admin/g2g` | Offer creation, sync, market intelligence, stock repair, deliveries |
+| `/admin/inventory` | Main admin mega panel | Many admin and public APIs | Central command center with many tabs |
+| `/admin/kb` | Knowledge base manager | `/api/kb`, `/api/admin/kb-history` | KB CRUD and history |
+| `/admin/newsletter` | Newsletter sender | `/api/admin/newsletter/send` | Bulk email/newsletter sending UI |
+| `/admin/payments` | Payment gateway settings | Settings APIs | Gateway config and payment settings UI |
+| `/admin/payouts` | Payout queue | `/api/admin/payouts` | Approve/reject payout requests |
+| `/admin/playerup` | PlayerUp automation center | `/api/admin/playerup` | Sync, post, bump, logs |
+| `/admin/reviews` | Standalone review moderation | `/api/admin/reviews` | Review moderation UI |
+| `/admin/settings` | Global settings page | `/api/admin/settings`, `/api/admin/profile`, `/api/admin/reset` | System settings and admin profile |
+| `/admin/users` | User manager | `/api/admin/users` | Buyer/staff/admin user editing |
+| `/admin/z2u` | Z2U command center | `/api/admin/z2u` | Z2U listings, sync, creator, lifecycle controls |
+| `/admin/z2u-intel` | Z2U intelligence page | `/api/admin/z2u-intel` | Intelligence and AI-assisted analysis page |
+
+### Main admin mega panel tabs inside `/admin/inventory`
+
+The file `app/admin/inventory/page.tsx` dynamically loads a large set of operational tabs. These are important because they define most of the internal back office behavior.
+
+Core tabs loaded there:
+
+- `CatalogTab`
+- `OrdersTab`
+- `StockTab`
+- `BundleTab`
+- `SellTab`
+- `G2GTab`
+- `FinanceTab`
+- `PromosTab`
+- `WebsiteTab`
+- `IntelTab`
+- `PaymentsTab`
+- `UsersTab`
+- `HRTab`
+- `KBTab`
+- `MarketingTab`
+- `ToolsTab`
+- `LogsTab`
+- `SupportTab`
+- `SettingsTab`
+- `CatalogGenerator`
+- `ReviewsTab`
+- `DocumentsTab`
+- `VerificationTab`
+- `SellersTab`
+- `Z2UTab`
+- `Z2UOfferCreator`
+- `BuilderTab`
+- `WhatsAppTab`
+- `TrafficTab`
+- `BusinessTab`
+- `IndexingTab`
+
+Operational meaning of the mega panel:
+
+- product catalog and category management
+- raw inventory credential stock management
+- order management
+- bundle creation
+- manual sale / sale logging
+- wallet and finance adjustments
+- website content management
+- market intelligence tracking
+- HR / staff management
+- KB / blog / marketing content
+- docs and verification workflows
+- marketplace integration management
+- live traffic and SEO indexing management
+
+## 8. Main End-to-End User Flows
+
+### A. Storefront to payment to delivery
+
+1. User lands on homepage or shop
+2. User browses products on `/shop`
+3. User can:
+   - search
+   - filter by platform
+   - add to wishlist
+   - compare items
+   - add to cart
+4. User goes to `/checkout`
+5. Checkout supports:
+   - single product purchase
+   - cart checkout
+   - membership purchase
+6. Coupon validation happens through `/api/coupons`
+7. Payment submission goes to `/api/checkout/process`
+8. Payment methods in current code:
+   - Stripe
+   - Cryptomus
+   - Binance Pay
+   - wallet balance
+9. After successful purchase:
+   - order is created
+   - stock is reduced
+   - delivery entry is created
+   - delivery token page is generated
+   - email is sent
+10. Customer sees `/order-success`
+11. Customer can later open `/my-orders` and `/delivery/[token]`
+
+### B. Buyer auth flow
+
+1. Register on `/register`
+2. Verify email through `/verify-email`
+3. Login at `/login`
+4. Buyer session is stored in `localStorage`
+5. Dashboard is available at `/dashboard`
+
+### C. Buyer dashboard flow
+
+Dashboard gives access to:
+
+- wallet overview
+- referral earnings
+- recent orders
+- active deliveries
+- notifications
+- business formation status
+- verification status
+
+### D. Support flow
+
+1. Buyer visits `/support`
+2. Creates ticket through `/api/tickets`
+3. Admin or staff replies through admin/support tools
+4. Buyer sees replies in support center
+
+### E. Review flow
+
+Current review-related flows:
+
+- public review wall on `/reviews`
+- testimonial submission on `/share-experience`
+- post-order review form on `/shop/review?orderId=...`
+- delivery page review submission from `/delivery/[token]`
+
+### F. Membership and VIP flow
+
+- Membership landing page is `/membership`
+- Checkout supports membership products directly
+- Product detail and listing logic can gate some items based on user membership
+
+### G. Referral and affiliate flow
+
+- `/refer` shows referral program
+- Buyer gets a referral code and link
+- Dashboard exposes referral metrics
+- Affiliate leaderboard endpoints exist
+- Wallet conversion and withdraw routes also exist
+
+### H. Business formation flow
+
+1. User lands on `/services/form-business`
+2. User chooses jurisdiction and formation options
+3. Frontend requests account, offerings, schema, and filing methods from `/api/admin/corptools`
+4. User completes wizard
+5. Corporate Tools API is used as the back-end service for business setup
+
+### I. Staff flow
+
+1. Staff logs in on `/staff/login`
+2. Staff dashboard loads profile and permitted data
+3. Staff can manage subsets of:
+   - inventory
+   - leads
+   - marketing
+   - support
+   - website content
+   - finance
+   - PlayerUp
+   - Z2U
+4. Staff profile can be updated through `/api/staff/profile`
+
+## 9. API Route Inventory
+
+This section lists the route files that define the working back-end surface of the main app.
+
+### Auth and account
+
+- `/api/auth/register` - buyer registration, referral linkage, verification token, email send
+- `/api/auth/login` - buyer login, role-aware login path
+- `/api/auth/forgot-password` - password reset request
+- `/api/auth/verify` - email verification
+- `/api/dashboard` - buyer dashboard data
+- `/api/dashboard/seller` - seller dashboard data
+- `/api/orders` - buyer order list
+- `/api/orders/recent` - recent orders feed
+- `/api/notifications` - buyer notifications
+- `/api/user/profile` - buyer profile update
+- `/api/user/review` - post-order testimonial/review submit
+- `/api/user/verify-identity` - KYC request submit and status
+- `/api/user/wallet` - wallet read/update logic
+- `/api/user/wallet/deposit` - wallet deposit flow
+- `/api/user/wallet/convert` - referral balance to wallet conversion
+- `/api/user/referrals` - referral-related user data
+- `/api/user/bonus` - user bonus logic
+- `/api/user/2fa` - user 2FA endpoint
+
+### Catalog, cart, checkout, delivery
+
+- `/api/products` - product CRUD, bulk import/update, stock-aware listing
+- `/api/cart` - cart persistence
+- `/api/wishlist` - wishlist persistence
+- `/api/coupons` - coupon validation for checkout
+- `/api/checkout/process` - payment processing and order creation
+- `/api/delivery/[token]` - secure delivery vault access and reveal tracking
+- `/api/reviews` - product reviews
+- `/api/reviews/global` - global review wall feed
+- `/api/sales/recent` - recent paid sales feed
+
+### Content, leads, and marketing
+
+- `/api/contact` - contact form submit
+- `/api/messages` - stored inbound messages
+- `/api/pages` - legal/static page content from `data/pages.json`
+- `/api/services` - services content
+- `/api/projects` - project/work content
+- `/api/rentals` - rental/pre-ranked asset content
+- `/api/blogs` - blog CRUD and listing
+- `/api/kb` - knowledge base content and CRUD
+- `/api/testimonials` - testimonials and public share experience flow
+- `/api/newsletter` - newsletter subscribe endpoint
+- `/api/audit` - SEO/site audit lead tool
+- `/api/backlinks` - backlink checker tool route
+- `/api/builder/submit` - custom builder request
+- `/api/leads` - CRM lead capture and lead management
+- `/api/referral/leaderboard` - referral leaderboard
+- `/api/affiliate/leaderboard` - affiliate leaderboard
+- `/api/affiliate/withdraw` - affiliate withdrawal
+- `/api/analytics/track` - analytics event collection
+- `/api/stats/live` - live stats endpoint
+- `/api/stats/public` - public stat counters
+
+### Tickets, support, and communication
+
+- `/api/tickets` - ticket list, create, reply, close
+- `/api/tickets/create` - ticket creation helper route
+- `/api/upload` - image/file upload to base64 data URI
+- `/api/newsletter` - newsletter signup
+- `/api/whatsapp/webhook` - WhatsApp webhook ingestion
+- `/api/discord/fulfill` - Discord fulfillment hook
+
+### Admin operations
+
+- `/api/admin/login`
+- `/api/admin/dashboard`
+- `/api/admin/live-traffic`
+- `/api/admin/logs`
+- `/api/admin/orders`
+- `/api/admin/users`
+- `/api/admin/coupons`
+- `/api/admin/payouts`
+- `/api/admin/settings`
+- `/api/admin/profile`
+- `/api/admin/reset`
+- `/api/admin/reviews`
+- `/api/admin/reviews/remind`
+- `/api/admin/mass-review-boost`
+- `/api/admin/inventory`
+- `/api/admin/categories`
+- `/api/admin/kb-history`
+- `/api/admin/verification`
+- `/api/admin/documents`
+- `/api/admin/documents/email`
+- `/api/admin/newsletter/send`
+- `/api/admin/whatsapp`
+- `/api/admin/indexing`
+- `/api/admin/check`
+- `/api/admin/stats`
+- `/api/admin/sync-db`
+- `/api/admin/fix-balance`
+- `/api/admin/builder`
+
+### Admin content generation and AI helper routes
+
+- `/api/admin/generate-blog`
+- `/api/admin/generate-kb`
+- `/api/admin/bulk-generate-kb`
+- `/api/admin/generate-marketing`
+- `/api/admin/generate-reviews`
+- `/api/admin/bulk-generate-product-reviews`
+
+### Marketplace and external selling hubs
+
+- `/api/admin/g2g`
+- `/api/g2g/webhook`
+- `/api/webhook/g2g/order`
+- `/api/webhook/g2g/offer`
+- `/api/cron/g2g-sync`
+- `/api/admin/playerup`
+- `/api/cron/playerup`
+- `/api/admin/z2u`
+- `/api/admin/z2u-intel`
+- `/api/repair`
+
+### Finance and operations
+
+- `/api/finance` - transaction and wallet movement log
+- `/api/market` - market intelligence tracking
+- `/api/social` - social posting / marketing feed data
+- `/api/hr/employees` - employee CRUD and user sync
+
+### Webhooks and payment processors
+
+- `/api/webhooks/stripe`
+- `/api/webhooks/cryptomus`
+
+### Setup and health
+
+- `/api/health`
+- `/api/setup`
+- `/api/setup/migrate`
+
+## 10. Shared Service Libraries
+
+Key files in `lib/` and what they do:
+
+- `lib/db.ts` - MySQL pool, query helper, DB bootstrap, schema initialization
+- `lib/auth.ts` - admin auth checks from cookie/settings
+- `lib/payment.ts` - order fulfillment, membership activation, delivery token generation, stock movement
+- `lib/email.ts` - SMTP email sending and transactional email templates
+- `lib/g2g.ts` - G2G API auth, signing, stock sync, order messaging
+- `lib/corptools.ts` - Corporate Tools API client
+- `lib/telegram.ts` - Telegram alerts and outbound messaging
+- `lib/google-indexing.ts` - Google indexing helper
+- `lib/playerup-auto.ts` - PlayerUp automation helper
+- `lib/analytics.ts` - frontend analytics helpers
+- `lib/discord.ts` - Discord integration logic
+- `lib/icons.ts` - platform icon mapping
+- `lib/api-response.ts` - helper response utilities
+
+## 11. External Integrations
+
+The current codebase connects to these external systems:
+
+- MySQL
+- Stripe
+- Cryptomus
+- Binance Pay
+- SMTP email through Nodemailer
+- Telegram bot/admin alerts
+- Google Analytics
+- Google Indexing / Search Console style integration
+- Corporate Tools
+- G2G
+- PlayerUp
+- Z2U
+- WhatsApp webhook flow
+- Discord fulfillment route
+- AI generation endpoints for blog/KB/marketing/reviews
+
+Marketplace note:
+
+- G2G has both admin center logic and webhook routes
+- PlayerUp and Z2U rely on admin routes plus extension/automation support elsewhere in the repo
+- There are sidecar browser extension folders in the repository used for marketplace automation tasks
+
+## 12. Top-Level Folder Guide
+
+This repository contains more than the main site.
+
+| Folder or file | Purpose |
+|---|---|
+| `app/` | Main Next.js App Router pages and API routes |
+| `components/` | Shared UI components and admin tab components |
+| `lib/` | Shared backend and service logic |
+| `data/` | JSON-backed content and legacy structured data |
+| `public/` | Static assets |
+| `scripts/` | DB migration/seeding/setup scripts |
+| `android/` | Capacitor Android wrapper project |
+| `mobile-build/` | Web assets for mobile wrapper |
+| `officialum_admin_mobile/` | Separate Flutter mobile app |
+| `extension/` | Browser extension project |
+| `extension-bump/` | Browser extension for bumping/listing support |
+| `extension-creator/` | Browser extension for creation workflows |
+| `z2u-thread-extender/` | Z2U-related extension/helper |
+| `g2/` | G2G-related assets / PHP API materials |
+| `bot/` | Bot-related files |
+| `offer (1)/` | Separate PHP/MySQL bot package |
+| `officialum1-site-main/` | Secondary or duplicate site project snapshot |
+| `middleware.ts` | Admin and HR route gate logic |
+| `package.json` | Main app dependencies and scripts |
+| `vercel.json` | Deployment and cron configuration |
+
+## 13. Build and Runtime Notes
+
+Main scripts from `package.json`:
+
+- `npm run dev`
+- `npm run build`
+- `npm start`
+- `npm run deploy`
+
+Current deployment model:
+
+- Next.js app intended for Vercel-style hosting
+- Cron route present in `vercel.json`
+- MySQL database expected
+- Several env-based third-party integrations expected
+
+Important runtime note for rebuild:
+
+- The current app has many optional external integrations
+- The clean rebuild should isolate integration-dependent features behind modules or toggles
+
+## 14. Important Current Implementation Quirks
+
+These are not reasons to remove features. They are reasons to rebuild them more cleanly.
+
+### A. Mixed data model
+
+- Some site content is in MySQL
+- Some site content is in JSON files
+- Admin tools touch both systems
+
+### B. Very large admin surface
+
+- `/admin/inventory` is effectively a mega application inside one page
+- Many unrelated business functions live together in one huge internal screen
+
+### C. Auth/session inconsistency
+
+- Buyer and staff state is client-localStorage-heavy
+- Admin is cookie-gated
+- Some APIs rely on user IDs passed from the client
+
+### D. Multiple businesses combined
+
+- Agency site
+- digital account marketplace
+- business formation system
+- staff and HR system
+- marketplace automation console
+
+This is powerful, but the rebuild should present it in a cleaner information architecture.
+
+### E. Sidecar automation projects in same repo
+
+- Extensions and extra projects live beside the main site
+- Rebuild should separate main platform from automation tooling at the architecture level
+
+### F. Verified partial or messy areas worth cleaning in rebuild
+
+- Some admin review moderation payloads do not align cleanly with the API
+- Some website/admin content actions are wired through legacy JSON endpoints
+- Newsletter sending logic is not cleanly separated from audit/email helpers
+- Some admin actions are present in UI but only partially implemented
+- Seller dashboard links point to pages that are not fully present
+
+## 15. Rebuild Brief for Another Developer
+
+If another developer is rebuilding this project, the rebuild should preserve the following capabilities.
+
+### Must keep
+
+- same page families and route structure
+- same product catalog and account storefront concept
+- same cart, wishlist, compare, checkout, and delivery vault flows
+- same buyer dashboard and support flows
+- same membership and referral systems
+- same business formation wizard
+- same admin operational breadth
+- same staff/HR capability
+- same G2G, PlayerUp, and Z2U operational idea
+
+### Can improve heavily
+
+- theme
+- visual language
+- design system
+- spacing and page length
+- page grouping and information hierarchy
+- admin IA and modularity
+- content management architecture
+- auth/session implementation
+- consistency of API contracts
+
+### Recommended clean rebuild architecture
+
+1. Keep Next.js App Router
+2. Keep MySQL for transactional data
+3. Move all editable content into either:
+   - a clean DB-backed CMS table set
+   - or a dedicated content module
+4. Replace localStorage auth with real server-side session auth
+5. Split admin into clearer modules instead of one mega page
+6. Keep marketplace integrations behind service modules
+7. Preserve delivery token system and inventory-based fulfillment
+8. Keep the homepage block structure, but reduce clutter
+
+### Recommended design brief
+
+Build a site that feels like the same product platform, but cleaner:
+
+- same general route map
+- same long-form conversion structure
+- same premium marketplace feel
+- different theme colors and brand mood
+- less noisy UI
+- fewer competing card styles
+- clearer typography hierarchy
+- more consistent mobile behavior
+
+Suggested approach:
+
+- keep the same layout grammar
+- keep the same features
+- use a cleaner theme system
+- reduce duplicated page patterns
+- simplify giant dense admin screens
+
+## 16. What the New Developer Should Build Again
+
+This is the shortest possible feature summary to hand to a rebuild developer:
+
+- Marketing site with homepage, about, services, work, blog, FAQ, help, contact, legal pages
+- Digital product marketplace with search, filtering, compare, wishlist, cart, checkout, and product detail pages
+- Multi-gateway payment processing with Stripe, Cryptomus, Binance, and wallet
+- Delivery vault system that reveals credentials after successful payment
+- Buyer accounts with dashboard, orders, support, reviews, wallet, referrals, and verification
+- Membership plans and VIP-gated offers
+- Referral and affiliate logic
+- Support ticket system
+- Reviews and testimonials system
+- Blog and knowledge base CMS
+- Business formation wizard backed by Corporate Tools
+- Admin back office for catalog, orders, inventory, finance, content, users, staff, reviews, docs, verification, traffic, and settings
+- Staff dashboard for internal operators
+- G2G / PlayerUp / Z2U marketplace management centers
+
+## 17. Final Recommendation
+
+Do not clone the current code structure line for line.
+
+Instead:
+
+- clone the product behavior
+- clone the route map
+- clone the admin/business capabilities
+- clone the storefront and delivery logic
+- then rebuild the implementation with a cleaner architecture and a different theme
+
+If you use this file as the source brief, another developer should be able to build:
+
+- the same website product
+- with the same major pages
+- with the same main features
+- with the same business logic domains
+- but with a cleaner and more maintainable system

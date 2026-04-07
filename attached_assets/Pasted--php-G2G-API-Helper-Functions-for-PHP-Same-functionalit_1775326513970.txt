@@ -1,0 +1,122 @@
+<?php
+/**
+ * G2G API Helper Functions for PHP
+ * Same functionality as lib/g2g-api.js but in PHP
+ */
+
+// Load environment variables
+$G2G_API_KEY = getenv('G2G_API_KEY') ?: "AZES6HAPUIXTNK6ATCLIGHOMNF2TRLH6";
+$G2G_SECRET_KEY = getenv('G2G_SECRET_KEY') ?: "asWMg3K5xwxHiAMr0LxGHkEDx0Z7XnXzJsJ1V3feRV2";
+$G2G_USER_ID = getenv('G2G_USER_ID') ?: "7788063";
+$G2G_BASE_URL = getenv('G2G_BASE_URL') ?: "https://open-api.g2g.com/v2";
+
+// Admin password for login (change this to your desired password)
+// You can also set ADMIN_PASSWORD environment variable
+define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'admin123');
+
+/**
+ * Generate HMAC-SHA256 signature for G2G API authentication
+ * Based on G2G official Postman collection:
+ * canonical_string = url_path + api_key + user_id + timestamp
+ */
+function generateSignature($path, $timestamp, $userId = null) {
+    global $G2G_API_KEY, $G2G_SECRET_KEY, $G2G_USER_ID;
+    
+    $uid = $userId ?: $G2G_USER_ID;
+    // G2G API format: path + api_key + user_id + timestamp (NO method!)
+    $stringToSign = $path . $G2G_API_KEY . $uid . $timestamp;
+    $signature = hash_hmac('sha256', $stringToSign, $G2G_SECRET_KEY);
+    return $signature;
+}
+
+/**
+ * Generate headers for API request including signature
+ */
+function getHeaders($method, $path, $userId = null) {
+    global $G2G_API_KEY, $G2G_USER_ID;
+    
+    $timestamp = (string)(time() * 1000); // milliseconds
+    $uid = $userId ?: $G2G_USER_ID;
+    
+    // Handle empty string case
+    if (empty($uid) || trim($uid) === '') {
+        $uid = $G2G_USER_ID;
+    }
+    
+    $signature = generateSignature($path, $timestamp, $uid);
+    
+    // G2G API uses 'g2g-userid' (without hyphen) as per official Postman collection
+    return [
+        'g2g-api-key: ' . $G2G_API_KEY,
+        'g2g-timestamp: ' . $timestamp,
+        'g2g-signature: ' . $signature,
+        'Content-Type: application/json',
+        'g2g-userid: ' . (string)$uid
+    ];
+}
+
+/**
+ * Make API request to G2G
+ */
+function makeG2GRequest($method, $url, $headers, $body = null) {
+    $ch = curl_init();
+    
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
+    
+    if ($body !== null) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+    }
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    if ($error) {
+        return [
+            'success' => false,
+            'error' => $error
+        ];
+    }
+    
+    return [
+        'success' => $httpCode >= 200 && $httpCode < 300,
+        'status_code' => $httpCode,
+        'data' => json_decode($response, true),
+        'raw_response' => $response
+    ];
+}
+
+/**
+ * Send JSON response
+ */
+function sendJsonResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    echo json_encode($data);
+    exit;
+}
+
+/**
+ * Get request body as JSON
+ */
+function getRequestBody() {
+    $input = file_get_contents('php://input');
+    return json_decode($input, true) ?: [];
+}
+
+/**
+ * Get query parameter
+ */
+function getQueryParam($name, $default = null) {
+    return isset($_GET[$name]) ? trim($_GET[$name]) : $default;
+}
+
+?>

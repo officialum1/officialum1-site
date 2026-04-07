@@ -1,0 +1,40 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health";
+import cartRouter from "./cart";
+import productsRouter from "./products";
+import ordersRouter from "./orders";
+import authRouter from "./auth";
+import blogsRouter from "./blogs";
+import reviewsRouter from "./reviews";
+import servicesRouter from "./services";
+import statsRouter from "./stats";
+import contactRouter from "./contact";
+import ticketsRouter from "./tickets";
+import adminRouter from "./admin";
+import paymentRouter from "./payment";
+import kbRouter from "./kb";
+import miscRouter from "./misc";
+import whatsappRouter from "./whatsapp";
+import socialRouter from "./social";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use(cartRouter);
+router.use(productsRouter);
+router.use(ordersRouter);
+router.use(authRouter);
+router.use(blogsRouter);
+router.use(reviewsRouter);
+router.use(servicesRouter);
+router.use(statsRouter);
+router.use(contactRouter);
+router.use(ticketsRouter);
+router.use(adminRouter);
+router.use(paymentRouter);
+router.use(kbRouter);
+router.use(miscRouter);
+router.use(whatsappRouter);
+router.use(socialRouter);
+
+export default router;

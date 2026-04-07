@@ -1,0 +1,307 @@
+You are a senior technical SEO engineer, full-stack developer, schema strategist, and CRO specialist.
+
+I need you to do a **deep technical SEO audit + implementation plan + direct fixes** for this website:
+
+**Website:** https://officialum1.com/
+
+## Main goal
+
+Improve crawlability, indexing, structured data, topical relevance, internal linking, category/page SEO, and overall organic search performance for Google, AI search systems, and modern LLM-based discovery.
+
+## Business context
+
+This site has:
+
+* agency/service pages
+* shop/product/category pages
+* blog/content pages
+* knowledge base/support-style pages
+
+We want the site to rank for commercial intent keywords around products and services.
+Examples of target intent patterns:
+
+* reddit account for sale
+* reddit boosting service
+* discord account for sale
+* instagram boosting service
+* social media account for sale
+* digital product marketplace
+* account boosting services
+
+You should use your own judgment and improve keyword targeting, architecture, and page strategy beyond these examples.
+
+## What I want from you
+
+Do a **complete end-to-end audit and implementation**, not just advice.
+
+Work in 4 phases:
+
+# PHASE 1 — FULL SEO + TECHNICAL AUDIT
+
+Crawl the site and identify:
+
+1. Indexing issues
+2. Robots.txt problems
+3. Sitemap issues
+4. Canonical tag issues
+5. Missing / duplicate meta titles
+6. Missing / duplicate meta descriptions
+7. Missing H1 or multiple H1 problems
+8. Thin content pages
+9. Duplicate or near-duplicate pages
+10. Broken internal links
+11. Redirect chains / 404 issues
+12. Weak internal linking
+13. Poor URL structure
+14. Missing image alt text
+15. Missing OG / Twitter meta tags
+16. Weak Core Web Vitals opportunities
+17. JS rendering / hydration issues affecting SEO
+18. Poor mobile SEO signals
+19. Breadcrumb issues
+20. Pagination / filter / faceted navigation SEO issues
+21. Category page optimization gaps
+22. Product page optimization gaps
+23. Blog/content cluster gaps
+24. E-E-A-T trust signal gaps
+25. Local/business entity signal gaps
+26. Knowledge Panel readiness gaps
+27. AI/LLM discoverability gaps
+
+Then give me:
+
+* a prioritized issue list
+* severity: critical / high / medium / low
+* impact estimate
+* exact file/component/template likely involved
+* exact fix recommendation
+
+# PHASE 2 — DIRECT IMPLEMENTATION
+
+Implement fixes directly in the codebase wherever possible.
+
+## Must implement these items if missing or weak:
+
+### A. Technical SEO foundation
+
+* clean robots.txt
+* XML sitemap and sitemap index if needed
+* canonical tags on all important pages
+* proper meta title + meta description generation rules
+* default OG tags + Twitter cards
+* breadcrumb support
+* noindex rules for thin, filtered, duplicate, search, cart, account, and utility pages when appropriate
+* proper rel handling if needed
+* fix broken internal links
+* improve internal anchor text
+
+### B. Structured data / schema
+
+Implement valid JSON-LD schema where appropriate:
+
+* Organization
+* WebSite
+* WebPage
+* BreadcrumbList
+* Product
+* Offer
+* AggregateRating (only where real data exists)
+* Review (only where real data exists)
+* Article / BlogPosting
+* FAQPage
+* Service
+* LocalBusiness if appropriate
+* ContactPage / AboutPage markup if relevant
+
+Also:
+
+* connect entity signals clearly for OfficialUM1
+* strengthen brand/entity understanding for Google Knowledge Panel readiness
+* include sameAs fields only if real official profiles exist
+* create a schema map showing which schema belongs on which template/page type
+
+### C. LLM / AI discoverability
+
+Create and/or improve:
+
+* /llms.txt
+* /humans.txt
+* cleaner machine-readable site guidance if appropriate
+* content discoverability for AI crawlers without hurting SEO
+* strong internal semantic linking between commercial, informational, and trust pages
+
+### D. On-page SEO
+
+For all key page types:
+
+* homepage
+* service pages
+* category pages
+* product pages
+* blog pages
+* knowledge base pages
+
+Improve:
+
+* title tags
+* meta descriptions
+* H1-H3 structure
+* intro copy
+* semantic entities
+* keyword placement
+* internal links
+* FAQ sections where useful
+* CTA placement
+* topical completeness
+* trust signals
+* page copy quality
+
+Do not keyword stuff.
+Write naturally but commercially strong.
+
+# PHASE 3 — CATEGORY + SERVICE PAGE SEO STRATEGY
+
+We especially want category and service pages to rank.
+
+Create or improve SEO landing pages around themes like:
+
+* “[platform] account for sale”
+* “[platform] boosting service”
+* “[platform] aged account”
+* “[platform] verified account”
+* “[platform] growth service”
+
+Examples:
+
+* reddit account for sale
+* reddit boosting service
+* discord account for sale
+* instagram boosting service
+
+But do this intelligently:
+
+* avoid spammy duplication
+* avoid doorway-page patterns
+* create scalable reusable templates
+* use unique supporting content blocks for each category/service
+* create optimized category intros
+* add FAQs
+* add breadcrumbs
+* add related categories/services
+* add supporting blog links
+* add trust/support/delivery information where appropriate
+
+Build a keyword architecture that maps:
+
+* homepage
+* primary service pages
+* primary category pages
+* secondary subcategory pages
+* blog/support content
+* trust/legal/help pages
+
+Output a keyword-to-page map.
+
+# PHASE 4 — DELIVERABLES
+
+After auditing and implementing, give me these outputs:
+
+## 1. Executive summary
+
+Simple explanation of the biggest SEO problems and fixes.
+
+## 2. Completed fixes list
+
+Show exactly what was changed.
+
+## 3. Remaining recommendations
+
+What still needs manual input from me.
+
+## 4. Page-by-page SEO recommendations
+
+For top priority pages, provide:
+
+* target keyword
+* secondary keywords
+* title tag
+* meta description
+* H1
+* suggested schema
+* internal links to add
+* FAQ ideas
+
+## 5. Content expansion plan
+
+Suggest:
+
+* high-intent category pages
+* service pages
+* blog clusters
+* supporting topical authority articles
+* trust-building pages
+
+## 6. Knowledge Panel readiness checklist
+
+Tell me what is done and what is still needed:
+
+* organization schema
+* sameAs
+* consistent NAP/brand data
+* about page quality
+* contact page quality
+* social/entity consistency
+* author/editor/business trust signals
+
+## 7. AI visibility checklist
+
+Tell me what was done for:
+
+* llms.txt
+* crawl clarity
+* structured content
+* semantic page relationships
+* machine-readable trust signals
+
+# Important constraints
+
+* Do not make fake reviews, fake ratings, fake authors, fake awards, or fake business claims.
+* Do not add schema that is not supported by visible page content.
+* Do not stuff keywords unnaturally.
+* Do not create doorway/spam pages.
+* Keep content commercially strong but natural.
+* Follow Google Search best practices.
+* Follow valid schema rules.
+
+# Extra requirements
+
+Please inspect all major routes/templates/components and identify reusable SEO patterns.
+If the stack supports it, centralize SEO logic into reusable components/helpers.
+
+Also do these:
+
+* create reusable metadata generators
+* create reusable schema generators
+* create reusable breadcrumb logic
+* create reusable category SEO block components
+* create reusable FAQ SEO component
+* create internal linking suggestions between related pages
+* improve footer/header contextual internal links if useful
+
+# Output format
+
+Respond in this order:
+
+1. Audit findings
+2. Priority fixes
+3. Code changes made
+4. New files added
+5. SEO page map
+6. Schema map
+7. llms.txt content
+8. robots.txt content
+9. sitemap notes
+10. Remaining manual actions
+
+Be aggressive in finding issues, but careful and clean in implementation.
+Act like a real senior SEO engineer who also writes production-safe code.

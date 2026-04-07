@@ -1,0 +1,56 @@
+User-agent: *
+Allow: /
+
+# Block utility/account pages from indexing
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order-success
+Disallow: /my-orders
+Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /wishlist
+Disallow: /admin
+Disallow: /d/
+
+# Allow all content pages
+Allow: /shop
+Allow: /shop/
+Allow: /blog
+Allow: /blog/
+Allow: /kb
+Allow: /kb/
+Allow: /services
+Allow: /about
+Allow: /contact
+Allow: /reviews
+Allow: /work
+Allow: /faq
+Allow: /privacy
+Allow: /terms
+Allow: /bundles
+Allow: /refer
+Allow: /membership
+
+# Sitemap
+Sitemap: https://officialum1.com/sitemap.xml
+
+# AI/LLM crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /

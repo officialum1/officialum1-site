@@ -1,0 +1,20 @@
+/* TEAM */
+Name: OfficialUM1 Team
+Contact: hello [at] officialum1 [dot] com
+Location: Sahiwal, Punjab, Pakistan
+
+/* SITE */
+Last update: 2026/04/04
+Language: English
+Doctype: HTML5
+IDE: Custom build
+
+/* THANKS */
+Built with React, Vite, and Node.js
+Hosted on Replit
+
+/* CONTACT */
+Email: hello@officialum1.com
+WhatsApp: +92 323 7102924
+Twitter: @OfficialUM1
+Telegram: @OfficialUM1

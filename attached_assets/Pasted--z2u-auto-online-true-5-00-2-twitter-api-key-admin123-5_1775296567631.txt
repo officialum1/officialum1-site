@@ -1,0 +1,178 @@
+	z2u_auto_online	true	5.00	
+
+
+2	twitter_api_key	admin123	5.00	
+
+
+3	telegramToken	8459465990:AAFdk3JYvHtzbaqSrX4E70NAE2lCfTSr0Y8	5.00	
+
+
+4	telegramChatId	1057210686	5.00	
+
+
+5	telegram_chat_id	@buyallsocialmedia	5.00	
+
+
+6	telegram_bot_token	8459465990:AAFdk3JYvHtzbaqSrX4E70NAE2lCfTSr0Y8	5.00	
+
+
+7	stripeSecret	
+rk_live_51PbrmQIDd6USh1WyWHKJeoeD1K27moj6VqlkIYlme5jWQKA4fhl…
+5.00	
+
+
+8	stripePublic	
+pk_live_51PbrmQIDd6USh1WygjPh88hXT3lOZ5DqFtpKfOolWRvbrwkBk5R…
+5.00	
+
+
+9	smtpUser	no-reply@officialum1.com	5.00	
+
+
+10	smtpPass	KPH-@w?.5ryU,hm	5.00	
+
+
+11	smtpHost	smtp.titan.email	5.00	
+
+
+12	session_cookies_z2u_com	
+Path=/; Path=/; Path=/; Path=/; Path=/; Path=/; Path=/; Path…
+5.00	
+
+
+13	session_cookies_www_playerup_com	
+xf_user=1081652%2C220bdbd5baf062c438f6514b6b1e8201e24afec4; …
+5.00	
+
+
+14	session_cookies_playerup_com	
+xf_user=1081652%2C220bdbd5baf062c438f6514b6b1e8201e24afec4; …
+5.00	
+
+
+15	session_cookies_g2g_com	
+noticebar_cookie=1; is_adult=true; long_lived_token=73c9257a…
+5.00	
+
+
+16	session_cookies_chatgpt_com		5.00	
+
+
+17	referral_commission_rate	4	5.00	
+
+
+18	playerup_creator_state	
+{"running":true,"status":"queued","current":0,"total":50,"su…
+5.00	
+
+
+19	playerup_creator_command	
+{"id":"1774599437079_o3w1df","mode":"start","issuedAt":"2026…
+5.00	
+
+
+20	playerup_bump_enabled	true	5.00	
+
+
+21	payment_gateways	{"stripe":false,"crypto":true,"binance":false,"wallet":true}	5.00	
+
+
+22	openaiKey	
+sk-proj-aSO481aOt3vagx8seD_8V2qcgRWNuvgwKEC-rc4CNFbrMIuDzTgt…
+5.00	
+
+
+23	mozKey	famemake_secure_2024	5.00	
+
+
+24	marketing_ai_model	openai	5.00	
+
+
+25	linkedin_access_token	
+AQVqzH_-6A_vV3Ek8J_YlbX1_mLAk8_8qP9BuTcWHocraN_OGzWC_T7y9V1D…
+5.00	
+
+
+26	instagram_user_id	admin@officialum1.com	5.00	
+
+
+27	geminiKey	AIzaSyCFF6lTJaHmv8hdunUq3EPjaQhX6qOl7Q0	5.00	
+
+
+28	g2g_user_id	7788063	5.00	
+
+
+29	g2g_secret_key	idWGr11XXk2i6qzElpxejCAUsQj3jWy5NmoTKx6Mtsv	5.00	
+
+
+30	g2g_order_webhook_secret	qFEmRtPmLoTr	5.00	
+
+
+31	g2g_offer_webhook_secret	ZOMNUclhKZlNHyd	5.00	
+
+
+32	g2g_auto_reply	false	5.00	
+
+
+33	g2g_auto_pilot	true	5.00	
+
+
+34	g2g_auto_online	true	5.00	
+
+
+35	g2g_api_key	8NXH8NAKNSZMMJ8QMTXHCEO3NSNPPQDQ	5.00	
+
+
+36	facebook_page_token	
+EAAVed1X0zIQBQjDUX2tyGZC6HZBbPGtjcxWYb9aS1Y4GgqneePUI2VYWx6I…
+5.00	
+
+
+37	facebook_page_id	401409086388417	5.00	
+
+
+38	enable_stripe	true	5.00	
+
+
+39	enable_cryptomus	true	5.00	
+
+
+40	discount_silver	3	5.00	
+
+
+41	discount_gold	5	5.00	
+
+
+42	discount_diamond	10	5.00	
+
+
+43	discord_webhook_url	
+https://discord.com/api/webhooks/1467343192650289203/gcHaCUf…
+5.00	
+
+
+44	deepseekKey	sk-2dfb7449fb184c058e5f0d831cf1a5b9	5.00	
+
+
+45	cryptomusKey	
+ZJT96sgJ7O0Nm0FnihNCkKHwxcq7yfujULePNIbRyahKz5PHbN9sCV6IJujO…
+5.00	
+
+
+46	cryptomusId	f825b30d-8228-47b5-b92c-48dc1120998b	5.00	
+
+
+47	corptools_secret_key	
+e449819475ada558e5e69b59ec935c7be2030af85a3b1e6445ceda6797b8…
+5.00	
+
+
+48	corptools_account_id	3f982fee-8528-4f89-8929-a4cfc9c9aa4c	5.00	
+
+
+49	corptools_access_key	
+37872498dfab6c4efc644c6b048cfa4de2184a029cbba169e422daa9b8b7…
+5.00	
+
+
+50	binanceSecret	admin123	5.00

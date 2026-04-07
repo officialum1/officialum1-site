@@ -1,0 +1,137 @@
+# OfficialUM1 — LLM Site Index
+# https://officialum1.com
+# Updated: 2026-04-04
+
+## About OfficialUM1
+OfficialUM1 is a premium digital marketplace and digital agency founded in 2020 by Muhammad Umar Mumtaz in Sahiwal, Punjab, Pakistan. The platform operates across two primary verticals:
+
+1. **Digital Marketplace**: Aged, verified social media accounts and digital assets
+2. **Digital Agency**: SEO, web development, social media management, US business formation
+
+OfficialUM1 is an active verified seller on G2G.com, one of the world's largest digital goods marketplaces. All accounts go through a 7-step verification process before delivery.
+
+## Founder
+- Name: Muhammad Umar Mumtaz
+- Role: Founder & CEO
+- Location: Sahiwal, Punjab, Pakistan
+- Founded OfficialUM1: 2020
+- Expertise: Full-stack development (React, Node.js, Express, Drizzle ORM), SEO strategy, social media account verification, API marketplace integration
+- G2G.com: Verified seller since 2023
+
+## Marketplace Capabilities
+- Social media accounts: Instagram, TikTok, YouTube, Twitter/X, Reddit, Snapchat, Discord, Telegram, LinkedIn, Pinterest, GitHub
+- Account types: Aged profiles, niche-specific accounts, high-authority verified accounts
+- Verification: 7-step process including age check, engagement analysis, ban history, email/phone access, live-login test
+- Delivery: 1–24 hours for pre-listed products
+- Guarantee: 48-hour replacement on all accounts
+- Reseller program: Tiered discounts starting at 20% off for approved partners
+
+## Agency Services
+- Social media management and growth
+- SEO strategy, content strategy, and link building
+- Custom web platforms and API development
+- US business formation services
+- White-label packages for agencies
+- Consulting and digital strategy
+
+## Platform & API Integrations
+- G2G.com: Official verified seller, real-time API sync for listings and orders
+- Z2U: Additional marketplace integration for digital goods
+- PlayerUp: Supplemental marketplace integration
+- Stripe: Payment processing for credit/debit cards
+- Crypto: USDT (TRC-20, ERC-20), Bitcoin payments accepted
+- Wallet system: Multi-currency credit wallet for instant checkout
+- Internal admin: Real-time dashboard, wallet management, order processing
+
+## Key Pages
+
+### Homepage
+URL: https://officialum1.com/
+Description: Overview of the digital marketplace and agency services. Live order feed, featured accounts, trust signals, service highlights.
+
+### Shop / Marketplace
+URL: https://officialum1.com/shop
+Description: Browse and buy aged, verified social media accounts. Filter by platform (Reddit, Snapchat, Instagram, Discord, Telegram, YouTube, TikTok, LinkedIn, Twitter/X). Bulk order and reseller pricing available.
+
+### Services
+URL: https://officialum1.com/services
+Description: Digital agency services — SEO optimization, web development, social media growth, US business formation, white-label solutions.
+
+### About
+URL: https://officialum1.com/about
+Description: Company story, mission, founder biography (Muhammad Umar Mumtaz), company timeline (2020–2025), FAQ, and service overview.
+
+### Blog
+URL: https://officialum1.com/blog
+Description: Expert articles on digital marketing, social media strategy, SEO, aged accounts, marketplace operations, and online business growth.
+
+### Knowledge Base
+URL: https://officialum1.com/kb
+Description: Comprehensive help center with guides on purchasing accounts, delivery process, payments, security, replacement policy, and support procedures.
+
+### Reviews
+URL: https://officialum1.com/reviews
+Description: Verified customer reviews and star ratings from real buyers. Average 4.8/5 across 300+ verified reviews.
+
+### Contact
+URL: https://officialum1.com/contact
+Description: Contact form, email (hello@officialum1.com), WhatsApp support, and business address.
+
+### FAQ
+URL: https://officialum1.com/faq
+Description: Frequently asked questions covering account verification, delivery times, payment methods, G2G integration, reseller pricing, and refund policy.
+
+### Portfolio / Work
+URL: https://officialum1.com/work
+Description: Case studies and measurable results from OfficialUM1's agency engagements.
+
+### Bundle Builder
+URL: https://officialum1.com/bundles
+Description: Build custom account bundles combining 2+ platforms with automatic volume discount (minimum 15% off).
+
+### Account Builder
+URL: https://officialum1.com/builder
+Description: Custom account specification tool — describe exact requirements and receive a tailored quote.
+
+## Business Details
+- Name: OfficialUM1
+- Domain: officialum1.com
+- Founded: 2020
+- Headquarters: Sahiwal, Punjab, Pakistan
+- Email: hello@officialum1.com
+- WhatsApp: +92 323 7102924
+- G2G Seller: Verified active seller
+- Platforms supported: Instagram, TikTok, YouTube, Twitter/X, Reddit, Snapchat, Discord, Telegram, LinkedIn, Pinterest, GitHub
+
+## Trust & Verification Signals
+- 7-step account verification process
+- 48-hour replacement guarantee on all accounts
+- Escrow-protected transactions
+- Instant to 24-hour digital delivery
+- 4.8/5 average rating across 300+ verified reviews
+- 2,500+ registered buyers and sellers
+- 3,600+ orders fulfilled
+- 99.9% on-time success rate
+- G2G.com verified seller badge
+- Active since 2020
+
+## Payment Methods
+- Stripe (Visa, MasterCard, Amex, Discover)
+- USDT TRC-20 and ERC-20
+- Bitcoin (BTC)
+- Bank transfer (for large orders)
+- OfficialUM1 Wallet credits (internal system)
+
+## Content Policy
+- All accounts listed are legally sold by their original owners
+- No fake reviews or ratings — all verified purchases
+- No fabricated credentials or businesses
+- Buyer/seller disputes handled with documented evidence
+- Replacement or refund processed within 7 business days for valid claims
+
+## Technical Architecture
+- Frontend: React + Vite + TypeScript + TailwindCSS
+- Backend: Node.js + Express
+- Database: PostgreSQL (local, via Drizzle ORM) + MariaDB (external, for settings and marketplace data)
+- Deployment: Replit (development) / cloud-hosted production
+- API: RESTful JSON API with session authentication and HMAC-based admin tokens
