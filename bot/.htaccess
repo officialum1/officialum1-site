@@ -1,0 +1,5 @@
+RewriteEngine On
+
+RewriteRule ^bot$ bot.php [L]
+RewriteRule ^test$ test.php [L]
+RewriteRule ^setwebhook$ setwebhook.php [L]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": "trans_init_z2u_correction",
+    "type": "sale",
+    "platform": "Z2U",
+    "amount": 97,
+    "description": "Historical Z2U Sales Correction",
+    "processedBy": "Admin",
+    "date": "2026-02-01T12:00:00Z"
+  }
+]

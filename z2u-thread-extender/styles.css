@@ -1,0 +1,59 @@
+/*
+ * Z2U Batch Sort - notification overlay only
+ */
+
+:root {
+  --z2u-red: #da251c;
+}
+
+/* Bump Notification Box */
+.z2u-bump-overlay {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111;
+  color: #fff;
+  padding: 15px 25px;
+  border-radius: 12px;
+  border-left: 4px solid var(--z2u-red);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 999999;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: z2u-slide-in 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 250px;
+}
+
+.z2u-bump-overlay .pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--z2u-red);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--z2u-red);
+  animation: z2u-pulse 1.5s infinite;
+}
+
+.z2u-bump-overlay .text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+@keyframes z2u-slide-in {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes z2u-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+}
