@@ -1,0 +1,16 @@
+.next
+node_modules
+out
+build
+*.zip
+*.pem
+*.crx
+attributes.txt
+bot.zip
+deploy.zip
+v1.zip
+g2.zip
+offer (1).zip
+*.js.bak
+*.ts.bak
+tmp/

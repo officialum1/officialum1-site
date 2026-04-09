@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">OfficialUM1 Admin</string>
+    <string name="title_activity_main">OfficialUM1 Admin</string>
+    <string name="package_name">com.officialum1.admin</string>
+    <string name="custom_url_scheme">com.officialum1.admin</string>
+</resources>

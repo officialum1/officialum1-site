@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "title": "Website Development",
+        "desc": "Custom, high-performance websites built with Next.js and React. Secure, scalable, and designed to convert.",
+        "icon": "💻"
+    },
+    {
+        "id": 2,
+        "title": "SEO Services",
+        "desc": "Comprehensive Search Engine Optimization to dominate SERPs. We handle Technical, On-page, and Off-page SEO.",
+        "icon": "🚀"
+    },
+    {
+        "id": 3,
+        "title": "Guest Posting",
+        "desc": "Secure high-quality guest post placements on authoritative niche websites to boost your Domain Authority.",
+        "icon": "📰"
+    },
+    {
+        "id": 4,
+        "title": "Backlink Building",
+        "desc": "Strategic link-building campaigns. We acquire high-DR backlinks to enhance your site's credibility and ranking power.",
+        "icon": "🔗"
+    },
+    {
+        "id": 5,
+        "title": "Speed Optimization",
+        "desc": "Lightning-fast load times. We optimize code, images, and Core Web Vitals to improve User Experience and Google rankings.",
+        "icon": "⚡"
+    },
+    {
+        "id": 6,
+        "title": "Accounts & Growth",
+        "desc": "Premium social media accounts and member growth services. Jumpstart your social proof on Discord, Telegram, and more.",
+        "icon": "👥"
+    },
+    {
+        "id": 7,
+        "title": "US LLC Formation",
+        "desc": "Fast, hassle-free US LLC formation for non-residents. We handle EIN, registered agent, and business bank account setup.",
+        "icon": "🏢"
+    }
+]

@@ -1,0 +1,21 @@
+{
+    "crons": [
+        {
+            "path": "/api/cron/playerup",
+            "schedule": "0 0 * * *"
+        }
+    ],
+    "redirects": [
+        {
+            "source": "/(.*)",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "www.officialum1.com"
+                }
+            ],
+            "destination": "https://officialum1.com/$1",
+            "permanent": true
+        }
+    ]
+}

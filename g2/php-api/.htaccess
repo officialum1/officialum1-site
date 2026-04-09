@@ -1,0 +1,23 @@
+# PHP API Routes Configuration
+# Ye file php-api folder mein rakho
+
+RewriteEngine On
+
+# Route all API requests through router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/router.php [L,QSA]
+
+# Direct file access (if needed)
+RewriteRule ^api/get_services\.php$ api/get_services.php [L]
+RewriteRule ^api/get_products\.php$ api/get_products.php [L]
+RewriteRule ^api/create_offer\.php$ api/create_offer.php [L]
+RewriteRule ^api/deliver\.php$ api/deliver.php [L]
+
+# CORS Headers (if needed)
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PATCH, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+

@@ -1,0 +1,402 @@
+[
+  {
+    "id": 1,
+    "name": "Mason E.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Saved me months of grinding. Worth every penny.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 2,
+    "name": "David R.",
+    "role": "Buyer - Instagram 10k Followers",
+    "review": "Trusted seller. I have bought 3 accounts so far.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 3,
+    "name": "Mason E.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Got my Discord members in under an hour. Real looking profiles too.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 4,
+    "name": "Noah F.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Absolutely amazing service! Instant delivery.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 5,
+    "name": "Olivia P.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Trusted seller. I have bought 3 accounts so far.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 6,
+    "name": "Michael K.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Smooth transaction via Crypto. Recommend!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 7,
+    "name": "Emma W.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "The followers are sticking, high retention. Good job.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 8,
+    "name": "Sarah J.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Smooth transaction via Crypto. Recommend!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 9,
+    "name": "David R.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 10,
+    "name": "Michael K.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Will definitely buy again. Thanks guys!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 11,
+    "name": "Sarah J.",
+    "role": "Buyer - Instagram 10k Followers",
+    "review": "Finally a legit site for Reddit accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 12,
+    "name": "Mason E.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Cheap prices for such high quality accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 13,
+    "name": "Michael K.",
+    "role": "Buyer - Instagram 10k Followers",
+    "review": "Easy checkout, instant access. 10/10.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 14,
+    "name": "Michael K.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Best place to buy social assets. Support was very helpful.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 15,
+    "name": "Isabella G.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "Had a small issue but admin fixed it in 5 mins.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 16,
+    "name": "Liam C.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Will definitely buy again. Thanks guys!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 17,
+    "name": "Ava D.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "High authority backlinks really helped my SEO.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 18,
+    "name": "Alex M.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 19,
+    "name": "Sophia H.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Will definitely buy again. Thanks guys!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 20,
+    "name": "Noah F.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Smooth transaction via Crypto. Recommend!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 21,
+    "name": "Noah F.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "Finally a legit site for Reddit accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 22,
+    "name": "David R.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "Smooth transaction via Crypto. Recommend!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 23,
+    "name": "David R.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "The account was exactly as described. High karma and aged.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 24,
+    "name": "Isabella G.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "The followers are sticking, high retention. Good job.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 25,
+    "name": "Daniel T.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Absolutely amazing service! Instant delivery.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 26,
+    "name": "Alex M.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Will definitely buy again. Thanks guys!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 27,
+    "name": "Liam C.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Finally a legit site for Reddit accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 28,
+    "name": "Daniel T.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 29,
+    "name": "Sophia H.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Trusted seller. I have bought 3 accounts so far.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 30,
+    "name": "Isabella G.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Had a small issue but admin fixed it in 5 mins.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 31,
+    "name": "Mason E.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Saved me months of grinding. Worth every penny.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 32,
+    "name": "Isabella G.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Cheap prices for such high quality accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 33,
+    "name": "Emma W.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "The followers are sticking, high retention. Good job.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 34,
+    "name": "David R.",
+    "role": "Buyer - Instagram 10k Followers",
+    "review": "The followers are sticking, high retention. Good job.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 35,
+    "name": "James L.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "Finally a legit site for Reddit accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 36,
+    "name": "James L.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Got my Discord members in under an hour. Real looking profiles too.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 37,
+    "name": "Sarah J.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Smooth transaction via Crypto. Recommend!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 38,
+    "name": "Daniel T.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Saved me months of grinding. Worth every penny.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 39,
+    "name": "William B.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Got my Discord members in under an hour. Real looking profiles too.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 40,
+    "name": "Isabella G.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Finally a legit site for Reddit accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 41,
+    "name": "Sophia H.",
+    "role": "Buyer - Twitter Blue Verified",
+    "review": "High authority backlinks really helped my SEO.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 42,
+    "name": "Liam C.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "High authority backlinks really helped my SEO.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 43,
+    "name": "Noah F.",
+    "role": "Buyer - Instagram 10k Followers",
+    "review": "Will definitely buy again. Thanks guys!",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 44,
+    "name": "Alex M.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 45,
+    "name": "Ava D.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 46,
+    "name": "Ava D.",
+    "role": "Buyer - Discord 1k Members",
+    "review": "Authentication worked perfectly, no bans.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 47,
+    "name": "Alex M.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "Cheap prices for such high quality accounts.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 48,
+    "name": "Sarah J.",
+    "role": "Buyer - Facebook Page (Monetized)",
+    "review": "The followers are sticking, high retention. Good job.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 49,
+    "name": "Isabella G.",
+    "role": "Buyer - Reddit Account (Aged)",
+    "review": "Easy checkout, instant access. 10/10.",
+    "isAdmin": false,
+    "approved": true
+  },
+  {
+    "id": 50,
+    "name": "Daniel T.",
+    "role": "Buyer - TikTok 5k Followers",
+    "review": "The account was exactly as described. High karma and aged.",
+    "isAdmin": false,
+    "approved": true
+  }
+]

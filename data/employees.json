@@ -1,0 +1,103 @@
+[
+  {
+    "id": "emp_1",
+    "name": "Jane Doe",
+    "email": "jane@officialum1.com",
+    "position": "Support Specialist",
+    "department": "Support",
+    "status": "Active",
+    "joinDate": "2024-01-15",
+    "salary": 3500
+  },
+  {
+    "id": "emp_1768970724496",
+    "name": "CommissionUser",
+    "email": "comm@test.com",
+    "position": "Sales",
+    "department": "Marketing",
+    "salary": 0,
+    "commissionRate": 0,
+    "compensationType": "",
+    "joinDate": "2026-01-21",
+    "status": "Active"
+  },
+  {
+    "id": "emp_1768972427200",
+    "name": "CommissionUserV5",
+    "email": "v5@test.com",
+    "position": "Sales",
+    "department": "Marketing",
+    "compensationType": "commission",
+    "salary": 0,
+    "commissionRate": 15,
+    "joinDate": "2026-01-21",
+    "status": "Active"
+  },
+  {
+    "id": "emp_1769017698621",
+    "name": "RestrictedUser",
+    "email": "restricted@test.com",
+    "position": "Dev",
+    "department": "Development",
+    "salary": 0,
+    "commissionRate": 10,
+    "compensationType": "Commission",
+    "allowedPlatforms": [
+      "Z2U"
+    ],
+    "joinDate": "2026-01-21",
+    "status": "Active"
+  },
+  {
+    "id": "emp_1769058859597",
+    "name": "TestAll",
+    "email": "test@test.com",
+    "position": "Tester",
+    "department": "",
+    "salary": 1000,
+    "commissionRate": 0,
+    "compensationType": "Fixed",
+    "allowedPlatforms": [
+      "Z2U",
+      "PlayerUp",
+      "G2G",
+      "Direct"
+    ],
+    "joinDate": "2026-01-22",
+    "status": "Active"
+  },
+  {
+    "id": "emp_1769090755452",
+    "name": "umar",
+    "password": "umar@officialum1.com",
+    "email": "umar@officialum1.com",
+    "position": "sale",
+    "department": "Management",
+    "salary": 0,
+    "commissionRate": 40,
+    "compensationType": "Commission",
+    "allowedPlatforms": [
+      "Z2U",
+      "G2G",
+      "Direct"
+    ],
+    "joinDate": "2026-01-22",
+    "status": "Active"
+  },
+  {
+    "id": "emp_1769091168269",
+    "name": "TestStaffPass",
+    "password": "staff123",
+    "email": "pass@test.com",
+    "position": "Tester",
+    "department": "",
+    "salary": 1000,
+    "commissionRate": 0,
+    "compensationType": "Fixed",
+    "allowedPlatforms": [
+      "Z2U"
+    ],
+    "joinDate": "2026-01-22",
+    "status": "Active"
+  }
+]
