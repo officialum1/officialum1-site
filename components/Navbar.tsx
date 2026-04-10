@@ -72,7 +72,7 @@ export default function Navbar() {
     }
   };
 
-  const navLinks = [
+  const navLinks: { href: string; label: string; highlight?: boolean }[] = [
     { href: "/services", label: "Services" },
     { href: "/shop", label: "Shop" },
     { href: "/my-orders", label: "Track Order" },
@@ -81,7 +81,7 @@ export default function Navbar() {
     { href: "/faq", label: "Knowledge Base" },
     { href: "/about", label: "About" },
     { href: "/services/form-business", label: "US Business Hub", highlight: true },
-  ] as const;
+  ];
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
