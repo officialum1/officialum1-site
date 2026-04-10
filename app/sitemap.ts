@@ -1,10 +1,9 @@
 import { MetadataRoute } from 'next';
-import { query } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://officialum1.com';
 
-    // Static Pages
+    // Static Pages — always returned even if DB is unreachable
     const routes: MetadataRoute.Sitemap = [
         { url: baseUrl, lastModified: new Date(), changeFrequency: 'always', priority: 1, },
         { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8, },
@@ -20,37 +19,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/tools/password-generator`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7, },
     ];
 
-    try {
-        // Fetch Products
-        const products = await query("SELECT id, created_at FROM products") as any[];
-        const productUrls = products.map((product) => ({
-            url: `${baseUrl}/shop/${product.id}`,
-            lastModified: new Date(product.created_at || new Date()),
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-        }));
+    // Only attempt DB queries at runtime (not during build)
+    if (process.env.NODE_ENV === 'production' && process.env.DB_HOST) {
+        try {
+            const { query } = await import('@/lib/db');
 
-        // Fetch KB Articles
-        const articles = await query("SELECT slug, created_at FROM knowledge_base WHERE is_published = 1") as any[];
-        const kbUrls = articles.map((art) => ({
-            url: `${baseUrl}/kb/${art.slug}`,
-            lastModified: new Date(art.created_at || new Date()),
-            changeFrequency: 'monthly' as const,
-            priority: 0.7,
-        }));
+            const [products, articles, blogs] = await Promise.allSettled([
+                query("SELECT id, created_at FROM products") as Promise<any[]>,
+                query("SELECT slug, created_at FROM knowledge_base WHERE is_published = 1") as Promise<any[]>,
+                query("SELECT id, slug, created_at FROM blogs") as Promise<any[]>,
+            ]);
 
-        // Fetch Blog Posts
-        const blogs = await query("SELECT id, slug, created_at FROM blogs") as any[];
-        const blogUrls = blogs.map((blog) => ({
-            url: `${baseUrl}/blog/${blog.slug || blog.id}`,
-            lastModified: new Date(blog.created_at || new Date()),
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-        }));
+            if (products.status === 'fulfilled') {
+                products.value.forEach((product: any) => {
+                    routes.push({
+                        url: `${baseUrl}/shop/${product.id}`,
+                        lastModified: new Date(product.created_at || new Date()),
+                        changeFrequency: 'weekly',
+                        priority: 0.8,
+                    });
+                });
+            }
 
-        return [...routes, ...productUrls, ...kbUrls, ...blogUrls];
-    } catch (error) {
-        console.error("Sitemap Generation Error:", error);
-        return routes;
+            if (articles.status === 'fulfilled') {
+                articles.value.forEach((art: any) => {
+                    routes.push({
+                        url: `${baseUrl}/kb/${art.slug}`,
+                        lastModified: new Date(art.created_at || new Date()),
+                        changeFrequency: 'monthly',
+                        priority: 0.7,
+                    });
+                });
+            }
+
+            if (blogs.status === 'fulfilled') {
+                blogs.value.forEach((blog: any) => {
+                    routes.push({
+                        url: `${baseUrl}/blog/${blog.slug || blog.id}`,
+                        lastModified: new Date(blog.created_at || new Date()),
+                        changeFrequency: 'weekly',
+                        priority: 0.8,
+                    });
+                });
+            }
+        } catch (error) {
+            console.warn("Sitemap: DB unavailable, returning static routes only.", error);
+        }
     }
+
+    return routes;
 }
