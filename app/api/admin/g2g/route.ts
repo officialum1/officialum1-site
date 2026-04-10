@@ -235,8 +235,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    // Basic auth check removed for brevity, rely on middleware or specific check if needed
-    // if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await request.json();
         const { action, listings, orderId, delivery_details } = body;

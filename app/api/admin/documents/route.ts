@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { query, initDB } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         await initDB();
 
@@ -47,6 +49,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         await initDB(); // Ensure DB is init for GET as well just in case
 

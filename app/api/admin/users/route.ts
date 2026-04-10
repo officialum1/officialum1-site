@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from '@/lib/email';
+import { isAuthenticated } from '@/lib/auth';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 export async function GET(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
@@ -75,6 +78,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { userId, action, amount, email } = body;
@@ -124,7 +128,8 @@ export async function POST(req: Request) {
                 if (cleanEmail) {
                     const exists = await query("SELECT id FROM users WHERE email = ?", [cleanEmail]) as any[];
                     if (exists.length === 0) {
-                        await query("INSERT INTO users (email, role, password, is_verified, created_at) VALUES (?, 'buyer', '123456', 1, NOW())", [cleanEmail]);
+                        const hashedDefault = await bcrypt.hash('changeme123', 10);
+                        await query("INSERT INTO users (email, role, password, is_verified, created_at) VALUES (?, 'buyer', ?, 1, NOW())", [cleanEmail, hashedDefault]);
                         count++;
                     }
                 }
@@ -143,6 +148,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const body = await req.json();
         const { id, email, password, telegram, role } = body;
@@ -151,7 +157,11 @@ export async function PATCH(req: Request) {
         const values = [];
 
         if (email) { updates.push("email = ?"); values.push(email); }
-        if (password) { updates.push("password = ?"); values.push(password); } // Ideally hash this
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updates.push("password = ?");
+            values.push(hashedPassword);
+        }
         if (telegram) { updates.push("telegram = ?"); values.push(telegram); }
         if (role) { updates.push("role = ?"); values.push(role); }
         if (body.membership) { updates.push("membership = ?"); values.push(body.membership); }
@@ -168,6 +178,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');

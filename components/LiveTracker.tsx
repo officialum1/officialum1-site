@@ -10,7 +10,7 @@ export default function LiveTracker() {
         // Generate a random session ID if not exists
         let sessionId = sessionStorage.getItem('oum1_session');
         if (!sessionId) {
-            sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            sessionId = crypto.randomUUID();
             sessionStorage.setItem('oum1_session', sessionId);
         }
 

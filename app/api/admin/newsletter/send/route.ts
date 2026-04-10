@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { sendAuditReport } from '@/lib/email'; // Re-using existing email function
+import { sendAuditReport } from '@/lib/email';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { subject, content } = await req.json();
 

@@ -208,13 +208,7 @@ p {
   box-shadow: 0 20px 48px rgba(79, 70, 229, 0.12);
 }
 
-/* GRID SYSTEM */
-.container {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
+/* GRID SYSTEM - container handled by @layer components above */
 
 .grid-2 {
   display: grid;
@@ -517,7 +511,8 @@ select.input-field option {
     padding: 60px 0;
   }
 
-  .btn {
+  .hero .btn,
+  .hero .btn-group .btn {
     width: 100%;
   }
 
@@ -622,5 +617,25 @@ select.input-field option {
 @media (min-width: 769px) {
   .mobile-hide {
     display: inherit !important;
+  }
+}
+
+/* STAFF DASHBOARD RESPONSIVE */
+.staff-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .staff-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ADMIN SHELL MOBILE */
+@media (max-width: 1024px) {
+  .admin-content {
+    margin-left: 0 !important;
   }
 }

@@ -109,15 +109,17 @@ let isInitialized = false;
 export async function initDB(force = false) {
     if (isInitialized && !force) return;
 
+    // --- CORE TABLES ---
+
     // Users Table
     await query(`
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(50) PRIMARY KEY,
             email VARCHAR(255) UNIQUE NOT NULL,
-            username VARCHAR(100) UNIQUE, -- Added for Staff/Public Profiles
+            username VARCHAR(100) UNIQUE,
             password VARCHAR(255),
             telegram VARCHAR(255),
-            role VARCHAR(50) DEFAULT 'buyer', -- 'admin', 'buyer', or 'seller'
+            role VARCHAR(50) DEFAULT 'buyer',
             referral_code VARCHAR(50),
             referred_by VARCHAR(50),
             verification_token VARCHAR(255),
@@ -128,12 +130,15 @@ export async function initDB(force = false) {
             total_spent DECIMAL(10,2) DEFAULT 0.00,
             points INT DEFAULT 0,
             reset_token VARCHAR(100),
+            wallet_balance DECIMAL(10,2) DEFAULT 0.00,
+            affiliate_balance DECIMAL(10,2) DEFAULT 0.00,
+            total_affiliate_earnings DECIMAL(10,2) DEFAULT 0.00,
+            permissions TEXT,
+            two_factor_enabled BOOLEAN DEFAULT FALSE,
+            tier VARCHAR(50) DEFAULT 'Bronze',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
-
-    // Migration: Add username if missing
-    try { await query("ALTER TABLE users ADD COLUMN username VARCHAR(100) UNIQUE"); } catch (e) { }
 
     // Products Table
     await query(`
@@ -144,9 +149,31 @@ export async function initDB(force = false) {
             image TEXT,
             platform VARCHAR(100),
             description TEXT,
-            type VARCHAR(50), -- 'account' or 'service'
-            creds TEXT, -- Credentials or Service Details
+            type VARCHAR(50),
+            creds TEXT,
             stock INT DEFAULT 1,
+            g2g_listing_id VARCHAR(100),
+            category_id INT,
+            user_id VARCHAR(50),
+            status VARCHAR(50) DEFAULT 'active',
+            sale_price VARCHAR(50),
+            sale_ends_at TIMESTAMP NULL,
+            bundle_items TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Categories Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS categories (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            slug VARCHAR(100) NOT NULL UNIQUE,
+            icon VARCHAR(50),
+            image TEXT NULL,
+            discount_percent DECIMAL(5,2) DEFAULT 0.00,
+            sale_ends_at TIMESTAMP NULL,
+            is_vip_only BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -161,20 +188,65 @@ export async function initDB(force = false) {
             amount VARCHAR(50),
             originalPrice VARCHAR(50),
             promoCode VARCHAR(50),
+            status VARCHAR(50),
             method VARCHAR(50),
-            status VARCHAR(50), -- 'paid', 'pending'
+            quantity INT DEFAULT 1,
+            delivery_info TEXT,
+            delivery_status VARCHAR(50) DEFAULT 'pending',
+            delivery_details TEXT,
+            fulfilled_by VARCHAR(50),
+            review_sent BOOLEAN DEFAULT FALSE,
+            coupon_code VARCHAR(50),
+            discount_amount DECIMAL(10,2) DEFAULT 0.00,
+            progress_percent INT DEFAULT 0,
+            report_link TEXT,
             date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    // Migration: Add Quantity & Delivery Info (Safe Alter)
-    try { await query("ALTER TABLE orders ADD COLUMN quantity INT DEFAULT 1"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN delivery_info TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN delivery_status VARCHAR(50) DEFAULT 'pending'"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN delivery_details TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN fulfilled_by VARCHAR(50)"); } catch (e) { }
+    // Inventory Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS inventory (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(255),
+            platform VARCHAR(50),
+            purchasePrice DECIMAL(10,2),
+            status VARCHAR(50) DEFAULT 'In Stock',
+            purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            accountDetails LONGTEXT,
+            account_email VARCHAR(255),
+            account_username VARCHAR(255),
+            account_password VARCHAR(255),
+            account_region VARCHAR(50),
+            account_level VARCHAR(50),
+            account_meta JSON,
+            image LONGTEXT
+        )
+    `);
 
-    // Tickets Table
+    // Settings Table
+    await query(`
+        CREATE TABLE IF NOT EXISTS settings (
+            setting_key VARCHAR(100) PRIMARY KEY,
+            setting_value TEXT,
+            referral_commission_rate DECIMAL(5,2) DEFAULT 5.00
+        )
+    `);
+
+    // Activity Logs
+    await query(`
+        CREATE TABLE IF NOT EXISTS activity_logs (
+            id VARCHAR(50) PRIMARY KEY,
+            user VARCHAR(100),
+            action VARCHAR(100),
+            details TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // --- SUPPORT & CONTENT ---
+
+    // Tickets & Replies
     await query(`
         CREATE TABLE IF NOT EXISTS tickets (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -182,17 +254,8 @@ export async function initDB(force = false) {
             subject VARCHAR(255) NOT NULL,
             message TEXT NOT NULL,
             status VARCHAR(50) DEFAULT 'open',
+            attachment TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-
-
-    // Settings Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS settings (
-            setting_key VARCHAR(100) PRIMARY KEY,
-            setting_value TEXT
         )
     `);
 
@@ -212,90 +275,68 @@ export async function initDB(force = false) {
         CREATE TABLE IF NOT EXISTS blogs (
             id INT AUTO_INCREMENT PRIMARY KEY,
             title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) UNIQUE,
+            category VARCHAR(100),
+            image LONGTEXT,
             excerpt TEXT,
             content LONGTEXT,
-            category VARCHAR(100),
-            image VARCHAR(255),
-            author VARCHAR(100) DEFAULT 'Admin',
-            slug VARCHAR(255),
+            author VARCHAR(100) DEFAULT 'OfficialUM1 Team',
             views INT DEFAULT 0,
             read_time VARCHAR(20) DEFAULT '5 min',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    try { await query("ALTER TABLE blogs ADD COLUMN slug VARCHAR(255)"); } catch (e) { }
-    try { await query("ALTER TABLE blogs ADD COLUMN views INT DEFAULT 0"); } catch (e) { }
-    try { await query("ALTER TABLE blogs ADD COLUMN read_time VARCHAR(20) DEFAULT '5 min'"); } catch (e) { }
-
-
-    // Newsletter Table
+    // Knowledge Base & History
     await query(`
-        CREATE TABLE IF NOT EXISTS newsletter (
+        CREATE TABLE IF NOT EXISTS knowledge_base (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) UNIQUE NOT NULL,
+            content LONGTEXT NOT NULL,
+            category VARCHAR(100) DEFAULT 'General',
+            views INT DEFAULT 0,
+            is_published BOOLEAN DEFAULT TRUE,
+            meta_description TEXT,
+            keywords TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     `);
 
-    // Migration: Support Ticket Attachments
-    try { await query("ALTER TABLE tickets ADD COLUMN attachment TEXT"); } catch (e) { }
-
-    // Testimonials Table
     await query(`
-        CREATE TABLE IF NOT EXISTS testimonials (
+        CREATE TABLE IF NOT EXISTS kb_history (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            role VARCHAR(255),
-            review TEXT NOT NULL,
-            rating INT DEFAULT 5,
-            approved BOOLEAN DEFAULT FALSE,
-            user_id VARCHAR(50),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            kb_id INT NOT NULL,
+            old_title TEXT,
+            old_content LONGTEXT,
+            changed_by VARCHAR(100) DEFAULT 'Admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (kb_id) REFERENCES knowledge_base(id) ON DELETE CASCADE
         )
     `);
 
-    try { await query("ALTER TABLE testimonials ADD COLUMN user_id VARCHAR(50)"); } catch (e) { }
+    // --- BUSINESS & CRM ---
 
-    // Settings Table (Key-Value Store)
+    // Leads (CRM)
     await query(`
-        CREATE TABLE IF NOT EXISTS settings (
-            setting_key VARCHAR(100) PRIMARY KEY,
-            setting_value TEXT
-        )
-    `);
-
-    // --- NEW ADMIN TABLES ---
-
-    // 1. Inventory (Optimized for Search)
-    await query(`
-        CREATE TABLE IF NOT EXISTS inventory (
+        CREATE TABLE IF NOT EXISTS leads (
             id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(255),
+            clientName VARCHAR(255),
             platform VARCHAR(50),
-            purchasePrice DECIMAL(10,2),
-            status VARCHAR(50) DEFAULT 'In Stock',
-            purchaseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            accountDetails LONGTEXT,
-            account_email VARCHAR(255),
-            account_username VARCHAR(255),
-            account_password VARCHAR(255),
-            account_region VARCHAR(50),
-            account_level VARCHAR(50),
-            account_meta JSON -- For any extra field-specific data
+            budget DECIMAL(10,2),
+            status VARCHAR(50),
+            notes TEXT,
+            buyerEmail VARCHAR(255),
+            document_link TEXT,
+            website_url VARCHAR(255),
+            lighthouse_score VARCHAR(50),
+            personalized_pitch TEXT,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    // Migration: Add searchable columns if missing
-    try { await query("ALTER TABLE inventory ADD COLUMN account_email VARCHAR(255)"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN account_username VARCHAR(255)"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN account_password VARCHAR(255)"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN account_region VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN account_level VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN image LONGTEXT"); } catch (e) { }
-    try { await query("ALTER TABLE inventory ADD COLUMN account_meta JSON"); } catch (e) { }
-
-    // 2. Transactions (Balance History)
+    // Transactions (Internal Finance)
     await query(`
         CREATE TABLE IF NOT EXISTS transactions (
             id VARCHAR(50) PRIMARY KEY,
@@ -311,517 +352,22 @@ export async function initDB(force = false) {
         )
     `);
 
-    // Migration: Add cost & quantity columns if missing
-    try { await query("ALTER TABLE transactions ADD COLUMN cost DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-    try { await query("ALTER TABLE transactions ADD COLUMN quantity INT DEFAULT 1"); } catch (e) { }
-
-    // Activity Logs (Internal Audit Trail)
-    await query(`
-        CREATE TABLE IF NOT EXISTS activity_logs (
-            id VARCHAR(50) PRIMARY KEY,
-            user VARCHAR(100),
-            action VARCHAR(100),
-            details TEXT,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 3. Leads (CRM)
-    await query(`
-        CREATE TABLE IF NOT EXISTS leads (
-            id VARCHAR(50) PRIMARY KEY,
-            clientName VARCHAR(255),
-            platform VARCHAR(50),
-            budget DECIMAL(10,2),
-            status VARCHAR(50),
-            notes TEXT,
-            buyerEmail VARCHAR(255),
-            document_link TEXT,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // Migration: Add new columns if missing
-    try { await query("ALTER TABLE leads ADD COLUMN buyerEmail VARCHAR(255)"); } catch (e) { }
-    try { await query("ALTER TABLE leads ADD COLUMN document_link TEXT"); } catch (e) { }
-
-    // 4. Shopping Cart Tables (Missing Sync Fix)
-    await query(`
-        CREATE TABLE IF NOT EXISTS carts (
-            id VARCHAR(50) PRIMARY KEY,
-            guest_email VARCHAR(255),
-            status VARCHAR(50) DEFAULT 'active',
-            last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    await query(`
-        CREATE TABLE IF NOT EXISTS cart_items (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            cart_id VARCHAR(50),
-            product_id INT,
-            quantity INT DEFAULT 1,
-            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE
-        )
-    `);
-
-    // 5. Wishlists (Migration to MySQL)
-    await query(`
-        CREATE TABLE IF NOT EXISTS wishlists (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50), -- Can be email or user ID
-            product_id INT,
-            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY unique_wishlist (user_id, product_id)
-        )
-    `);
-
-    isInitialized = true;
-    // 4. Employees (HR)
-    await query(`
-        CREATE TABLE IF NOT EXISTS employees (
-            id VARCHAR(50) PRIMARY KEY,
-            name VARCHAR(255),
-            email VARCHAR(255),
-            password VARCHAR(255),
-            position VARCHAR(100),
-            department VARCHAR(100),
-            salary DECIMAL(10,2),
-            commissionRate DECIMAL(5,2),
-            compensationType VARCHAR(50),
-            allowedPlatforms TEXT,
-            status VARCHAR(50),
-            username VARCHAR(100),
-            joinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // Migration: Add username to employees
-    try { await query("ALTER TABLE employees ADD COLUMN username VARCHAR(100)"); } catch (e) { }
-
-    // 5. Deliveries
-    await query(`
-        CREATE TABLE IF NOT EXISTS deliveries (
-            token VARCHAR(100) PRIMARY KEY,
-            orderId VARCHAR(50),
-            itemName VARCHAR(255),
-            details LONGTEXT,
-            proofImage LONGTEXT,
-            views INT DEFAULT 0,
-            ipAddress VARCHAR(100) DEFAULT NULL,
-            userAgent VARCHAR(255) DEFAULT NULL,
-            revealedAt TIMESTAMP NULL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 6. Social Posts
-    await query(`
-        CREATE TABLE IF NOT EXISTS social_posts (
-            id VARCHAR(50) PRIMARY KEY,
-            content TEXT,
-            platform VARCHAR(50),
-            status VARCHAR(50),
-            likes INT DEFAULT 0,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // --- MIGRATIONS & NEW COLUMNS ---
-    try { await query("ALTER TABLE products ADD COLUMN g2g_listing_id VARCHAR(100)"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN affiliate_balance DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN total_affiliate_earnings DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN permissions TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN review_sent BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE testimonials ADD COLUMN order_id VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE testimonials ADD COLUMN product_id INT"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN is_banned BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN membership VARCHAR(50) DEFAULT 'none'"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN membership_expires TIMESTAMP NULL"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN total_spent DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN points INT DEFAULT 0"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN two_factor_enabled BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE users ADD COLUMN tier VARCHAR(50) DEFAULT 'Bronze'"); } catch (e) { }
-
-    try { await query("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN discount_amount DECIMAL(10,2) DEFAULT 0.00"); } catch (e) { }
-
-    // 7. Builder Requests
-    await query(`
-        CREATE TABLE IF NOT EXISTS builder_requests (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50),
-            platform VARCHAR(50),
-            niche VARCHAR(100),
-            requirements TEXT,
-            budget DECIMAL(10,2),
-            status VARCHAR(50) DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 8. Wallet Transactions
-    await query(`
-        CREATE TABLE IF NOT EXISTS wallet_transactions (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50) NOT NULL,
-            type ENUM('deposit', 'purchase', 'refund', 'affiliate_payout') NOT NULL,
-            amount DECIMAL(10,2) NOT NULL,
-            description TEXT,
-            status VARCHAR(50) DEFAULT 'completed',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 9. Knowledge Base (Optimized with Versioning)
-    await query(`
-        CREATE TABLE IF NOT EXISTS knowledge_base (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            slug VARCHAR(255) UNIQUE NOT NULL,
-            content LONGTEXT NOT NULL,
-            category VARCHAR(100) DEFAULT 'General',
-            views INT DEFAULT 0,
-            is_published BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-    `);
-
-    // KB History / Audit Log (For "Knowing what was there")
-    await query(`
-        CREATE TABLE IF NOT EXISTS kb_history (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            kb_id INT NOT NULL,
-            old_title TEXT,
-            old_content LONGTEXT,
-            changed_by VARCHAR(100) DEFAULT 'Admin',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    try { await query("ALTER TABLE knowledge_base ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"); } catch (e) { }
-    try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE knowledge_base MODIFY COLUMN content LONGTEXT"); } catch (e) { }
-
-    // Delivery Proof Additions
-    try { await query("ALTER TABLE deliveries ADD COLUMN ipAddress VARCHAR(100) DEFAULT NULL"); } catch (e) { }
-    try { await query("ALTER TABLE deliveries ADD COLUMN userAgent VARCHAR(255) DEFAULT NULL"); } catch (e) { }
-    try { await query("ALTER TABLE deliveries ADD COLUMN revealedAt TIMESTAMP NULL"); } catch (e) { }
-
-
-    // 10. Promotional Codes (Expanded)
-    try { await query("ALTER TABLE settings ADD COLUMN referral_commission_rate DECIMAL(5,2) DEFAULT 5.00"); } catch (e) { }
-    try { await query("ALTER TABLE employees ADD COLUMN permissions TEXT"); } catch (e) { }
-
-    // 11. Flash Sales & Bundles
-    try { await query("ALTER TABLE products ADD COLUMN sale_price VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE products ADD COLUMN sale_ends_at TIMESTAMP NULL"); } catch (e) { }
-    try { await query("ALTER TABLE products ADD COLUMN bundle_items TEXT"); } catch (e) { } // JSON array of product IDs
-
-    // 12. Reviews Table (New)
-    await query(`
-        CREATE TABLE IF NOT EXISTS reviews (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            product_id INT NOT NULL,
-            user_id VARCHAR(50) NOT NULL,
-            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-            comment TEXT,
-            status VARCHAR(20) DEFAULT 'approved',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // Migration for Reviews (Exhaustive)
-    try { await query("ALTER TABLE reviews ADD COLUMN product_id INT NOT NULL"); } catch (e) { }
-    try { await query("ALTER TABLE reviews ADD COLUMN user_id VARCHAR(50) NOT NULL"); } catch (e) { }
-    try { await query("ALTER TABLE reviews ADD COLUMN rating INT NOT NULL DEFAULT 5"); } catch (e) { }
-    try { await query("ALTER TABLE reviews ADD COLUMN comment TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE reviews ADD COLUMN status VARCHAR(20) DEFAULT 'approved'"); } catch (e) { }
-    try { await query("ALTER TABLE reviews ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"); } catch (e) { }
-
-    // 13. Notifications Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS notifications(
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id VARCHAR(50) NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        message TEXT NOT NULL,
-        type VARCHAR(50) DEFAULT 'info', -- 'deposit', 'order', 'support', 'system'
-            is_read BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-        `);
-
-    // 14. Live Traffic Tracker
-    await query(`
-        CREATE TABLE IF NOT EXISTS live_traffic(
-            session_id VARCHAR(100) PRIMARY KEY,
-            ip_address VARCHAR(100),
-            current_page VARCHAR(255),
-            user_agent VARCHAR(255),
-            location VARCHAR(100) DEFAULT 'Unknown',
-            last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 14. Coupons Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS coupons(
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            code VARCHAR(50) UNIQUE NOT NULL,
-            type ENUM('percent', 'flat') NOT NULL,
-            value DECIMAL(10, 2) NOT NULL,
-            min_amount DECIMAL(10, 2) DEFAULT 0.00,
-            expiry TIMESTAMP NULL,
-            status ENUM('active', 'inactive') DEFAULT 'active',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        `);
-
-    // 15. Payouts Table (Affiliate Withdrawals)
+    // Payouts
     await query(`
         CREATE TABLE IF NOT EXISTS payouts(
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id VARCHAR(50) NOT NULL,
             amount DECIMAL(10, 2) NOT NULL,
-            method VARCHAR(50) NOT NULL, -- 'paypal', 'crypto', 'bank'
-            details TEXT NOT NULL, -- address, email, etc.
+            method VARCHAR(50) NOT NULL,
+            details TEXT NOT NULL,
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
-    await query(`
-        CREATE TABLE IF NOT EXISTS knowledge_base(
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            slug VARCHAR(255) NOT NULL UNIQUE,
-            content LONGTEXT NOT NULL,
-            category VARCHAR(100) DEFAULT 'General',
-            views INT DEFAULT 0,
-            is_published BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
 
-    // 17. KB History Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS kb_history (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            kb_id INT NOT NULL,
-            old_title VARCHAR(255),
-            old_content LONGTEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (kb_id) REFERENCES knowledge_base(id) ON DELETE CASCADE
-        )
-    `);
+    // --- INTEGRATIONS ---
 
-    // 17. Blogs Table (SEO)
-    await query(`
-        CREATE TABLE IF NOT EXISTS blogs (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            slug VARCHAR(255),
-            category VARCHAR(100),
-            image LONGTEXT,
-            excerpt TEXT,
-            content LONGTEXT,
-            author VARCHAR(100) DEFAULT 'OfficialUM1 Team',
-            views INT DEFAULT 0,
-            read_time VARCHAR(20) DEFAULT '5 min',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // Add SEO Columns
-    try { await query("ALTER TABLE knowledge_base ADD COLUMN meta_description TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE knowledge_base ADD COLUMN keywords TEXT"); } catch (e) { }
-
-    // 17. Categories Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS categories (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100) NOT NULL UNIQUE,
-            slug VARCHAR(100) NOT NULL UNIQUE,
-            icon VARCHAR(50),
-            discount_percent DECIMAL(5,2) DEFAULT 0.00,
-            sale_ends_at TIMESTAMP NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // Migration: Add category_id to products
-    try { await query("ALTER TABLE products ADD COLUMN category_id INT"); } catch (e) { }
-    try { await query("ALTER TABLE products ADD CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL"); } catch (e) { }
-    try { await query("ALTER TABLE categories ADD COLUMN is_vip_only BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE categories ADD COLUMN image TEXT NULL"); } catch (e) { }
-
-    // --- NEW REVENUE ENGINE MIGRATIONS ---
-
-    // 1. Leads Enhancements (Pitch & SEO Audit)
-    try { await query("ALTER TABLE leads ADD COLUMN lighthouse_score VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE leads ADD COLUMN personalized_pitch TEXT"); } catch (e) { }
-    try { await query("ALTER TABLE leads ADD COLUMN website_url VARCHAR(255)"); } catch (e) { }
-
-    // 3. Admin/Staff Username Login Support
-    try { await query("ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE"); } catch (e) { }
-    try { await query("ALTER TABLE employees ADD COLUMN username VARCHAR(50) UNIQUE"); } catch (e) { }
-
-    // 2. Orders Enhancements (Progress Tracking)
-    try { await query("ALTER TABLE orders ADD COLUMN progress_percent INT DEFAULT 0"); } catch (e) { }
-    try { await query("ALTER TABLE orders ADD COLUMN report_link TEXT"); } catch (e) { }
-
-    // 3. Market Intelligence Table
-    await query(`
-        CREATE TABLE IF NOT EXISTS market_intel (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            item_name VARCHAR(255) NOT NULL,
-            platform VARCHAR(50), -- 'Z2U', 'G2G', etc.
-            competitor_price DECIMAL(10,2),
-            my_price DECIMAL(10,2),
-            status VARCHAR(50), -- 'Competitive', 'Underpriced', 'Overpriced'
-            last_checked TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // --- PERFORMANCE OPTIMIZATIONS: ADD INDEXES ---
-    console.log("Adding performance indexes...");
-
-    // Orders table indexes
-    try { await query("CREATE INDEX idx_orders_userId ON orders(userId)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_orders_guestEmail ON orders(guestEmail)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_orders_status ON orders(status)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_orders_date ON orders(date)"); } catch (e) { }
-
-    // Products table indexes
-    try { await query("CREATE INDEX idx_products_platform ON products(platform)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_products_type ON products(type)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_products_stock ON products(stock)"); } catch (e) { }
-
-    // Seller System Migrations
-    try { await query("ALTER TABLE products ADD COLUMN user_id VARCHAR(50)"); } catch (e) { }
-    try { await query("ALTER TABLE products ADD COLUMN status VARCHAR(50) DEFAULT 'active'"); } catch (e) { }
-    try { await query("CREATE INDEX idx_products_user ON products(user_id)"); } catch (e) { }
-
-    // Leads table indexes
-    try { await query("CREATE INDEX idx_leads_status ON leads(status)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_leads_platform ON leads(platform)"); } catch (e) { }
-
-    // Market Intel indexes
-    try { await query("CREATE INDEX idx_market_platform ON market_intel(platform)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_market_status ON market_intel(status)"); } catch (e) { }
-
-    // Users table indexes
-    try { await query("CREATE INDEX idx_users_email ON users(email)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_users_role ON users(role)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_users_referral_code ON users(referral_code)"); } catch (e) { }
-
-    // Inventory indexes for fast search
-    try { await query("CREATE INDEX idx_inventory_email ON inventory(account_email)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_inventory_username ON inventory(account_username)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_inventory_platform ON inventory(platform)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_inventory_status ON inventory(status)"); } catch (e) { }
-
-    // 18. Verification Requests
-    await query(`
-        CREATE TABLE IF NOT EXISTS verification_requests (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id VARCHAR(50) NOT NULL,
-            type VARCHAR(50) DEFAULT 'identity',
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-            document_image LONGTEXT,
-            selfie_image LONGTEXT,
-            notes TEXT,
-            rejection_reason TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-    `);
-
-    // Migration: Update to LONGTEXT for Base64 Image Storage
-    try { await query("ALTER TABLE verification_requests MODIFY COLUMN document_image LONGTEXT"); } catch (e) { }
-    try { await query("ALTER TABLE verification_requests MODIFY COLUMN selfie_image LONGTEXT"); } catch (e) { }
-    try { await query("ALTER TABLE verification_requests ADD COLUMN rejection_reason TEXT"); } catch (e) { }
-
-    // 19. Official Documents Archive
-    await query(`
-        CREATE TABLE IF NOT EXISTS documents (
-            id VARCHAR(50) PRIMARY KEY,
-            type ENUM('invoice', 'contract', 'letter') NOT NULL,
-            document_number VARCHAR(100) UNIQUE NOT NULL,
-            recipient_name VARCHAR(255) NOT NULL,
-            recipient_email VARCHAR(255),
-            recipient_address TEXT,
-            subject VARCHAR(255),
-            content LONGTEXT, -- Stores body content or contract terms
-            items JSON, -- Stores invoice line items
-            amount DECIMAL(10, 2),
-            currency VARCHAR(10) DEFAULT 'USD',
-            status ENUM('draft', 'issued', 'void') DEFAULT 'issued',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            created_by VARCHAR(50) DEFAULT 'Admin'
-        )
-    `);
-
-    // Index for quick document lookups
-    try { await query("CREATE INDEX idx_docs_number ON documents(document_number)"); } catch (e) { }
-    try { await query("CREATE INDEX idx_docs_recipient ON documents(recipient_name)"); } catch (e) { }
-
-    // 20. PlayerUp Listings
-    await query(`
-        CREATE TABLE IF NOT EXISTS playerup_listings (
-            id VARCHAR(50) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            url VARCHAR(255) UNIQUE NOT NULL,
-            platform VARCHAR(50) DEFAULT 'Other',
-            lastBumped TIMESTAMP NULL,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            frequency VARCHAR(50) DEFAULT 'Every 24 hours',
-            status VARCHAR(50) DEFAULT 'Inactive',
-            username VARCHAR(100) DEFAULT 'officialum1',
-            lastBumpStatus VARCHAR(20) DEFAULT 'pending'
-        )
-    `);
-
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN lastBumpStatus VARCHAR(20) DEFAULT 'pending'"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN autoBump BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings MODIFY COLUMN autoBump BOOLEAN DEFAULT FALSE"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN dailyBumpCount INT DEFAULT 0"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN lastResetDate DATE DEFAULT NULL"); } catch (e) { }
-    try { await query("ALTER TABLE playerup_listings ADD COLUMN limitReached BOOLEAN DEFAULT FALSE"); } catch (e) { }
-
-
-    // 21. Z2U Listings
-    await query(`
-        CREATE TABLE IF NOT EXISTS z2u_listings (
-            id VARCHAR(50) PRIMARY KEY,
-            title VARCHAR(255) NOT NULL,
-            url VARCHAR(255) UNIQUE NOT NULL,
-            platform VARCHAR(50) DEFAULT 'Other',
-            price DECIMAL(10,2),
-            stock INT,
-            status VARCHAR(50) DEFAULT 'Active',
-            last_sync TIMESTAMP NULL,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 22. Z2U Bump Logs
-    await query(`
-        CREATE TABLE IF NOT EXISTS z2u_bump_logs (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            message TEXT,
-            type VARCHAR(50) DEFAULT 'info',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    // 22. G2G Integration Tables
+    // G2G Integration
     await query(`
         CREATE TABLE IF NOT EXISTS g2g_orders (
             order_id VARCHAR(100) PRIMARY KEY,
@@ -848,19 +394,108 @@ export async function initDB(force = false) {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     `);
-    // 23. WhatsApp Messages
+
+    // Z2U Center
     await query(`
-        CREATE TABLE IF NOT EXISTS whatsapp_messages (
+        CREATE TABLE IF NOT EXISTS z2u_listings (
+            id VARCHAR(50) PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            url VARCHAR(255) UNIQUE NOT NULL,
+            platform VARCHAR(50) DEFAULT 'Other',
+            price DECIMAL(10,2),
+            stock INT,
+            status VARCHAR(50) DEFAULT 'Active',
+            last_sync TIMESTAMP NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    await query(`
+        CREATE TABLE IF NOT EXISTS z2u_bump_logs (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            message_id VARCHAR(255) UNIQUE,
-            sender_phone VARCHAR(50),
-            sender_name VARCHAR(100),
-            message_text TEXT,
-            direction VARCHAR(20) DEFAULT 'inbound',
-            status VARCHAR(50) DEFAULT 'received',
+            message TEXT,
+            type VARCHAR(50) DEFAULT 'info',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
+    // --- UTILITIES ---
+
+    // Deliveries
+    await query(`
+        CREATE TABLE IF NOT EXISTS deliveries (
+            token VARCHAR(100) PRIMARY KEY,
+            orderId VARCHAR(50),
+            itemName VARCHAR(255),
+            details LONGTEXT,
+            proofImage LONGTEXT,
+            views INT DEFAULT 0,
+            ipAddress VARCHAR(100) DEFAULT NULL,
+            userAgent VARCHAR(255) DEFAULT NULL,
+            revealedAt TIMESTAMP NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Verification Requests
+    await query(`
+        CREATE TABLE IF NOT EXISTS verification_requests (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id VARCHAR(50) NOT NULL,
+            type VARCHAR(50) DEFAULT 'identity',
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            document_image LONGTEXT,
+            selfie_image LONGTEXT,
+            notes TEXT,
+            rejection_reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
+
+    // Live Traffic
+    await query(`
+        CREATE TABLE IF NOT EXISTS live_traffic(
+            session_id VARCHAR(100) PRIMARY KEY,
+            ip_address VARCHAR(100),
+            current_page VARCHAR(255),
+            user_agent VARCHAR(255),
+            location VARCHAR(100) DEFAULT 'Unknown',
+            last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    `);
+
+    // Employees (HR)
+    await query(`
+        CREATE TABLE IF NOT EXISTS employees (
+            id VARCHAR(50) PRIMARY KEY,
+            name VARCHAR(255),
+            email VARCHAR(255),
+            password VARCHAR(255),
+            position VARCHAR(100),
+            department VARCHAR(100),
+            salary DECIMAL(10,2),
+            commissionRate DECIMAL(5,2),
+            compensationType VARCHAR(50),
+            allowedPlatforms TEXT,
+            status VARCHAR(50),
+            username VARCHAR(100),
+            permissions TEXT,
+            joinDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // --- SECONDARY TABLES & MIGRATIONS ---
+    try {
+        // Essential migrations that might be missing in production
+        await query("CREATE INDEX idx_orders_userId ON orders(userId)");
+        await query("CREATE INDEX idx_orders_status ON orders(status)");
+        await query("CREATE INDEX idx_products_stock ON products(stock)");
+        await query("CREATE INDEX idx_users_email ON users(email)");
+    } catch (e) { }
+
+    // Final Flag
     isInitialized = true;
+    console.log("Database initialized successfully.");
 }

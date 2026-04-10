@@ -341,7 +341,7 @@ export async function POST(req: Request) {
                             }
 
                             // Create Delivery Token
-                            const token = Math.random().toString(36).substring(2, 10);
+                            const token = crypto.randomBytes(8).toString('hex');
                             await query("INSERT INTO deliveries (token, orderId, itemName, details) VALUES (?, ?, ?, ?)",
                                 [token, orderId, pName, JSON.stringify({ accounts: combinedCreds, inventoryIds: soldIds, items: itemsList })]);
 

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET() {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const payouts = await query(`
             SELECT p.*, u.email 
@@ -16,6 +18,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { payoutId, action } = await req.json(); // action: 'approve' | 'reject'
 

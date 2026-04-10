@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createGhostCompany, getFilingSchema, getOfferings, getAccount, getFilingMethods, getCompanies } from '@/lib/corptools';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(request: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'schema';
     const companyId = searchParams.get('company_id');
@@ -44,6 +46,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { name, state, entityType } = await request.json();
 

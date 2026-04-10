@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { setAdminSession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -18,8 +18,6 @@ export async function POST(request: NextRequest) {
         let isValid = false;
         let userRole = 'admin';
 
-        console.log(`🔍 Admin Login Attempt: "${inputEmail}"`);
-
         // 1. MASTER ADMIN & SYSTEM USER CHECK
         if (!inputEmail || inputEmail === 'admin' || inputEmail === 'officialum1') {
             let storedMasterPass = DEFAULT_ADMIN_PASSWORD;
@@ -31,12 +29,10 @@ export async function POST(request: NextRequest) {
                 }
             } catch (e) { }
 
-            if (storedMasterPass) {
-                const isMatch = await bcrypt.compare(password, storedMasterPass).catch(() => password === storedMasterPass);
-                // Simple equality check too in case of plain text migration
-                if (isMatch || password === storedMasterPass) {
+            if (storedMasterPass && password) {
+                const isMatch = await bcrypt.compare(password, storedMasterPass).catch(() => false);
+                if (isMatch) {
                     isValid = true;
-                    console.log("✅ Master Password check passed");
                 }
             }
         }
@@ -48,11 +44,9 @@ export async function POST(request: NextRequest) {
             if (employees.length > 0) {
                 for (const emp of employees) {
                     const isHashMatch = await bcrypt.compare(password, emp.password).catch(() => false);
-                    const isPlainMatch = password === emp.password;
-                    if (isHashMatch || isPlainMatch) {
+                    if (isHashMatch) {
                         isValid = true;
                         userRole = emp.position === 'Admin' ? 'admin' : 'seller';
-                        console.log(`✅ Employee match: ${emp.email}`);
                         break;
                     }
                 }
@@ -64,11 +58,9 @@ export async function POST(request: NextRequest) {
                 if (users.length > 0) {
                     for (const user of users) {
                         const isHashMatch = await bcrypt.compare(password, user.password).catch(() => false);
-                        const isPlainMatch = password === user.password;
-                        if ((isHashMatch || isPlainMatch) && (user.role === 'admin' || user.role === 'seller')) {
+                        if (isHashMatch && (user.role === 'admin' || user.role === 'seller')) {
                             isValid = true;
                             userRole = user.role;
-                            console.log(`✅ User match: ${user.email} (Role: ${userRole})`);
                             break;
                         }
                     }
@@ -81,38 +73,27 @@ export async function POST(request: NextRequest) {
                 if (admins.length > 0) {
                     const admin = admins[0];
                     const isHashMatch = await bcrypt.compare(password, admin.password).catch(() => false);
-                    const isPlainMatch = password === admin.password;
-                    if (isHashMatch || isPlainMatch) {
+                    if (isHashMatch) {
                         isValid = true;
                         userRole = 'admin';
-                        console.log(`✅ Admin user-table fallback match: ${admin.email}`);
                     }
                 }
             }
         }
 
         if (isValid) {
-            console.log(`🚀 Login SUCCESS: ${inputEmail || 'admin'} as ${userRole}`);
-            const response = NextResponse.json({ success: true, role: userRole });
-            const cookieStore = await cookies();
-            cookieStore.set('admin_token', 'authenticated_session_v1', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 60 * 60 * 24 * 7, // 1 week
-                path: '/',
-            });
-            return response;
+            await setAdminSession();
+            return NextResponse.json({ success: true, role: userRole });
         }
 
-        console.log(`❌ Login FAILED: ${inputEmail || 'admin'}`);
         return NextResponse.json({
             success: false,
-            message: 'Invalid credentials',
-            debug: { email: inputEmail, hasPass: !!password }
+            message: 'Invalid credentials'
         }, { status: 401 });
 
     } catch (error: any) {
-        console.error('🔥 Login Error:', error);
-        return NextResponse.json({ success: false, error: 'Server error', details: error.message }, { status: 500 });
+        console.error('Login Error:', error);
+        return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
     }
 }
+

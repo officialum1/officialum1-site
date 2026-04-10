@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendAuditReport, sendVerificationEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
     try {
@@ -17,9 +18,9 @@ export async function POST(req: Request) {
         }
 
         // 3. Generate Codes & ID
-        const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7).toUpperCase()}`;
-        const newRefCode = Math.random().toString(36).substring(7).toUpperCase();
-        const verificationToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const userId = `user_${Date.now()}_${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+        const newRefCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         // Resolve Referral Code to User ID
         let referrerId = null;

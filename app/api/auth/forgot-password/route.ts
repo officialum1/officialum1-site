@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendPasswordResetEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 export async function POST(req: Request) {
     try {
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
         }
 
         // 2. Generate Reset Token (Simple random string)
-        const resetToken = Math.random().toString(36).substring(2, 10).toUpperCase();
+        const resetToken = crypto.randomBytes(4).toString('hex').toUpperCase();
 
         // 3. Save Token to DB
         await query("UPDATE users SET reset_token = ? WHERE email = ?", [resetToken, email]);

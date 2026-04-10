@@ -189,7 +189,7 @@ export default function StaffDashboard() {
             <Navbar />
             <div className="container" style={{ paddingTop: '120px', paddingBottom: '100px' }}>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
                         <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Staff Workspace</h1>
                         <p style={{ color: '#888' }}>Welcome back, {staff?.name} • <span style={{ color: '#00ff88' }}>{staff?.position}</span></p>
@@ -238,7 +238,7 @@ export default function StaffDashboard() {
                     ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem' }}>
+                <div className="staff-main-grid">
 
                     {/* INVENTORY TAB */}
                     {activeTab === 'inventory' && (
@@ -246,6 +246,7 @@ export default function StaffDashboard() {
                             <div>
                                 <h2 style={{ marginBottom: '1.5rem', color: '#00ff88' }}>Available Inventory</h2>
                                 <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                    <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                         <thead>
                                             <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
@@ -270,6 +271,7 @@ export default function StaffDashboard() {
                                             )}
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
 
@@ -318,6 +320,7 @@ export default function StaffDashboard() {
                                     <button onClick={() => setShowAddLead(true)} className="btn btn-primary">+ New Lead</button>
                                 </div>
                                 <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+                                    <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                         <thead><tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}><th style={{ padding: '1rem' }}>Name</th><th style={{ padding: '1rem' }}>Status</th><th style={{ padding: '1rem' }}>Value</th></tr></thead>
                                         <tbody>
@@ -334,6 +337,7 @@ export default function StaffDashboard() {
                                             {leads.length === 0 && <tr><td colSpan={3} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No leads.</td></tr>}
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
                             <div>

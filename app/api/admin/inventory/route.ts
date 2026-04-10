@@ -3,6 +3,7 @@ import { query, withTransaction } from '@/lib/db';
 import { syncG2GStock } from '@/lib/g2g';
 import { ApiResponse } from '@/lib/api-response';
 import { isAuthenticated } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function GET(request: Request) {
     if (!await isAuthenticated()) return ApiResponse.unauthorized();
@@ -228,7 +229,7 @@ export async function POST(request: Request) {
 
                 // 3. Create Delivery
                 if (soldInventoryIds.length > 0) {
-                    const token = Math.random().toString(36).substring(2, 10);
+                    const token = crypto.randomBytes(8).toString('hex');
                     const deliveryDetails = {
                         note: `Bulk Order of ${qty} x ${productName}`,
                         accounts: combinedDetailsText,
@@ -262,7 +263,7 @@ export async function POST(request: Request) {
                     const details = item.accountDetails ? JSON.parse(item.accountDetails) : {};
 
                     // Generate Short Token (8 chars)
-                    const token = Math.random().toString(36).substring(2, 10);
+                    const token = crypto.randomBytes(8).toString('hex');
 
                     // Ensure details has a consistent structure with inventoryIds
                     const deliveryDetails = {
@@ -525,7 +526,7 @@ export async function POST(request: Request) {
                         isReplacement: true
                     };
 
-                    const newToken = Math.random().toString(36).substring(2, 10);
+                    const newToken = crypto.randomBytes(8).toString('hex');
                     await conn.execute("UPDATE deliveries SET details = ?, token = ? WHERE token = ?", [JSON.stringify(updatedDetails), newToken, delivery.token]);
 
                     await conn.execute("INSERT INTO activity_logs (id, user, action, details) VALUES (?, ?, ?, ?)",
@@ -597,7 +598,7 @@ export async function POST(request: Request) {
                     isReplacement: true
                 };
 
-                const newToken = Math.random().toString(36).substring(2, 10);
+                const newToken = crypto.randomBytes(8).toString('hex');
                 await conn.execute("UPDATE deliveries SET details = ?, token = ? WHERE token = ?", [JSON.stringify(updatedDetails), newToken, delivery.token]);
 
                 // 7. Log
@@ -754,7 +755,7 @@ export async function POST(request: Request) {
                     isReplacement: true
                 };
 
-                const newToken = Math.random().toString(36).substring(2, 10);
+                const newToken = crypto.randomBytes(8).toString('hex');
                 await conn.execute("UPDATE deliveries SET details = ?, token = ? WHERE orderId = ?", [JSON.stringify(newDetails), newToken, transactionId]);
 
                 // Log

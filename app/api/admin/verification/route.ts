@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { sendVerificationStatusEmail } from '@/lib/email';
+import { isAuthenticated } from '@/lib/auth';
 
 export async function GET(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const requests = await query(`
             SELECT
@@ -22,6 +24,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    if (!await isAuthenticated()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try {
         const { requestId, userId, status, reason } = await req.json();
 

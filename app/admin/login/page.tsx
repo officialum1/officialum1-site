@@ -24,18 +24,12 @@ export default function AdminLoginPage() {
             if (data.success) {
                 // 2. Check for Admin or staff role
                 if (data.user.role === 'admin' || data.user.role === 'seller') {
-                    // Set Secure Cookie
-                    document.cookie = "admin_session=true; path=/; max-age=86400; SameSite=Strict";
-
-                    // Set Local Storage for Navbar and Dashboard
+                    // Set Local Storage for Navbar and Dashboard (UI only - no secrets)
                     localStorage.setItem('buyer_user', JSON.stringify(data.user));
 
-                    // SAVE ADMIN KEY for Extension & Dashboard Access
-                    // (This assumes the user password = admin password, or at least grants access)
-                    localStorage.setItem('admin_key', password);
-
-                    // Redirect
+                    // Redirect (session cookies set by server)
                     window.location.href = '/admin/inventory';
+
                 } else {
                     alert('Access Denied. You do not have staff/admin permissions.');
                     setLoading(false);
