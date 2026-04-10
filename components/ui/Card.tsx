@@ -1,7 +1,7 @@
 import * as React from "react";
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 };
 
 function cx(...parts: Array<string | undefined | false>) {
