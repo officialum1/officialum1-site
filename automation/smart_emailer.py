@@ -17,7 +17,7 @@ TEMPLATES = {
 
 I was researching {website_domain} and noticed great potential in your digital setup, but the mobile loading performance seems a bit heavy, which might be hurting your conversions and Google ranking.
 
-At OfficialUM1 LLC, we specialize in high-performance Next.js full-stack platforms and organic SEO architecture (recent live engineering: adsokay.com, backerspro.com, thematelstrip.com, iptvroom.com).
+At OfficialUM1 LLC, we specialize in high-performance Next.js full-stack platforms and organic SEO architecture (recent live engineering: adsokay.com, thematelstrip.com, iptvroom.com).
 
 Would you be open to a quick 2-minute video audit showing 3 specific speed & SEO fixes for {website_domain}? 
 
@@ -59,7 +59,6 @@ I am reaching out from OfficialUM1 LLC. We serve as the backend execution and wh
 
 Some of our recent end-to-end builds & SEO ranking deployments include:
 - adsokay.com (High-scale AdTech & web platform)
-- backerspro.com (Crowdfunding & launch engine)
 - thematelstrip.com (E-commerce & industrial architecture)
 - meetfaced.com & famemake.com (Social & growth web apps)
 - sahiwaldivision.com (High authority SEO directory & news portal)
