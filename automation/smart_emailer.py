@@ -17,9 +17,9 @@ TEMPLATES = {
 
 I was researching {website_domain} and noticed great potential in your digital setup, but the mobile loading performance seems a bit heavy, which might be hurting your conversions and Google ranking.
 
-At OfficialUM1 LLC, we specialize in modern Next.js web engineering and headless platforms that achieve 95+ Google Lighthouse scores and load in under 1 second.
+At OfficialUM1 LLC, we specialize in high-performance Next.js full-stack platforms and organic SEO architecture (recent live engineering: adsokay.com, backerspro.com, thematelstrip.com, iptvroom.com).
 
-Would you be open to a quick 2-minute video audit showing 3 specific performance fixes for {website_domain}? 
+Would you be open to a quick 2-minute video audit showing 3 specific speed & SEO fixes for {website_domain}? 
 
 Best regards,
 
@@ -36,7 +36,7 @@ Email: hello@officialum1.com
 
 Hope you are having a productive week.
 
-I came across {website_domain} and loved your content quality. We currently manage direct editorial access and permanent do-follow guest post placements across 500+ high-traffic, DR 50-85 authority publications in your industry.
+I came across {website_domain} and loved your content quality. We currently manage direct editorial access and permanent do-follow guest post placements across 500+ high-traffic, DR 50-85 authority publications in your industry (including media platforms like sahiwaldivision.com, famemake.com, meetfaced.com).
 
 If you are currently focusing on scaling your organic search traffic and keyword rankings, I can share a tailored spreadsheet of available publications and sample live URLs.
 
@@ -57,14 +57,16 @@ Email: hello@officialum1.com
 
 I am reaching out from OfficialUM1 LLC. We serve as the backend execution and white-label development/SEO team for digital agencies across the US, UK, and UAE.
 
-We handle:
-- Turnkey Next.js / React full-stack web applications
-- White-label technical & local SEO campaigns
-- High-authority guest posts & verified backlink acquisition
+Some of our recent end-to-end builds & SEO ranking deployments include:
+- adsokay.com (High-scale AdTech & web platform)
+- backerspro.com (Crowdfunding & launch engine)
+- thematelstrip.com (E-commerce & industrial architecture)
+- meetfaced.com & famemake.com (Social & growth web apps)
+- sahiwaldivision.com (High authority SEO directory & news portal)
 
 Our white-label pricing gives agencies 60%+ profit margins without hiring in-house staff.
 
-Would you be open to a brief chat or seeing our agency portfolio?
+Would you be open to a brief chat or seeing our live agency portfolio?
 
 Best regards,
 
