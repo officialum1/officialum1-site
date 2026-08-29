@@ -1,184 +1,50 @@
 [
   {
     "id": 1,
-    "title": "Crypto SaaS Viral Launch",
-    "category": "Marketing",
-    "image": "https://images.unsplash.com/photo-1620288627223-537a9813866c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Leveraged our 5yr+ Aged Reddit Accounts to drive 10,000+ organic signups for a new Defi platform in 48 hours."
+    "title": "AdsOkay — Next-Gen AdTech & Monetization Platform",
+    "category": "AdTech & Web Platform",
+    "url": "https://adsokay.com",
+    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Full-stack high-speed AdTech and publisher monetization platform with real-time impression analytics and sub-second page loads."
   },
   {
     "id": 2,
-    "title": "NFT Community Scaling",
-    "category": "Community Growth",
-    "image": "https://images.unsplash.com/photo-1621501103258-3e135c8c1fda?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Boosted a Discord server to 50k real members using our Mixed Member packages, resulting in a sold-out mint."
+    "title": "TheMatelStrip — Industrial E-Commerce Architecture",
+    "category": "E-Commerce & SEO",
+    "url": "https://thematelstrip.com",
+    "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Custom industrial e-commerce catalog engineered for global B2B supply, high-ranking product keywords, and organic buyer search traffic."
   },
   {
     "id": 3,
-    "title": "Authority Site Flip",
-    "category": "SEO & Assets",
-    "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Built a 'Tech Review' blog to DR 65 using our private backlink network. Rented for $2.5k/mo, then sold for 6 figures."
+    "title": "IPTVRoom — Global Streaming & Digital Media Portal",
+    "category": "Streaming & Media",
+    "url": "https://iptvroom.com",
+    "image": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "High-concurrency digital media and IPTV platform optimized for high conversion checkout, instant automated provisioning, and worldwide CDN delivery."
   },
   {
     "id": 4,
-    "title": "Influencer Brand Scale",
-    "category": "Social Media",
-    "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Accelerated a fashion brand's Instagram to 100k followers, unlocking 'Swipe Up' features and driving 300% more sales."
+    "title": "MeetFaced — Social Community & Web Application",
+    "category": "Full-Stack Web App",
+    "url": "https://meetfaced.com",
+    "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Dynamic social networking platform featuring responsive real-time interactions, profile matchmaking, and secure membership management."
   },
   {
     "id": 5,
-    "title": "Monetized Page Turnaround",
-    "category": "Facebook Ops",
-    "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Revived a dead Facebook page with our content strategy, restoring monetization eligibility and generating daily ad revenue."
+    "title": "FameMake — Influencer Marketing & Social Growth Engine",
+    "category": "SaaS & Social Growth",
+    "url": "https://famemake.com",
+    "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Automated social media growth and influencer management system with self-serve checkout, automated package fulfillment, and live metrics."
   },
   {
     "id": 6,
-    "title": "Local Rank Domination",
-    "category": "SEO",
-    "image": "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Ranked a local plumbing business #1 in 5 cities simultaneously using our localized rental site network."
-  },
-  {
-    "id": 7,
-    "title": "YouTube Automation Empire",
-    "category": "Video Growth",
-    "image": "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Supplied a network of Monetized YouTube channels to a media agency, allowing them to scale ad revenue to $50k/mo instantly."
-  },
-  {
-    "id": 8,
-    "title": "Telegram Signal Group",
-    "category": "Community",
-    "image": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Grew a private trading signal group to 20,000 members for a client, creating a high-value recurring subscription model."
-  },
-  {
-    "id": 9,
-    "title": "Google News Approval",
-    "category": "SEO & PR",
+    "title": "SahiwalDivision — High Authority SEO & Regional News Portal",
+    "category": "SEO Authority & Media",
+    "url": "https://sahiwaldivision.com",
     "image": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Used our high-trust Aged Domains to get a finance blog Google News approved in 14 days, skyrocketing organic traffic."
-  },
-  {
-    "id": 10,
-    "title": "TikTok Brand Explosion",
-    "category": "Video Viral",
-    "image": "https://images.unsplash.com/photo-1611162616475-46b635cb6868?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Provided 5k High-Retention Followers to a dropshipping brand, triggering the algorithm to push their organic content to millions."
-  },
-  {
-    "id": 11,
-    "title": "Instant X Verification",
-    "category": "Branding",
-    "image": "https://images.unsplash.com/photo-1611605698383-3b85847e98a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Secured 'Twitter Blue' verification for a CEO's profile using our pre-verified aged account service, building instant credibility."
-  },
-  {
-    "id": 12,
-    "title": "Discord Hype Chatters",
-    "category": "Engagement",
-    "image": "https://images.unsplash.com/photo-1596740926474-00539541b6ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Deployed 20 active chatters to a quiet NFT Discord, simulating 24/7 activity and increasing investor confidence."
-  },
-  {
-    "id": 13,
-    "title": "Twitch Partner Fast-Track",
-    "category": "Live Streaming",
-    "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Helped a streamer hit 'Partner' status in 30 days by providing stable, high-retention live viewers and chat engagement."
-  },
-  {
-    "id": 14,
-    "title": "LinkedIn B2B Lead Gen",
-    "category": "Professional",
-    "image": "https://images.unsplash.com/photo-1611944212129-2999026649a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Supplied 50 Aged LinkedIn accounts for a marketing agency's outreach campaign, resulting in 200+ qualified leads."
-  },
-  {
-    "id": 15,
-    "title": "Telegram Mass Outreach",
-    "category": "Direct Marketing",
-    "image": "https://images.unsplash.com/photo-1563986768494-4dee46a38531?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Executed a targeted Mass DM campaign to 50,000 crypto users on Telegram, driving massive presale volume."
-  },
-  {
-    "id": 16,
-    "title": "Agency Bulk Order: 500 FB Pages",
-    "category": "Agency Supply",
-    "image": "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Supplied a major ad agency with 500 Reinstated Facebook Pages for their Black Friday campaigns. Zero bans reported."
-  },
-  {
-    "id": 17,
-    "title": "Election Campaign Awareness",
-    "category": "Trend Management",
-    "image": "https://images.unsplash.com/photo-1540910419868-47fb78488738?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Managed a Twitter trend campaign for a local election, delivering 5M impressions using our aged account network."
-  },
-  {
-    "id": 18,
-    "title": "Creator Economy Growth",
-    "category": "Talent Management",
-    "image": "https://images.unsplash.com/photo-1586810724476-c294fb7ac01b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Scaled 10 content creators from 0 to 100k aggregate followers across TikTok and Reels, launching their paid communities."
-  },
-  {
-    "id": 19,
-    "title": "Mobile App User Acquisition",
-    "category": "App Marketing",
-    "image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Used Reddit guerilla marketing to drive 5,000 cost-free installs for a new productivity app in its first week."
-  },
-  {
-    "id": 20,
-    "title": "Real Estate Lead Funnel",
-    "category": "Lead Gen",
-    "image": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Built a network of local Facebook pages for a Realtor, generating 50+ qualified home-buyer appointments per month."
-  },
-  {
-    "id": 21,
-    "title": "SaaS Product Hunt Launch",
-    "category": "Launch Strategy",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Secured 'Product of the Day' on Product Hunt by mobilizing our community of aged tech accounts for organic support."
-  },
-  {
-    "id": 22,
-    "title": "Game Steam Wishlist Boost",
-    "category": "Gaming",
-    "image": "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Generated 2,000 real Steam wishlists for an Indie developer through targeted Discord community promotions."
-  },
-  {
-    "id": 23,
-    "title": "Private Blog Network Setup",
-    "category": "SEO Infrastructure",
-    "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Built a custom PBN of 20 high-DA sites for a gambling affiliate, ensuring bulletproof rankings in a competitive niche."
-  },
-  {
-    "id": 24,
-    "title": "Verified Business Manager",
-    "category": "Ad Assets",
-    "image": "https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Supplied 5 Verified Meta Business Managers (BMs) to a dropshipper, allowing them to scale daily spread to $10k without limits."
-  },
-  {
-    "id": 25,
-    "title": "Health Brand Trust",
-    "category": "Reputation",
-    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "description": "Managed Trustpilot and Google Reviews for a supplement brand, maintaining a 4.8-star rating during a viral sales spike."
-  },
-  {
-    "title": "Success Story: Mason E.",
-    "category": "Facebook Page (Monetized)",
-    "description": "Saved me months of grinding. Worth every penny.",
-    "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    "id": 26
+    "description": "High-DR digital news and regional authority portal with 10,000+ indexed URLs, Google News optimization, and top search engine rankings."
   }
 ]
