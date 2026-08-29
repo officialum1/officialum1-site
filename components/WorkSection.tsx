@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { readJson } from "@/lib/read-json";
 
 export default function WorkSection() {
+    const pathname = usePathname();
+    const isWorkPage = pathname === "/work";
     const [projects, setProjects] = useState<any[]>([]);
 
     useEffect(() => {
@@ -143,24 +146,47 @@ export default function WorkSection() {
                     ))}
                 </div>
 
-                <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
-                    <a
-                        href="/work"
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: "0.65rem 1.75rem",
-                            borderRadius: "999px",
-                            border: "1px solid var(--border-subtle)",
-                            fontSize: "0.9rem",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            textDecoration: "none",
-                        }}
-                    >
-                        View All Work →
-                    </a>
+                <div style={{ textAlign: "center", marginTop: "3rem" }}>
+                    {isWorkPage ? (
+                        <a
+                            href="/contact"
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "0.5rem",
+                                padding: "0.85rem 2.2rem",
+                                borderRadius: "999px",
+                                background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-violet) 100%)",
+                                fontSize: "0.95rem",
+                                fontWeight: 700,
+                                color: "#fff",
+                                textDecoration: "none",
+                                boxShadow: "0 10px 30px rgba(79, 142, 247, 0.25)",
+                            }}
+                            className="hover:scale-105 transition-transform"
+                        >
+                            Start Your Project With Us →
+                        </a>
+                    ) : (
+                        <a
+                            href="/work"
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "0.65rem 1.75rem",
+                                borderRadius: "999px",
+                                border: "1px solid var(--border-subtle)",
+                                fontSize: "0.9rem",
+                                fontWeight: 600,
+                                color: "var(--text-primary)",
+                                textDecoration: "none",
+                            }}
+                        >
+                            View All Work →
+                        </a>
+                    )}
                 </div>
             </div>
             <style jsx>{`
