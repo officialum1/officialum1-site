@@ -1,0 +1,20 @@
+{
+  "smtp": {
+    "host": "smtp.hostinger.com",
+    "port": 465,
+    "use_ssl": true,
+    "email": "hello@officialum1.com",
+    "password": "YOUR_EMAIL_PASSWORD_HERE",
+    "sender_name": "Muhammad Umar | OfficialUM1 LLC"
+  },
+  "search_defaults": {
+    "default_niche": "Digital Marketing Agencies",
+    "default_location": "New York, USA",
+    "max_leads_per_batch": 10
+  },
+  "outreach": {
+    "min_delay_seconds": 30,
+    "max_delay_seconds": 60,
+    "auto_sync_crm": true
+  }
+}

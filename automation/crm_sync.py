@@ -1,0 +1,44 @@
+"""
+OfficialUM1 CRM Sync Module
+Saves scraped and verified leads into the OfficialUM1 CRM Leads Database.
+"""
+import requests
+from typing import Dict, Any
+
+API_ENDPOINT = "http://localhost:3000/api/leads"
+
+def sync_lead_to_crm(lead: Dict[str, Any], platform_tag: str = "B2B Outreach", base_url: str = "http://localhost:3000") -> bool:
+    target_url = f"{base_url.rstrip('/')}/api/leads"
+    
+    primary_email = lead["emails"][0] if lead.get("emails") else lead.get("buyerEmail", "")
+    if not primary_email:
+        return False
+
+    client_name = lead.get("clientName") or lead.get("domain") or "Verified Lead"
+    website = lead.get("website", "")
+    phones = ", ".join(lead.get("phones", []))
+    
+    notes = f"Website: {website}\n"
+    if phones:
+        notes += f"Phone: {phones}\n"
+    notes += f"Extracted via OfficialUM1 100% Lead Hunter Suite.\nDetails: {lead.get('notes', '')}"
+
+    payload = {
+        "action": "guest_post_quote",
+        "name": client_name,
+        "email": primary_email,
+        "domain": lead.get("domain", website),
+        "niche": platform_tag,
+        "message": notes,
+        "packageName": "Outreach Lead"
+    }
+
+    try:
+        res = requests.post(target_url, json=payload, timeout=6)
+        if res.status_code in [200, 201]:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"CRM Sync Error for {client_name}: {e}")
+        return False
