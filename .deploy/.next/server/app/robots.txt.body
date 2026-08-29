@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/admin/
+
+Host: https://officialum1.com
+Sitemap: https://officialum1.com/sitemap.xml

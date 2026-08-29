@@ -1,0 +1,15 @@
+{
+    "redirects": [
+        {
+            "source": "/(.*)",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "www.officialum1.com"
+                }
+            ],
+            "destination": "https://officialum1.com/$1",
+            "permanent": true
+        }
+    ]
+}

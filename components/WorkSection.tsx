@@ -1,0 +1,163 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { readJson } from "@/lib/read-json";
+
+export default function WorkSection() {
+    const [projects, setProjects] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch('/api/projects')
+            .then(res => readJson<any[]>(res))
+            .then(data => setProjects(Array.isArray(data) ? data : []))
+            .catch(() => setProjects([]));
+    }, []);
+
+    return (
+        <section id="work" className="section-padding" style={{ background: "var(--bg-section)" }}>
+            <div className="container">
+                <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+                    <h2
+                        style={{
+                            fontFamily: "var(--font-space-grotesk), sans-serif",
+                            fontWeight: 800,
+                            fontSize: "clamp(2rem,4vw,2.6rem)",
+                            color: "var(--text-primary)",
+                            marginBottom: "0.75rem",
+                        }}
+                    >
+                        Featured{" "}
+                        <span
+                            style={{
+                                background: "linear-gradient(135deg, var(--accent-blue), var(--accent-violet))",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                backgroundClip: "text",
+                            }}
+                        >
+                            Projects
+                        </span>
+                    </h2>
+                    <p
+                        className="subheading"
+                        style={{
+                            maxWidth: "540px",
+                            margin: "0 auto",
+                            fontSize: "0.95rem",
+                            color: "var(--text-muted)",
+                        }}
+                    >
+                        Real results we’ve delivered for brands across SaaS, e‑commerce, and services.
+                    </p>
+                </div>
+
+                <div
+                    className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                >
+                    {projects.map((project) => (
+                        <article
+                            key={project.id}
+                            className="workCard group flex flex-col overflow-hidden rounded-2xl"
+                            style={{
+                                background: "var(--bg-card)",
+                                border: "1px solid var(--border-subtle)",
+                                backdropFilter: "blur(20px)",
+                                WebkitBackdropFilter: "blur(20px)",
+                                transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                            }}
+                        >
+                            <div style={{ position: "relative", height: "200px", overflow: "hidden" }}>
+                                <img
+                                    src={
+                                        project.image ||
+                                        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                                    }
+                                    alt={project.title}
+                                    loading="lazy"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                        transform: "scale(1)",
+                                        transition: "transform 0.35s ease",
+                                    }}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src =
+                                            "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                                    }}
+                                />
+                            </div>
+                            <div style={{ padding: "1.5rem" }}>
+                                <div
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        padding: "0.25rem 0.7rem",
+                                        borderRadius: "999px",
+                                        marginBottom: "0.75rem",
+                                        fontSize: "0.7rem",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.16em",
+                                        background:
+                                            "linear-gradient(135deg, rgba(79,142,247,0.2), rgba(151,71,255,0.25))",
+                                        color: "var(--text-primary)",
+                                    }}
+                                >
+                                    {project.category || "Case Study"}
+                                </div>
+                                <h3
+                                    style={{
+                                        marginBottom: "0.4rem",
+                                        fontSize: "1.05rem",
+                                        fontWeight: 700,
+                                        color: "var(--text-primary)",
+                                        fontFamily: "var(--font-space-grotesk), sans-serif",
+                                    }}
+                                >
+                                    {project.title}
+                                </h3>
+                                <p
+                                    style={{
+                                        fontSize: "0.9rem",
+                                        color: "var(--text-muted)",
+                                    }}
+                                >
+                                    {project.description}
+                                </p>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+
+                <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+                    <a
+                        href="/work"
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "0.65rem 1.75rem",
+                            borderRadius: "999px",
+                            border: "1px solid var(--border-subtle)",
+                            fontSize: "0.9rem",
+                            fontWeight: 600,
+                            color: "var(--text-primary)",
+                            textDecoration: "none",
+                        }}
+                    >
+                        View All Work →
+                    </a>
+                </div>
+            </div>
+            <style jsx>{`
+              .workCard:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 70px rgba(79, 142, 247, 0.12);
+              }
+              .workCard:hover img {
+                transform: scale(1.05);
+              }
+            `}</style>
+        </section>
+    );
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Test Product",
+    "platform": "Reddit",
+    "type": "account",
+    "price": "10",
+    "desc": "This is a test product for debugging purposes.",
+    "creds": "user:pass123",
+    "image": "https://img.icons8.com/color/480/shop.png",
+    "id": 1768459368948
+  },
+  {
+    "id": 1,
+    "name": "5yr Aged Reddit Account (2k Karma)",
+    "platform": "Reddit",
+    "type": "account",
+    "price": "45",
+    "desc": "Premium aged Reddit account with organic karma history. safe for marketing.",
+    "creds": "Login: user_demo1 / pass: DemoPass123! \nRecovery: recovery@demo.com",
+    "image": "https://images.unsplash.com/photo-1590074219920-56286fa6443c?auto=format&fit=crop&w=300&q=80"
+  },
+  {
+    "id": 2,
+    "name": "Instagram 10k Followers Page",
+    "platform": "Instagram",
+    "type": "account",
+    "price": "120",
+    "desc": "Niche: Travel. Real followers, high engagement rate. Ready for dropshipping.",
+    "creds": "Login: travel_guru_10k / pass: SafeTravels2024",
+    "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=300&q=80"
+  },
+  {
+    "id": 3,
+    "name": "Discord Server Boost (Level 3)",
+    "platform": "Discord",
+    "type": "service",
+    "price": "25",
+    "desc": "We will boost your server to Level 3 for 1 month within 24 hours.",
+    "image": "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?auto=format&fit=crop&w=300&q=80"
+  },
+  {
+    "id": 4,
+    "name": "Verified Business Manager (Facebook)",
+    "platform": "Facebook",
+    "type": "account",
+    "price": "85",
+    "desc": "Reinstated BM with $250 daily limit. Perfect for ads.",
+    "creds": "Invite Link: https://fb.me/bm/invite/xyz...",
+    "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=300&q=80"
+  }
+]

@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[22016,["/_next/static/chunks/421e5d5e5cd54efd.js","/_next/static/chunks/796e69ae18b2784c.js"],""]
+3:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/7340adf74ff47ec0.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"osv-C2KLdYv-LmFABT7jm","rsc":["$","$1","c",{"children":[["$","div",null,{"style":{"height":"100vh","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center","textAlign":"center","background":"#050505","color":"white"},"children":[["$","h1",null,{"style":{"fontSize":"6rem","fontWeight":"bold","margin":0,"textShadow":"0 0 20px var(--primary)"},"className":"text-gradient","children":"404"}],["$","h2",null,{"style":{"fontSize":"2rem","marginBottom":"1rem"},"children":"Lost in Cyberspace?"}],["$","p",null,{"style":{"color":"var(--text-muted)","marginBottom":"2rem"},"children":"The page you are looking for has been moved or doesn't exist."}],["$","$L2",null,{"href":"/","className":"btn btn-primary","children":"Return Home"}]]}],[["$","script","script-0",{"src":"/_next/static/chunks/796e69ae18b2784c.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

@@ -1,0 +1,173 @@
+[
+  {
+    "id": "inv_1",
+    "name": "Fortnite Account Level 100",
+    "platform": "Z2U",
+    "purchasePrice": 20,
+    "salePrice": 0,
+    "status": "In Stock",
+    "purchaseDate": "2024-01-20"
+  },
+  {
+    "id": "inv_1769057264653",
+    "name": "Non-Z2U Account",
+    "platform": "PlayerUp",
+    "purchasePrice": 50,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-22"
+  },
+  {
+    "id": "inv_1769093060553",
+    "name": "",
+    "platform": "Z2U",
+    "purchasePrice": 0,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "",
+      "password": "",
+      "email": "",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769093604451",
+    "name": "Credential Test Item",
+    "platform": "Z2U",
+    "purchasePrice": 0,
+    "status": "Sold",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "",
+      "password": "",
+      "email": "",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769105970539",
+    "name": "BrowserTestItem",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "Sold",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "testuser",
+      "password": "testpass",
+      "email": "",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769106193658",
+    "name": "BrowserTestItem2",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "testuser2",
+      "password": "testpass2",
+      "email": "",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769107210623",
+    "name": "BrowserTestItem",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "Sold",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "testuser",
+      "password": "testpass",
+      "email": "mail:pass",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769108838021",
+    "name": "BrowserTestItemFinal",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "Sold",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "finaluser",
+      "password": "finalpass",
+      "email": "final@mail.com:pass",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769109495154",
+    "name": "ItemTest4",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "Sold",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "user4",
+      "password": "pass4",
+      "email": "mail4@test.com:pass4",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769110619325",
+    "name": "FinalFixItem",
+    "platform": "Z2U",
+    "purchasePrice": 10,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-22",
+    "accountDetails": {
+      "username": "fixuser",
+      "password": "fixpass",
+      "email": "fix@mail.com:pass",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769251335208",
+    "name": "Reddit",
+    "platform": "Direct",
+    "purchasePrice": 1,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-24",
+    "accountDetails": {
+      "username": "1",
+      "password": "1",
+      "email": "1",
+      "extraInfo": "1"
+    }
+  },
+  {
+    "id": "inv_1769253398911",
+    "name": "reddit",
+    "platform": "Z2U",
+    "purchasePrice": 1,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-24",
+    "accountDetails": {
+      "username": "",
+      "password": "",
+      "email": "",
+      "extraInfo": ""
+    }
+  },
+  {
+    "id": "inv_1769260470144",
+    "name": "reddit account",
+    "platform": "Z2U",
+    "purchasePrice": 1,
+    "status": "In Stock",
+    "purchaseDate": "2026-01-24",
+    "accountDetails": {
+      "username": "",
+      "password": "",
+      "email": "",
+      "extraInfo": ""
+    }
+  }
+]

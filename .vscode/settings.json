@@ -1,0 +1,10 @@
+{
+  "java.jdt.ls.java.home": "C:\\Users\\Abc\\.jdk\\jdk-17.0.20.1+1",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "C:\\Users\\Abc\\.jdk\\jdk-17.0.20.1+1",
+      "default": true
+    }
+  ]
+}
