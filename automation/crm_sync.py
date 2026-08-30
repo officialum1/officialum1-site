@@ -7,9 +7,7 @@ from typing import Dict, Any
 
 API_ENDPOINT = "http://localhost:3000/api/leads"
 
-def sync_lead_to_crm(lead: Dict[str, Any], platform_tag: str = "B2B Outreach", base_url: str = "http://localhost:3000") -> bool:
-    target_url = f"{base_url.rstrip('/')}/api/leads"
-    
+def sync_lead_to_crm(lead: Dict[str, Any], platform_tag: str = "B2B Outreach", base_url: str = "https://officialum1.com") -> bool:
     primary_email = lead["emails"][0] if lead.get("emails") else lead.get("buyerEmail", "")
     if not primary_email:
         return False
@@ -24,21 +22,22 @@ def sync_lead_to_crm(lead: Dict[str, Any], platform_tag: str = "B2B Outreach", b
     notes += f"Extracted via OfficialUM1 100% Lead Hunter Suite.\nDetails: {lead.get('notes', '')}"
 
     payload = {
-        "action": "guest_post_quote",
-        "name": client_name,
-        "email": primary_email,
-        "domain": lead.get("domain", website),
-        "niche": platform_tag,
-        "message": notes,
-        "packageName": "Outreach Lead"
+        "action": "add",
+        "clientName": client_name,
+        "buyerEmail": primary_email,
+        "platform": platform_tag,
+        "budget": 500,
+        "notes": notes
     }
 
-    try:
-        res = requests.post(target_url, json=payload, timeout=6)
-        if res.status_code in [200, 201]:
-            return True
-        else:
-            return False
-    except Exception as e:
-        print(f"CRM Sync Error for {client_name}: {e}")
-        return False
+    # Try live domain first, fallback to localhost
+    for url_root in [base_url, "http://localhost:3000"]:
+        try:
+            target_url = f"{url_root.rstrip('/')}/api/leads"
+            res = requests.post(target_url, json=payload, timeout=6)
+            if res.status_code in [200, 201]:
+                return True
+        except Exception:
+            continue
+
+    return False

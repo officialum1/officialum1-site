@@ -5,7 +5,15 @@ Crawls target websites, business directories, and contact endpoints to find real
 import re
 import time
 import urllib.parse
+import sys
 from typing import List, Dict, Any
+
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 import requests
 from bs4 import BeautifulSoup
 from lead_validator import verify_lead_email
@@ -91,36 +99,58 @@ def scrape_website_leads(url: str, business_name: str = "") -> Dict[str, Any]:
     return result
 
 
-def search_bing_leads(query: str, max_results: int = 15) -> List[Dict[str, Any]]:
+def search_web_leads(query: str, max_results: int = 15) -> List[Dict[str, Any]]:
     """
-    Finds business websites via Bing search query without needing paid API keys.
+    Finds business websites via DuckDuckGo and directory parsing without API limits.
     """
-    encoded_q = urllib.parse.quote(query)
-    search_url = f"https://www.bing.com/search?q={encoded_q}&count={max_results}"
-    
+    search_url = "https://html.duckduckgo.com/html/"
     found_leads = []
     seen_domains = set()
 
     try:
-        res = requests.get(search_url, headers=HEADERS, timeout=8)
+        res = requests.post(search_url, data={"q": query}, headers=HEADERS, timeout=10)
         if res.status_code == 200:
             soup = BeautifulSoup(res.text, 'html.parser')
-            results = soup.select('li.b_algo h2 a')
+            links = soup.select('.result__snippet, .result__url, .result__title a')
 
-            for link in results:
-                href = link.get('href', '')
-                title = link.get_text().strip()
-                if href and href.startswith('http'):
-                    domain = urllib.parse.urlparse(href).netloc.replace('www.', '')
-                    if domain and domain not in seen_domains and not any(ign in domain for ign in ['bing.', 'microsoft.', 'google.', 'wikipedia.org', 'youtube.com']):
-                        seen_domains.add(domain)
-                        print(f"  🔍 Auditing {domain}...")
-                        lead_data = scrape_website_leads(href, business_name=title.split('|')[0].split('-')[0].strip())
-                        if lead_data["emails"]:
-                            found_leads.append(lead_data)
-                            print(f"  ✅ Found 100% Verified Lead: {lead_data['clientName']} -> {', '.join(lead_data['emails'])}")
-                        time.sleep(1.2)
+            extracted_urls = []
+            for tag in soup.select('a.result__url, a.result__snippet'):
+                raw_href = tag.get('href', '').strip()
+                if 'uddg=' in raw_href:
+                    try:
+                        parsed_uddg = urllib.parse.parse_qs(urllib.parse.urlparse(raw_href).query).get('uddg', [''])[0]
+                        if parsed_uddg:
+                            extracted_urls.append(parsed_uddg)
+                    except Exception:
+                        pass
+                elif raw_href.startswith('http'):
+                    extracted_urls.append(raw_href)
+
+            for href in extracted_urls[:max_results]:
+                try:
+                    parsed_domain = urllib.parse.urlparse(href).netloc.replace('www.', '').lower()
+                    if not parsed_domain or parsed_domain in seen_domains:
+                        continue
+                    
+                    if any(ign in parsed_domain for ign in ['duckduckgo.', 'google.', 'wikipedia.org', 'youtube.com', 'facebook.com', 'twitter.com', 'linkedin.com']):
+                        continue
+
+                    seen_domains.add(parsed_domain)
+                    print(f"  🔍 Auditing {parsed_domain}...")
+                    
+                    lead_data = scrape_website_leads(href)
+                    if lead_data["emails"]:
+                        found_leads.append(lead_data)
+                        print(f"  ✅ [100% VERIFIED LEAD] {lead_data['clientName']} -> {', '.join(lead_data['emails'])}")
+                    
+                    time.sleep(1.0)
+                except Exception:
+                    continue
+
     except Exception as e:
         print(f"Error during search: {e}")
 
     return found_leads
+
+# Alias for backwards compatibility
+search_bing_leads = search_web_leads
