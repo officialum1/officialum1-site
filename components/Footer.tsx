@@ -295,10 +295,11 @@ export default function Footer() {
 
                     {/* Quick Link Bar & Return Path */}
                     <div className="flex items-center justify-between md:justify-start gap-6 border-t border-white/5 xl:border-0 pt-6 xl:pt-0">
-                        <div className="flex gap-5">
+                        <div className="flex flex-wrap gap-4 md:gap-5">
                             <a href="/privacy" className="hover:text-white transition-colors">Privacy Policy</a>
                             <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
                             <a href="/refund" className="hover:text-white transition-colors">Refund Policy</a>
+                            <a href="/delivery-policy" className="hover:text-white transition-colors">Delivery Policy</a>
                             <a href="/contact" className="hover:text-white transition-colors">Customer Support</a>
                         </div>
 
