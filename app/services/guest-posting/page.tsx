@@ -11,126 +11,103 @@ import {
   ShieldCheck,
   Target,
   TrendingUp,
+  Sparkles,
+  Zap,
+  Award,
+  Layers,
+  Check,
+  X,
+  ExternalLink
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GuestPostQuoteForm from "@/components/GuestPostQuoteForm";
 import { PageHero } from "@/components/ui/PageHero";
+import Script from "next/script";
 
 export const metadata: Metadata = {
-  title: "Guest Posting Services | Buy Niche Guest Posts | OfficialUM1",
+  title: "Buy High DA Guest Posts & Niche Edits (DA60+) | 100% DoFollow | OfficialUM1",
   description:
-    "Buy niche-relevant guest posting services from OfficialUM1. Publisher outreach, content planning, contextual placements, and clear placement reports for SEO authority growth.",
+    "Buy high-authority niche guest posts & curated niche edits on 65,000+ verified real websites (DA 40 to DA 75+). 100% DoFollow, real Google organic traffic, zero PBNs, and 365-day replacement warranty.",
   keywords: [
-    "guest posting services",
     "buy guest posts",
-    "high DA guest posting",
-    "guest post backlinks",
-    "niche guest posts",
-    "link building services",
+    "high da guest posting",
+    "da60 guest post package",
+    "niche edits backlinks",
+    "buy contextual backlinks",
+    "dofollow link building agency",
+    "b2b seo link building",
+    "guest posting service usa",
+    "blogger outreach agency",
   ],
   alternates: { canonical: "https://officialum1.com/services/guest-posting" },
 };
 
-const benefits = [
-  {
-    icon: Target,
-    title: "Niche Fit First",
-    text: "We match your campaign with publishers that make sense for your industry, target page, and audience intent.",
-  },
+const trustMetrics = [
+  { value: "65,000+", label: "Verified Real Publishers", sub: "Manual Blogger Outreach Network" },
+  { value: "DA 40 - 75+", label: "Domain Authority Range", sub: "Moz DA & Ahrefs DR 50-85+" },
+  { value: "5k - 50k+", label: "Monthly Organic Traffic", sub: "Verified Google Search Visits" },
+  { value: "100% DoFollow", label: "Contextual In-Content", sub: "365-Day Free Replacement" },
+];
+
+const vettingStandards = [
   {
     icon: SearchCheck,
-    title: "Publisher Vetting",
-    text: "Sites are reviewed for relevance, visible content quality, indexability, and placement standards before outreach.",
+    title: "1. Zero PBNs / 100% Real Websites",
+    desc: "Every publisher in our network is an established, independently owned web property with real active readership, branded search volume, and legitimate editorial management."
+  },
+  {
+    icon: TrendingUp,
+    title: "2. Verified Google Organic Traffic",
+    desc: "We strictly reject dead sites with inflated metrics. Each target domain must show positive, upward organic search traffic trends in Ahrefs and Semrush (1k to 50k+ monthly visits)."
+  },
+  {
+    icon: Target,
+    title: "3. Hyper-Relevant Niche Fit",
+    desc: "Your link is placed inside closely matching editorial themes (Tech, SaaS, Health, Finance, E-Commerce, Legal) to ensure maximum contextual link equity flow."
   },
   {
     icon: FileText,
-    title: "Content Included",
-    text: "We can prepare the article, plan anchor text, and send a publisher-ready draft for approval.",
+    title: "4. 1,000+ Word Native Content Included",
+    desc: "Our native US/UK content team writes high-value, researched editorial articles that naturally integrate your brand anchors without triggering commercial footprint flags."
   },
   {
     icon: ShieldCheck,
-    title: "Clean Reporting",
-    text: "You receive the live URL, target page, anchor, publisher details, and final placement notes after publishing.",
-  },
-];
-
-const packages = [
-  {
-    name: "Starter Placement",
-    price: "$99+",
-    detail: "For one money page, local SEO page, or first test placement.",
-    items: ["1 niche placement", "Publisher shortlist", "Content guidance", "Live URL report"],
+    title: "5. 365-Day Replacement Warranty",
+    desc: "If any publisher modifies, removes, or un-indexes a placement within 365 days, our team replaces it immediately on an equal or higher authority domain free of charge."
   },
   {
-    name: "Growth Pack",
-    price: "$249+",
-    detail: "For brands that want momentum across multiple target pages.",
-    items: ["3 placements", "Article writing included", "Anchor map", "Placement report"],
-    featured: true,
-  },
-  {
-    name: "Authority Pack",
-    price: "$499+",
-    detail: "For competitive niches that need stronger publisher quality.",
-    items: ["5 placements", "Higher authority targets", "Manual outreach", "Monthly strategy notes"],
-  },
-  {
-    name: "Monthly Agency Plan",
-    price: "$999+",
-    detail: "For recurring campaigns, agencies, and ongoing authority building.",
-    items: ["5 to 10+ placements", "Monthly link plan", "Content calendar", "Performance reporting"],
-  },
-];
-
-const processSteps = [
-  {
-    title: "Submit your target",
-    text: "Share your domain, niche, target URL, anchor text, budget, and preferred delivery timeline.",
-  },
-  {
-    title: "We shortlist publishers",
-    text: "We check relevance, topical fit, content quality, and placement requirements before sending options.",
-  },
-  {
-    title: "Approve content",
-    text: "We prepare or refine the article so the placement reads naturally and matches publisher guidelines.",
-  },
-  {
-    title: "Publish and report",
-    text: "You get the live post URL, anchor, target page, publisher details, and campaign notes in one report.",
-  },
-];
-
-const deliverables = [
-  "Publisher URL and live guest post link",
-  "Target page and anchor text record",
-  "Content title and article status",
-  "Placement date and package value",
-  "Publisher policy notes where relevant",
-  "Next-step recommendations for your SEO plan",
+    icon: Zap,
+    title: "6. Fast 5 to 10 Day Turnaround",
+    desc: "No months of waiting. From niche shortlist review to live published URL and white-label ranking report, campaigns are fulfilled with rapid precision."
+  }
 ];
 
 const faqs = [
   {
-    question: "Do you guarantee rankings?",
+    question: "What makes OfficialUM1's guest posting different from cheap link vendors?",
     answer:
-      "No. Guest posting can support authority and discovery, but Google rankings depend on many factors including site quality, content, technical SEO, competition, and search intent.",
+      "Most cheap vendors use spammy Private Blog Networks (PBNs) or link-farm domains with zero actual Google search traffic. OfficialUM1 partners with 65,000+ real, active editorial publishers with verified Ahrefs organic traffic (5k-50k+ visits), strict 0% spam scores, and 100% permanent DoFollow in-content placement guarantees."
   },
   {
-    question: "Are links always follow links?",
+    question: "What is the difference between Guest Posts and Niche Edits?",
     answer:
-      "Link attributes depend on publisher policy. We focus on relevant, transparent placements and report the final URL and placement details clearly.",
+      "A Guest Post is a brand-new 800-1,200 word article written and published on the partner website containing your contextual backlink. A Niche Edit (Curated Link Insertion) places your link into an already existing, aged article that is already indexed and ranking in Google, providing immediate ranking signals."
   },
   {
-    question: "Can you write the article?",
+    question: "Do you provide a replacement guarantee?",
     answer:
-      "Yes. Growth, Authority, and Monthly plans can include article writing, anchor planning, and publisher-ready formatting.",
+      "Yes. We offer an industry-leading 365-day free replacement warranty. In the rare event that a publisher alters or removes an article within 12 months, we replace the link on an equal or higher DA domain at zero cost."
   },
   {
-    question: "How fast can a guest post go live?",
+    question: "Can I choose my target anchor texts and landing pages?",
     answer:
-      "Most simple placements can be planned within a few business days. Publishing time depends on publisher review speed and niche requirements.",
+      "Absolutely. You can specify exact-match, partial-match, branded, or URL anchors during ordering, or let our senior link-building strategists map optimal anchor distributions to protect your site against over-optimization penalties."
+  },
+  {
+    question: "How fast will my guest posts go live?",
+    answer:
+      "Standard turnaround is 5 to 10 business days for Guest Posts, and 48 to 72 hours for Niche Edits. You receive a live white-label dashboard and spreadsheet report with live URLs, DA/DR metrics, anchor texts, and indexing status."
   },
 ];
 
@@ -138,327 +115,269 @@ export default function GuestPostingPage() {
   const serviceJsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Guest Posting Services",
-    provider: {
+    "name": "High DA Guest Posting & Niche Edits Service",
+    "serviceType": "SEO Link Building & Blogger Outreach",
+    "provider": {
       "@type": "Organization",
-      name: "OfficialUM1",
-      url: "https://officialum1.com",
+      "name": "OfficialUM1 LLC",
+      "url": "https://officialum1.com"
     },
-    areaServed: "Worldwide",
-    serviceType: "Guest Posting and Link Building",
-    description:
-      "Niche-relevant guest post placements with publisher outreach, content planning, and placement reporting.",
-    url: "https://officialum1.com/services/guest-posting",
-    hasOfferCatalog: {
+    "description": "High-authority contextual guest posting and niche edit backlinks on 65,000+ verified real websites with guaranteed DoFollow links and real organic Google traffic.",
+    "areaServed": ["US", "GB", "CA", "AE", "AU", "Worldwide"],
+    "hasOfferCatalog": {
       "@type": "OfferCatalog",
-      name: "Guest Posting Packages",
-      itemListElement: packages.map((pkg) => ({
-        "@type": "Offer",
-        name: pkg.name,
-        description: pkg.detail,
-        priceCurrency: "USD",
-        price: pkg.price.replace(/[^0-9]/g, ""),
-        availability: "https://schema.org/InStock",
-      })),
-    },
+      "name": "Guest Posting & Link Building Packages",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Starter Authority Pack (5x DA40+ Posts)"
+          },
+          "price": "499",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "DA 60+ Ranking Powerhouse (10x DA60+ Posts)"
+          },
+          "price": "1499",
+          "priceCurrency": "USD"
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Enterprise All-In-One Surge"
+          },
+          "price": "2499",
+          "priceCurrency": "USD"
+        }
+      ]
+    }
   };
 
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
+    "mainEntity": faqs.map((f) => ({
       "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
+      "name": f.question,
+      "acceptedAnswer": {
         "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
+        "text": f.answer
+      }
+    }))
   };
 
   return (
-    <main className="inner-page">
+    <main style={{ background: "var(--bg-base)", minHeight: "100vh", color: "var(--text-primary)" }}>
       <Navbar />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([serviceJsonLd, faqJsonLd]) }}
-      />
-      <div style={{ paddingTop: "80px" }}>
+
+      <Script id="service-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
+      <Script id="faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+
+      <div style={{ paddingTop: '80px' }}>
         <PageHero
-          breadcrumbs={[
-            { label: "Home", href: "/" },
-            { label: "Services", href: "/services" },
-            { label: "Guest Posting" },
-          ]}
-          label="Guest Posting"
-          title="Guest posts that turn authority into leads"
-          description="Sell smarter with niche-relevant publisher outreach, clean content planning, transparent reports, and a quote flow connected directly to your admin CRM."
+          breadcrumbs={[{ label: "Home", href: "/" }, { label: "Services", href: "/services" }, { label: "Guest Posting" }]}
+          label="Enterprise Authority Engine"
+          title={<>Premium High DA <span style={{ color: "var(--accent-blue)" }}>Guest Posting</span> &amp; Niche Edits</>}
+          description="Scale your organic search rankings with contextual, 100% DoFollow backlinks on 65,000+ verified real websites (DA 40 to DA 75+). Guaranteed real Google traffic, zero PBNs, and 365-day replacement warranty."
           right={
-            <Link
-              href="#quote"
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-4 text-sm font-black text-white"
-              style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
+            <a
+              href="#order-form"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-extrabold text-sm transition-all shadow-xl shadow-blue-500/25"
+              style={{ background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-violet) 100%)" }}
             >
-              Get Quote
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+              <Zap size={16} /> Choose Link Package <ArrowRight size={16} />
+            </a>
           }
         />
 
-        <section className="py-[72px]" style={{ background: "var(--bg-base)" }}>
+        {/* Live Authority Metrics Ribbon */}
+        <section className="border-y border-[var(--border-subtle)] bg-white py-10">
           <div className="container">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {benefits.map((benefit) => (
-                <article
-                  key={benefit.title}
-                  className="rounded-xl border p-6"
-                  style={{
-                    background: "#ffffff",
-                    borderColor: "var(--border-subtle)",
-                    boxShadow: "0 12px 30px rgba(24,32,38,0.06)",
-                  }}
-                >
-                  <div
-                    className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg"
-                    style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
-                  >
-                    <benefit.icon size={23} />
-                  </div>
-                  <h2 className="mb-3 text-xl font-black" style={{ color: "var(--text-primary)" }}>
-                    {benefit.title}
-                  </h2>
-                  <p className="text-sm leading-7" style={{ color: "var(--text-muted)" }}>
-                    {benefit.text}
-                  </p>
-                </article>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {trustMetrics.map((m, i) => (
+                <div key={i} className="text-center p-4 rounded-2xl bg-gray-50/60 border border-gray-100">
+                  <div className="text-2xl md:text-3xl font-black text-[var(--accent-blue)]">{m.value}</div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] mt-1">{m.label}</div>
+                  <div className="text-[11px] text-[var(--text-muted)] mt-0.5">{m.sub}</div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-[88px]" style={{ background: "var(--bg-section)" }}>
-          <div className="container">
-            <div className="mb-12 max-w-3xl">
-              <span
-                className="text-xs font-bold uppercase"
-                style={{ color: "var(--accent-blue)", letterSpacing: "0.14em" }}
-              >
-                Packages
+        {/* Main Interactive Package & Order Engine */}
+        <section className="py-20 md:py-28" style={{ background: "var(--bg-base)" }}>
+          <div className="container max-w-6xl">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-blue)]">
+                Guaranteed Authority Placements
               </span>
-              <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                Pick a package, then we customize the publisher list
+              <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mt-2">
+                Select Your Link Building Strategy
               </h2>
-              <p className="mt-4" style={{ color: "var(--text-muted)" }}>
-                Pricing starts simple, but the final quote depends on niche difficulty, publisher quality, traffic standards, article length, and delivery speed.
+              <p className="text-sm text-[var(--text-muted)] mt-3">
+                Choose from our pre-configured, high-ROI authority bundles or use the interactive calculator to build a custom link package tailored to your target URLs.
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-4">
-              {packages.map((pkg) => (
-                <article
-                  key={pkg.name}
-                  className="relative flex flex-col rounded-xl border p-6"
-                  style={{
-                    background: pkg.featured ? "linear-gradient(180deg,#ffffff,#f3faf8)" : "#ffffff",
-                    borderColor: pkg.featured ? "rgba(20,108,120,0.34)" : "var(--border-subtle)",
-                    boxShadow: pkg.featured
-                      ? "0 18px 44px rgba(20,108,120,0.14)"
-                      : "0 12px 30px rgba(24,32,38,0.06)",
-                  }}
+            {/* Interactive Calculator and Order Component */}
+            <GuestPostQuoteForm />
+          </div>
+        </section>
+
+        {/* Quality Vetting & 6-Point Standard */}
+        <section className="py-20 bg-white border-y border-[var(--border-subtle)]">
+          <div className="container max-w-6xl">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-blue)]">
+                The OfficialUM1 Quality Standard
+              </span>
+              <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mt-2">
+                Why 900+ Agencies Trust Our Link Infrastructure
+              </h2>
+              <p className="text-sm text-[var(--text-muted)] mt-3">
+                Google updates penalize artificial link schemes. We protect your domain with strict manual outreach, authentic editorial placement, and zero footprint.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vettingStandards.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-gray-50/40 hover:bg-white hover:shadow-lg transition-all"
                 >
-                  {pkg.featured ? (
-                    <span
-                      className="mb-4 w-fit rounded-full px-3 py-1 text-xs font-black uppercase"
-                      style={{ color: "var(--accent-blue)", background: "rgba(20,108,120,0.10)" }}
-                    >
-                      Best seller
-                    </span>
-                  ) : null}
-                  <h3 className="mb-2 text-2xl font-black" style={{ color: "var(--text-primary)" }}>
-                    {pkg.name}
-                  </h3>
-                  <div className="mb-4 text-3xl font-black" style={{ color: "var(--accent-blue)" }}>
-                    {pkg.price}
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-[var(--accent-blue)] flex items-center justify-center mb-4">
+                    <item.icon className="w-5 h-5" />
                   </div>
-                  <p className="mb-6 text-sm leading-7" style={{ color: "var(--text-muted)" }}>
-                    {pkg.detail}
-                  </p>
-                  <ul className="mb-8 grid gap-3">
-                    {pkg.items.map((item) => (
-                      <li key={item} className="flex gap-3 text-sm" style={{ color: "var(--text-primary)" }}>
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none" style={{ color: "var(--accent-blue)" }} />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href="#quote"
-                    className="mt-auto inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-bold text-white"
-                    style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
-                  >
-                    Request Quote
-                  </Link>
-                </article>
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)] mb-2">{item.title}</h3>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-[88px]" style={{ background: "var(--bg-base)" }}>
-          <div className="container">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-              <div>
-                <span
-                  className="text-xs font-bold uppercase"
-                  style={{ color: "var(--accent-blue)", letterSpacing: "0.14em" }}
-                >
-                  How it works
-                </span>
-                <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                  A simple sales flow your team can actually manage
-                </h2>
-                <p className="mt-4 leading-8" style={{ color: "var(--text-muted)" }}>
-                  The public page collects quote details. The admin panel stores every request as a lead, so you can follow up, update status, attach documents, and track revenue.
-                </p>
-              </div>
-
-              <div className="grid gap-4">
-                {processSteps.map((step, index) => (
-                  <article
-                    key={step.title}
-                    className="grid gap-4 rounded-xl border p-5 sm:grid-cols-[52px_1fr]"
-                    style={{ background: "#ffffff", borderColor: "var(--border-subtle)" }}
-                  >
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-full text-sm font-black"
-                      style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
-                    >
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h3 className="mb-2 text-xl font-black" style={{ color: "var(--text-primary)" }}>
-                        {step.title}
-                      </h3>
-                      <p className="text-sm leading-7" style={{ color: "var(--text-muted)" }}>
-                        {step.text}
-                      </p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="quote" className="py-[88px]" style={{ background: "var(--bg-section)" }}>
-          <div className="container">
-            <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-              <div>
-                <span
-                  className="text-xs font-bold uppercase"
-                  style={{ color: "var(--accent-blue)", letterSpacing: "0.14em" }}
-                >
-                  Connected to admin
-                </span>
-                <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                  Guest post quotes now become trackable leads
-                </h2>
-                <p className="mt-4 leading-8" style={{ color: "var(--text-muted)" }}>
-                  Jab koi client form submit karega, admin panel ke Leads tab mein Guest Posting pipeline ke andar aa jayega. Follow-up, notes, status, budget, aur report link wahi manage ho sakte hain.
-                </p>
-
-                <div className="mt-8 grid gap-4">
-                  {[
-                    { icon: Globe2, title: "Client details", text: "Domain, niche, target URL, anchor, budget, and timeline are saved." },
-                    { icon: BarChart3, title: "Revenue tracking", text: "Budget value goes into your lead pipeline and dashboard totals." },
-                    { icon: LinkIcon, title: "Report ready", text: "Final publisher URL can be stored in the existing document/report link field." },
-                    { icon: TrendingUp, title: "Upsell path", text: "Single placement buyers can be moved into monthly packages." },
-                  ].map((item) => (
-                    <div key={item.title} className="flex gap-4">
-                      <div
-                        className="flex h-11 w-11 flex-none items-center justify-center rounded-lg"
-                        style={{ background: "rgba(196,71,45,0.10)", color: "var(--accent-violet)" }}
-                      >
-                        <item.icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="mb-1 text-lg font-black" style={{ color: "var(--text-primary)" }}>
-                          {item.title}
-                        </h3>
-                        <p className="text-sm leading-7" style={{ color: "var(--text-muted)" }}>
-                          {item.text}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <GuestPostQuoteForm />
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[88px]" style={{ background: "var(--bg-base)" }}>
-          <div className="container">
-            <div
-              className="grid gap-8 rounded-2xl border p-6 sm:p-8 lg:grid-cols-2"
-              style={{
-                background: "linear-gradient(135deg, #ffffff, #eef4f2)",
-                borderColor: "var(--border-subtle)",
-                boxShadow: "0 18px 44px rgba(24,32,38,0.08)",
-              }}
-            >
-              <div>
-                <h2 className="mb-4 text-3xl font-black">What the client receives</h2>
-                <p className="leading-8" style={{ color: "var(--text-muted)" }}>
-                  Every campaign should be easy to verify. Keep the output concrete so the buyer can see exactly what was delivered.
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {deliverables.map((item) => (
-                  <div key={item} className="flex gap-3 rounded-xl bg-white p-4 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none" style={{ color: "var(--accent-blue)" }} />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[88px]" style={{ background: "var(--bg-section)" }}>
-          <div className="container">
-            <div className="mb-10 max-w-3xl">
-              <span
-                className="text-xs font-bold uppercase"
-                style={{ color: "var(--accent-blue)", letterSpacing: "0.14em" }}
-              >
-                FAQ
+        {/* Comparison Matrix: OfficialUM1 vs Cheap Marketplaces */}
+        <section className="py-20 md:py-28" style={{ background: "var(--bg-base)" }}>
+          <div className="container max-w-5xl">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-blue)]">
+                Comparison Analysis
               </span>
-              <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                Clear expectations before the sale
+              <h2 className="text-3xl md:text-4xl font-black text-[var(--text-primary)] mt-2">
+                OfficialUM1 vs Cheap Link Marketplaces
+              </h2>
+              <p className="text-sm text-[var(--text-muted)] mt-3">
+                See why leading US &amp; European SEO agencies choose our verified white-hat publisher network over dangerous cheap link brokers.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-[var(--border-subtle)] bg-white overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b bg-gray-50/80 text-[var(--text-primary)]">
+                      <th className="p-4 md:p-6 font-extrabold text-sm">Feature / Metric</th>
+                      <th className="p-4 md:p-6 font-extrabold text-sm text-[var(--accent-blue)] bg-blue-50/50">
+                        OfficialUM1 LLC
+                      </th>
+                      <th className="p-4 md:p-6 font-extrabold text-sm text-gray-500">
+                        Cheap Freelancers / PBNs
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    <tr>
+                      <td className="p-4 md:p-6 font-bold text-[var(--text-primary)]">Publisher Authenticity</td>
+                      <td className="p-4 md:p-6 font-semibold text-emerald-700 bg-blue-50/30">
+                        <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> 100% Real Blogs &amp; Media Outlets</div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-500">
+                        <div className="flex items-center gap-1.5"><X className="w-4 h-4 text-red-500" /> De-indexed PBNs &amp; Link Farms</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 md:p-6 font-bold text-[var(--text-primary)]">Organic Google Traffic</td>
+                      <td className="p-4 md:p-6 font-semibold text-emerald-700 bg-blue-50/30">
+                        <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Verified 1k - 50k+ Monthly Visits</div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-500">
+                        <div className="flex items-center gap-1.5"><X className="w-4 h-4 text-red-500" /> 0 Organic Search Visits</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 md:p-6 font-bold text-[var(--text-primary)]">Link Attribute</td>
+                      <td className="p-4 md:p-6 font-semibold text-emerald-700 bg-blue-50/30">
+                        <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Guaranteed 100% DoFollow In-Content</div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-500">
+                        <div className="flex items-center gap-1.5"><X className="w-4 h-4 text-red-500" /> NoFollow, Sponsored, or Footer</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 md:p-6 font-bold text-[var(--text-primary)]">Content Quality</td>
+                      <td className="p-4 md:p-6 font-semibold text-emerald-700 bg-blue-50/30">
+                        <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> Native 1,000+ Word Researched Articles</div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-500">
+                        <div className="flex items-center gap-1.5"><X className="w-4 h-4 text-red-500" /> Low-Quality AI Spun 300 words</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 md:p-6 font-bold text-[var(--text-primary)]">Replacement Warranty</td>
+                      <td className="p-4 md:p-6 font-semibold text-emerald-700 bg-blue-50/30">
+                        <div className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600" /> 365-Day Free Link Replacement</div>
+                      </td>
+                      <td className="p-4 md:p-6 text-gray-500">
+                        <div className="flex items-center gap-1.5"><X className="w-4 h-4 text-red-500" /> None (Links deleted after 30 days)</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQs */}
+        <section className="py-20 bg-white border-t border-[var(--border-subtle)]">
+          <div className="container max-w-4xl">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <span className="text-xs font-bold uppercase tracking-widest text-[var(--accent-blue)]">
+                Frequently Asked Questions
+              </span>
+              <h2 className="text-3xl font-black text-[var(--text-primary)] mt-2">
+                Everything You Need to Know
               </h2>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              {faqs.map((faq) => (
-                <article
-                  key={faq.question}
-                  className="rounded-xl border p-6"
-                  style={{ background: "#ffffff", borderColor: "var(--border-subtle)" }}
-                >
-                  <h3 className="mb-3 text-xl font-black" style={{ color: "var(--text-primary)" }}>
-                    {faq.question}
-                  </h3>
-                  <p className="text-sm leading-7" style={{ color: "var(--text-muted)" }}>
-                    {faq.answer}
-                  </p>
-                </article>
+
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="p-6 rounded-2xl border border-[var(--border-subtle)] bg-gray-50/30">
+                  <h3 className="text-base font-extrabold text-[var(--text-primary)]">{faq.question}</h3>
+                  <p className="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">{faq.answer}</p>
+                </div>
               ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <a
+                href="#order-form"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-[var(--accent-blue)] text-white font-extrabold text-sm transition-all shadow-xl shadow-blue-500/25"
+              >
+                Launch Your Campaign Today <ArrowRight size={16} />
+              </a>
             </div>
           </div>
         </section>
       </div>
+
       <Footer />
     </main>
   );
