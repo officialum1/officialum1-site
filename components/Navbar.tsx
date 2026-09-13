@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { usePathname } from "next/navigation";
-import { Bell, Heart, Menu, Search, ShoppingCart, X } from "lucide-react";
+import { Bell, ChevronDown, Heart, Menu, Search, ShoppingCart, Sparkles, X } from "lucide-react";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -91,7 +91,12 @@ export default function Navbar() {
     ];
 
     const mobileNavLinks = [
-        { href: "/services", label: "Services" },
+        { href: "/services", label: "All Services" },
+        { href: "/services/guest-posting", label: "🔗 High-DA Guest Posting" },
+        { href: "/services/niche-edits", label: "⚡ Aged Niche Edits" },
+        { href: "/services/crypto-guest-posting", label: "🪙 Crypto & Web3 Links" },
+        { href: "/services/press-release-distribution", label: "📰 Press Release Distribution" },
+        { href: "/services/local-citations", label: "📍 Local SEO Citations (8 Countries)" },
         { href: "/shop", label: "Shop" },
         ...(user ? [{ href: "/my-orders", label: "Track Order" }] : []),
         { href: "/reviews", label: "Reviews" },
@@ -146,7 +151,136 @@ export default function Navbar() {
 
                 {/* Center nav */}
                 <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex px-2">
-                    {navLinks.map((l) => (
+                    <Link
+                        href="/services"
+                        className={`relative flex-shrink-0 whitespace-nowrap px-2 py-2 text-[12.5px] 2xl:text-[13.5px] font-semibold transition-colors ${
+                            isActive("/services") && pathname === "/services"
+                                ? "text-[var(--accent-blue)]"
+                                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                        }`}
+                    >
+                        Services
+                    </Link>
+
+                    {/* Packages Mega Dropdown */}
+                    <div className="relative group py-2">
+                        <button
+                            type="button"
+                            className="flex items-center gap-1 px-2 text-[12.5px] 2xl:text-[13.5px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus:outline-none"
+                        >
+                            <span>Packages</span>
+                            <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />
+                        </button>
+
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full hidden group-hover:block w-[720px] p-6 bg-white rounded-3xl border border-[var(--border-subtle)] shadow-2xl z-[3000] animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="grid grid-cols-3 gap-6 text-left">
+                                {/* Col 1: Link Building */}
+                                <div>
+                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
+                                        Link Building
+                                    </div>
+                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">DA Packages</div>
+                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700 mb-4">
+                                        <li>
+                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between">
+                                                <span>DA50+ Package</span>
+                                                <span className="text-[10px] text-gray-400">$299+</span>
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between font-bold text-[var(--text-primary)]">
+                                                <span>DA60+ Powerhouse ⭐</span>
+                                                <span className="text-[10px] text-[var(--accent-blue)] font-bold">$1,499</span>
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between">
+                                                <span>DA70+ Elite Pack</span>
+                                                <span className="text-[10px] text-gray-400">$2,499</span>
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/services/niche-edits" className="hover:text-[var(--accent-blue)] flex items-center justify-between text-indigo-600">
+                                                <span>Aged Niche Edits ⚡</span>
+                                                <span className="text-[10px] text-indigo-500">$599+</span>
+                                            </Link>
+                                        </li>
+                                    </ul>
+
+                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Crypto Packages</div>
+                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700">
+                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Starter Pack ($899)</Link></li>
+                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Growth Pack ($1,899)</Link></li>
+                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Elite Pack ($3,499)</Link></li>
+                                    </ul>
+                                </div>
+
+                                {/* Col 2: Press Release */}
+                                <div>
+                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
+                                        Press Release Distribution
+                                    </div>
+                                    <ul className="space-y-2 text-xs font-semibold text-gray-700">
+                                        <li>
+                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
+                                                <div className="font-bold text-[var(--text-primary)]">National Wire (250+ Sites)</div>
+                                                <div className="text-[10px] text-gray-400 font-normal">Google News, NBC, CBS &bull; $399</div>
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
+                                                <div className="font-bold text-[var(--text-primary)]">Global Authority Wire (400+) ⭐</div>
+                                                <div className="text-[10px] text-gray-400 font-normal">Yahoo Finance &amp; AP Wire &bull; $799</div>
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
+                                                <div className="font-bold text-[var(--text-primary)]">Enterprise Financial PR</div>
+                                                <div className="text-[10px] text-gray-400 font-normal">Stock &amp; Crypto Terminals &bull; $1,499</div>
+                                            </Link>
+                                        </li>
+                                        <li className="pt-2 border-t">
+                                            <Link href="/press" className="hover:text-[var(--accent-blue)] text-[11px] text-[var(--accent-blue)] font-bold block">
+                                                &rarr; Visit Corporate Press Room
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* Col 3: Local SEO Listings */}
+                                <div>
+                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
+                                        Local SEO (Citations)
+                                    </div>
+                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700">
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇺🇸 USA Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇬🇧 UK Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇨🇦 Canada Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇦🇺 Australia Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇦🇪 Dubai Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇸🇬 Singapore Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇵🇭 Philippines Local Listings ($149+)</Link></li>
+                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇮🇩 Indonesia Local Listings ($149+)</Link></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between text-[11px]">
+                                <span className="font-semibold text-gray-500">🔒 100% Verified Manual Placement &bull; 365-Day Replacement Warranty</span>
+                                <Link href="/store" className="font-bold text-[var(--accent-blue)] hover:underline">
+                                    Browse Authority Store &rarr;
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    {[
+                        { href: "/shop", label: "Shop" },
+                        { href: "/reviews", label: "Reviews" },
+                        { href: "/store", label: "Rentals" },
+                        { href: "/blog", label: "Blog" },
+                        { href: "/services/form-business", label: "Business Hub", highlight: true },
+                    ].map((l) => (
                         <Link
                             key={l.href}
                             href={l.href}
