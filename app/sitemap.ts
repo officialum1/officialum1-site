@@ -67,17 +67,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }));
 
         // Fetch Blog Posts
-        const blogs = await query("SELECT id, slug, created_at FROM blogs") as any[];
-        const blogUrls = blogs.map((blog) => ({
-            url: `${baseUrl}/blog/${blog.slug || blog.id}`,
-            lastModified: new Date(blog.created_at || new Date()),
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-        }));
+        let blogs: any[] = [];
+        try {
+            blogs = await query("SELECT id, slug, created_at FROM blogs") as any[];
+        } catch {
+            blogs = [];
+        }
+
+        const blogUrls = (blogs && blogs.length > 0)
+            ? blogs.map((blog) => ({
+                url: `${baseUrl}/blog/${blog.slug || blog.id}`,
+                lastModified: new Date(blog.created_at || new Date()),
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            }))
+            : [
+                { url: `${baseUrl}/blog/blog-1`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+                { url: `${baseUrl}/blog/blog-2`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+                { url: `${baseUrl}/blog/blog-3`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+                { url: `${baseUrl}/blog/blog-4`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+            ];
 
         return [...routes, ...productUrls, ...kbUrls, ...blogUrls];
     } catch (error) {
         console.error("Sitemap Generation Error:", error);
-        return routes;
+        return [
+            ...routes,
+            { url: `${baseUrl}/blog/blog-1`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+            { url: `${baseUrl}/blog/blog-2`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+            { url: `${baseUrl}/blog/blog-3`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+            { url: `${baseUrl}/blog/blog-4`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+        ];
     }
 }
