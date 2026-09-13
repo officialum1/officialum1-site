@@ -204,7 +204,7 @@ export default function Footer() {
                             {[
                                 { name: 'Web Development', href: '/services' },
                                 { name: 'SEO Optimization', href: '/services' },
-                                { name: 'Social Strategy', href: '/services' },
+                                { name: 'WordPress Speed', href: '/services/wordpress-speed-optimization' },
                                 { name: 'Guest Posting', href: '/services/guest-posting' },
                                 { name: 'Site Rentals', href: '/store' }
                             ].map((link, index) => (

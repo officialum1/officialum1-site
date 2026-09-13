@@ -8,6 +8,13 @@ import urllib.parse
 import sys
 from typing import List, Dict, Any
 
+import os
+import sys
+
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+if _current_dir not in sys.path:
+    sys.path.insert(0, _current_dir)
+
 if sys.stdout.encoding != 'utf-8':
     try:
         sys.stdout.reconfigure(encoding='utf-8')
@@ -16,7 +23,10 @@ if sys.stdout.encoding != 'utf-8':
 
 import requests
 from bs4 import BeautifulSoup
-from lead_validator import verify_lead_email
+try:
+    from lead_validator import verify_lead_email
+except ImportError:
+    from automation.lead_validator import verify_lead_email
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 HEADERS = {"User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"}
