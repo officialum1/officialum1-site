@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { usePathname } from "next/navigation";
-import { Bell, ChevronDown, Heart, Menu, Search, ShoppingCart, Sparkles, X } from "lucide-react";
+import { Bell, ChevronDown, Download, Heart, Menu, Search, ShoppingCart, Smartphone, Sparkles, X } from "lucide-react";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -82,15 +82,18 @@ export default function Navbar() {
     };
 
     const navLinks = [
+        { href: "/", label: "Home" },
         { href: "/services", label: "Services" },
         { href: "/shop", label: "Shop" },
-        { href: "/reviews", label: "Reviews" },
         { href: "/store", label: "Rentals" },
+        { href: "/reviews", label: "Reviews" },
         { href: "/blog", label: "Blog" },
+        { href: "/about", label: "About" },
         { href: "/services/form-business", label: "Business Hub", highlight: true },
     ];
 
     const mobileNavLinks = [
+        { href: "/download-app", label: "📱 Download Android App", highlight: true },
         { href: "/services", label: "All Services" },
         { href: "/services/guest-posting", label: "🔗 High-DA Guest Posting" },
         { href: "/services/niche-edits", label: "⚡ Aged Niche Edits" },
@@ -447,6 +450,21 @@ export default function Navbar() {
                             )}
                         </div>
                     )}
+
+                    {/* Download App Badge */}
+                    <Link
+                        href="/download-app"
+                        className="hidden lg:inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[12px] font-bold transition hover:bg-[rgba(20,108,120,0.08)]"
+                        style={{
+                            borderColor: "rgba(20,108,120,0.25)",
+                            background: "rgba(20,108,120,0.04)",
+                            color: "var(--accent-blue)"
+                        }}
+                        title="Download Android App"
+                    >
+                        <Smartphone className="h-3.5 w-3.5 text-[var(--accent-blue)]" />
+                        <span>Get App</span>
+                    </Link>
 
                     {/* Wishlist */}
                     <Link

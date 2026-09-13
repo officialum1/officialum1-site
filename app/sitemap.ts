@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/services/web-design-sahiwal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
         { url: `${baseUrl}/services/social-media-sahiwal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
         { url: `${baseUrl}/services/guest-posting`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+        { url: `${baseUrl}/download-app`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${baseUrl}/services/niche-edits`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${baseUrl}/services/crypto-guest-posting`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${baseUrl}/services/press-release-distribution`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },

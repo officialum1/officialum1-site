@@ -254,6 +254,7 @@ export default function Footer() {
                         </h3>
                         <div className="grid grid-cols-1 gap-y-3.5 text-[13.5px]">
                             {[
+                                { name: '📱 Download Android App', href: '/download-app' },
                                 { name: 'Live Speed Audit Tool', href: '/tools/speed-audit' },
                                 { name: 'Help & Support Desk', href: '/help' },
                                 { name: 'Insight Blog & Guides', href: '/blog' },
