@@ -16,6 +16,8 @@ import 'intelligence_screen.dart';
 import 'settings_screen.dart';
 import 'web_module_screen.dart';
 import 'login_screen.dart';
+import 'guest_posting_screen.dart';
+import 'native_store_screen.dart';
 
 import 'website_management_screen.dart';
 import 'promos_management_screen.dart';
@@ -34,11 +36,13 @@ class MainNavigationContainer extends StatefulWidget {
 }
 
 class _MainNavigationContainerState extends State<MainNavigationContainer> {
-  int _selectedIndex = -1;
-  String? _currentWebTitle = "OfficialUM1 Marketplace";
-  String? _currentWebUrl = "https://officialum1.com/shop";
+  int _currentBottomIndex = 0; // 0: Store, 1: Guest Posting, 2: Sell & Link, 3: Leads, 4: Dashboard
+  int _drawerModuleIndex = -1; // -1 means use bottom nav, >=0 means drawer override
+  String? _currentWebTitle;
+  String? _currentWebUrl;
 
   Widget _getScreen(bool isAuthenticated) {
+    // If user clicked an external web link from the drawer
     if (_currentWebUrl != null) {
       return WebModuleScreen(
         title: _currentWebTitle ?? "Marketplace", 
@@ -46,40 +50,67 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
       );
     }
 
-    if (!isAuthenticated) return const LoginScreen();
+    // If a drawer module is selected
+    if (_drawerModuleIndex >= 0) {
+      if (!isAuthenticated && _drawerModuleIndex != 100) return const LoginScreen();
 
-    switch (_selectedIndex) {
-      case 0: return const DashboardScreen();
-      case 1: return const InventoryScreen();
-      case 2: return const OrdersScreen();
-      case 4: return const CatalogScreen();
-      case 5: return const ReviewsManagementScreen();
-      case 6: return const GenericListScreen(module: 'Bundles', endpoint: '/admin/inventory');
-      case 9: return const PromosManagementScreen();
-      case 10: return const GenericListScreen(module: 'Sales History', endpoint: '/admin/inventory?type=balance');
-      case 11: return const LeadsManagementScreen();
-      case 12: return const UserManagementScreen(); 
-      case 13: return const UserManagementScreen();
-      case 14: return const VerificationsManagementScreen();
-      case 15: return const SupportTicketsScreen();
-      case 16: return const PayoutsScreen();
-      case 17: return const FinanceScreen();
-      case 18: return const IntelligenceScreen();
-      case 19: return const KBManagementScreen();
-      case 20: return const StaffManagementScreen();
-      case 21: return const WebsiteManagementScreen();
-      case 22: return const RecordSaleScreen();
-      case 23: return const AutomationScreen();
-      case 24: return const SettingsScreen();
-      case 25: return const GenericListScreen(module: 'Logs', endpoint: '/admin/logs');
-      case 100: return const LoginScreen();
-      default: return WebModuleScreen(title: "OfficialUM1 Marketplace", url: "https://officialum1.com/shop");
+      switch (_drawerModuleIndex) {
+        case 0: return const DashboardScreen();
+        case 1: return const InventoryScreen();
+        case 2: return const OrdersScreen();
+        case 4: return const CatalogScreen();
+        case 5: return const ReviewsManagementScreen();
+        case 6: return const GenericListScreen(module: 'Bundles', endpoint: '/admin/inventory');
+        case 9: return const PromosManagementScreen();
+        case 10: return const GenericListScreen(module: 'Sales History', endpoint: '/admin/inventory?type=balance');
+        case 11: return const LeadsManagementScreen();
+        case 12: return const UserManagementScreen(); 
+        case 13: return const UserManagementScreen();
+        case 14: return const VerificationsManagementScreen();
+        case 15: return const SupportTicketsScreen();
+        case 16: return const PayoutsScreen();
+        case 17: return const FinanceScreen();
+        case 18: return const IntelligenceScreen();
+        case 19: return const KBManagementScreen();
+        case 20: return const StaffManagementScreen();
+        case 21: return const WebsiteManagementScreen();
+        case 22: return const RecordSaleScreen();
+        case 23: return const AutomationScreen();
+        case 24: return const SettingsScreen();
+        case 25: return const GenericListScreen(module: 'Logs', endpoint: '/admin/logs');
+        case 100: return const LoginScreen();
+        default: return const NativeStoreScreen();
+      }
     }
+
+    // Default Bottom Navigation Screens (100% Native)
+    switch (_currentBottomIndex) {
+      case 0:
+        return const NativeStoreScreen();
+      case 1:
+        return const GuestPostingScreen();
+      case 2:
+        return isAuthenticated ? const RecordSaleScreen() : const LoginScreen();
+      case 3:
+        return isAuthenticated ? const LeadsManagementScreen() : const LoginScreen();
+      case 4:
+        return isAuthenticated ? const DashboardScreen() : const LoginScreen();
+      default:
+        return const NativeStoreScreen();
+    }
+  }
+
+  void _selectBottomTab(int index) {
+    setState(() {
+      _currentBottomIndex = index;
+      _drawerModuleIndex = -1;
+      _currentWebUrl = null;
+    });
   }
 
   void _selectModule(int index, {String? title}) {
     setState(() {
-      _selectedIndex = index;
+      _drawerModuleIndex = index;
       _currentWebUrl = null;
     });
     Navigator.pop(context);
@@ -87,7 +118,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
 
   void _selectWebModule(String title, String url) {
     setState(() {
-      _selectedIndex = -1;
+      _drawerModuleIndex = -1;
       _currentWebTitle = title;
       _currentWebUrl = url;
     });
@@ -98,12 +129,13 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     
-    // Auto-redirect to Dashboard if we just logged in from the Login screen
-    if (auth.isAuthenticated && _selectedIndex == 100) {
+    // Auto-redirect if logged in from the Login screen
+    if (auth.isAuthenticated && _drawerModuleIndex == 100) {
       Future.microtask(() {
         if (mounted) {
           setState(() {
-            _selectedIndex = 0;
+            _drawerModuleIndex = -1;
+            _currentBottomIndex = 4; // go to dashboard
             _currentWebUrl = null;
           });
         }
@@ -114,6 +146,50 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
       key: MainNavigationContainer.scaffoldKey,
       drawer: _buildDrawer(auth),
       body: _getScreen(auth.isAuthenticated),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A0A),
+          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _drawerModuleIndex == -1 ? _currentBottomIndex : 0,
+          onTap: _selectBottomTab,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color(0xFF0A0A0A),
+          selectedItemColor: const Color(0xFF00FF88),
+          unselectedItemColor: Colors.grey.shade600,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 0.5),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 9),
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.storefront_outlined),
+              activeIcon: Icon(Icons.storefront, color: Color(0xFF00FF88)),
+              label: 'STORE',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.rocket_launch_outlined),
+              activeIcon: Icon(Icons.rocket_launch, color: Color(0xFF00FF88)),
+              label: 'GUEST POST',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.flash_on_outlined),
+              activeIcon: Icon(Icons.flash_on, color: Color(0xFF00FF88)),
+              label: 'SELL & LINK',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.contact_mail_outlined),
+              activeIcon: Icon(Icons.contact_mail, color: Color(0xFF00FF88)),
+              label: 'LEADS CRM',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard, color: Color(0xFF00FF88)),
+              label: 'ADMIN HUB',
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -271,7 +347,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   }
 
   Widget _buildDrawerItem(String title, IconData icon, int index) {
-    bool isSelected = _selectedIndex == index && _currentWebUrl == null;
+    bool isSelected = _drawerModuleIndex == index && _currentWebUrl == null;
     return ListTile(
       onTap: () => _selectModule(index, title: title),
       dense: true,
