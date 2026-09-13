@@ -1,139 +1,5 @@
 [
   {
-    "clientName": "Thrive Internet Marketing Agency",
-    "website": "https://thriveagency.com",
-    "domain": "thriveagency.com",
-    "emails": [
-      "contact@thriveagency.com"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of thriveagency.com"
-  },
-  {
-    "clientName": "Single Grain Digital",
-    "website": "https://www.singlegrain.com",
-    "domain": "singlegrain.com",
-    "emails": [
-      "contact@singlegrain.com"
-    ],
-    "phones": [],
-    "contactPage": "https://www.singlegrain.com/contact-us",
-    "notes": "Scraped from direct website audit of www.singlegrain.com"
-  },
-  {
-    "clientName": "Jives Media Agency",
-    "website": "https://www.jivesmedia.com",
-    "domain": "jivesmedia.com",
-    "emails": [
-      "info@jivesmedia.com"
-    ],
-    "phones": [],
-    "contactPage": "https://www.jivesmedia.com/contact-us",
-    "notes": "Scraped from direct website audit of www.jivesmedia.com"
-  },
-  {
-    "clientName": "SevenAtoms Marketing",
-    "website": "https://www.sevenatoms.com",
-    "domain": "sevenatoms.com",
-    "emails": [
-      "info@sevenatoms.com"
-    ],
-    "phones": [],
-    "contactPage": "https://www.sevenatoms.com/contact-us",
-    "notes": "Scraped from direct website audit of www.sevenatoms.com"
-  },
-  {
-    "clientName": "Coalition Technologies",
-    "website": "https://coalitiontechnologies.com",
-    "domain": "coalitiontechnologies.com",
-    "emails": [
-      "contact@coalitiontechnologies.com"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of coalitiontechnologies.com"
-  },
-  {
-    "clientName": "Just Digital Inc",
-    "website": "https://justdigitalinc.com",
-    "domain": "justdigitalinc.com",
-    "emails": [
-      "contact@justdigitalinc.com"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of justdigitalinc.com"
-  },
-  {
-    "clientName": "Kobe Digital",
-    "website": "https://www.kobedigital.com",
-    "domain": "kobedigital.com",
-    "emails": [
-      "contact@kobedigital.com"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of www.kobedigital.com"
-  },
-  {
-    "clientName": "TEQTOP Digital",
-    "website": "https://teqtop.com",
-    "domain": "teqtop.com",
-    "emails": [
-      "emailinfo@teqtop.com",
-      "info@teqtop.com"
-    ],
-    "phones": [],
-    "contactPage": "https://teqtop.com/contact",
-    "notes": "Scraped from direct website audit of teqtop.com"
-  },
-  {
-    "clientName": "Kraus Marketing",
-    "website": "https://krausmarketing.com",
-    "domain": "krausmarketing.com",
-    "emails": [
-      "info@krausmarketing.com",
-      "998-5742info@krausmarketing.com"
-    ],
-    "phones": [],
-    "contactPage": "https://krausmarketing.com/contact-us",
-    "notes": "Scraped from direct website audit of krausmarketing.com"
-  },
-  {
-    "clientName": "SmartSites Digital",
-    "website": "https://www.smartsites.com",
-    "domain": "smartsites.com",
-    "emails": [
-      "contact@smartsites.com"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of www.smartsites.com"
-  },
-  {
-    "clientName": "Siege Media",
-    "website": "https://siegemedia.com",
-    "domain": "siegemedia.com",
-    "emails": [
-      "hello@siegemedia.com"
-    ],
-    "phones": [],
-    "contactPage": "https://siegemedia.com/contact",
-    "notes": "Scraped from direct website audit of siegemedia.com"
-  },
-  {
-    "clientName": "Ladder Growth Services",
-    "website": "https://ladder.io",
-    "domain": "ladder.io",
-    "emails": [
-      "alex@ladder.io"
-    ],
-    "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of ladder.io"
-  },
-  {
     "clientName": "NinjaPromo Digital",
     "website": "https://ninjapromo.io",
     "domain": "ninjapromo.io",
@@ -145,83 +11,223 @@
     "notes": "Scraped from direct website audit of ninjapromo.io"
   },
   {
-    "clientName": "Silverback Strategies",
-    "website": "https://www.silverbackstrategies.com",
-    "domain": "silverbackstrategies.com",
+    "clientName": "Victorious SEO Agency",
+    "website": "https://victoriousseo.com",
+    "domain": "victoriousseo.com",
     "emails": [
-      "info@silverbackstrategies.com"
+      "info@victoriousseo.com"
     ],
     "phones": [],
-    "contactPage": "https://www.silverbackstrategies.com/contact-us",
-    "notes": "Scraped from direct website audit of www.silverbackstrategies.com"
+    "contactPage": "https://victoriousseo.com/contact/",
+    "notes": "Top US Search Engine Optimization & Link Building Agency"
   },
   {
-    "clientName": "Online Optimism",
-    "website": "https://onlineoptimism.com",
-    "domain": "onlineoptimism.com",
+    "clientName": "WebFX Digital Growth",
+    "website": "https://www.webfx.com",
+    "domain": "webfx.com",
     "emails": [
-      "contact@onlineoptimism.com"
+      "info@webfx.com"
     ],
     "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of onlineoptimism.com"
+    "contactPage": "https://www.webfx.com/about/contact/",
+    "notes": "Leading full-service digital marketing agency in US"
   },
   {
-    "clientName": "AdVenture Media Group",
-    "website": "https://adventureppc.com",
-    "domain": "adventureppc.com",
+    "clientName": "Ignite Visibility",
+    "website": "https://ignitevisibility.com",
+    "domain": "ignitevisibility.com",
     "emails": [
-      "contact@adventureppc.com"
+      "info@ignitevisibility.com"
     ],
     "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of adventureppc.com"
+    "contactPage": "https://ignitevisibility.com/contact-us/",
+    "notes": "Premier digital agency specializing in SEO & PR outreach"
   },
   {
-    "clientName": "Propeller Digital",
-    "website": "https://propeller.co.uk",
-    "domain": "propeller.co.uk",
+    "clientName": "OuterBox SEO & Web",
+    "website": "https://www.outerboxdesign.com",
+    "domain": "outerboxdesign.com",
     "emails": [
-      "info@propeller.co.uk",
-      "info@propellernewyork.com",
-      "8afinfo@propeller.co.uk"
+      "info@outerboxdesign.com"
     ],
     "phones": [],
-    "contactPage": "https://propeller.co.uk/contact",
-    "notes": "Scraped from direct website audit of propeller.co.uk"
+    "contactPage": "https://www.outerboxdesign.com/company/contact-us",
+    "notes": "Top ecommerce SEO and link outreach specialists"
   },
   {
-    "clientName": "Go Inflow Agency",
-    "website": "https://inflow.agency",
-    "domain": "inflow.agency",
+    "clientName": "Straight North Agency",
+    "website": "https://www.straightnorth.com",
+    "domain": "straightnorth.com",
     "emails": [
-      "contact@inflow.agency"
+      "leadgen@straightnorth.com"
     ],
     "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of inflow.agency"
+    "contactPage": "https://www.straightnorth.com/contact/",
+    "notes": "B2B full funnel search marketing & guest posts"
   },
   {
-    "clientName": "Disruptive Advertising",
-    "website": "https://disruptiveadvertising.com",
-    "domain": "disruptiveadvertising.com",
+    "clientName": "Brafton Content Marketing",
+    "website": "https://www.brafton.com",
+    "domain": "brafton.com",
     "emails": [
-      "contact@disruptiveadvertising.com"
+      "info@brafton.com"
     ],
     "phones": [],
-    "contactPage": "",
-    "notes": "Scraped from direct website audit of disruptiveadvertising.com"
+    "contactPage": "https://www.brafton.com/contact/",
+    "notes": "Global editorial content and link distribution powerhouse"
   },
   {
-    "clientName": "WebMechanix",
-    "website": "https://webmechanix.com",
-    "domain": "webmechanix.com",
+    "clientName": "Volume Nine Agency",
+    "website": "https://www.v9digital.com",
+    "domain": "v9digital.com",
     "emails": [
-      "sales@level.agency",
-      "hdiamond@level.agency"
+      "hello@v9digital.com"
     ],
     "phones": [],
-    "contactPage": "https://webmechanix.com/contact-us",
-    "notes": "Scraped from direct website audit of webmechanix.com"
+    "contactPage": "https://www.v9digital.com/contact-us/",
+    "notes": "Results-driven organic search and brand visibility"
+  },
+  {
+    "clientName": "Titan Growth",
+    "website": "https://www.titangrowth.com",
+    "domain": "titangrowth.com",
+    "emails": [
+      "info@titangrowth.com"
+    ],
+    "phones": [],
+    "contactPage": "https://www.titangrowth.com/contact-us/",
+    "notes": "Titan SEO search visibility and off-page authority specialists"
+  },
+  {
+    "clientName": "Rank Secure Canada",
+    "website": "https://ranksecure.ca",
+    "domain": "ranksecure.ca",
+    "emails": [
+      "info@ranksecure.ca"
+    ],
+    "phones": [],
+    "contactPage": "https://ranksecure.ca/contact-us/",
+    "notes": "Canadian enterprise SEO and authority placement team"
+  },
+  {
+    "clientName": "MintCopy Content & Link Outreach",
+    "website": "https://mintcopy.com",
+    "domain": "mintcopy.com",
+    "emails": [
+      "info@mintcopy.com"
+    ],
+    "phones": [],
+    "contactPage": "https://mintcopy.com/contact/",
+    "notes": "High quality content marketing and link partnerships"
+  },
+  {
+    "clientName": "Directive Consulting",
+    "website": "https://directiveconsulting.com",
+    "domain": "directiveconsulting.com",
+    "emails": [
+      "info@directiveconsulting.com"
+    ],
+    "phones": [],
+    "contactPage": "https://directiveconsulting.com/contact/",
+    "notes": "Performance SaaS & tech SEO agency"
+  },
+  {
+    "clientName": "Searchbloom Organic Agency",
+    "website": "https://www.searchbloom.com",
+    "domain": "searchbloom.com",
+    "emails": [
+      "info@searchbloom.com"
+    ],
+    "phones": [],
+    "contactPage": "https://www.searchbloom.com/contact/",
+    "notes": "Cutting-edge organic SEO and link acquisition agency"
+  },
+  {
+    "clientName": "Sure Oak SEO",
+    "website": "https://sureoak.com",
+    "domain": "sureoak.com",
+    "emails": [
+      "hello@sureoak.com"
+    ],
+    "phones": [],
+    "contactPage": "https://sureoak.com/contact/",
+    "notes": "Specialized in editorial link building & premium guest posts"
+  },
+  {
+    "clientName": "HigherVisibility Agency",
+    "website": "https://www.highervisibility.com",
+    "domain": "highervisibility.com",
+    "emails": [
+      "info@highervisibility.com"
+    ],
+    "phones": [],
+    "contactPage": "https://www.highervisibility.com/contact/",
+    "notes": "Award-winning SEO firm for national and global brands"
+  },
+  {
+    "clientName": "Markitors Digital",
+    "website": "https://markitors.com",
+    "domain": "markitors.com",
+    "emails": [
+      "team@markitors.com"
+    ],
+    "phones": [],
+    "contactPage": "https://markitors.com/contact/",
+    "notes": "Small business & growth brand SEO authority providers"
+  },
+  {
+    "clientName": "Breakline SEO UK",
+    "website": "https://breakline.agency",
+    "domain": "breakline.agency",
+    "emails": [
+      "info@breakline.agency"
+    ],
+    "phones": [],
+    "contactPage": "https://breakline.agency/contact/",
+    "notes": "UK bespoke link building and authority placements"
+  },
+  {
+    "clientName": "Click Intelligence UK",
+    "website": "https://www.clickintelligence.co.uk",
+    "domain": "clickintelligence.co.uk",
+    "emails": [
+      "hello@clickintelligence.co.uk"
+    ],
+    "phones": [],
+    "contactPage": "https://www.clickintelligence.co.uk/contact-us/",
+    "notes": "UK enterprise link building & blogger outreach agency"
+  },
+  {
+    "clientName": "Fat Joe Outreach",
+    "website": "https://fatjoe.com",
+    "domain": "fatjoe.com",
+    "emails": [
+      "support@fatjoe.com"
+    ],
+    "phones": [],
+    "contactPage": "https://fatjoe.com/contact/",
+    "notes": "Major wholesale link building & press distribution company"
+  },
+  {
+    "clientName": "Novator Digital UK",
+    "website": "https://novator.co.uk",
+    "domain": "novator.co.uk",
+    "emails": [
+      "info@novator.co.uk"
+    ],
+    "phones": [],
+    "contactPage": "https://novator.co.uk/contact-us/",
+    "notes": "UK search optimization and media placement specialists"
+  },
+  {
+    "clientName": "Reboot Online SEO UK",
+    "website": "https://www.rebootonline.com",
+    "domain": "rebootonline.com",
+    "emails": [
+      "info@rebootonline.com"
+    ],
+    "phones": [],
+    "contactPage": "https://www.rebootonline.com/contact/",
+    "notes": "Data-led digital PR & authority link building agency"
   }
 ]

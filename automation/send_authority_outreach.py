@@ -152,8 +152,8 @@ def main():
         return
 
     sent_count = 0
-    # Process up to 10 leads in this batch
-    batch_leads = pending_leads[:10]
+    # Process up to 21 leads in this batch
+    batch_leads = pending_leads[:21]
 
     for idx, lead in enumerate(batch_leads, 1):
         client = lead.get("clientName", "Founder")
@@ -174,7 +174,7 @@ def main():
             print(f"  ❌ [FAILED] Could not send to {email}")
 
         if not dry_run and idx < len(batch_leads):
-            delay = random.randint(15, 30)
+            delay = random.randint(6, 12)
             print(f"  ⏳ Anti-spam cooldown: waiting {delay}s before next email...")
             time.sleep(delay)
 
