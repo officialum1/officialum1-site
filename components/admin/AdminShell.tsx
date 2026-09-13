@@ -27,56 +27,58 @@ type NavGroup = {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "STORE",
+    label: "OVERVIEW & ANALYTICS",
     items: [
-      { id: "catalog", label: "Catalog", href: "/admin/catalog", icon: Store },
-      { id: "stock", label: "Stock", href: "/admin/stock", icon: Database },
-      { id: "orders", label: "Orders", href: "/admin/orders", icon: Package },
-      { id: "bundles", label: "Bundles", href: "/admin/bundles", icon: Boxes },
-      { id: "reviews_hub", label: "Reviews Hub", href: "/admin/reviews_hub", icon: Star },
-      { id: "reviews", label: "Review Moderator", href: "/admin/reviews", icon: ShieldCheck },
+      { id: "sell", label: "Sales & Revenue", href: "/admin/sell", icon: TrendingUp },
+      { id: "live_traffic", label: "Live Traffic", href: "/admin/live_traffic", icon: Activity },
+      { id: "logs", label: "System Activity", href: "/admin/logs", icon: FileText },
+    ]
+  },
+  {
+    label: "STORE & CLIENT ORDERS",
+    items: [
+      { id: "orders", label: "Orders & Deliveries", href: "/admin/orders", icon: Package },
+      { id: "catalog", label: "Services & Catalog", href: "/admin/catalog", icon: Store },
+      { id: "stock", label: "Inventory Stock", href: "/admin/stock", icon: Database },
+      { id: "bundles", label: "Service Bundles", href: "/admin/bundles", icon: Boxes },
       { id: "coupons", label: "Promo Codes", href: "/admin/coupons", icon: Percent },
     ]
   },
-
   {
-    label: "SALES & CRM",
+    label: "CLIENT CRM & SUPPORT",
     items: [
-      { id: "sell", label: "Sales Tracker", href: "/admin/sell", icon: TrendingUp },
-      { id: "leads", label: "Leads", href: "/admin/leads", icon: Users },
-      { id: "buyers", label: "Buyers", href: "/admin/buyers", icon: UserCheck },
-      { id: "sellers", label: "Sellers", href: "/admin/sellers", icon: UserPlus },
-      { id: "verification", label: "Verifications", href: "/admin/verification", icon: ShieldCheck },
-      { id: "support", label: "Support", href: "/admin/support", icon: HelpCircle },
+      { id: "leads", label: "Inbound Leads", href: "/admin/leads", icon: Users },
+      { id: "support", label: "Support Inbox", href: "/admin/support", icon: HelpCircle },
+      { id: "reviews_hub", label: "Reviews & Ratings", href: "/admin/reviews_hub", icon: Star },
+      { id: "verification", label: "KYC Verifications", href: "/admin/verification", icon: ShieldCheck },
     ]
   },
   {
-    label: "CONTENT",
+    label: "MARKETING & SOCIAL HUB",
     items: [
-      { id: "website", label: "Website", href: "/admin/website", icon: Globe },
-      { id: "rankmath", label: "Rank Math SEO", href: "/admin/rankmath", icon: Sparkles },
-      { id: "marketing", label: "Marketing", href: "/admin/marketing", icon: Megaphone },
-      { id: "blogs", label: "AI Blogs Manager", href: "/admin/blogs", icon: FileEdit },
+      { id: "marketing", label: "Social Media Hub", href: "/admin/marketing", icon: Megaphone },
       { id: "newsletter", label: "Newsletter Broadcast", href: "/admin/newsletter", icon: Mail },
-      { id: "intel", label: "Intelligence", href: "/admin/intel", icon: Brain },
-      { id: "kb", label: "Knowledge Base", href: "/admin/kb", icon: BookOpen },
-      { id: "tools", label: "Tools", href: "/admin/tools", icon: Wrench },
-      { id: "indexing", label: "Indexing", href: "/admin/indexing", icon: Rocket },
-      { id: "builder", label: "Page Builder", href: "/admin/builder", icon: Layout },
-      { id: "live_traffic", label: "Live Traffic", href: "/admin/live_traffic", icon: Activity },
+      { id: "intel", label: "Market Intelligence", href: "/admin/intel", icon: Brain },
     ]
   },
   {
-    label: "ADMIN",
+    label: "WEBSITE & SEO ENGINE",
     items: [
-      { id: "finance", label: "Finance", href: "/admin/finance", icon: LineChart },
-      { id: "payments", label: "Payments", href: "/admin/payments", icon: CreditCard },
+      { id: "rankmath", label: "Rank Math & Knowledge Panel", href: "/admin/rankmath", icon: Sparkles },
+      { id: "indexing", label: "1-Click Google Indexing", href: "/admin/indexing", icon: Rocket },
+      { id: "blogs", label: "AI Blogs Manager", href: "/admin/blogs", icon: FileEdit },
+      { id: "kb", label: "Knowledge Base", href: "/admin/kb", icon: BookOpen },
+      { id: "documents", label: "Pages & Legal Documents", href: "/admin/documents", icon: FileText },
+    ]
+  },
+  {
+    label: "FINANCE & ADMINISTRATION",
+    items: [
+      { id: "finance", label: "Wallets & Accounts", href: "/admin/finance", icon: LineChart },
       { id: "payouts", label: "Payout Requests", href: "/admin/payouts", icon: Receipt },
-      { id: "hr", label: "Staff/HR", href: "/admin/hr", icon: Briefcase },
-      { id: "business", label: "Business Hub", href: "/admin/business", icon: Briefcase },
-      { id: "documents", label: "Documents", href: "/admin/documents", icon: FileText },
-      { id: "logs", label: "Logs", href: "/admin/logs", icon: FileText },
-      { id: "settings", label: "Settings", href: "/admin/settings", icon: Settings },
+      { id: "buyers", label: "User Database", href: "/admin/buyers", icon: UserCheck },
+      { id: "hr", label: "Staff & Permissions", href: "/admin/hr", icon: Briefcase },
+      { id: "settings", label: "System API Keys", href: "/admin/settings", icon: Settings },
     ]
   }
 ];
