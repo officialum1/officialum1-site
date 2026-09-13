@@ -230,6 +230,7 @@ export default function Footer() {
                         <ul className="space-y-4 text-[13.5px]">
                             {[
                                 { name: 'About Us', href: '/about' },
+                                { name: 'Press Room', href: '/press' },
                                 { name: 'Portfolio Hub', href: '/work' },
                                 { name: 'Reviews', href: '/reviews' },
                                 { name: 'Contact Us', href: '/contact' }
