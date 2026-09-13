@@ -4,7 +4,7 @@ import ROICalculator from "@/components/ROICalculator";
 import SuccessRoadmap from "@/components/SuccessRoadmap";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/PageHero";
-import { Globe, Search, Share2, Sparkles, TrendingUp } from "lucide-react";
+import { Globe, MapPin, RefreshCw, Rocket, Search, Share2, ShieldCheck, ShoppingBag, Sparkles, TrendingUp, Zap } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Services | Digital Marketing Agency in Sahiwal | OfficialUM1",
@@ -22,46 +22,60 @@ export const metadata: Metadata = {
 
 const services = [
   {
+    icon: Zap,
+    title: "WordPress Speed Optimization",
+    desc: "Guaranteed 90+ Google PageSpeed score and sub-1.5s load times with zero downtime.",
+    href: "/services/wordpress-speed-optimization",
+    cta: "Speed Up Site",
+  },
+  {
+    icon: Rocket,
+    title: "WordPress to Next.js Migration",
+    desc: "Migrate clunky WordPress sites to high-speed, ultra-secure Next.js 14 App Router platforms.",
+    href: "/services/wordpress-to-nextjs-migration",
+    cta: "Migrate to Next.js",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Malware Removal & Security",
+    desc: "Emergency 24-hour WordPress malware cleanup, backdoor removal & 60-day hack-free warranty.",
+    href: "/services/wordpress-malware-removal",
+    cta: "Clean Malware",
+  },
+  {
+    icon: ShoppingBag,
+    title: "E-Commerce CRO Optimization",
+    desc: "Turn visitors into buyers with 1-click checkouts, sticky carts, and average order value upsells.",
+    href: "/services/ecommerce-cro",
+    cta: "Boost Conversions",
+  },
+  {
+    icon: MapPin,
+    title: "Local SEO & Google Maps 3-Pack",
+    desc: "Dominate Google Maps local pack rankings, citations, and inbound calls for US/UK businesses.",
+    href: "/services/local-seo",
+    cta: "Rank Locally",
+  },
+  {
     icon: Globe,
-    title: "Web Development",
-    desc: "Modern, conversion-first websites and internal tools built for speed and scale.",
-    href: "/contact",
-    cta: "Build with Us",
+    title: "Guest Posting & Authority Links",
+    desc: "High-DR editorial guest post placements with clean outreach and real topical authority.",
+    href: "/services/guest-posting",
+    cta: "View Guest Posts",
+  },
+  {
+    icon: RefreshCw,
+    title: "Website Care & Maintenance",
+    desc: "Daily cloud backups, weekly safe updates, 24/7 uptime monitoring & dedicated developer hours.",
+    href: "/services/website-maintenance",
+    cta: "View Care Plans",
   },
   {
     icon: Search,
-    title: "SEO Optimization",
-    desc: "Technical and content SEO that compounds traffic and ranks for profitable intent.",
-    href: "/contact",
-    cta: "Plan SEO",
-  },
-  {
-    icon: TrendingUp,
-    title: "Growth Systems",
-    desc: "Funnels, landing pages, and analytics loops that turn visits into orders.",
-    href: "/contact",
-    cta: "Map Growth",
-  },
-  {
-    icon: Share2,
-    title: "Social Media Growth",
-    desc: "High-quality account growth strategies and acquisition-ready audiences.",
-    href: "/contact",
-    cta: "Grow Social",
-  },
-  {
-    icon: Sparkles,
-    title: "Content Production",
-    desc: "Blogs, knowledge base pages, and product pages that read well and rank higher.",
-    href: "/contact",
-    cta: "Create Content",
-  },
-  {
-    icon: Globe,
-    title: "Guest Posting",
-    desc: "High-DA placements with clean outreach and real editorial relevance.",
-    href: "/services/guest-posting",
-    cta: "View Guest Posts",
+    title: "White Label Agency SEO",
+    desc: "Invisible, ultra-profitable SEO fulfillment and technical execution for marketing agencies.",
+    href: "/services/white-label-seo",
+    cta: "Agency Partner",
   },
 ];
 
