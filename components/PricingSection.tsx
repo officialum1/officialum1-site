@@ -6,41 +6,74 @@ import { Sparkles, TrendingUp, Building2, Check } from "lucide-react";
 const plans = [
   {
     name: "Starter",
-    price: "$499",
+    priceOneTime: "$499",
+    priceMonthly: "$249",
+    periodMonthly: "/mo",
     icon: Sparkles,
-    features: [
+    subtitleOneTime: "Ideal for startups needing a fast launch",
+    subtitleMonthly: "Ongoing monthly SEO & development support",
+    featuresOneTime: [
       "5-Page Custom Website",
-      "Basic SEO Setup",
-      "Mobile Responsive",
+      "Basic SEO & Meta Setup",
+      "Mobile Responsive & Fast Load",
       "Contact Form Integration",
-      "1 Month Support",
+      "1 Month Free Support",
+    ],
+    featuresMonthly: [
+      "Continuous Website Updates",
+      "Monthly Organic SEO Optimization",
+      "Keyword & Rank Tracking",
+      "Security & Speed Monitoring",
+      "Dedicated Monthly Support",
     ],
     recommend: false,
   },
   {
     name: "Growth",
-    price: "$999",
+    priceOneTime: "$999",
+    priceMonthly: "$499",
+    periodMonthly: "/mo",
     icon: TrendingUp,
-    features: [
+    subtitleOneTime: "Complete solution for scaling businesses",
+    subtitleMonthly: "Aggressive organic growth & content scaling",
+    featuresOneTime: [
       "10-Page Custom Website",
-      "Advanced SEO & Schema",
-      "Speed Optimization (90+)",
-      "Blog Setup",
-      "Social Media Integration",
-      "3 Months Support",
+      "Advanced SEO & Schema Architecture",
+      "Speed Optimization (90+ Score)",
+      "Blog & CMS Setup",
+      "Social Media & Analytics Integration",
+      "3 Months Extended Support",
+    ],
+    featuresMonthly: [
+      "Full Web Maintenance & Feature Additions",
+      "High-Authority Backlinks & Outreach",
+      "Advanced Technical & On-Page SEO",
+      "Monthly Performance & Analytics Reports",
+      "24/7 Priority Support & Fast Turnaround",
     ],
     recommend: true,
   },
   {
     name: "Enterprise",
-    price: "Custom",
+    priceOneTime: "Custom",
+    priceMonthly: "Custom",
+    periodMonthly: "",
     icon: Building2,
-    features: [
-      "Full E-Commerce / Web App",
-      "Custom Backend",
-      "API Integrations",
-      "Advanced Security",
-      "Priority 24/7 Support",
+    subtitleOneTime: "Tailored engineering for complex platforms",
+    subtitleMonthly: "Dedicated team & custom infrastructure",
+    featuresOneTime: [
+      "Full E-Commerce / Custom Web App",
+      "Scalable Backend & Cloud Architecture",
+      "Custom API & Payment Integrations",
+      "Enterprise Grade Security & Compliance",
+      "Dedicated 24/7 Priority Support",
+    ],
+    featuresMonthly: [
+      "Dedicated Full-Stack Developer",
+      "Enterprise SLA & 99.9% Uptime Guarantee",
+      "Custom Feature Development Sprints",
+      "Security Audits & High-Load Optimization",
+      "Dedicated Account Manager 24/7",
     ],
     recommend: false,
   },
@@ -79,7 +112,7 @@ export default function PricingSection() {
           </p>
         </div>
 
-        {/* Pricing toggle (visual only) */}
+        {/* Pricing toggle */}
         <div className="mb-10 flex justify-center">
           <div
             className="inline-flex rounded-full p-1"
@@ -94,7 +127,7 @@ export default function PricingSection() {
                 color: billing === "monthly" ? "#fff" : "var(--text-muted)",
               }}
             >
-              Monthly
+              Monthly Retainer
             </button>
             <button
               type="button"
@@ -105,7 +138,7 @@ export default function PricingSection() {
                 color: billing === "onetime" ? "#fff" : "var(--text-muted)",
               }}
             >
-              One-time
+              One-time Project
             </button>
           </div>
         </div>
@@ -113,6 +146,11 @@ export default function PricingSection() {
         <div className="grid gap-8 md:grid-cols-3 md:items-stretch lg:gap-6">
           {plans.map((plan, index) => {
             const Icon = plan.icon;
+            const currentPrice = billing === "monthly" ? plan.priceMonthly : plan.priceOneTime;
+            const currentPeriod = billing === "monthly" ? plan.periodMonthly : "";
+            const currentFeatures = billing === "monthly" ? plan.featuresMonthly : plan.featuresOneTime;
+            const currentSubtitle = billing === "monthly" ? plan.subtitleMonthly : plan.subtitleOneTime;
+
             return (
               <div
                 key={index}
@@ -148,20 +186,28 @@ export default function PricingSection() {
                 >
                   <Icon className="h-6 w-6" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+                <h3 className="mb-1 text-xl font-bold" style={{ color: "var(--text-primary)" }}>
                   {plan.name}
                 </h3>
+                <p className="mb-4 text-xs" style={{ color: "var(--text-muted)" }}>
+                  {currentSubtitle}
+                </p>
                 <div
-                  className="mb-6 text-4xl font-black md:text-[2.5rem]"
+                  className="mb-6 flex items-baseline gap-1 text-4xl font-black md:text-[2.5rem]"
                   style={{
                     color: "var(--text-primary)",
                     fontFamily: "var(--font-space-grotesk), sans-serif",
                   }}
                 >
-                  {plan.price}
+                  <span>{currentPrice}</span>
+                  {currentPeriod && (
+                    <span className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>
+                      {currentPeriod}
+                    </span>
+                  )}
                 </div>
                 <ul className="mb-8 flex flex-1 flex-col gap-3 text-left">
-                  {plan.features.map((feature, i) => (
+                  {currentFeatures.map((feature, i) => (
                     <li key={i} className="flex items-center gap-3 text-[0.95rem]" style={{ color: "var(--text-muted)" }}>
                       <span style={{ color: "var(--accent-blue)", flexShrink: 0 }}>
                         <Check className="h-5 w-5" strokeWidth={2.5} />
