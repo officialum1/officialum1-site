@@ -11,31 +11,41 @@ function slugify(value: string) {
         .replace(/(^-|-$)/g, '');
 }
 
+import staticPosts from '@/data/posts.json';
+
 export async function GET() {
     try {
         const rows: any = await query("SELECT * FROM blogs ORDER BY created_at DESC");
-        const formatted = rows.map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            category: p.category || 'Growth',
-            image: p.image,
-            excerpt: p.excerpt,
-            content: p.content,
-            slug: p.slug,
-            read_time: p.read_time,
-            meta_title: p.meta_title,
-            meta_description: p.meta_description,
-            focus_keyword: p.focus_keyword,
-            seo_keywords: p.seo_keywords,
-            canonical_url: p.canonical_url,
-            robots: p.robots || 'index,follow',
-            schema_type: p.schema_type || 'BlogPosting',
-            date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        }));
-        return NextResponse.json(formatted);
+        if (Array.isArray(rows) && rows.length > 0) {
+            const formatted = rows.map((p: any) => ({
+                id: p.id,
+                title: p.title,
+                category: p.category || 'Growth',
+                image: p.image,
+                excerpt: p.excerpt,
+                content: p.content,
+                slug: p.slug,
+                read_time: p.read_time,
+                meta_title: p.meta_title,
+                meta_description: p.meta_description,
+                focus_keyword: p.focus_keyword,
+                seo_keywords: p.seo_keywords,
+                canonical_url: p.canonical_url,
+                robots: p.robots || 'index,follow',
+                schema_type: p.schema_type || 'BlogPosting',
+                date: new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            }));
+            return NextResponse.json(formatted);
+        }
     } catch (error) {
-        return NextResponse.json([], { status: 500 });
+        // Continue to fallback
     }
+
+    if (Array.isArray(staticPosts) && staticPosts.length > 0) {
+        return NextResponse.json(staticPosts);
+    }
+
+    return NextResponse.json([]);
 }
 
 export async function POST(request: Request) {

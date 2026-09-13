@@ -28,14 +28,40 @@ type BlogPostRow = {
   schema_type?: string;
 };
 
+import staticPosts from "@/data/posts.json";
+
 async function getPost(slug: string): Promise<BlogPostRow | null> {
   try {
     const rows: any = await query("SELECT * FROM blogs WHERE id = ? OR slug = ?", [slug, slug]);
     if (Array.isArray(rows) && rows.length > 0) return rows[0];
-    return null;
   } catch {
-    return null;
+    // Database query failed or unavailable
   }
+
+  if (Array.isArray(staticPosts)) {
+    const match = staticPosts.find(
+      (p: any) => String(p.id) === slug || p.slug === slug
+    );
+    if (match) {
+      return {
+        id: match.id,
+        title: match.title,
+        category: match.category,
+        image: match.image,
+        excerpt: match.excerpt,
+        content: match.content,
+        slug: match.slug,
+        read_time: match.readTime || match.read_time,
+        date: match.date,
+        meta_title: match.meta_title,
+        meta_description: match.meta_description,
+        schema_type: "BlogPosting",
+        robots: "index,follow",
+      };
+    }
+  }
+
+  return null;
 }
 
 async function getFeaturedProduct(category?: string) {

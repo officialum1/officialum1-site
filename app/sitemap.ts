@@ -74,6 +74,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             blogs = [];
         }
 
+        const staticSlugs = [
+            "why-wordpress-website-is-slow-how-to-fix-pagespeed",
+            "how-to-remove-wordpress-malware-clear-google-blacklist",
+            "wordpress-to-nextjs-migration-guide",
+            "google-maps-3-pack-local-seo-ranking-blueprint",
+            "ecommerce-cro-fixes-to-double-store-sales",
+            "why-professional-web-development-matters",
+            "the-truth-about-seo-engineering",
+            "social-media-conversation-not-billboard"
+        ];
+
         const blogUrls = (blogs && blogs.length > 0)
             ? blogs.map((blog) => ({
                 url: `${baseUrl}/blog/${blog.slug || blog.id}`,
@@ -81,22 +92,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 changeFrequency: 'weekly' as const,
                 priority: 0.8,
             }))
-            : [
-                { url: `${baseUrl}/blog/blog-1`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-                { url: `${baseUrl}/blog/blog-2`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-                { url: `${baseUrl}/blog/blog-3`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-                { url: `${baseUrl}/blog/blog-4`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-            ];
+            : staticSlugs.map((slug) => ({
+                url: `${baseUrl}/blog/${slug}`,
+                lastModified: new Date(),
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            }));
 
         return [...routes, ...productUrls, ...kbUrls, ...blogUrls];
     } catch (error) {
         console.error("Sitemap Generation Error:", error);
+        const staticSlugs = [
+            "why-wordpress-website-is-slow-how-to-fix-pagespeed",
+            "how-to-remove-wordpress-malware-clear-google-blacklist",
+            "wordpress-to-nextjs-migration-guide",
+            "google-maps-3-pack-local-seo-ranking-blueprint",
+            "ecommerce-cro-fixes-to-double-store-sales",
+            "why-professional-web-development-matters",
+            "the-truth-about-seo-engineering",
+            "social-media-conversation-not-billboard"
+        ];
         return [
             ...routes,
-            { url: `${baseUrl}/blog/blog-1`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-            { url: `${baseUrl}/blog/blog-2`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-            { url: `${baseUrl}/blog/blog-3`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
-            { url: `${baseUrl}/blog/blog-4`, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 0.8 },
+            ...staticSlugs.map((slug) => ({
+                url: `${baseUrl}/blog/${slug}`,
+                lastModified: new Date(),
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            })),
         ];
     }
 }
