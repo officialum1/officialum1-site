@@ -225,7 +225,7 @@ export default function WordPressSpeedOptimizationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#05070a] text-white">
+    <main className="inner-page">
       <Navbar />
 
       {/* Structured SEO Schemas */}
@@ -256,23 +256,36 @@ export default function WordPressSpeedOptimizationPage() {
           label="Performance Engineering"
           title={
             <>
-              Guaranteed <span className="text-red-500">90+ PageSpeed</span> & Sub-1.5s Load Time for WordPress
+              Guaranteed <span style={{ color: "var(--accent-blue)" }}>90+ PageSpeed</span> & Sub-1.5s Load Time
             </>
           }
           description="Stop losing 30-40% of your conversions to slow load times. We transform sluggish WordPress & WooCommerce websites into lightning-fast platforms with zero downtime."
+          right={
+            <Link
+              href="#audit-form"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-4 text-sm font-black text-white"
+              style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
+            >
+              Request Free Audit
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          }
         />
 
         {/* Live Speed Score Comparison Section */}
-        <section className="py-16 sm:py-24 border-b border-gray-900 bg-gradient-to-b from-[#05070a] via-gray-950 to-[#05070a]">
+        <section className="py-16 sm:py-24" style={{ background: "var(--bg-base)" }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1 text-xs font-semibold text-red-400 mb-4">
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider mb-4"
+                style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
+              >
                 <Gauge className="h-4 w-4" /> Real Client Diagnostic Metrics
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: "var(--text-primary)" }}>
                 Before vs. After OfficialUM1 Optimization
               </h2>
-              <p className="mt-3 text-gray-400 text-base sm:text-lg">
+              <p className="mt-3 text-base sm:text-lg" style={{ color: "var(--text-muted)" }}>
                 See the measurable impact our performance engineers deliver across Core Web Vitals, server latency, and mobile score.
               </p>
             </div>
@@ -281,23 +294,35 @@ export default function WordPressSpeedOptimizationPage() {
               {comparisonMetrics.map((item) => (
                 <div
                   key={item.metric}
-                  className="rounded-3xl border border-gray-800 bg-gray-900/60 p-6 shadow-xl relative overflow-hidden backdrop-blur-md"
+                  className="rounded-2xl border p-6 relative overflow-hidden"
+                  style={{
+                    background: "#ffffff",
+                    borderColor: "var(--border-subtle)",
+                    boxShadow: "0 12px 30px rgba(24,32,38,0.06)",
+                  }}
                 >
-                  <div className="absolute top-0 right-0 rounded-bl-xl bg-emerald-500/10 border-b border-l border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-400">
+                  <div
+                    className="absolute top-0 right-0 rounded-bl-xl border-b border-l px-3 py-1 text-xs font-bold"
+                    style={{
+                      background: "rgba(20,132,95,0.08)",
+                      borderColor: "rgba(20,132,95,0.2)",
+                      color: "#14845f",
+                    }}
+                  >
                     {item.improvement}
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4 pr-12">
+                  <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4 pr-12">
                     {item.metric}
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-                      <span className="text-xs text-red-400 font-medium">Before:</span>
-                      <span className="text-sm font-bold text-gray-400 line-through">{item.before}</span>
+                    <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: "var(--border-subtle)" }}>
+                      <span className="text-xs text-red-500 font-bold">Before:</span>
+                      <span className="text-sm font-medium text-gray-400 line-through">{item.before}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-emerald-400 font-bold">After:</span>
-                      <span className="text-lg font-extrabold text-white text-emerald-400">{item.after}</span>
+                      <span className="text-xs text-emerald-600 font-bold">After:</span>
+                      <span className="text-lg font-black text-emerald-600">{item.after}</span>
                     </div>
                   </div>
                 </div>
@@ -307,16 +332,16 @@ export default function WordPressSpeedOptimizationPage() {
         </section>
 
         {/* 6 Technical Pillars */}
-        <section className="py-20 sm:py-28 bg-[#05070a]">
+        <section className="py-20 sm:py-28" style={{ background: "var(--bg-section)" }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-red-400">
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--accent-blue)" }}>
                 Full-Stack Performance Architecture
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">
+              <h2 className="text-3xl sm:text-4xl font-black mt-2" style={{ color: "var(--text-primary)" }}>
                 How We Turbocharge Your WordPress Infrastructure
               </h2>
-              <p className="mt-3 text-gray-400 text-base">
+              <p className="mt-3 text-base" style={{ color: "var(--text-muted)" }}>
                 We don’t just install basic caching plugins. We execute deep code-level, database-level, and CDN-level optimizations.
               </p>
             </div>
@@ -327,13 +352,25 @@ export default function WordPressSpeedOptimizationPage() {
                 return (
                   <div
                     key={pillar.title}
-                    className="rounded-3xl border border-gray-800/80 bg-gradient-to-b from-gray-900/40 to-gray-950/80 p-8 shadow-lg hover:border-red-500/40 transition-all duration-300 group"
+                    className="rounded-2xl border p-8 transition-all duration-300 group hover:-translate-y-1"
+                    style={{
+                      background: "#ffffff",
+                      borderColor: "var(--border-subtle)",
+                      boxShadow: "0 12px 30px rgba(24,32,38,0.06)",
+                    }}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20 mb-6 group-hover:scale-110 group-hover:bg-red-500/20 transition-all">
+                    <div
+                      className="flex h-12 w-12 items-center justify-center rounded-xl mb-6 group-hover:scale-105 transition-all"
+                      style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
+                    >
                       <IconComponent className="h-6 w-6" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">{pillar.title}</h3>
-                    <p className="text-sm text-gray-400 leading-relaxed">{pillar.text}</p>
+                    <h3 className="text-xl font-black mb-3" style={{ color: "var(--text-primary)" }}>
+                      {pillar.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                      {pillar.text}
+                    </p>
                   </div>
                 );
               })}
@@ -342,23 +379,23 @@ export default function WordPressSpeedOptimizationPage() {
         </section>
 
         {/* Interactive Speed Audit Intake Form */}
-        <section id="audit-form" className="py-16 sm:py-24 border-y border-gray-900 bg-gradient-to-b from-gray-950 via-[#0a0d14] to-gray-950">
+        <section id="audit-form" className="py-16 sm:py-24" style={{ background: "var(--bg-section-alt)" }}>
           <div className="container mx-auto px-4 max-w-4xl">
             <SpeedAuditQuoteForm />
           </div>
         </section>
 
         {/* Transparent Pricing Packages */}
-        <section className="py-20 sm:py-28 bg-[#05070a]">
+        <section className="py-20 sm:py-28" style={{ background: "var(--bg-section)" }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-red-400">
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--accent-blue)" }}>
                 Transparent & Risk-Free
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">
+              <h2 className="text-3xl sm:text-4xl font-black mt-2" style={{ color: "var(--text-primary)" }}>
                 Simple, Flat-Rate Performance Packages
               </h2>
-              <p className="mt-3 text-gray-400 text-base">
+              <p className="mt-3 text-base" style={{ color: "var(--text-muted)" }}>
                 One-time investment. Pay only after you verify the live 90+ PageSpeed benchmark.
               </p>
             </div>
@@ -367,30 +404,40 @@ export default function WordPressSpeedOptimizationPage() {
               {packages.map((pkg) => (
                 <div
                   key={pkg.name}
-                  className={`rounded-3xl border p-8 flex flex-col justify-between transition-all duration-300 relative ${
-                    pkg.featured
-                      ? "border-red-500 bg-gradient-to-b from-gray-900 via-gray-950 to-gray-950 shadow-2xl shadow-red-500/10 ring-1 ring-red-500"
-                      : "border-gray-800 bg-gray-900/40 hover:border-gray-700"
-                  }`}
+                  className="rounded-3xl border p-8 flex flex-col justify-between transition-all duration-300 relative"
+                  style={{
+                    background: "#ffffff",
+                    borderColor: pkg.featured ? "var(--primary)" : "var(--border-subtle)",
+                    boxShadow: pkg.featured
+                      ? "0 20px 48px rgba(20,108,120,0.14)"
+                      : "0 12px 30px rgba(24,32,38,0.06)",
+                  }}
                 >
                   {pkg.featured && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-red-600 px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">
+                    <div
+                      className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-md"
+                      style={{ background: "var(--gradient)" }}
+                    >
                       Most Popular
                     </div>
                   )}
 
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-2">{pkg.name}</h3>
-                    <p className="text-xs text-gray-400 mb-6 min-h-[36px]">{pkg.detail}</p>
-                    <div className="text-4xl font-black text-white mb-6">
+                    <h3 className="text-xl font-black mb-2" style={{ color: "var(--text-primary)" }}>
+                      {pkg.name}
+                    </h3>
+                    <p className="text-xs mb-6 min-h-[36px]" style={{ color: "var(--text-muted)" }}>
+                      {pkg.detail}
+                    </p>
+                    <div className="text-4xl font-black mb-6" style={{ color: "var(--text-primary)" }}>
                       {pkg.price}
-                      <span className="text-xs font-medium text-gray-400 ml-2">/ one-time</span>
+                      <span className="text-xs font-medium text-gray-500 ml-2">/ one-time</span>
                     </div>
 
-                    <ul className="space-y-3.5 mb-8 border-t border-gray-800 pt-6">
+                    <ul className="space-y-3.5 mb-8 border-t pt-6" style={{ borderColor: "var(--border-subtle)" }}>
                       {pkg.items.map((item) => (
-                        <li key={item} className="flex items-start gap-3 text-xs text-gray-300">
-                          <CheckCircle2 className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                        <li key={item} className="flex items-start gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
+                          <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" style={{ color: "var(--accent-blue)" }} />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -399,11 +446,11 @@ export default function WordPressSpeedOptimizationPage() {
 
                   <a
                     href="#audit-form"
-                    className={`w-full inline-flex items-center justify-center rounded-xl py-3.5 text-sm font-bold transition-all ${
-                      pkg.featured
-                        ? "bg-red-600 text-white hover:bg-red-500 shadow-lg shadow-red-600/20"
-                        : "bg-gray-800 text-white hover:bg-gray-700"
-                    }`}
+                    className="w-full inline-flex items-center justify-center rounded-xl py-3.5 text-sm font-extrabold text-white transition-all shadow-md"
+                    style={{
+                      background: pkg.featured ? "var(--gradient)" : "var(--primary)",
+                      boxShadow: pkg.featured ? "var(--glow-blue)" : "none",
+                    }}
                   >
                     Select {pkg.name}
                   </a>
@@ -414,12 +461,12 @@ export default function WordPressSpeedOptimizationPage() {
         </section>
 
         {/* Verified Live Projects / Client Showcase */}
-        <section className="py-16 sm:py-24 border-y border-gray-900 bg-gray-950/60">
+        <section className="py-16 sm:py-24 border-y" style={{ background: "var(--bg-base)", borderColor: "var(--border-subtle)" }}>
           <div className="container mx-auto px-4 max-w-6xl text-center">
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+            <h3 className="text-xl sm:text-2xl font-black mb-3" style={{ color: "var(--text-primary)" }}>
               Proven Across High-Scale Production Platforms
             </h3>
-            <p className="text-gray-400 text-sm max-w-2xl mx-auto mb-8">
+            <p className="text-sm max-w-2xl mx-auto mb-8" style={{ color: "var(--text-muted)" }}>
               Explore live client platforms engineered, accelerated, and maintained by OfficialUM1 LLC:
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
@@ -435,12 +482,19 @@ export default function WordPressSpeedOptimizationPage() {
                   href={`https://${site.name}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-2xl border border-gray-800 bg-gray-900/60 px-5 py-3 text-left hover:border-red-500/50 hover:bg-gray-850 transition"
+                  className="rounded-2xl border px-5 py-3 text-left transition hover:-translate-y-0.5"
+                  style={{
+                    background: "#ffffff",
+                    borderColor: "var(--border-subtle)",
+                    boxShadow: "0 6px 18px rgba(24,32,38,0.04)",
+                  }}
                 >
-                  <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                    {site.name} <ArrowRight className="h-3 w-3 text-red-400" />
+                  <div className="text-xs font-extrabold flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
+                    {site.name} <ArrowRight className="h-3 w-3" style={{ color: "var(--accent-blue)" }} />
                   </div>
-                  <div className="text-[11px] text-gray-500">{site.desc}</div>
+                  <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    {site.desc}
+                  </div>
                 </a>
               ))}
             </div>
@@ -448,13 +502,13 @@ export default function WordPressSpeedOptimizationPage() {
         </section>
 
         {/* Deep FAQ Section */}
-        <section className="py-20 sm:py-28 bg-[#05070a]">
+        <section className="py-20 sm:py-28" style={{ background: "var(--bg-section)" }}>
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="text-center mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest text-red-400">
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--accent-blue)" }}>
                 Frequently Asked Questions
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2">
+              <h2 className="text-3xl sm:text-4xl font-black mt-2" style={{ color: "var(--text-primary)" }}>
                 Everything You Need to Know
               </h2>
             </div>
@@ -463,13 +517,20 @@ export default function WordPressSpeedOptimizationPage() {
               {faqs.map((faq) => (
                 <div
                   key={faq.q}
-                  className="rounded-2xl border border-gray-800 bg-gray-900/40 p-6 sm:p-8 hover:border-gray-700 transition"
+                  className="rounded-2xl border p-6 sm:p-8 transition"
+                  style={{
+                    background: "#ffffff",
+                    borderColor: "var(--border-subtle)",
+                    boxShadow: "0 8px 24px rgba(24,32,38,0.04)",
+                  }}
                 >
-                  <h3 className="text-base sm:text-lg font-bold text-white mb-2 flex items-start gap-3">
-                    <Sparkles className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                  <h3 className="text-base sm:text-lg font-black mb-2 flex items-start gap-3" style={{ color: "var(--text-primary)" }}>
+                    <Sparkles className="h-5 w-5 shrink-0 mt-0.5" style={{ color: "var(--accent-blue)" }} />
                     {faq.q}
                   </h3>
-                  <p className="text-sm text-gray-400 leading-relaxed pl-8">{faq.a}</p>
+                  <p className="text-sm leading-relaxed pl-8" style={{ color: "var(--text-muted)" }}>
+                    {faq.a}
+                  </p>
                 </div>
               ))}
             </div>
@@ -477,29 +538,45 @@ export default function WordPressSpeedOptimizationPage() {
         </section>
 
         {/* Global Conversion CTA Banner */}
-        <section className="py-20 bg-gray-950 border-t border-gray-900">
+        <section className="py-20" style={{ background: "var(--bg-section-alt)" }}>
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="rounded-3xl border border-red-500/20 bg-gradient-to-r from-red-950/40 via-gray-900 to-red-950/40 p-10 sm:p-14 text-center relative overflow-hidden shadow-2xl">
+            <div
+              className="rounded-3xl border p-10 sm:p-14 text-center relative overflow-hidden"
+              style={{
+                background: "#ffffff",
+                borderColor: "var(--border-subtle)",
+                boxShadow: "0 24px 60px rgba(24,32,38,0.08)",
+              }}
+            >
               <div className="relative z-10 max-w-2xl mx-auto">
-                <span className="inline-flex items-center gap-2 rounded-full bg-red-500/20 px-4 py-1 text-xs font-bold text-red-400 mb-4 border border-red-500/30">
+                <span
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider mb-4"
+                  style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
+                >
                   <Clock className="h-3.5 w-3.5" /> 24-Hour Express Delivery
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4" style={{ color: "var(--text-primary)" }}>
                   Ready to Turn Your WordPress Site Into a Speed Machine?
                 </h2>
-                <p className="text-gray-300 text-sm sm:text-base mb-8">
+                <p className="text-sm sm:text-base mb-8" style={{ color: "var(--text-muted)" }}>
                   Get your free diagnostic report today. Guaranteed 90+ PageSpeed or you pay nothing.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <a
                     href="#audit-form"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-8 py-4 text-sm font-bold text-white shadow-xl shadow-red-600/30 hover:bg-red-500 transition-all duration-300"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-xl transition-all duration-300"
+                    style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
                   >
                     <Gauge className="h-4 w-4" /> Request Speed Audit Now
                   </a>
                   <a
                     href="mailto:hello@officialum1.com"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-900 px-8 py-4 text-sm font-bold text-gray-200 hover:bg-gray-800 transition"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border px-8 py-4 text-sm font-bold transition"
+                    style={{
+                      background: "var(--bg-base)",
+                      borderColor: "var(--border-subtle)",
+                      color: "var(--text-primary)",
+                    }}
                   >
                     Email: hello@officialum1.com
                   </a>
