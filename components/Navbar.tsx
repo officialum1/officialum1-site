@@ -172,76 +172,79 @@ export default function Navbar() {
                             <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />
                         </button>
 
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full hidden group-hover:block w-[720px] p-6 bg-white rounded-3xl border border-[var(--border-subtle)] shadow-2xl z-[3000] animate-in fade-in slide-in-from-top-2 duration-200">
-                            <div className="grid grid-cols-3 gap-6 text-left">
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full hidden group-hover:block w-[840px] p-7 bg-white/95 backdrop-blur-xl rounded-[28px] border border-gray-100 shadow-[0_24px_70px_-15px_rgba(15,23,42,0.18)] z-[3000] animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="grid grid-cols-3 gap-7 text-left">
                                 {/* Col 1: Link Building */}
                                 <div>
-                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
-                                        Link Building
+                                    <div className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b border-gray-100 pb-2.5 mb-3">
+                                        <span>🔗</span> Link Building
                                     </div>
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">DA Packages</div>
-                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700 mb-4">
+                                    <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">DA Authority Packs</div>
+                                    <ul className="space-y-1 text-[12.5px] font-semibold text-gray-700 mb-4">
                                         <li>
-                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between">
+                                            <Link href="/services/guest-posting" className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
                                                 <span>DA50+ Package</span>
-                                                <span className="text-[10px] text-gray-400">$299+</span>
+                                                <span className="text-[11px] font-bold text-gray-400">$299+</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between font-bold text-[var(--text-primary)]">
-                                                <span>DA60+ Powerhouse ⭐</span>
-                                                <span className="text-[10px] text-[var(--accent-blue)] font-bold">$1,499</span>
+                                            <Link href="/services/guest-posting" className="p-2 rounded-xl bg-amber-50/50 hover:bg-amber-100/60 flex items-center justify-between transition-all font-bold text-[var(--text-primary)]">
+                                                <span className="flex items-center gap-1">DA60+ Powerhouse <span className="text-[10px] text-amber-600">⭐ Best</span></span>
+                                                <span className="text-[11px] text-amber-700 font-black">$1,499</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/guest-posting" className="hover:text-[var(--accent-blue)] flex items-center justify-between">
+                                            <Link href="/services/guest-posting" className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
                                                 <span>DA70+ Elite Pack</span>
-                                                <span className="text-[10px] text-gray-400">$2,499</span>
+                                                <span className="text-[11px] font-bold text-gray-400">$2,499</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/niche-edits" className="hover:text-[var(--accent-blue)] flex items-center justify-between text-indigo-600">
+                                            <Link href="/services/niche-edits" className="p-2 rounded-xl bg-indigo-50/40 hover:bg-indigo-100/60 flex items-center justify-between transition-all text-indigo-700 font-bold">
                                                 <span>Aged Niche Edits ⚡</span>
-                                                <span className="text-[10px] text-indigo-500">$599+</span>
+                                                <span className="text-[11px] text-indigo-600 font-black">$599+</span>
                                             </Link>
                                         </li>
                                     </ul>
 
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Crypto Packages</div>
-                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700">
-                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Starter Pack ($899)</Link></li>
-                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Growth Pack ($1,899)</Link></li>
-                                        <li><Link href="/services/crypto-guest-posting" className="hover:text-[var(--accent-blue)]">Crypto Elite Pack ($3,499)</Link></li>
+                                    <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">Crypto &amp; Web3 Packs</div>
+                                    <ul className="space-y-1 text-[12px] font-semibold text-gray-700">
+                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Starter Pack</span><span className="text-[10px] text-gray-400">$899</span></Link></li>
+                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Growth Pack</span><span className="text-[10px] text-gray-400">$1,899</span></Link></li>
+                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Elite Pack</span><span className="text-[10px] text-gray-400">$3,499</span></Link></li>
                                     </ul>
                                 </div>
 
                                 {/* Col 2: Press Release */}
                                 <div>
-                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
-                                        Press Release Distribution
+                                    <div className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b border-gray-100 pb-2.5 mb-3">
+                                        <span>📰</span> Press Release Syndication
                                     </div>
-                                    <ul className="space-y-2 text-xs font-semibold text-gray-700">
+                                    <ul className="space-y-2 text-[12.5px] font-semibold text-gray-700">
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
-                                                <div className="font-bold text-[var(--text-primary)]">National Wire (250+ Sites)</div>
-                                                <div className="text-[10px] text-gray-400 font-normal">Google News, NBC, CBS &bull; $399</div>
+                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
+                                                <div className="font-extrabold text-[var(--text-primary)]">National Wire (250+ Sites)</div>
+                                                <div className="text-[11px] text-gray-500 font-normal mt-0.5">Google News, NBC, CBS &bull; <strong className="text-[var(--text-primary)]">$399</strong></div>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
-                                                <div className="font-bold text-[var(--text-primary)]">Global Authority Wire (400+) ⭐</div>
-                                                <div className="text-[10px] text-gray-400 font-normal">Yahoo Finance &amp; AP Wire &bull; $799</div>
+                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl bg-blue-50/40 hover:bg-blue-100/60 border border-blue-100 block transition-all">
+                                                <div className="font-extrabold text-[var(--accent-blue)] flex items-center justify-between">
+                                                    <span>Global Authority Wire ⭐</span>
+                                                    <span className="text-[11px] font-black">$799</span>
+                                                </div>
+                                                <div className="text-[11px] text-gray-600 font-normal mt-0.5">Yahoo Finance, Bloomberg &amp; AP Wire</div>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="hover:text-[var(--accent-blue)] block">
-                                                <div className="font-bold text-[var(--text-primary)]">Enterprise Financial PR</div>
-                                                <div className="text-[10px] text-gray-400 font-normal">Stock &amp; Crypto Terminals &bull; $1,499</div>
+                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
+                                                <div className="font-extrabold text-[var(--text-primary)]">Enterprise Financial PR</div>
+                                                <div className="text-[11px] text-gray-500 font-normal mt-0.5">Stock &amp; Crypto Terminals &bull; <strong className="text-[var(--text-primary)]">$1,499</strong></div>
                                             </Link>
                                         </li>
-                                        <li className="pt-2 border-t">
-                                            <Link href="/press" className="hover:text-[var(--accent-blue)] text-[11px] text-[var(--accent-blue)] font-bold block">
-                                                &rarr; Visit Corporate Press Room
+                                        <li className="pt-2">
+                                            <Link href="/press" className="p-2 rounded-xl hover:bg-blue-50 text-[11.5px] text-[var(--accent-blue)] font-extrabold flex items-center gap-1 transition-all">
+                                                <span>&rarr; Visit Corporate Press Room</span>
                                             </Link>
                                         </li>
                                     </ul>
@@ -249,26 +252,29 @@ export default function Navbar() {
 
                                 {/* Col 3: Local SEO Listings */}
                                 <div>
-                                    <div className="text-[11px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b pb-2 mb-3">
-                                        Local SEO (Citations)
+                                    <div className="flex items-center gap-1.5 text-[11.5px] font-black uppercase tracking-wider text-[var(--accent-blue)] border-b border-gray-100 pb-2.5 mb-3">
+                                        <span>📍</span> Local SEO (Citations)
                                     </div>
-                                    <ul className="space-y-1.5 text-xs font-semibold text-gray-700">
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇺🇸 USA Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇬🇧 UK Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇨🇦 Canada Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇦🇺 Australia Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇦🇪 Dubai Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇸🇬 Singapore Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇵🇭 Philippines Local Listings ($149+)</Link></li>
-                                        <li><Link href="/services/local-citations" className="hover:text-[var(--accent-blue)]">🇮🇩 Indonesia Local Listings ($149+)</Link></li>
+                                    <ul className="space-y-1 text-[12px] font-semibold text-gray-700">
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇺🇸 USA Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇬🇧 UK Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇨🇦 Canada Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇺 Australia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇪 Dubai Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇸🇬 Singapore Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇵🇭 Philippines Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇮🇩 Indonesia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between text-[11px]">
-                                <span className="font-semibold text-gray-500">🔒 100% Verified Manual Placement &bull; 365-Day Replacement Warranty</span>
-                                <Link href="/store" className="font-bold text-[var(--accent-blue)] hover:underline">
-                                    Browse Authority Store &rarr;
+                            <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between text-[11.5px]">
+                                <span className="font-semibold text-gray-500 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    100% Verified Manual Placement &bull; 365-Day Replacement Warranty
+                                </span>
+                                <Link href="/store" className="font-extrabold text-[var(--accent-blue)] hover:underline flex items-center gap-1">
+                                    Browse Digital Store &rarr;
                                 </Link>
                             </div>
                         </div>
