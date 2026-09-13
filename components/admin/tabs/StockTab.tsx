@@ -144,19 +144,23 @@ export default function StockTab({
     return (
         <div className="FadeIn">
             <div style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                     <div>
-                        <h2 style={{ fontSize: '1.4rem', margin: 0 }}>📦 Stock Inventory</h2>
-                        <p style={{ color: '#666', fontSize: '0.9rem' }}>Manage bulk accounts and manual links.</p>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, color: '#182026' }}>📦 Stock Inventory</h2>
+                        <p style={{ color: '#64748B', fontSize: '0.9rem', marginTop: '2px' }}>Manage accounts stock, digital assets and inventory batches.</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button onClick={() => setShowAddInv(true)} className="btn btn-outline">+ Add Item</button>
-                        <button onClick={() => setShowBulk(true)} className="btn btn-outline">Bulk</button>
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button onClick={() => setShowAddInv(true)} className="btn btn-primary" style={{ padding: '8px 18px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>+</span> Add Item
+                        </button>
+                        <button onClick={() => setShowBulk(true)} className="btn btn-outline" style={{ padding: '8px 18px' }}>
+                            Bulk Import
+                        </button>
                     </div>
                 </div>
 
                 {/* SEARCH BAR */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
                         <input
                             type="text"
@@ -164,46 +168,87 @@ export default function StockTab({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="input-field"
-                            style={{ width: '100%', paddingLeft: '2.5rem' }}
+                            style={{ width: '100%', paddingLeft: '2.5rem', height: '42px', fontSize: '13.5px' }}
                         />
-                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.6 }}>🔍</span>
                     </div>
                 </div>
 
                 {/* STOCK VIEW TOGGLE & STATUS FILTER */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {['In Stock', 'Sold', 'Defective'].map(status => (
-                            <button
-                                key={status}
-                                onClick={() => setSearchQuery(status === 'In Stock' ? '' : status)}
-                                className="btn"
-                                style={{
-                                    padding: '6px 15px',
-                                    fontSize: '0.8rem',
-                                    background: searchQuery === status ? '#00ff88' : 'rgba(255,255,255,0.05)',
-                                    color: searchQuery === status ? '#000' : '#888',
-                                    border: '1px solid #333'
-                                }}
-                            >
-                                {status}
-                            </button>
-                        ))}
+                        {[
+                            { label: 'All Items', val: '' },
+                            { label: 'In Stock', val: 'In Stock' },
+                            { label: 'Sold', val: 'Sold' },
+                            { label: 'Defective', val: 'Defective' }
+                        ].map(st => {
+                            const isSelected = searchQuery === st.val;
+                            return (
+                                <button
+                                    key={st.label}
+                                    onClick={() => setSearchQuery(st.val)}
+                                    style={{
+                                        padding: '7px 16px',
+                                        fontSize: '12.5px',
+                                        fontWeight: 600,
+                                        borderRadius: '8px',
+                                        background: isSelected ? '#146C78' : '#FFFFFF',
+                                        color: isSelected ? '#FFFFFF' : '#475569',
+                                        border: isSelected ? '1px solid #146C78' : '1px solid #CBD5E1',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.15s'
+                                    }}
+                                >
+                                    {st.label}
+                                </button>
+                            );
+                        })}
                     </div>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-                        <button onClick={() => setViewMode('summary')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'summary' ? '#00ff88' : 'transparent', color: viewMode === 'summary' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>Cards</button>
-                        <button onClick={() => setViewMode('list')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#00ff88' : 'transparent', color: viewMode === 'list' ? '#000' : '#888', cursor: 'pointer', fontWeight: 'bold' }}>List</button>
+                    <div style={{ background: '#E2E8F0', padding: '3px', borderRadius: '8px', display: 'flex', gap: '2px' }}>
+                        <button 
+                            onClick={() => setViewMode('summary')} 
+                            style={{ 
+                                padding: '6px 14px', 
+                                borderRadius: '6px', 
+                                border: 'none', 
+                                background: viewMode === 'summary' ? '#FFFFFF' : 'transparent', 
+                                color: viewMode === 'summary' ? '#146C78' : '#64748B', 
+                                cursor: 'pointer', 
+                                fontWeight: 700,
+                                fontSize: '12.5px',
+                                boxShadow: viewMode === 'summary' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+                            }}
+                        >
+                            Cards View
+                        </button>
+                        <button 
+                            onClick={() => setViewMode('list')} 
+                            style={{ 
+                                padding: '6px 14px', 
+                                borderRadius: '6px', 
+                                border: 'none', 
+                                background: viewMode === 'list' ? '#FFFFFF' : 'transparent', 
+                                color: viewMode === 'list' ? '#146C78' : '#64748B', 
+                                cursor: 'pointer', 
+                                fontWeight: 700,
+                                fontSize: '12.5px',
+                                boxShadow: viewMode === 'list' ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+                            }}
+                        >
+                            Table View
+                        </button>
                     </div>
                 </div>
 
                 {/* Stock Display */}
                 {viewMode === 'summary' ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
                         {Array.from(new Set(filteredInventory.filter(i => i.status === 'In Stock').map(i => i.name))).map(name => {
                             const items = filteredInventory.filter(i => i.name === name);
                             const activeItems = items.filter(i => i.status === 'In Stock');
                             const inStock = activeItems.length;
-                            const platform = activeItems[0]?.platform || 'Unknown';
+                            const platform = activeItems[0]?.platform || 'Direct';
 
                             if (inStock === 0) return null;
 
@@ -214,42 +259,60 @@ export default function StockTab({
                                         setSearchQuery(name);
                                         setViewMode('list');
                                     }}
-                                    className="glass stock-card"
+                                    className="glass-hover"
                                     style={{
+                                        background: '#FFFFFF',
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         position: 'relative',
                                         overflow: 'hidden',
-                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        border: '1px solid #E2E8F0',
+                                        boxShadow: '0 2px 6px rgba(24,32,38,0.04)',
                                         cursor: 'pointer',
-                                        transition: '0.3s'
+                                        transition: 'all 0.2s'
                                     }}
                                 >
-                                    <div style={{ position: 'absolute', top: 0, right: 0, padding: '4px 10px', background: '#00ff88', color: '#000', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                                    <div style={{ 
+                                        position: 'absolute', 
+                                        top: '12px', 
+                                        right: '12px', 
+                                        padding: '3px 9px', 
+                                        background: '#DCFCE7', 
+                                        color: '#15803D', 
+                                        border: '1px solid #BBF7D0',
+                                        fontSize: '10.5px', 
+                                        fontWeight: 700,
+                                        borderRadius: '20px',
+                                        letterSpacing: '0.4px'
+                                    }}>
                                         ACTIVE
                                     </div>
-                                    <h3 style={{ marginBottom: '0.5rem', fontSize: '1.2rem', color: '#fff' }}>{name}</h3>
-                                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ marginBottom: '0.4rem', fontSize: '1.15rem', fontWeight: 800, color: '#182026' }}>{name}</h3>
+                                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.25rem' }}>
                                         {activeItems[0]?.image ? (
-                                            <img src={activeItems[0].image} alt="" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+                                            <img src={activeItems[0].image} alt="" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
                                         ) : (
-                                            <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>📦</div>
+                                            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>📦</div>
                                         )}
-                                        <div style={{ fontSize: '0.85rem', color: '#888' }}>Platform: <span style={{ color: '#ccc' }}>{platform}</span></div>
+                                        <div style={{ fontSize: '0.85rem', color: '#64748B' }}>Platform: <span style={{ color: '#182026', fontWeight: 600 }}>{platform}</span></div>
                                     </div>
 
-                                    <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.2)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                                        <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#00ff88', lineHeight: '1' }}>{inStock}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '5px' }}>Check stock items</div>
+                                    <div style={{ textAlign: 'center', background: '#F8FAF9', padding: '1rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                                        <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#146C78', lineHeight: '1' }}>{inStock}</div>
+                                        <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>Units in Stock</div>
                                     </div>
 
-                                    <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: '#444' }}>
-                                        Click to divide & edit individual items
+                                    <div style={{ marginTop: '0.85rem', textAlign: 'center', fontSize: '11.5px', color: '#94A3B8', fontWeight: 500 }}>
+                                        Click to view & manage individual items →
                                     </div>
                                 </div>
                             );
                         })}
-                        {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && <div style={{ color: '#666', gridColumn: 'span 3', textAlign: 'center', padding: '4rem' }}>No active stock found.</div>}
+                        {filteredInventory.filter(i => i.status === 'In Stock').length === 0 && (
+                            <div style={{ color: '#64748B', gridColumn: 'span 3', textAlign: 'center', padding: '4rem', background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+                                No active stock items found.
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="glass" style={{ borderRadius: '16px', overflow: 'hidden' }}>
