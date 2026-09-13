@@ -1654,40 +1654,53 @@ body:not(.admin-theme) svg {
 }
 
 /* Universal Typography within Admin */
+.admin-theme,
+.admin-theme div,
+.admin-theme section,
+.admin-theme main {
+  color: var(--admin-text-main);
+}
+
 .admin-theme h1,
 .admin-theme h2,
 .admin-theme h3,
 .admin-theme h4,
 .admin-theme h5,
 .admin-theme h6 {
-  color: var(--admin-text-main) !important;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  color: #182026 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
 }
 
 .admin-theme p,
-.admin-theme span:not([class*="badge"]):not([class*="pill"]):not([style*="color: #00ff88"]):not([style*="color: #ff4444"]):not([style*="color: rgb"]) {
-  color: inherit;
+.admin-theme small,
+.admin-theme .text-muted,
+.admin-theme .subheading {
+  color: #64748B !important;
 }
 
-/* Glass & Card Normalization */
+/* Glass & Card Universal Normalization */
 .admin-theme .glass,
 .admin-theme .glassCard,
 .admin-theme .admin-card,
+.admin-theme .stock-card,
+.admin-theme .workCard,
+.admin-theme .services-card-home,
 .admin-theme [class*="glass"] {
   background: #FFFFFF !important;
-  border: 1px solid var(--admin-border) !important;
+  border: 1px solid #E2E8F0 !important;
   border-radius: 16px !important;
-  box-shadow: 0 1px 3px rgba(24, 32, 38, 0.05), 0 10px 24px -10px rgba(24, 32, 38, 0.04) !important;
-  color: var(--admin-text-main) !important;
+  box-shadow: 0 1px 3px rgba(24, 32, 38, 0.04), 0 4px 12px rgba(24, 32, 38, 0.02) !important;
+  color: #182026 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.admin-theme .glass-hover:hover {
-  background: #F8FAF9 !important;
+.admin-theme .glass-hover:hover,
+.admin-theme .glass:hover {
+  background: #FFFFFF !important;
   border-color: #CBD5E1 !important;
-  box-shadow: 0 4px 14px rgba(24, 32, 38, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(24, 32, 38, 0.07) !important;
 }
 
 /* Form Controls & Inputs */
@@ -1705,7 +1718,7 @@ body:not(.admin-theme) svg {
   background: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   border-radius: 8px !important;
-  color: var(--admin-text-main) !important;
+  color: #182026 !important;
   font-size: 13.5px !important;
   font-weight: 500 !important;
   padding: 8px 14px !important;
@@ -1717,7 +1730,7 @@ body:not(.admin-theme) svg {
 .admin-theme .input-field::placeholder,
 .admin-theme input::placeholder,
 .admin-theme textarea::placeholder {
-  color: var(--admin-text-sub) !important;
+  color: #94A3B8 !important;
   font-weight: 400 !important;
 }
 
@@ -1725,42 +1738,45 @@ body:not(.admin-theme) svg {
 .admin-theme input:focus,
 .admin-theme textarea:focus,
 .admin-theme select:focus {
-  border-color: var(--admin-primary) !important;
+  border-color: #146C78 !important;
   box-shadow: 0 0 0 3px rgba(20, 108, 120, 0.15) !important;
   background: #FFFFFF !important;
 }
 
 .admin-theme label {
-  color: var(--admin-text-muted) !important;
+  color: #475569 !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
 }
 
-/* Action Buttons */
+/* Action Buttons - Strict Brand Uniformity */
 .admin-theme .btn,
 .admin-theme button.btn-primary,
 .admin-theme .btn-primary {
-  background: linear-gradient(135deg, #146C78 0%, #0E525C 100%) !important;
+  background: #146C78 !important;
   color: #FFFFFF !important;
-  border: none !important;
+  border: 1px solid #146C78 !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
   font-size: 13.5px !important;
-  box-shadow: 0 2px 6px rgba(20, 108, 120, 0.25) !important;
-  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 5px rgba(20, 108, 120, 0.2) !important;
+  transition: all 0.15s ease !important;
   cursor: pointer !important;
 }
 
-.admin-theme .btn-primary:hover {
-  background: linear-gradient(135deg, #0E525C 0%, #08373E 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(20, 108, 120, 0.35) !important;
+.admin-theme .btn-primary:hover,
+.admin-theme .btn:hover {
+  background: #0E525C !important;
+  border-color: #0E525C !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 10px rgba(20, 108, 120, 0.3) !important;
 }
 
 .admin-theme .btn-outline,
-.admin-theme .btn-secondary {
+.admin-theme .btn-secondary,
+.admin-theme button[class*="btn-outline"] {
   background: #FFFFFF !important;
   border: 1px solid #CBD5E1 !important;
   color: #334155 !important;
@@ -1768,7 +1784,7 @@ body:not(.admin-theme) svg {
   font-weight: 600 !important;
   font-size: 13.5px !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.15s ease !important;
   cursor: pointer !important;
 }
 
@@ -1776,18 +1792,18 @@ body:not(.admin-theme) svg {
 .admin-theme .btn-secondary:hover {
   background: #F8FAF9 !important;
   border-color: #94A3B8 !important;
-  color: #0F172A !important;
+  color: #182026 !important;
 }
 
 .admin-theme .btn-danger {
   background: #EF4444 !important;
   color: #FFFFFF !important;
-  border: none !important;
+  border: 1px solid #EF4444 !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
 }
 
-/* Tables & Lists */
+/* Tables & Lists Uniformity */
 .admin-theme table {
   width: 100% !important;
   border-collapse: separate !important;
@@ -1795,26 +1811,31 @@ body:not(.admin-theme) svg {
   background: #FFFFFF !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  border: 1px solid var(--admin-border) !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+.admin-theme table thead,
+.admin-theme table thead tr {
+  background: #F8FAF9 !important;
 }
 
 .admin-theme table th {
   background: #F8FAF9 !important;
-  color: var(--admin-text-muted) !important;
-  font-size: 11px !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.6px !important;
   padding: 12px 16px !important;
-  border-bottom: 1px solid var(--admin-border) !important;
+  border-bottom: 1px solid #E2E8F0 !important;
   text-align: left !important;
 }
 
 .admin-theme table td {
   padding: 14px 16px !important;
-  color: var(--admin-text-main) !important;
+  color: #182026 !important;
   font-size: 13px !important;
-  border-bottom: 1px solid var(--admin-border-subtle) !important;
+  border-bottom: 1px solid #F1F5F9 !important;
   background: #FFFFFF !important;
 }
 
@@ -1826,70 +1847,85 @@ body:not(.admin-theme) svg {
   background: #F8FAF9 !important;
 }
 
-/* Status Badges */
+/* Status Badges - Unified Harmonious Palette */
 .admin-theme .badge,
-.admin-theme .status-badge {
+.admin-theme .status-badge,
+.admin-theme span[style*="padding: 4px 10px"],
+.admin-theme span[style*="padding: 3px"] {
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
   padding: 3px 10px !important;
   border-radius: 20px !important;
   font-size: 11.5px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.2px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
 }
 
 .admin-theme .badge-success,
 .admin-theme [class*="text-emerald"],
-.admin-theme [class*="text-green"] {
-  background: #E8F8F3 !important;
-  color: #0E7051 !important;
-  border: 1px solid #C1EADA !important;
+.admin-theme [class*="text-green"],
+.admin-theme [style*="color: #00ff88"],
+.admin-theme [style*="color:#00ff88"] {
+  background: #DCFCE7 !important;
+  color: #15803D !important;
+  border: 1px solid #BBF7D0 !important;
 }
 
 .admin-theme .badge-warning,
 .admin-theme [class*="text-amber"],
-.admin-theme [class*="text-yellow"] {
-  background: #FEF7E6 !important;
-  color: #A36B00 !important;
-  border: 1px solid #FBE2A7 !important;
+.admin-theme [class*="text-yellow"],
+.admin-theme [style*="color: #ffa500"],
+.admin-theme [style*="color: #ffaa00"] {
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
+  border: 1px solid #FDE68A !important;
 }
 
 .admin-theme .badge-danger,
 .admin-theme [class*="text-rose"],
-.admin-theme [class*="text-red"] {
-  background: #FDF0ED !important;
-  color: #B4331B !important;
-  border: 1px solid #F8CEC5 !important;
+.admin-theme [class*="text-red"],
+.admin-theme [style*="color: #ff4444"],
+.admin-theme [style*="color: #ff0055"] {
+  background: #FEE2E2 !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
 }
 
 .admin-theme .badge-info,
 .admin-theme [class*="text-blue"],
-.admin-theme [class*="text-indigo"] {
-  background: #EAF4F6 !important;
+.admin-theme [class*="text-indigo"],
+.admin-theme [style*="color: #00b4ff"],
+.admin-theme [style*="color: #1DA1F2"],
+.admin-theme [style*="color: #24A1DE"] {
+  background: #E6F3F1 !important;
   color: #146C78 !important;
   border: 1px solid #C2E2E6 !important;
 }
 
-/* Overrides for Legacy Inline Dark Styles */
+/* Complete Override for Dark & Neon Elements Across All Tabs */
 .admin-theme [style*="background: #050505"],
 .admin-theme [style*="background: #000"],
 .admin-theme [style*="background:#050505"],
-.admin-theme [style*="background: rgb(5, 5, 5)"] {
-  background: #FFFFFF !important;
-  border: 1px solid var(--admin-border) !important;
-  color: var(--admin-text-main) !important;
+.admin-theme [style*="background: rgb(5, 5, 5)"],
+.admin-theme [style*="background: rgba(0, 0, 0, 0.2)"],
+.admin-theme [style*="background: rgba(0,0,0,0.2)"] {
+  background: #F8FAF9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #182026 !important;
 }
 
 .admin-theme [style*="color: #fff"],
 .admin-theme [style*="color: #FFFFFF"],
-.admin-theme [style*="color:#fff"] {
-  color: var(--admin-text-main) !important;
+.admin-theme [style*="color:#fff"],
+.admin-theme [style*="color: white"] {
+  color: #182026 !important;
 }
 
 .admin-theme button[style*="color: #fff"],
 .admin-theme button[style*="color: #FFFFFF"],
-.admin-theme a[style*="color: #fff"],
+.admin-theme a.btn[style*="color: #fff"],
+.admin-theme .btn-primary,
 .admin-theme .btn-primary * {
   color: #FFFFFF !important;
 }
@@ -1897,28 +1933,26 @@ body:not(.admin-theme) svg {
 .admin-theme [style*="color: #888"],
 .admin-theme [style*="color: #666"],
 .admin-theme [style*="color: #aaa"],
-.admin-theme [style*="color: #999"] {
-  color: var(--admin-text-muted) !important;
-}
-
-.admin-theme [style*="color: #00ff88"] {
-  color: #0E7051 !important;
-  font-weight: 700 !important;
+.admin-theme [style*="color: #999"],
+.admin-theme [style*="color: #444"],
+.admin-theme [style*="color: #333"] {
+  color: #64748B !important;
 }
 
 .admin-theme [style*="border: 1px solid #222"],
+.admin-theme [style*="border: 1px solid #333"],
 .admin-theme [style*="border: 1px solid rgba(255, 255, 255"] {
-  border-color: var(--admin-border) !important;
+  border-color: #E2E8F0 !important;
 }
 
 .admin-theme [style*="background: rgba(255, 255, 255, 0.05)"],
 .admin-theme [style*="background: rgba(255, 255, 255, 0.03)"],
 .admin-theme [style*="background: rgba(255, 255, 255, 0.08)"] {
   background: #FFFFFF !important;
-  border: 1px solid var(--admin-border) !important;
+  border: 1px solid #E2E8F0 !important;
 }
 
-/* Dialogs & Modal Overlays */
+/* Modals & Overlays */
 .admin-theme .modern-modal-overlay,
 .admin-theme .overlay {
   background: rgba(15, 23, 42, 0.5) !important;
@@ -1927,9 +1961,10 @@ body:not(.admin-theme) svg {
 
 .admin-theme .modern-modal-card {
   background: #FFFFFF !important;
-  border: 1px solid var(--admin-border) !important;
+  border: 1px solid #E2E8F0 !important;
   border-radius: 18px !important;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
-  color: var(--admin-text-main) !important;
+  color: #182026 !important;
 }
+
 
