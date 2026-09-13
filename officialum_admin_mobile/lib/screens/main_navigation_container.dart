@@ -18,6 +18,9 @@ import 'web_module_screen.dart';
 import 'login_screen.dart';
 import 'guest_posting_screen.dart';
 import 'native_store_screen.dart';
+import 'client_orders_screen.dart';
+import 'client_reviews_screen.dart';
+import 'client_account_screen.dart';
 
 import 'website_management_screen.dart';
 import 'promos_management_screen.dart';
@@ -36,7 +39,7 @@ class MainNavigationContainer extends StatefulWidget {
 }
 
 class _MainNavigationContainerState extends State<MainNavigationContainer> {
-  int _currentBottomIndex = 0; // 0: Store, 1: Guest Posting, 2: Sell & Link, 3: Leads, 4: Dashboard
+  int _currentBottomIndex = 0; // 0: Store, 1: Guest Post, 2: Tracking, 3: Reviews, 4: Support
   int _drawerModuleIndex = -1; // -1 means use bottom nav, >=0 means drawer override
   String? _currentWebTitle;
   String? _currentWebUrl;
@@ -50,7 +53,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
       );
     }
 
-    // If a drawer module is selected
+    // If an admin drawer module is selected
     if (_drawerModuleIndex >= 0) {
       if (!isAuthenticated && _drawerModuleIndex != 100) return const LoginScreen();
 
@@ -83,18 +86,24 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
       }
     }
 
-    // Default Bottom Navigation Screens (100% Native)
+    // 100% Client-First Bottom Navigation (Store, Guest Post, Tracking, Reviews, Support)
     switch (_currentBottomIndex) {
       case 0:
         return const NativeStoreScreen();
       case 1:
         return const GuestPostingScreen();
       case 2:
-        return isAuthenticated ? const RecordSaleScreen() : const LoginScreen();
+        return const ClientOrdersScreen();
       case 3:
-        return isAuthenticated ? const LeadsManagementScreen() : const LoginScreen();
+        return const ClientReviewsScreen();
       case 4:
-        return isAuthenticated ? const DashboardScreen() : const LoginScreen();
+        return ClientAccountScreen(
+          onOpenAdminHub: () {
+            setState(() {
+              _drawerModuleIndex = 0; // open overview dashboard
+            });
+          },
+        );
       default:
         return const NativeStoreScreen();
     }
@@ -129,19 +138,6 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     
-    // Auto-redirect if logged in from the Login screen
-    if (auth.isAuthenticated && _drawerModuleIndex == 100) {
-      Future.microtask(() {
-        if (mounted) {
-          setState(() {
-            _drawerModuleIndex = -1;
-            _currentBottomIndex = 4; // go to dashboard
-            _currentWebUrl = null;
-          });
-        }
-      });
-    }
-
     return Scaffold(
       key: MainNavigationContainer.scaffoldKey,
       drawer: _buildDrawer(auth),
@@ -173,19 +169,19 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
               label: 'GUEST POST',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.flash_on_outlined),
-              activeIcon: Icon(Icons.flash_on, color: Color(0xFF00FF88)),
-              label: 'SELL & LINK',
+              icon: Icon(Icons.receipt_long_outlined),
+              activeIcon: Icon(Icons.receipt_long, color: Color(0xFF00FF88)),
+              label: 'TRACKING',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.contact_mail_outlined),
-              activeIcon: Icon(Icons.contact_mail, color: Color(0xFF00FF88)),
-              label: 'LEADS CRM',
+              icon: Icon(Icons.star_outline),
+              activeIcon: Icon(Icons.star, color: Color(0xFF00FF88)),
+              label: 'REVIEWS',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_outlined),
-              activeIcon: Icon(Icons.dashboard, color: Color(0xFF00FF88)),
-              label: 'ADMIN HUB',
+              icon: Icon(Icons.person_outline),
+              activeIcon: Icon(Icons.person, color: Color(0xFF00FF88)),
+              label: 'SUPPORT',
             ),
           ],
         ),
