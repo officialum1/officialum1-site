@@ -10,11 +10,11 @@ class ClientAccountScreen extends StatelessWidget {
   const ClientAccountScreen({super.key, this.onOpenAdminHub});
 
   void _openWhatsApp(BuildContext context) {
-    Clipboard.setData(const ClipboardData(text: "+923297650742"));
+    Clipboard.setData(const ClipboardData(text: "+923237102924"));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         backgroundColor: Color(0xFF25D366),
-        content: Text("WhatsApp number (+92 329 7650742) copied to clipboard!", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        content: Text("WhatsApp Official Support (+92 323 7102924) copied to clipboard!", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
     );
   }

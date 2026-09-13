@@ -224,7 +224,10 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   
                   if (!auth.isAuthenticated)
                     GestureDetector(
-                      onTap: () => _selectModule(100),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute(builder: (c) => const LoginScreen()));
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
                         decoration: BoxDecoration(
@@ -236,7 +239,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                           children: [
                             Icon(Icons.login_rounded, color: Colors.black, size: 18),
                             SizedBox(width: 8),
-                            Text('LOGIN / SIGNUP', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1)),
+                            Text('MEMBER SIGN IN / REGISTER', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 1)),
                           ],
                         ),
                       ),
@@ -266,7 +269,7 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 children: [
-                  _buildSectionHeader('AUTHORITY & LINK BUILDING (NEW)'),
+                  _buildSectionHeader('AUTHORITY LINK BUILDING & GUEST POSTS'),
                   _buildWebItem('🔥 DA60+ Guest Posting', Icons.rocket_launch_outlined, 'https://officialum1.com/services/guest-posting'),
                   _buildWebItem('⚡ Contextual Niche Edits', Icons.link_rounded, 'https://officialum1.com/services/niche-edits'),
                   _buildWebItem('📰 Press Release Wire', Icons.newspaper_outlined, 'https://officialum1.com/services/press-release-distribution'),
@@ -282,15 +285,15 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                   _buildWebItem('🛠️ All Services Catalog', Icons.miscellaneous_services, 'https://officialum1.com/services'),
                   
                   const SizedBox(height: 15),
-                  _buildSectionHeader('CLIENT & BUYER PORTAL'),
-                  _buildWebItem('👤 Control Dashboard', Icons.account_circle_outlined, 'https://officialum1.com/dashboard'),
+                  _buildSectionHeader('CLIENT SERVICES & ORDERS'),
+                  _buildWebItem('👤 Client Dashboard', Icons.account_circle_outlined, 'https://officialum1.com/dashboard'),
                   _buildWebItem('🛒 Instant Checkout', Icons.shopping_cart_checkout, 'https://officialum1.com/checkout'),
                   _buildWebItem('📜 My Purchases & Deliveries', Icons.history_edu, 'https://officialum1.com/my-orders'),
                   _buildWebItem('💰 Referral Program', Icons.card_giftcard, 'https://officialum1.com/refer'),
                   
                   const Divider(color: Colors.white12, height: 30),
                   
-                  if (auth.isAuthenticated) ...[
+                  if (auth.isAuthenticated && (auth.user?['role'] == 'admin' || (auth.user?['email'] ?? '').toString().toLowerCase().contains('admin') || (auth.user?['email'] ?? '').toString().toLowerCase().contains('officialum1'))) ...[
                     _buildSectionHeader('ADMIN COMMAND PANEL'),
                     _buildDrawerItem('Overview Dashboard', Icons.speed, 0),
                     _buildDrawerItem('⚡ Record Sale & Auto-Link', Icons.flash_on_outlined, 22),
@@ -318,12 +321,14 @@ class _MainNavigationContainerState extends State<MainNavigationContainer> {
                     _buildDrawerItem('Settings Hub', Icons.settings_outlined, 24),
                     
                     const Divider(color: Colors.white12, height: 30),
+                  ],
+
+                  if (auth.isAuthenticated)
                     ListTile(
                       onTap: () => auth.logout(),
                       leading: const Icon(Icons.logout, color: Colors.redAccent, size: 18),
                       title: const Text('LOGOUT SESSION', style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold)),
                     ),
-                  ],
                   
                   const SizedBox(height: 50),
                 ],

@@ -34,21 +34,36 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text.trim(),
     );
     
-    if (error != null) {
-      setState(() {
-        _isLoading = false;
-        _error = error;
-      });
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
+    if (mounted) {
+      if (error != null) {
+        setState(() {
+          _isLoading = false;
+          _error = error;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Color(0xFF00FF88)),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -63,45 +78,45 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo or Icon
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: const Color(0xFF00FF88).withOpacity(0.5), width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF00FF88).withOpacity(0.2),
+                        color: const Color(0xFF00FF88).withOpacity(0.15),
                         blurRadius: 20,
                         spreadRadius: 5,
                       )
                     ],
                   ),
-                  child: const Icon(Icons.admin_panel_settings, size: 60, color: Color(0xFF00FF88)),
+                  child: const Icon(Icons.person_rounded, size: 48, color: Color(0xFF00FF88)),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 const Text(
-                  'ADMIN ACCESS',
+                  'CLIENT & MEMBER ACCESS',
                   style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 4,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'OFFICIALUM1 SECURE HUB',
+                  'Sync your purchases, active orders & VIP support',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withOpacity(0.5),
-                    letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 36),
                 
                 // Email Input
                 Container(
@@ -112,19 +127,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: TextField(
                     controller: _emailController,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Admin Email / Username',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF00FF88)),
+                      hintText: 'Account Email Address',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                      prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF00FF88), size: 20),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
                 ),
                 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 
                 // Password Input
                 Container(
@@ -136,41 +151,55 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF00FF88)),
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 13),
+                      prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF00FF88), size: 20),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
                     ),
                     onSubmitted: (_) => _handleLogin(),
                   ),
                 ),
                 
                 if (_error != null) ...[
-                  const SizedBox(height: 16),
-                  Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(_error!, style: const TextStyle(color: Colors.redAccent, fontSize: 12))),
+                      ],
+                    ),
+                  ),
                 ],
                 
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
                 
                 // Login Button
                 SizedBox(
                   width: double.infinity,
-                  height: 60,
+                  height: 54,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF00FF88),
                       foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 10,
-                      shadowColor: const Color(0xFF00FF88).withOpacity(0.4),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 8,
+                      shadowColor: const Color(0xFF00FF88).withOpacity(0.3),
                     ),
                     child: _isLoading
                         ? const SpinKitThreeBounce(color: Colors.black, size: 20)
-                        : const Text('AUTHORIZE', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+                        : const Text('SIGN IN TO ACCOUNT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 13)),
                   ),
                 ),
               ],
