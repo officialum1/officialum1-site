@@ -1441,7 +1441,7 @@ function AdminDashboard() {
         // Use the bank/wallet name as the platform for Direct sales to update correct wallet
         const finalPlatform = (newSale.platform === 'Direct' && newSale.paymentReceived) ? newSale.paymentReceived : newSale.platform;
 
-        await fetch('/api/admin/inventory', {
+        const res = await fetch('/api/admin/inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1454,7 +1454,19 @@ function AdminDashboard() {
                 productName: newSale.productName // For bulk
             })
         });
-        modernAlert("Sale recorded successfully!");
+        const resData = await res.json();
+        const token = resData?.data?.delivery?.token || resData?.delivery?.token;
+        if (token) {
+            const deliveryUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://officialum1.com'}/delivery/${token}`;
+            try {
+                if (navigator?.clipboard) {
+                    await navigator.clipboard.writeText(deliveryUrl);
+                }
+            } catch (clipErr) {}
+            modernAlert(`✅ Sale Recorded Successfully!\n\n🔗 Delivery Link (Auto-Copied to Clipboard):\n${deliveryUrl}`);
+        } else {
+            modernAlert("Sale recorded successfully!");
+        }
         setNewSale({ description: '', platform: 'OfficialUM1', paymentReceived: '', salePrice: '', staffName: 'Admin', proofImage: '', inventoryId: '', productName: '', quantity: '1' });
         fetchData();
     };

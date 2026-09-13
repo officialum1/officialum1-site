@@ -373,7 +373,7 @@ export default function SellTab({
                                 </td>
                             </tr>
                         )) : (
-                            <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No manual sales recorded yet.</td></tr>
+                            <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>No manual sales recorded yet.</td></tr>
                         )}
                     </tbody>
                 </table>
