@@ -42,6 +42,8 @@ CORE_URLS = [
     f"https://{HOST}/services/seo-services-dubai",
     f"https://{HOST}/services/outsource-web-development",
     f"https://{HOST}/tools/speed-audit",
+    f"https://{HOST}/press",
+    f"https://{HOST}/press/officialum1-launches-nextjs-speed-architecture-2026",
     f"https://{HOST}/work",
     f"https://{HOST}/about",
     f"https://{HOST}/reviews",
