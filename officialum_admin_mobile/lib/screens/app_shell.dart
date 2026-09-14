@@ -203,24 +203,30 @@ class _AppShellState extends State<AppShell> {
                   _buildDrawerNav('⭐ 4.9 Verified Reviews', Icons.star_outline, 3),
                   _buildDrawerNav('👤 Account & 24/7 Support', Icons.person_outline, 4),
 
-                  if (isAdmin) ...[
-                    const Divider(color: Colors.white12, height: 30),
-                    _buildSectionHeader('ADMIN COMMAND PANEL'),
-                    ListTile(
+                  const Divider(color: Colors.white12, height: 26),
+                  _buildSectionHeader('STORE OWNER & ADMINISTRATION'),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00FF88).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF00FF88).withValues(alpha: 0.3)),
+                    ),
+                    child: ListTile(
                       onTap: () {
                         Navigator.pop(context);
                         setState(() => _showAdminHub = true);
                       },
                       dense: true,
-                      leading: const Icon(Icons.admin_panel_settings, color: Color(0xFF00FF88), size: 18),
-                      title: const Text('ADMIN COMMAND CENTER', style: TextStyle(color: Color(0xFF00FF88), fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      selectedTileColor: const Color(0xFF00FF88).withValues(alpha: 0.1),
+                      leading: const Icon(Icons.admin_panel_settings, color: Color(0xFF00FF88), size: 22),
+                      title: const Text('ADMIN COMMAND CENTER', style: TextStyle(color: Color(0xFF00FF88), fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 0.5)),
+                      subtitle: const Text('⚡ Sell & Link • 📦 Stock • 👥 CRM • 🌐 Portal', style: TextStyle(color: Colors.white70, fontSize: 9)),
+                      trailing: const Icon(Icons.arrow_forward_ios, color: Color(0xFF00FF88), size: 12),
                     ),
-                  ],
+                  ),
 
                   if (isAuth) ...[
-                    const Divider(color: Colors.white12, height: 30),
+                    const Divider(color: Colors.white12, height: 26),
                     ListTile(
                       onTap: () {
                         Navigator.pop(context);

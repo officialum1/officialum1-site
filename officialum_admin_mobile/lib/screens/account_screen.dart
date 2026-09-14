@@ -192,39 +192,41 @@ class AccountScreen extends StatelessWidget {
             ),
           ),
 
-          // Admin Access Panel (Only if authorized admin)
-          if (isAdmin) ...[
-            const SizedBox(height: 24),
-            const Text("ADMINISTRATION (AUTHORIZED)", style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: onOpenAdminHub,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF111111),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF00FF88).withValues(alpha: 0.4)),
+          // Admin Access Panel (Store Owner / Admin)
+          const SizedBox(height: 24),
+          const Text("STORE OWNER & ADMINISTRATION", style: TextStyle(color: Color(0xFF00FF88), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: onOpenAdminHub,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF002817), Color(0xFF111111)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.admin_panel_settings, color: Color(0xFF00FF88), size: 24),
-                    SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Admin Command Center", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text("Record sales, CRM quotes, inventory & finance.", style: TextStyle(color: Colors.grey, fontSize: 11)),
-                        ],
-                      ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF00FF88).withValues(alpha: 0.5)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.admin_panel_settings, color: Color(0xFF00FF88), size: 28),
+                  SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Admin Command Center", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text("Record sales, auto-delivery links, stock & CRM.", style: TextStyle(color: Color(0xFF00FF88), fontSize: 11)),
+                      ],
                     ),
-                    Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF00FF88)),
-                  ],
-                ),
+                  ),
+                  Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF00FF88)),
+                ],
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
