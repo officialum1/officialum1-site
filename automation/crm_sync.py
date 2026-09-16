@@ -1,75 +1,54 @@
 """
 OfficialUM1 CRM Sync Module
-Saves scraped and verified leads into the OfficialUM1 CRM Leads Database (JSON + API).
+Saves outreach campaign emails & leads into the OfficialUM1 CRM Leads Database (data/leads.json + DB).
 """
 import os
 import json
 import time
-import requests
-from typing import Dict, Any
 
 CRM_JSON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "leads.json")
 
-def sync_lead_to_crm(lead: Dict[str, Any], platform_tag: str = "B2B Outreach", base_url: str = "https://officialum1.com") -> bool:
+def sync_outreach_to_crm(lead: dict, campaign_tag: str = "B2B Outreach", status: str = "In Progress", budget: int = 399):
     primary_email = lead["emails"][0] if lead.get("emails") else lead.get("buyerEmail", "")
     if not primary_email:
-        return False
+        return
 
-    client_name = lead.get("clientName") or lead.get("domain") or "Verified Lead"
-    website = lead.get("website", "")
-    phones = ", ".join(lead.get("phones", []))
-    load_time = lead.get("load_time_seconds", "")
-    
-    notes_lines = [f"Website: {website}"]
-    if phones:
-        notes_lines.append(f"Phone: {phones}")
-    if load_time:
-        notes_lines.append(f"Load Time / Speed: {load_time}s")
-    notes_lines.append("Extracted via OfficialUM1 100% Lead Hunter Suite.")
+    client_name = lead.get("clientName") or lead.get("company") or lead.get("domain") or "Verified Target"
+    domain = lead.get("domain", "")
+    notes = lead.get("notes", "")
 
-    # 1. Local JSON fallback persistence
+    note_text = f"Domain: {domain}\nCampaign: {campaign_tag}\nStatus: {status}\nOutreach Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+    if notes:
+        note_text += f"\nDetails: {notes}"
+
     try:
         leads_list = []
         if os.path.exists(CRM_JSON_PATH):
             with open(CRM_JSON_PATH, "r", encoding="utf-8") as f:
                 leads_list = json.load(f)
 
-        existing_contacts = {l.get("contact", "") for l in leads_list}
-        if primary_email not in existing_contacts:
-            new_lead_entry = {
+        # Check if already exists in CRM by email
+        existing = next((l for l in leads_list if l.get("contact", "").lower() == primary_email.lower()), None)
+        if existing:
+            existing["status"] = status
+            existing["notes"] = note_text
+            existing["source"] = campaign_tag
+        else:
+            new_entry = {
                 "id": f"lead_{int(time.time() * 1000)}",
                 "name": client_name,
                 "contact": primary_email,
-                "source": platform_tag,
-                "status": "New",
-                "notes": "\n".join(notes_lines),
-                "value": "350",
-                "createdBy": "LeadHunterBot",
+                "source": campaign_tag,
+                "status": status,
+                "notes": note_text,
+                "value": str(budget),
+                "createdBy": "OutreachAutomation",
                 "createdAt": time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
             }
-            leads_list.insert(0, new_lead_entry)
-            with open(CRM_JSON_PATH, "w", encoding="utf-8") as f:
-                json.dump(leads_list, f, indent=2)
+            leads_list.insert(0, new_entry)
+
+        with open(CRM_JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump(leads_list, f, indent=2)
+
     except Exception as e:
-        print(f"  ⚠️ Warning saving to local CRM JSON: {e}")
-
-    # 2. Try live API sync
-    payload = {
-        "action": "add",
-        "clientName": client_name,
-        "buyerEmail": primary_email,
-        "platform": platform_tag,
-        "budget": 350,
-        "notes": "\n".join(notes_lines)
-    }
-
-    for url_root in [base_url, "http://localhost:3000"]:
-        try:
-            target_url = f"{url_root.rstrip('/')}/api/leads"
-            res = requests.post(target_url, json=payload, timeout=4)
-            if res.status_code in [200, 201]:
-                return True
-        except Exception:
-            continue
-
-    return True
+        print(f"  [CRM Sync Warning]: {e}")

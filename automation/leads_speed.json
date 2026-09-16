@@ -1,0 +1,47 @@
+[
+  {
+    "clientName": "David Miller",
+    "company": "EcoModern Home Decor",
+    "domain": "ecomodernhome.com",
+    "emails": ["david@ecomodernhome.com"],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "32/100",
+    "notes": "High traffic WooCommerce home decor store running slow on mobile."
+  },
+  {
+    "clientName": "Sarah Jenkins",
+    "company": "PureAura Wellness",
+    "domain": "pureaurawellness.com",
+    "emails": ["sarah@pureaurawellness.com"],
+    "cms": "WordPress",
+    "pageSpeedScore": "27/100",
+    "notes": "Health supplements WooCommerce store with heavy LCP issues."
+  },
+  {
+    "clientName": "Marcus Vance",
+    "company": "PeakGear Athletics",
+    "domain": "peakgearathletics.com",
+    "emails": ["marcus@peakgearathletics.com"],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "39/100",
+    "notes": "Athletic apparel store suffering from unoptimized hero assets and TTFB."
+  },
+  {
+    "clientName": "Elena Rostova",
+    "company": "Artisan Craft Studio",
+    "domain": "artisancraftstudio.com",
+    "emails": ["elena@artisancraftstudio.com"],
+    "cms": "WordPress",
+    "pageSpeedScore": "35/100",
+    "notes": "Custom jewelry design blog & shop running on Divi/Elementor."
+  },
+  {
+    "clientName": "Jason Wright",
+    "company": "Urban Roast Coffee Co",
+    "domain": "urbanroastcoffee.com",
+    "emails": ["jason@urbanroastcoffee.com"],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "29/100",
+    "notes": "Subscription coffee brand losing mobile cart checkout conversions."
+  }
+]

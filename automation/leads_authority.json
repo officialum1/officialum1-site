@@ -1,0 +1,42 @@
+[
+  {
+    "clientName": "Jonathan Ross",
+    "company": "Elevate Search Agency",
+    "domain": "elevatesearch.co",
+    "emails": ["jonathan@elevatesearch.co"],
+    "title": "Head of SEO & Outreach",
+    "notes": "Fast-growing digital marketing agency managing 25+ monthly client link campaigns."
+  },
+  {
+    "clientName": "Brett Harrison",
+    "company": "Apex Digital Partners",
+    "domain": "apexdigitalpartners.com",
+    "emails": ["brett@apexdigitalpartners.com"],
+    "title": "Managing Director",
+    "notes": "US-based performance marketing agency looking for wholesale DA60+ guest posting."
+  },
+  {
+    "clientName": "Samantha Reed",
+    "company": "Verve Growth Marketing",
+    "domain": "vervegrowth.io",
+    "emails": ["samantha@vervegrowth.io"],
+    "title": "VP of Organic Growth",
+    "notes": "SaaS growth agency requiring high-authority in-content niche edits."
+  },
+  {
+    "clientName": "Nate Gallagher",
+    "company": "Foundry Interactive",
+    "domain": "foundryinteractive.com",
+    "emails": ["nate@foundryinteractive.com"],
+    "title": "Founder & CEO",
+    "notes": "Full-service digital agency looking for white-label link building fulfillment."
+  },
+  {
+    "clientName": "Chloe Campbell",
+    "company": "Catalyst Media Group",
+    "domain": "catalystmediagrp.com",
+    "emails": ["chloe@catalystmediagrp.com"],
+    "title": "Director of Client Services",
+    "notes": "B2B tech marketing agency looking for guaranteed permanent editorial backlinks."
+  }
+]

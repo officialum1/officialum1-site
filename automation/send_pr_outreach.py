@@ -1,6 +1,6 @@
 """
-OfficialUM1 Authority Link Building & Guest Posting - Cold Outreach Sender
-Sends high-converting B2B outreach to agencies & brands for DA60+ Link Packs & Niche Edits.
+OfficialUM1 Press Release Syndication & Media Wire - Cold Outreach Sender
+Sends high-converting B2B outreach to startups, founders & marketing directors for AP News, Yahoo Finance & 350+ Media Syndication.
 """
 import os
 import sys
@@ -25,7 +25,7 @@ if sys.stdout.encoding != 'utf-8':
 from crm_sync import sync_outreach_to_crm
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
-AUTHORITY_LEADS_FILE = os.path.join(os.path.dirname(__file__), "leads_authority.json")
+PR_LEADS_FILE = os.path.join(os.path.dirname(__file__), "leads_pr.json")
 SENT_HISTORY_FILE = os.path.join(os.path.dirname(__file__), "sent_outreach_history.json")
 
 def load_config():
@@ -33,14 +33,10 @@ def load_config():
         return json.load(f)
 
 def load_leads():
-    if os.path.exists(AUTHORITY_LEADS_FILE):
-        with open(AUTHORITY_LEADS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    v_file = os.path.join(os.path.dirname(__file__), "verified_leads.json")
-    if os.path.exists(v_file):
-        with open(v_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+    if not os.path.exists(PR_LEADS_FILE):
+        return []
+    with open(PR_LEADS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def load_sent_history():
     if not os.path.exists(SENT_HISTORY_FILE):
@@ -51,7 +47,7 @@ def load_sent_history():
     except Exception:
         return []
 
-def record_sent(lead, campaign_type="AUTHORITY_INITIAL", status="DELIVERED"):
+def record_sent(lead, campaign_type="PR_INITIAL", status="DELIVERED"):
     history = load_sent_history()
     email = lead["emails"][0] if lead.get("emails") else ""
     history.append({
@@ -70,49 +66,47 @@ def record_sent(lead, campaign_type="AUTHORITY_INITIAL", status="DELIVERED"):
         print(f"  [Warning saving history]: {e}")
 
     # Automatically sync with Website Admin CRM
-    sync_outreach_to_crm(lead, campaign_tag="Authority Link Outreach", status="In Progress", budget=1499)
+    sync_outreach_to_crm(lead, campaign_tag="PR Wire Outreach", status="In Progress", budget=799)
 
-AUTHORITY_INITIAL_PITCH = """Hi {client_name},
+PR_INITIAL_PITCH = """Hi {client_name},
 
-Hope you are having a productive week.
+Saw what you are building with {company} ({domain}) -- congratulations on the recent momentum!
 
-I came across {domain} while researching active digital marketing and SEO agencies in your space.
+If you are looking to boost brand authority or get official "As Seen On FOX, NBC, CBS & Google News" trust badges for your landing page, we handle direct syndicated wire distribution.
 
-At OfficialUM1 LLC (US-registered digital marketing agency), we maintain direct editorial partnerships with over 65,000+ verified high-authority publications (DA 40 to DA 75+ with 5,000 to 50,000+ monthly Google organic visits).
+At OfficialUM1 LLC, we guarantee full editorial syndication across 250+ to 400+ major news portals (including AP News, Yahoo Finance, and MarketWatch) within 48 hours:
+- Full AP-Style Press Release Drafting Included
+- Guaranteed Indexing in Google News Search Stream
+- High-Trust Brand Citation Backlinks
+- Complete Live Placement PDF Dossier with all 250+ Live URLs
 
-If you are currently looking for reliable, white-label link building fulfillment for {domain} or your client campaigns, we have direct editorial slots available:
-- 10x DA 60+ / DR 65+ High-Traffic Editorial Guest Posts
-- In-Content Contextual Niche Edits (48-72h turnaround)
-- 100% Permanent DoFollow & 365-Day Free Replacement Warranty
-- Guaranteed Zero PBNs / Zero Footprint
+You can view our live press room & wire packages here:
+https://officialum1.com/services/press-release-distribution
 
-You can view our live publisher tiers and instant package calculator here:
-https://officialum1.com/services/guest-posting
-
-Would you like me to send over our curated publisher domain shortlist and sample live placement URLs for your review?
+Would you like me to send over a sample live media report and coverage links from our latest client release?
 
 Best regards,
 
 Muhammad Umar Mumtaz
 Founder & Managing Director | OfficialUM1 LLC
 1001 South Main Street, Suite 600, Kalispell, MT 59901, USA
-https://officialum1.com/services/guest-posting
+https://officialum1.com/services/press-release-distribution
 hello@officialum1.com
 """
 
-AUTHORITY_FOLLOWUP_1 = """Hi {client_name},
+PR_FOLLOWUP_1 = """Hi {client_name},
 
-Following up quickly on my previous note regarding white-label DA60+ editorial placements for {domain}.
+Following up quickly on my note from a few days ago regarding media wire syndication for {company}.
 
-We recently secured a 5-link niche pack for an agency partner that drove an immediate 40% organic traffic lift across their top 3 target keywords in 60 days.
+We just completed a 350+ outlet release that placed our client onto AP News, Yahoo Finance, and Google News in under 36 hours.
 
-Would you like me to send over 3 sample publisher domains in your niche along with wholesale agency pricing?
+Mind if I send over a 1-page sample coverage dossier to see if this fits your current launch strategy?
 
 Best regards,
 
 Muhammad Umar Mumtaz
-OfficialUM1 LLC | Authority Link Building
-https://officialum1.com/services/guest-posting
+OfficialUM1 LLC | Media & PR Syndication
+https://officialum1.com/services/press-release-distribution
 """
 
 def send_email(smtp_cfg, lead, step="initial", dry_run=False):
@@ -122,13 +116,14 @@ def send_email(smtp_cfg, lead, step="initial", dry_run=False):
     recipient_email = lead["emails"][0]
     client_name = lead.get("clientName", "Founder")
     domain = lead.get("domain", "")
+    company = lead.get("company", domain)
 
     if step == "followup":
-        subject = f"Re: Editorial link placements & DA60+ authority outreach for {domain}"
-        body = AUTHORITY_FOLLOWUP_1.format(client_name=client_name, domain=domain)
+        subject = f"Re: Guaranteed Yahoo Finance & Google News syndication for {domain}"
+        body = PR_FOLLOWUP_1.format(client_name=client_name, domain=domain, company=company)
     else:
-        subject = f"Editorial link placements & DA60+ authority outreach for {domain}"
-        body = AUTHORITY_INITIAL_PITCH.format(client_name=client_name, domain=domain)
+        subject = f"Guaranteed Yahoo Finance & Google News syndication for {domain}"
+        body = PR_INITIAL_PITCH.format(client_name=client_name, domain=domain, company=company)
 
     if dry_run:
         print(f"  [DRY RUN PREVIEW] Step: {step.upper()} | Subject: {subject}")
@@ -166,7 +161,7 @@ def main():
     sent_emails = {
         item.get("email", "").lower()
         for item in history
-        if item.get("campaign") == f"AUTHORITY_{step.upper()}" and item.get("status") == "DELIVERED"
+        if item.get("campaign") == f"PR_{step.upper()}" and item.get("status") == "DELIVERED"
     }
 
     pending_leads = [
@@ -175,14 +170,14 @@ def main():
     ]
 
     print("=" * 70)
-    print(" [OFFICIALUM1] - DA60+ AUTHORITY LINK COLD OUTREACH SENDER")
+    print(" [OFFICIALUM1] - PRESS RELEASE & MEDIA WIRE OUTREACH SENDER")
     print(f" Sender: {smtp_cfg.get('email')} via {smtp_cfg.get('host')}")
     print(f" Campaign Step: {step.upper()} | Pending Targets: {len(pending_leads)}")
     print(f" Mode: {'LIVE SENDING [LIVE]' if not dry_run else 'DRY RUN (Simulation) [PREVIEW]'}")
     print("=" * 70)
 
     if not pending_leads:
-        print("All authority leads for this step have already been contacted!")
+        print("All leads for this step have already been contacted!")
         return
 
     sent_count = 0
@@ -197,10 +192,10 @@ def main():
         success = send_email(smtp_cfg, lead, step=step, dry_run=dry_run)
         if success:
             status = "SIMULATED" if dry_run else "DELIVERED"
-            print(f"  [OK] [{status}] Authority Outreach dispatched successfully!")
+            print(f"  [OK] [{status}] PR Outreach email dispatched successfully!")
             sent_count += 1
             if not dry_run:
-                record_sent(lead, campaign_type=f"AUTHORITY_{step.upper()}", status="DELIVERED")
+                record_sent(lead, campaign_type=f"PR_{step.upper()}", status="DELIVERED")
         else:
             print(f"  [FAIL] Could not send to {email}")
 
@@ -212,7 +207,7 @@ def main():
     print("\n" + "=" * 70)
     print(f" Batch Complete! Processed {sent_count}/{len(pending_leads)} leads.")
     if dry_run:
-        print(" Run with --live to send actual emails, e.g.: python send_authority_outreach.py --live")
+        print(" Run with --live to send actual emails, e.g.: python send_pr_outreach.py --live")
     print("=" * 70)
 
 if __name__ == "__main__":

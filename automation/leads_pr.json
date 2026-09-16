@@ -1,0 +1,42 @@
+[
+  {
+    "clientName": "Alex Rivera",
+    "company": "OmniSync AI",
+    "domain": "omnisync.ai",
+    "emails": ["alex@omnisync.ai"],
+    "launchStage": "Product Hunt Launch / Seed Stage",
+    "notes": "B2B SaaS AI productivity platform seeking top-tier press coverage."
+  },
+  {
+    "clientName": "Liam Cooper",
+    "company": "DexPay Protocol",
+    "domain": "dexpay.io",
+    "emails": ["liam@dexpay.io"],
+    "launchStage": "Token Launch / Web3",
+    "notes": "Decentralized payment gateway looking for Yahoo Finance and crypto media features."
+  },
+  {
+    "clientName": "Rachel Hayes",
+    "company": "GlowNova Skincare",
+    "domain": "glownovaskin.com",
+    "emails": ["rachel@glownovaskin.com"],
+    "launchStage": "DTC Brand Scaling",
+    "notes": "Organic beauty brand looking for 'As Seen On Fox, CBS, NBC' landing page badges."
+  },
+  {
+    "clientName": "Devon Parker",
+    "company": "CloudTrace Security",
+    "domain": "cloudtrace.io",
+    "emails": ["devon@cloudtrace.io"],
+    "launchStage": "Series A Enterprise Launch",
+    "notes": "Cybersecurity startup announcing new SOC-2 compliance automation feature."
+  },
+  {
+    "clientName": "Tyler Brooks",
+    "company": "Verda Solar Solutions",
+    "domain": "verdasolar.com",
+    "emails": ["tyler@verdasolar.com"],
+    "launchStage": "Multi-State Expansion",
+    "notes": "Clean-tech energy firm expanding nationwide seeking Google News distribution."
+  }
+]
