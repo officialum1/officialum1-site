@@ -74,43 +74,35 @@ def record_sent(lead, campaign_type="AUTHORITY_INITIAL", status="DELIVERED"):
 
 AUTHORITY_INITIAL_PITCH = """Hi {client_name},
 
-Hope you are having a productive week.
+Hope your week is going well.
 
-I came across {domain} while researching active digital marketing and SEO agencies in your space.
+Reaching out because I saw the SEO work you are doing with {domain}. At OfficialUM1, we work directly with publishers across 65,000+ vetted websites (DA50 to DA75+ with real monthly Google organic traffic).
 
-At OfficialUM1 LLC (US-registered digital marketing agency), we maintain direct editorial partnerships with over 65,000+ verified high-authority publications (DA 40 to DA 75+ with 5,000 to 50,000+ monthly Google organic visits).
+We help agency partners and brands secure permanent in-content editorial backlinks and niche edits with zero PBNs and 365-day replacement protection.
 
-If you are currently looking for reliable, white-label link building fulfillment for {domain} or your client campaigns, we have direct editorial slots available:
-- 10x DA 60+ / DR 65+ High-Traffic Editorial Guest Posts
-- In-Content Contextual Niche Edits (48-72h turnaround)
-- 100% Permanent DoFollow & 365-Day Free Replacement Warranty
-- Guaranteed Zero PBNs / Zero Footprint
+Are you currently taking on new guest post placements or looking for direct wholesale rates for your client campaigns?
 
-You can view our live publisher tiers and instant package calculator here:
+Happy to send over our curated domain shortlist and 2-3 live sample placements if you would like to take a look.
+
+Best,
+
+Muhammad Umar
+Founder, OfficialUM1 LLC
 https://officialum1.com/services/guest-posting
-
-Would you like me to send over our curated publisher domain shortlist and sample live placement URLs for your review?
-
-Best regards,
-
-Muhammad Umar Mumtaz
-Founder & Managing Director | OfficialUM1 LLC
-1001 South Main Street, Suite 600, Kalispell, MT 59901, USA
-https://officialum1.com/services/guest-posting
-hello@officialum1.com
+Direct: hello@officialum1.com
 """
 
 AUTHORITY_FOLLOWUP_1 = """Hi {client_name},
 
-Following up quickly on my previous note regarding white-label DA60+ editorial placements for {domain}.
+Following up quickly on my note regarding white-label DA60+ editorial placements for {domain}.
 
 We recently secured a 5-link niche pack for an agency partner that drove an immediate 40% organic traffic lift across their top 3 target keywords in 60 days.
 
 Would you like me to send over 3 sample publisher domains in your niche along with wholesale agency pricing?
 
-Best regards,
+Best,
 
-Muhammad Umar Mumtaz
+Muhammad Umar
 OfficialUM1 LLC | Authority Link Building
 https://officialum1.com/services/guest-posting
 """

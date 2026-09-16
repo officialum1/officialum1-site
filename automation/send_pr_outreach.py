@@ -72,39 +72,31 @@ PR_INITIAL_PITCH = """Hi {client_name},
 
 Saw what you are building with {company} ({domain}) -- congratulations on the recent momentum!
 
-If you are looking to boost brand authority or get official "As Seen On FOX, NBC, CBS & Google News" trust badges for your landing page, we handle direct syndicated wire distribution.
+Wanted to reach out directly because we help growing tech brands and startups get syndicated across 250+ to 400+ major media outlets (including AP News, Yahoo Finance, MarketWatch, and Google News) in about 48 hours.
 
-At OfficialUM1 LLC, we guarantee full editorial syndication across 250+ to 400+ major news portals (including AP News, Yahoo Finance, and MarketWatch) within 48 hours:
-- Full AP-Style Press Release Drafting Included
-- Guaranteed Indexing in Google News Search Stream
-- High-Trust Brand Citation Backlinks
-- Complete Live Placement PDF Dossier with all 250+ Live URLs
+Most founders we work with use this to get official "As Seen On FOX, NBC & CBS" trust badges on their landing page and secure high-trust Google News brand backlinks.
 
-You can view our live press room & wire packages here:
+Would it be helpful if I shared a sample live media report from our last client campaign so you can see how the live placements look?
+
+Best,
+
+Muhammad Umar
+Founder, OfficialUM1 LLC
 https://officialum1.com/services/press-release-distribution
-
-Would you like me to send over a sample live media report and coverage links from our latest client release?
-
-Best regards,
-
-Muhammad Umar Mumtaz
-Founder & Managing Director | OfficialUM1 LLC
-1001 South Main Street, Suite 600, Kalispell, MT 59901, USA
-https://officialum1.com/services/press-release-distribution
-hello@officialum1.com
+Direct: hello@officialum1.com
 """
 
 PR_FOLLOWUP_1 = """Hi {client_name},
 
-Following up quickly on my note from a few days ago regarding media wire syndication for {company}.
+Following up quickly on my note from earlier this week regarding media wire syndication for {company}.
 
 We just completed a 350+ outlet release that placed our client onto AP News, Yahoo Finance, and Google News in under 36 hours.
 
-Mind if I send over a 1-page sample coverage dossier to see if this fits your current launch strategy?
+Mind if I send over a 1-page sample coverage dossier to see if this fits your current launch plans?
 
-Best regards,
+Best,
 
-Muhammad Umar Mumtaz
+Muhammad Umar
 OfficialUM1 LLC | Media & PR Syndication
 https://officialum1.com/services/press-release-distribution
 """

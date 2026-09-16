@@ -70,40 +70,33 @@ def record_sent(lead, campaign_type="SPEED_INITIAL", status="DELIVERED"):
 
 SPEED_INITIAL_PITCH = """Hi {client_name},
 
-I was looking through {domain} and noticed great potential in your online store, but ran a quick diagnostic and saw the mobile loading speed and Core Web Vitals (LCP/TTFB) are currently testing around {score}.
+Came across {domain} earlier today while looking at online stores in your space -- really like what you have put together.
 
-Slow load times directly hurt mobile checkout conversion rates and drop your Google search rankings.
+I ran a quick test on Google PageSpeed Insights and noticed the mobile version is currently scoring around {score}, taking over 4 seconds to become fully interactive. On mobile devices, that usually causes a noticeable drop in checkout completions and ad conversion rates.
 
-At OfficialUM1 LLC, we specialize in high-performance WordPress & WooCommerce speed optimization. We guarantee:
-- 90+ Google PageSpeed Score on Mobile & Desktop
-- Under 1.5s Total Load Time (database query cleanup, TTFB reduction, WebP conversion, JS/CSS delay, LiteSpeed edge caching)
-- Zero downtime & 100% Risk-Free Guarantee (You only pay when you see the live 90+ verified score)
+At OfficialUM1, we help WooCommerce and WordPress store owners get their Google Core Web Vitals to a guaranteed 90+ score (usually load times under 1.2s) without breaking any plugins, checkout flows, or design.
 
-You can check our live client benchmarks and speed packages here:
+Would you be open to a quick 2-minute video breakdown showing the exact 3 files slowing down {domain}? Happy to send it over for free if you are interested.
+
+Best,
+
+Muhammad Umar
+Founder, OfficialUM1 LLC
 https://officialum1.com/services/wordpress-speed-optimization
-
-Would you be open to a free 2-minute diagnostic audit showing the top 3 bottlenecks slowing down {domain}?
-
-Best regards,
-
-Muhammad Umar Mumtaz
-Founder & Managing Director | OfficialUM1 LLC
-1001 South Main Street, Suite 600, Kalispell, MT 59901, USA
-https://officialum1.com/services/wordpress-speed-optimization
-hello@officialum1.com
+Direct: hello@officialum1.com
 """
 
 SPEED_FOLLOWUP_1 = """Hi {client_name},
 
-Following up quickly on my note regarding {domain}'s mobile loading performance.
+Following up quickly on my note regarding {domain}'s mobile load speed.
 
-We recently optimized a similar WooCommerce store from 31/100 to 94/100 Google PageSpeed, cutting load time from 4.8s down to 1.1s — resulting in an immediate 22% lift in checkout completions.
+We recently optimized a similar WooCommerce store from 31/100 to 94/100 Google PageSpeed, cutting load time from 4.8s down to 1.1s -- resulting in an immediate 22% lift in checkout completions.
 
 Would you like me to send over the free 3-point diagnostic audit for {domain}?
 
-Best regards,
+Best,
 
-Muhammad Umar Mumtaz
+Muhammad Umar
 OfficialUM1 LLC | Web Performance Engineering
 https://officialum1.com/services/wordpress-speed-optimization
 """
