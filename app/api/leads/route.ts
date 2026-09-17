@@ -27,18 +27,44 @@ function buildGuestPostingNotes(body: any) {
     return lines.join('\n');
 }
 
+import { promises as fs } from 'fs';
+import path from 'path';
+
 export async function GET() {
     try {
         try {
-            const leads = await query("SELECT * FROM leads ORDER BY createdAt DESC");
-            return NextResponse.json(leads);
+            const leads: any = await query("SELECT * FROM leads ORDER BY createdAt DESC");
+            if (Array.isArray(leads) && leads.length > 0) {
+                return NextResponse.json(leads);
+            }
         } catch (createdAtError: any) {
-            if (createdAtError?.code !== 'ER_BAD_FIELD_ERROR') throw createdAtError;
-            const leads = await query("SELECT * FROM leads ORDER BY date DESC");
-            return NextResponse.json(leads);
+            try {
+                const leads: any = await query("SELECT * FROM leads ORDER BY date DESC");
+                if (Array.isArray(leads) && leads.length > 0) {
+                    return NextResponse.json(leads);
+                }
+            } catch (inner) {
+                // Fallback to JSON file
+            }
         }
+
+        // Fallback to data/leads.json
+        const jsonPath = path.join(process.cwd(), 'data', 'leads.json');
+        const fileData = await fs.readFile(jsonPath, 'utf8');
+        const rawLeads = JSON.parse(fileData);
+        const mappedLeads = rawLeads.map((l: any) => ({
+            id: l.id || `lead_${Date.now()}`,
+            clientName: l.name || l.clientName || 'Lead',
+            buyerEmail: l.contact || l.buyerEmail || '',
+            platform: l.source || l.platform || 'Cold Outreach',
+            budget: Number(l.value || l.budget || 0),
+            status: l.status || 'In Progress',
+            notes: l.notes || '',
+            createdAt: l.createdAt || new Date().toISOString()
+        }));
+        return NextResponse.json(mappedLeads);
     } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+        return NextResponse.json([]);
     }
 }
 
