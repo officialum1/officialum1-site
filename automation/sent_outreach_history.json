@@ -271,5 +271,815 @@
     "email": "info@rebootonline.com",
     "status": "DELIVERED",
     "timestamp": "2026-09-13 13:41:59"
+  },
+  {
+    "clientName": "David Miller",
+    "company": "EcoModern Home Decor",
+    "domain": "ecomodernhome.com",
+    "email": "david@ecomodernhome.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:05:46"
+  },
+  {
+    "clientName": "Sarah Jenkins",
+    "company": "PureAura Wellness",
+    "domain": "pureaurawellness.com",
+    "email": "sarah@pureaurawellness.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:06:07"
+  },
+  {
+    "clientName": "Marcus Vance",
+    "company": "PeakGear Athletics",
+    "domain": "peakgearathletics.com",
+    "email": "marcus@peakgearathletics.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:06:40"
+  },
+  {
+    "clientName": "Elena Rostova",
+    "company": "Artisan Craft Studio",
+    "domain": "artisancraftstudio.com",
+    "email": "elena@artisancraftstudio.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:07:08"
+  },
+  {
+    "clientName": "Jason Wright",
+    "company": "Urban Roast Coffee",
+    "domain": "urbanroastcoffee.com",
+    "email": "jason@urbanroastcoffee.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:07:40"
+  },
+  {
+    "clientName": "Brian Foster",
+    "company": "Apex Audio Gear",
+    "domain": "apexaudiogear.com",
+    "email": "brian@apexaudiogear.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:08:12"
+  },
+  {
+    "clientName": "Hannah Scott",
+    "company": "GlowBotanica Organics",
+    "domain": "glowbotanica.com",
+    "email": "hannah@glowbotanica.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:08:42"
+  },
+  {
+    "clientName": "Tyler Nelson",
+    "company": "Summit Trail Outfitters",
+    "domain": "summittrailoutfitters.com",
+    "email": "tyler@summittrailoutfitters.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:09:13"
+  },
+  {
+    "clientName": "Olivia Martinez",
+    "company": "Lumina Home Accents",
+    "domain": "luminahomeaccents.com",
+    "email": "olivia@luminahomeaccents.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:09:38"
+  },
+  {
+    "clientName": "Kevin Zhang",
+    "company": "VoltByte Electronics",
+    "domain": "voltbyte.com",
+    "email": "kevin@voltbyte.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:10:08"
+  },
+  {
+    "clientName": "Rachel Adams",
+    "company": "Velvet & Vine Boutique",
+    "domain": "velvetandvine.com",
+    "email": "rachel@velvetandvine.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:10:38"
+  },
+  {
+    "clientName": "Derek Coleman",
+    "company": "Ironclad Fitness Supply",
+    "domain": "ironcladfitness.com",
+    "email": "derek@ironcladfitness.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:11:11"
+  },
+  {
+    "clientName": "Chloe Bennett",
+    "company": "Aura Sleep Solutions",
+    "domain": "aurasleepsolutions.com",
+    "email": "chloe@aurasleepsolutions.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:11:32"
+  },
+  {
+    "clientName": "Nathan Drake",
+    "company": "Pioneer Leather Co",
+    "domain": "pioneerleatherco.com",
+    "email": "nathan@pioneerleatherco.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:12:00"
+  },
+  {
+    "clientName": "Megan Walsh",
+    "company": "TerraNourish Superfoods",
+    "domain": "terranourish.com",
+    "email": "megan@terranourish.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:12:27"
+  },
+  {
+    "clientName": "Justin Bailey",
+    "company": "Nordic Wave Eyewear",
+    "domain": "nordicwaveeyewear.com",
+    "email": "justin@nordicwaveeyewear.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:12:54"
+  },
+  {
+    "clientName": "Amber Collins",
+    "company": "Sage & Stone Ceramics",
+    "domain": "sageandstoneceramics.com",
+    "email": "amber@sageandstoneceramics.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:13:25"
+  },
+  {
+    "clientName": "Brandon Reed",
+    "company": "GripLock Tool Supply",
+    "domain": "griplocktools.com",
+    "email": "brandon@griplocktools.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:13:51"
+  },
+  {
+    "clientName": "Sophia Taylor",
+    "company": "Botanical Bliss Tea",
+    "domain": "botanicalblisstea.com",
+    "email": "sophia@botanicalblisstea.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:14:10"
+  },
+  {
+    "clientName": "Ethan Morales",
+    "company": "AeroStrap Watches",
+    "domain": "aerostrapwatches.com",
+    "email": "ethan@aerostrapwatches.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:14:38"
+  },
+  {
+    "clientName": "Jessica Hayes",
+    "company": "KiddieCraft Toys",
+    "domain": "kiddiecrafttoys.com",
+    "email": "jessica@kiddiecrafttoys.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:15:06"
+  },
+  {
+    "clientName": "Lucas Silva",
+    "company": "BaristaPro Espresso",
+    "domain": "baristaproespresso.com",
+    "email": "lucas@baristaproespresso.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:15:25"
+  },
+  {
+    "clientName": "Claire Hughes",
+    "company": "SilverOak Furniture",
+    "domain": "silveroakfurniture.com",
+    "email": "claire@silveroakfurniture.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:16:00"
+  },
+  {
+    "clientName": "Ryan Cooper",
+    "company": "HydraFlow Water Systems",
+    "domain": "hydraflowwater.com",
+    "email": "ryan@hydraflowwater.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:16:33"
+  },
+  {
+    "clientName": "Vanessa King",
+    "company": "PetZen Organics",
+    "domain": "petzenorganics.com",
+    "email": "vanessa@petzenorganics.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:17:01"
+  },
+  {
+    "clientName": "Austin Powell",
+    "company": "Veloce Cycling Goods",
+    "domain": "velocecycling.com",
+    "email": "austin@velocecycling.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:17:26"
+  },
+  {
+    "clientName": "Lauren Mitchell",
+    "company": "Silk & Cedar Decor",
+    "domain": "silkandcedardecor.com",
+    "email": "lauren@silkandcedardecor.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:17:48"
+  },
+  {
+    "clientName": "Gabriel Ortiz",
+    "company": "NextGen Gaming Lounge",
+    "domain": "nextgengamingstore.com",
+    "email": "gabriel@nextgengamingstore.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:18:13"
+  },
+  {
+    "clientName": "Brooke Reynolds",
+    "company": "Equinox Jewelry Studio",
+    "domain": "equinoxjewelrystudio.com",
+    "email": "brooke@equinoxjewelrystudio.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:18:42"
+  },
+  {
+    "clientName": "Dominic Price",
+    "company": "TacticalEdge Gear",
+    "domain": "tacticaledgegear.com",
+    "email": "dominic@tacticaledgegear.com",
+    "campaign": "SPEED_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 10:19:14"
+  },
+  {
+    "clientName": "Alex Rivera",
+    "company": "OmniSync AI",
+    "domain": "omnisync.ai",
+    "email": "alex@omnisync.ai",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:38:51"
+  },
+  {
+    "clientName": "Liam Cooper",
+    "company": "DexPay Protocol",
+    "domain": "dexpay.io",
+    "email": "liam@dexpay.io",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:39:11"
+  },
+  {
+    "clientName": "Rachel Hayes",
+    "company": "GlowNova Skincare",
+    "domain": "glownovaskin.com",
+    "email": "rachel@glownovaskin.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:39:37"
+  },
+  {
+    "clientName": "Devon Parker",
+    "company": "CloudTrace Security",
+    "domain": "cloudtrace.io",
+    "email": "devon@cloudtrace.io",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:40:07"
+  },
+  {
+    "clientName": "Tyler Brooks",
+    "company": "Verda Solar Solutions",
+    "domain": "verdasolar.com",
+    "email": "tyler@verdasolar.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:40:40"
+  },
+  {
+    "clientName": "Maya Lin",
+    "company": "FlowByte Analytics",
+    "domain": "flowbyte.io",
+    "email": "maya@flowbyte.io",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:41:09"
+  },
+  {
+    "clientName": "Connor Vance",
+    "company": "BlockForge Labs",
+    "domain": "blockforgelabs.com",
+    "email": "connor@blockforgelabs.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:41:34"
+  },
+  {
+    "clientName": "Elena Gomez",
+    "company": "Kinetix Health App",
+    "domain": "kinetixhealth.co",
+    "email": "elena@kinetixhealth.co",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:41:52"
+  },
+  {
+    "clientName": "Julian Ross",
+    "company": "PulseCore Energy",
+    "domain": "pulsecoreenergy.com",
+    "email": "julian@pulsecoreenergy.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:42:14"
+  },
+  {
+    "clientName": "Sophie Turner",
+    "company": "SilkBloom Organics",
+    "domain": "silkbloomorganics.com",
+    "email": "sophie@silkbloomorganics.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:42:39"
+  },
+  {
+    "clientName": "Marcus Sterling",
+    "company": "ApexFlow CRM",
+    "domain": "apexflowcrm.com",
+    "email": "marcus@apexflowcrm.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:43:09"
+  },
+  {
+    "clientName": "Valerie Dupont",
+    "company": "AeroDine Cloud Kitchens",
+    "domain": "aerodinekitchens.com",
+    "email": "valerie@aerodinekitchens.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:43:32"
+  },
+  {
+    "clientName": "Tariq Mansoor",
+    "company": "PayNova Global",
+    "domain": "paynovaglobal.com",
+    "email": "tariq@paynovaglobal.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:43:59"
+  },
+  {
+    "clientName": "Samantha Cole",
+    "company": "NovaBrite Dental Care",
+    "domain": "novabritedental.com",
+    "email": "samantha@novabritedental.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:44:22"
+  },
+  {
+    "clientName": "Harrison Blake",
+    "company": "NexusDrone Surveying",
+    "domain": "nexusdronesurvey.com",
+    "email": "harrison@nexusdronesurvey.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:44:46"
+  },
+  {
+    "clientName": "Zoe Chen",
+    "company": "MindBridge AI Tutor",
+    "domain": "mindbridgeai.com",
+    "email": "zoe@mindbridgeai.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:45:12"
+  },
+  {
+    "clientName": "Arthur Pendelton",
+    "company": "Heritage Watch Works",
+    "domain": "heritagewatchworks.com",
+    "email": "arthur@heritagewatchworks.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:45:32"
+  },
+  {
+    "clientName": "Leila Farouk",
+    "company": "Zenith Real Estate Fund",
+    "domain": "zenithrefund.com",
+    "email": "leila@zenithrefund.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:46:06"
+  },
+  {
+    "clientName": "Brandon Hayes",
+    "company": "HyperDrive EV Chargers",
+    "domain": "hyperdriveev.com",
+    "email": "brandon@hyperdriveev.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:46:36"
+  },
+  {
+    "clientName": "Gabrielle Soto",
+    "company": "Veritas Cyber Compliance",
+    "domain": "veritascompliance.io",
+    "email": "gabrielle@veritascompliance.io",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:47:00"
+  },
+  {
+    "clientName": "Dominic Walsh",
+    "company": "OmniLeads B2B Intelligence",
+    "domain": "omnileadsb2b.com",
+    "email": "dominic@omnileadsb2b.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:47:23"
+  },
+  {
+    "clientName": "Natalie Portman",
+    "company": "TerraPure Clean Water",
+    "domain": "terrapurewater.org",
+    "email": "natalie@terrapurewater.org",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:47:46"
+  },
+  {
+    "clientName": "Sean O'Connor",
+    "company": "CelticShield Cyber Insurance",
+    "domain": "celticshield.io",
+    "email": "sean@celticshield.io",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:48:12"
+  },
+  {
+    "clientName": "Kendra Lewis",
+    "company": "SavorCraft Artisan Foods",
+    "domain": "savorcraftfoods.com",
+    "email": "kendra@savorcraftfoods.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:48:33"
+  },
+  {
+    "clientName": "Trevor Philips",
+    "company": "AutoPilot Logistics AI",
+    "domain": "autopilotlogistics.ai",
+    "email": "trevor@autopilotlogistics.ai",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:48:58"
+  },
+  {
+    "clientName": "Chloe Vance",
+    "company": "LuxeHaven Boutique Stays",
+    "domain": "luxehavenstays.com",
+    "email": "chloe@luxehavenstays.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:49:26"
+  },
+  {
+    "clientName": "Gavin Rhodes",
+    "company": "SkyHigh Audio Systems",
+    "domain": "skyhighaudio.com",
+    "email": "gavin@skyhighaudio.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:49:45"
+  },
+  {
+    "clientName": "Priscilla Ward",
+    "company": "BioVita Longevity Labs",
+    "domain": "biovitalongevity.com",
+    "email": "priscilla@biovitalongevity.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:50:18"
+  },
+  {
+    "clientName": "Damian Frost",
+    "company": "AeroSpeed Drone Deliveries",
+    "domain": "aerospeeddrone.com",
+    "email": "damian@aerospeeddrone.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:50:48"
+  },
+  {
+    "clientName": "Miriam Gold",
+    "company": "Solace Mental Wellness",
+    "domain": "solacementalhealth.com",
+    "email": "miriam@solacementalhealth.com",
+    "campaign": "PR_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 19:51:16"
+  },
+  {
+    "clientName": "Jonathan Ross",
+    "company": "Elevate Search Agency",
+    "domain": "elevatesearch.co",
+    "email": "jonathan@elevatesearch.co",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:33:28"
+  },
+  {
+    "clientName": "Brett Harrison",
+    "company": "Apex Digital Partners",
+    "domain": "apexdigitalpartners.com",
+    "email": "brett@apexdigitalpartners.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:33:57"
+  },
+  {
+    "clientName": "Samantha Reed",
+    "company": "Verve Growth Marketing",
+    "domain": "vervegrowth.io",
+    "email": "samantha@vervegrowth.io",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:34:23"
+  },
+  {
+    "clientName": "Nate Gallagher",
+    "company": "Foundry Interactive",
+    "domain": "foundryinteractive.com",
+    "email": "nate@foundryinteractive.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:34:45"
+  },
+  {
+    "clientName": "Chloe Campbell",
+    "company": "Catalyst Media Group",
+    "domain": "catalystmediagrp.com",
+    "email": "chloe@catalystmediagrp.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:35:18"
+  },
+  {
+    "clientName": "Adam Mitchell",
+    "company": "Beacon Search Strategies",
+    "domain": "beaconsearchstrat.com",
+    "email": "adam@beaconsearchstrat.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:35:46"
+  },
+  {
+    "clientName": "Laura Henderson",
+    "company": "Summit Organic SEO",
+    "domain": "summitorganicseo.com",
+    "email": "laura@summitorganicseo.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:36:17"
+  },
+  {
+    "clientName": "Darren Brooks",
+    "company": "Velocity Growth Lab",
+    "domain": "velocitygrowthlab.io",
+    "email": "darren@velocitygrowthlab.io",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:36:48"
+  },
+  {
+    "clientName": "Megan Foster",
+    "company": "Horizon Peak Media",
+    "domain": "horizonpeakmedia.com",
+    "email": "megan@horizonpeakmedia.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:37:19"
+  },
+  {
+    "clientName": "Ryan Cooper",
+    "company": "ScaleUp Search Partners",
+    "domain": "scaleupsearchpartners.com",
+    "email": "ryan@scaleupsearchpartners.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:37:37"
+  },
+  {
+    "clientName": "Hannah Phillips",
+    "company": "Nexus SEO Collective",
+    "domain": "nexusseocollective.com",
+    "email": "hannah@nexusseocollective.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:38:04"
+  },
+  {
+    "clientName": "Colin Stewart",
+    "company": "IronClad Digital Marketing",
+    "domain": "ironcladdigitalmktg.com",
+    "email": "colin@ironcladdigitalmktg.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:38:26"
+  },
+  {
+    "clientName": "Tara Jenkins",
+    "company": "Silverline Web Solutions",
+    "domain": "silverlinewebsolutions.com",
+    "email": "tara@silverlinewebsolutions.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:38:44"
+  },
+  {
+    "clientName": "Elliot Vance",
+    "company": "Quantum Rank Media",
+    "domain": "quantumrankmedia.com",
+    "email": "elliot@quantumrankmedia.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:39:08"
+  },
+  {
+    "clientName": "Brooke Taylor",
+    "company": "BlueSky Organic Growth",
+    "domain": "blueskygrowthagency.com",
+    "email": "brooke@blueskygrowthagency.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:39:29"
+  },
+  {
+    "clientName": "Sean O'Donnell",
+    "company": "Highland Search Advisory",
+    "domain": "highlandsearchadv.com",
+    "email": "sean@highlandsearchadv.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:39:51"
+  },
+  {
+    "clientName": "Kimberly Ward",
+    "company": "NorthStar Media Group",
+    "domain": "northstarmediagrp.com",
+    "email": "kimberly@northstarmediagrp.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:40:23"
+  },
+  {
+    "clientName": "Austin Miller",
+    "company": "Vortex Digital Reach",
+    "domain": "vortexdigitalreach.com",
+    "email": "austin@vortexdigitalreach.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:40:43"
+  },
+  {
+    "clientName": "Danielle Green",
+    "company": "Frontline Growth Agency",
+    "domain": "frontlinegrowthagency.com",
+    "email": "danielle@frontlinegrowthagency.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:41:10"
+  },
+  {
+    "clientName": "Zachary Scott",
+    "company": "PeakRank Digital",
+    "domain": "peakrankdigital.com",
+    "email": "zachary@peakrankdigital.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:41:37"
+  },
+  {
+    "clientName": "Jessica Burns",
+    "company": "Optima Search Lab",
+    "domain": "optimasearchlab.com",
+    "email": "jessica@optimasearchlab.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:41:58"
+  },
+  {
+    "clientName": "Trevor Hayes",
+    "company": "Crestline Organic SEO",
+    "domain": "crestlineorganic.com",
+    "email": "trevor@crestlineorganic.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:42:23"
+  },
+  {
+    "clientName": "Vanessa Cruz",
+    "company": "Solstice Media Ventures",
+    "domain": "solsticemediaventures.com",
+    "email": "vanessa@solsticemediaventures.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:42:50"
+  },
+  {
+    "clientName": "Miles Thornton",
+    "company": "TrueNorth Search Partners",
+    "domain": "truenorthsearchpartners.com",
+    "email": "miles@truenorthsearchpartners.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:43:19"
+  },
+  {
+    "clientName": "Gillian Ross",
+    "company": "Aura Growth Partners",
+    "domain": "auragrowthpartners.com",
+    "email": "gillian@auragrowthpartners.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:43:46"
+  },
+  {
+    "clientName": "Dominic Vance",
+    "company": "Pinnacle Digital Edge",
+    "domain": "pinnacledigitaledge.com",
+    "email": "dominic@pinnacledigitaledge.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:44:15"
+  },
+  {
+    "clientName": "Cynthia Morales",
+    "company": "ClearPath Media Agency",
+    "domain": "clearpathmediaagency.com",
+    "email": "cynthia@clearpathmediaagency.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:44:43"
+  },
+  {
+    "clientName": "Kyle Washington",
+    "company": "AlphaWave Marketing",
+    "domain": "alphawavemarketing.io",
+    "email": "kyle@alphawavemarketing.io",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:45:14"
+  },
+  {
+    "clientName": "Paige Sullivan",
+    "company": "Silverstone Search Group",
+    "domain": "silverstonesearchgrp.com",
+    "email": "paige@silverstonesearchgrp.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:45:41"
+  },
+  {
+    "clientName": "Mitchell Reed",
+    "company": "ApexLink Agency",
+    "domain": "apexlinkagency.com",
+    "email": "mitchell@apexlinkagency.com",
+    "campaign": "AUTHORITY_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-16 20:46:05"
   }
 ]
