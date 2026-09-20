@@ -52,8 +52,23 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/seo-agencies-pakistan',
-        destination: '/blog/top-10-seo-agencies-in-pakistan',
+        source: '/best-digital-marketing-agencies-in-pakistan',
+        destination: '/blog/best-digital-marketing-agencies-in-pakistan',
+        permanent: true,
+      },
+      {
+        source: '/top-digital-marketing-agencies-in-pakistan',
+        destination: '/blog/best-digital-marketing-agencies-in-pakistan',
+        permanent: true,
+      },
+      {
+        source: '/guest-posting-sites-list',
+        destination: '/blog/high-da-guest-posting-sites-list-guide',
+        permanent: true,
+      },
+      {
+        source: '/high-da-guest-posting-sites',
+        destination: '/blog/high-da-guest-posting-sites-list-guide',
         permanent: true,
       },
     ];
