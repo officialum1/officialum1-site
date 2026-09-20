@@ -86,6 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
 
         const staticSlugs = [
+            "top-10-seo-agencies-in-pakistan",
             "why-wordpress-website-is-slow-how-to-fix-pagespeed",
             "how-to-remove-wordpress-malware-clear-google-blacklist",
             "wordpress-to-nextjs-migration-guide",
@@ -114,6 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } catch (error) {
         console.error("Sitemap Generation Error:", error);
         const staticSlugs = [
+            "top-10-seo-agencies-in-pakistan",
             "why-wordpress-website-is-slow-how-to-fix-pagespeed",
             "how-to-remove-wordpress-malware-clear-google-blacklist",
             "wordpress-to-nextjs-migration-guide",
