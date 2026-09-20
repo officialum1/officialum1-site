@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { query } from '@/lib/db';
+import staticPosts from '@/data/posts.json';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://officialum1.com';
@@ -58,85 +59,64 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/kb`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     ];
 
+    // Fallback/Default blog entries from posts.json
+    const staticBlogUrls: MetadataRoute.Sitemap = Array.isArray(staticPosts)
+        ? staticPosts.map((post: any) => ({
+            url: `${baseUrl}/blog/${post.slug || post.id}`,
+            lastModified: new Date(post.date ? new Date(post.date) : new Date()),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        }))
+        : [];
+
     try {
         // Fetch Products
         const products = await query("SELECT id, created_at FROM products") as any[];
-        const productUrls = products.map((product) => ({
-            url: `${baseUrl}/shop/${product.id}`,
-            lastModified: new Date(product.created_at || new Date()),
-            changeFrequency: 'weekly' as const,
-            priority: 0.8,
-        }));
+        const productUrls: MetadataRoute.Sitemap = Array.isArray(products)
+            ? products.map((product) => ({
+                url: `${baseUrl}/shop/${product.id}`,
+                lastModified: new Date(product.created_at || new Date()),
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            }))
+            : [];
 
         // Fetch KB Articles
         const articles = await query("SELECT slug, created_at FROM knowledge_base WHERE is_published = 1") as any[];
-        const kbUrls = articles.map((art) => ({
-            url: `${baseUrl}/kb/${art.slug}`,
-            lastModified: new Date(art.created_at || new Date()),
-            changeFrequency: 'monthly' as const,
-            priority: 0.7,
-        }));
+        const kbUrls: MetadataRoute.Sitemap = Array.isArray(articles)
+            ? articles.map((art) => ({
+                url: `${baseUrl}/kb/${art.slug}`,
+                lastModified: new Date(art.created_at || new Date()),
+                changeFrequency: 'monthly' as const,
+                priority: 0.7,
+            }))
+            : [];
 
-        // Fetch Blog Posts
-        let blogs: any[] = [];
+        // Fetch DB Blog Posts
+        let dbBlogs: any[] = [];
         try {
-            blogs = await query("SELECT id, slug, created_at FROM blogs") as any[];
+            dbBlogs = await query("SELECT id, slug, created_at FROM blogs") as any[];
         } catch {
-            blogs = [];
+            dbBlogs = [];
         }
 
-        const staticSlugs = [
-            "top-10-seo-agencies-in-pakistan",
-            "best-digital-marketing-agencies-in-pakistan",
-            "high-da-guest-posting-sites-list-guide",
-            "why-wordpress-website-is-slow-how-to-fix-pagespeed",
-            "how-to-remove-wordpress-malware-clear-google-blacklist",
-            "wordpress-to-nextjs-migration-guide",
-            "google-maps-3-pack-local-seo-ranking-blueprint",
-            "ecommerce-cro-fixes-to-double-store-sales",
-            "why-professional-web-development-matters",
-            "the-truth-about-seo-engineering",
-            "social-media-conversation-not-billboard"
-        ];
-
-        const blogUrls = (blogs && blogs.length > 0)
-            ? blogs.map((blog) => ({
+        const dbBlogUrls: MetadataRoute.Sitemap = (dbBlogs && dbBlogs.length > 0)
+            ? dbBlogs.map((blog) => ({
                 url: `${baseUrl}/blog/${blog.slug || blog.id}`,
                 lastModified: new Date(blog.created_at || new Date()),
                 changeFrequency: 'weekly' as const,
                 priority: 0.8,
             }))
-            : staticSlugs.map((slug) => ({
-                url: `${baseUrl}/blog/${slug}`,
-                lastModified: new Date(),
-                changeFrequency: 'weekly' as const,
-                priority: 0.8,
-            }));
+            : [];
 
-        return [...routes, ...productUrls, ...kbUrls, ...blogUrls];
-    } catch (error) {
-        console.error("Sitemap Generation Error:", error);
-        const staticSlugs = [
-            "top-10-seo-agencies-in-pakistan",
-            "best-digital-marketing-agencies-in-pakistan",
-            "high-da-guest-posting-sites-list-guide",
-            "why-wordpress-website-is-slow-how-to-fix-pagespeed",
-            "how-to-remove-wordpress-malware-clear-google-blacklist",
-            "wordpress-to-nextjs-migration-guide",
-            "google-maps-3-pack-local-seo-ranking-blueprint",
-            "ecommerce-cro-fixes-to-double-store-sales",
-            "why-professional-web-development-matters",
-            "the-truth-about-seo-engineering",
-            "social-media-conversation-not-billboard"
-        ];
-        return [
-            ...routes,
-            ...staticSlugs.map((slug) => ({
-                url: `${baseUrl}/blog/${slug}`,
-                lastModified: new Date(),
-                changeFrequency: 'weekly' as const,
-                priority: 0.8,
-            })),
-        ];
+        // Deduplicate blogs by URL
+        const allBlogUrlsMap = new Map<string, MetadataRoute.Sitemap[number]>();
+        for (const item of [...staticBlogUrls, ...dbBlogUrls]) {
+            allBlogUrlsMap.set(item.url, item);
+        }
+
+        return [...routes, ...productUrls, ...kbUrls, ...Array.from(allBlogUrlsMap.values())];
+    } catch {
+        return [...routes, ...staticBlogUrls];
     }
 }
