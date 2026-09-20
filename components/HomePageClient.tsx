@@ -11,6 +11,7 @@ import PricingSection from "@/components/PricingSection";
 import FeaturedProductsSection from "@/components/FeaturedProductsSection";
 import BusinessSection from "@/components/BusinessSection";
 import StatsSocialProof from "@/components/StatsSocialProof";
+import BlogSection from "@/components/BlogSection";
 
 import Script from "next/script";
 
@@ -87,6 +88,8 @@ export default function HomePageClient() {
       <StatsSocialProof />
 
       <WorkSection />
+
+      <BlogSection />
 
       <FreeAuditSection />
 
