@@ -97,16 +97,16 @@ export const DEFAULT_RANK_MATH_CONFIG: RankMathConfig = {
   },
   knowledge_panel: {
     org_type: "ProfessionalService",
-    org_name: "OfficialUM1 - Digital Marketing Agency Sahiwal",
+    org_name: "OfficialUM1",
     legal_name: "OfficialUM1 LLC",
     description:
-      "OfficialUM1 is the top-rated digital marketing agency in Sahiwal, Punjab, Pakistan, specializing in SEO, web development, guest posting, and revenue-focused digital strategy.",
+      "OfficialUM1 is a premier US & Pakistan registered digital marketing agency and software engineering firm specializing in SEO, custom Next.js web development, WordPress speed optimization, and digital PR.",
     url: SITE_URL,
-    logo_url: `${SITE_URL}/logo.jpg`,
+    logo_url: `${SITE_URL}/icon.jpg`,
     founder_name: "Muhammad Umar Mumtaz",
     founder_title: "Founder & CEO",
     founder_url: `${SITE_URL}/about`,
-    founder_image: `${SITE_URL}/founder.jpg`,
+    founder_image: `${SITE_URL}/icon.jpg`,
     founding_date: "2021",
     email: "hello@officialum1.com",
     phone: "+923237102924",
@@ -118,9 +118,9 @@ export const DEFAULT_RANK_MATH_CONFIG: RankMathConfig = {
     country: "PK",
     latitude: "30.6682",
     longitude: "73.1064",
-    area_served: "Sahiwal, Punjab, Pakistan, Worldwide",
+    area_served: "Sahiwal, Punjab, Pakistan, United States, United Kingdom, Worldwide",
     knows_about:
-      "Digital Marketing Agency Sahiwal, Search Engine Optimization, Web Development, Guest Posting, Backlink Building, Social Media Marketing",
+      "Digital Marketing, Search Engine Optimization, Technical SEO, Next.js Web Development, Headless Architecture, Guest Posting, Link Building, Core Web Vitals, Conversion Rate Optimization",
   },
   social: {
     twitter_handle: "@officialum1",
@@ -129,7 +129,7 @@ export const DEFAULT_RANK_MATH_CONFIG: RankMathConfig = {
     linkedin_url: "https://linkedin.com/company/officialum1",
     youtube_url: "",
     pinterest_url: "",
-    extra_same_as: "https://www.trustpilot.com/review/officialum1.com\nhttps://clutch.co/profile/officialum1\nhttps://www.reddit.com/r/officialum1/\nhttps://github.com/officialum1",
+    extra_same_as: "https://www.trustpilot.com/review/officialum1.com\nhttps://github.com/officialum1\nhttps://x.com/officialum1\nhttps://twitter.com/officialum1\nhttps://clutch.co/profile/officialum1\nhttps://www.reddit.com/r/officialum1/",
   },
   schema: {
     enable_organization: true,

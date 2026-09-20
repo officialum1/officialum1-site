@@ -27,33 +27,51 @@ export function buildRankMathOrganizationGraph(config: RankMathConfig) {
   const graph: Record<string, unknown>[] = [];
 
   if (config.schema.enable_organization || config.schema.enable_local_business) {
-    const orgType = config.schema.enable_local_business ? "LocalBusiness" : kp.org_type;
+    const orgTypes = ["Organization", "Corporation", "ProfessionalService"];
     const org: Record<string, unknown> = {
-      "@type": orgType,
+      "@type": orgTypes,
       "@id": ORG_ID,
-      name: kp.org_name,
-      legalName: kp.legal_name,
+      name: kp.org_name || "OfficialUM1",
+      alternateName: ["OfficialUM1 LLC", "Official UM1", "Officialum1", "officialum1.com"],
+      legalName: kp.legal_name || "OfficialUM1 LLC",
       description: kp.description,
-      url: kp.url,
-      foundingDate: kp.founding_date,
-      email: kp.email,
-      telephone: kp.phone,
-      priceRange: kp.price_range,
+      url: SITE_URL,
+      foundingDate: kp.founding_date || "2021",
+      foundingLocation: {
+        "@type": "Place",
+        name: "Sahiwal, Punjab, Pakistan",
+      },
+      email: kp.email || "hello@officialum1.com",
+      telephone: kp.phone || "+923237102924",
+      priceRange: kp.price_range || "$$",
       logo: {
         "@type": "ImageObject",
         "@id": `${SITE_URL}/#logo`,
-        url: kp.logo_url,
-        contentUrl: kp.logo_url,
+        url: `${SITE_URL}/icon.jpg`,
+        contentUrl: `${SITE_URL}/icon.jpg`,
+        caption: "OfficialUM1 Official Logo",
+        width: 512,
+        height: 512,
       },
       image: { "@id": `${SITE_URL}/#logo` },
       address: {
         "@type": "PostalAddress",
-        streetAddress: kp.street,
-        addressLocality: kp.city,
-        addressRegion: kp.region,
-        postalCode: kp.postal_code,
-        addressCountry: kp.country,
+        streetAddress: kp.street || "Sahiwal",
+        addressLocality: kp.city || "Sahiwal",
+        addressRegion: kp.region || "Punjab",
+        postalCode: kp.postal_code || "57000",
+        addressCountry: kp.country || "PK",
       },
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          telephone: kp.phone || "+923237102924",
+          contactType: "customer service",
+          email: kp.email || "hello@officialum1.com",
+          areaServed: ["PK", "US", "GB", "AE", "CA", "Worldwide"],
+          availableLanguage: ["English", "Urdu"],
+        },
+      ],
       areaServed: splitList(kp.area_served),
       knowsAbout: splitList(kp.knows_about),
       sameAs: sameAsLinks(config),
@@ -78,10 +96,16 @@ export function buildRankMathOrganizationGraph(config: RankMathConfig) {
     graph.push({
       "@type": "Person",
       "@id": FOUNDER_ID,
-      name: kp.founder_name,
-      jobTitle: kp.founder_title,
-      url: kp.founder_url,
-      image: kp.founder_image,
+      name: kp.founder_name || "Muhammad Umar Mumtaz",
+      jobTitle: kp.founder_title || "Founder & CEO",
+      url: `${SITE_URL}/about`,
+      image: `${SITE_URL}/icon.jpg`,
+      sameAs: [
+        "https://github.com/officialum1",
+        "https://x.com/officialum1",
+        "https://twitter.com/officialum1",
+        "https://linkedin.com/company/officialum1",
+      ],
       worksFor: { "@id": ORG_ID },
     });
   }
