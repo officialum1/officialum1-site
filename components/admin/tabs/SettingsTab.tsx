@@ -39,6 +39,97 @@ export default function SettingsTab({
                 <p style={{ color: '#666', marginBottom: '2.5rem' }}>Global platform settings and API integrations.</p>
 
                 <form onSubmit={handleSaveSettings} style={{ display: 'grid', gap: '2rem' }}>
+                    {/* Payment Gateways (Stripe, Cryptomus, Binance) */}
+                    <div style={{ padding: '1.75rem', background: 'linear-gradient(135deg, rgba(99, 91, 255, 0.12), rgba(20, 108, 120, 0.08))', borderRadius: '14px', border: '1px solid rgba(99, 91, 255, 0.25)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                            <div>
+                                <h3 style={{ color: '#635BFF', fontSize: '1.3rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    💳 Stripe & Payment Gateways
+                                </h3>
+                                <p style={{ color: '#aaa', fontSize: '0.82rem', margin: '0.3rem 0 0 0' }}>
+                                    Secure live card processing with 3D Secure, fraud protection, and instant wallet deposits.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '0.4rem' }}>
+                                    Stripe Gateway Status
+                                </label>
+                                <select
+                                    value={settings.enable_stripe || 'true'}
+                                    onChange={e => setSettings({ ...settings, enable_stripe: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.4)', color: '#00ff88', fontWeight: 700 }}
+                                >
+                                    <option value="true" style={{ background: '#182026', color: '#00ff88' }}>🟢 Active (Enable Card Payments)</option>
+                                    <option value="false" style={{ background: '#182026', color: '#ff4444' }}>🔴 Disabled</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '0.4rem' }}>
+                                    Stripe Publishable Key (<code style={{ color: '#635BFF' }}>pk_live_...</code>)
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="pk_live_51..."
+                                    value={settings.stripePublishableKey || ''}
+                                    onChange={e => setSettings({ ...settings, stripePublishableKey: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.4)' }}
+                                />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '0.4rem' }}>
+                                    Stripe Secret Key (<code style={{ color: '#ff9900' }}>sk_live_...</code> / <code style={{ color: '#ff9900' }}>rk_live_...</code>)
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder="sk_live_... or rk_live_..."
+                                    value={settings.stripeSecret || ''}
+                                    onChange={e => setSettings({ ...settings, stripeSecret: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.5)', fontFamily: 'monospace' }}
+                                />
+                                <span style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.3rem', display: 'block' }}>
+                                    Stored securely in MySQL database. Used for server-side checkout sessions and webhook verification.
+                                </span>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '0.4rem' }}>
+                                    Stripe Webhook Secret (<code style={{ color: '#aaa' }}>whsec_...</code>) (Optional)
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder="whsec_..."
+                                    value={settings.stripeWebhookSecret || ''}
+                                    onChange={e => setSettings({ ...settings, stripeWebhookSecret: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.4)', fontFamily: 'monospace' }}
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.85rem', color: '#fff', fontWeight: 600, marginBottom: '0.4rem' }}>
+                                    Cryptomus Crypto Gateway
+                                </label>
+                                <select
+                                    value={settings.enable_cryptomus || 'true'}
+                                    onChange={e => setSettings({ ...settings, enable_cryptomus: e.target.value })}
+                                    className="input-field"
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.4)' }}
+                                >
+                                    <option value="true" style={{ background: '#182026' }}>Active (USDT, BTC, ETH)</option>
+                                    <option value="false" style={{ background: '#182026' }}>Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Twitter */}
                     <div style={{ padding: '1.5rem', background: 'rgba(29, 161, 242, 0.1)', borderRadius: '12px' }}>
                         <h3 style={{ color: '#1DA1F2', marginBottom: '1rem' }}>Twitter / X</h3>
