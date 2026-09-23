@@ -521,6 +521,10 @@ function AdminDashboard() {
                     const intelRes = await fetch('/api/market');
                     setMarketIntel(await safeData(intelRes));
                     break;
+                case 'logs':
+                    const logsFreshRes = await fetch('/api/admin/logs', { cache: 'no-store' });
+                    setLogs(await safeData(logsFreshRes));
+                    break;
                 case 'users':
                     const usersRes = await fetch('/api/admin/users');
                     setUsers(await safeData(usersRes));
