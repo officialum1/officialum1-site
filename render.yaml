@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: officialum1-global-outreach-engine
+    runtime: python
+    region: oregon
+    plan: starter
+    buildCommand: "pip install -r automation/requirements.txt"
+    startCommand: "python automation/worker.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PORT
+        value: 10000
