@@ -42,6 +42,10 @@ export async function POST(req: Request) {
 
         if (status === 'paid' || status === 'paid_over') {
             await fulfillOrder(orderId);
+            try {
+                await query("INSERT INTO activity_logs (user, action, details, date) VALUES (?, ?, ?, NOW())",
+                    [`Order #${orderId}`, 'PAYMENT_SUCCESS_CRYPTOMUS', `Cryptomus Payment Verified: $${data.amount || '0'} ${data.currency || 'USD'} (Status: ${status})`]);
+            } catch (lErr) {}
         }
 
         return NextResponse.json({ success: true });

@@ -160,6 +160,12 @@ export async function POST(req: Request) {
         await query("INSERT INTO orders (orderId, userId, amount, method, status, date) VALUES (?, ?, ?, ?, 'pending', NOW())",
             [orderId, userId, amount, method]);
 
+        try {
+            const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || 'Unknown IP';
+            await query("INSERT INTO activity_logs (user, action, details, date) VALUES (?, ?, ?, NOW())",
+                [`User #${userId}`, `DEPOSIT_CLICK_${method.toUpperCase()}`, `Wallet Top-Up Click: $${amount} USD via ${method.toUpperCase()} | Deposit #${orderId} | IP: ${ip}`]);
+        } catch (logErr) {}
+
         return NextResponse.json({ success: true, paymentUrl, orderId });
 
     } catch (e: any) {

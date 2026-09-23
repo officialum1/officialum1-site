@@ -296,6 +296,24 @@ export async function POST(req: Request) {
             `, [orderId, userId, user.email || guestEmail, isBulk ? 0 : product.id, amountToCharge, product.price || amountToCharge, promoCode || null, method, orderStatus, isBulk ? cartItems.length : safeQuantity]);
         }
 
+        // Record Payment Intent / Click Log
+        try {
+            const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || 'Unknown IP';
+            const userIdentifier = user?.email || guestEmail || (userId !== 'guest' ? `User #${userId}` : `Guest`);
+            const productName = isBulk ? `Cart (${cartItems.length} items)` : (product?.name || 'Service');
+            
+            await query(`
+                INSERT INTO activity_logs (user, action, details, date)
+                VALUES (?, ?, ?, NOW())
+            `, [
+                userIdentifier,
+                `PAY_CLICK_${method.toUpperCase()}`,
+                `Clicked Pay Now: $${amountToCharge} USD for "${productName}" via ${method.toUpperCase()} | Order #${orderId} | Status: ${orderStatus} | IP: ${ip}`
+            ]);
+        } catch (logErr) {
+            console.error("Payment click activity log failed:", logErr);
+        }
+
         // Handle Fulfillment if paid
         if (orderStatus === 'paid') {
             try {
