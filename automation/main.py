@@ -253,9 +253,10 @@ def load_all_worldwide_leads():
 def send_email(smtp_cfg, to_email, subject, body_text):
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"] = f"{smtp_cfg['sender_name']} <{smtp_cfg['email']}>"
+    from_email = smtp_cfg.get("from_email", smtp_cfg.get("reply_to", "hello@officialum1.com"))
+    msg["From"] = f"{smtp_cfg.get('sender_name', 'Muhammad Umar')} <{from_email}>"
     msg["To"] = to_email
-    msg["Reply-To"] = smtp_cfg["reply_to"]
+    msg["Reply-To"] = smtp_cfg.get("reply_to", "hello@officialum1.com")
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain="officialum1.com")
 
