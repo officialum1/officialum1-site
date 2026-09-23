@@ -21,7 +21,11 @@ import {
   Bot, 
   Layers, 
   CheckCircle2, 
-  ArrowRight 
+  ArrowRight,
+  Palmtree,
+  Crown,
+  Server,
+  Mail
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -192,6 +196,41 @@ const servicePillars = [
         desc: "24/7 uptime monitoring, daily automated cloud snapshots, security hardening, and dedicated monthly senior developer hours.",
         href: "/services/website-maintenance",
         cta: "View Care Plans",
+      },
+    ]
+  },
+  {
+    category: "5. Turnkey 360° Full Brand Launch & Management",
+    badge: "Done-For-You Brand Incubator",
+    description: "Complete hands-off brand incubation: We handle domain purchase, high-speed cloud/VPS hosting, corporate emails, custom web development, and launch verified social media channels.",
+    items: [
+      {
+        icon: Server,
+        title: "Domain Acquisition, Cloud Hosting & SSL Setup",
+        desc: "End-to-end premium domain registration, DNS clustering, high-speed NVMe VPS/Cloud hosting, and lifetime auto-renewing SSL certificates.",
+        href: "/contact?service=Brand+Handling",
+        cta: "Deploy Hosting & Domain",
+      },
+      {
+        icon: Share2,
+        title: "Official Social Media Creation & High-End Branding",
+        desc: "Complete setup and visual identity creation across Instagram, Facebook, LinkedIn, X (Twitter), TikTok, and YouTube with consistent brand assets.",
+        href: "/contact?service=Brand+Handling",
+        cta: "Launch Social Profiles",
+      },
+      {
+        icon: Mail,
+        title: "Google Workspace & Custom Business Emails",
+        desc: "Professional @yourdomain.com email infrastructure with configured SPF, DKIM, DMARC, and MX records for 100% inbox delivery.",
+        href: "/contact?service=Brand+Handling",
+        cta: "Setup Corporate Inboxes",
+      },
+      {
+        icon: Crown,
+        title: "Turnkey 360° Complete Brand Launch Package",
+        desc: "Zero to fully operational company in 7 days: Domain + VPS Server + Custom Website + Inboxes + All Social Channels + Google Maps.",
+        href: "/contact?service=Turnkey+Brand+Launch",
+        cta: "Get Turnkey Brand Scope",
       },
     ]
   }
