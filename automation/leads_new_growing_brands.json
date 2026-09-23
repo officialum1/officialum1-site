@@ -1,0 +1,137 @@
+[
+  {
+    "clientName": "Hamza",
+    "company": "Desert Dune Xtreme Dubai",
+    "domain": "desertdunextreme.com",
+    "emails": ["hello@desertdunextreme.com", "contact@desertdunextreme.com"],
+    "city": "Dubai",
+    "industry": "Desert Buggy & Adventure Tours",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Zain",
+    "company": "Marina Wave Yacht Charters",
+    "domain": "marinawaveyachts.com",
+    "emails": ["info@marinawaveyachts.com", "book@marinawaveyachts.com"],
+    "city": "Dubai Marina",
+    "industry": "Boutique Yacht Rentals",
+    "stage": "New Startup Fleet"
+  },
+  {
+    "clientName": "Fahad",
+    "company": "Nomad Camp Dubai",
+    "domain": "nomadcampdubai.com",
+    "emails": ["experience@nomadcampdubai.com", "info@nomadcampdubai.com"],
+    "city": "Dubai Desert",
+    "industry": "Luxury Glamping & Stargazing Camp",
+    "stage": "New Luxury Camp Opening"
+  },
+  {
+    "clientName": "Saad",
+    "company": "Apex Rent a Car & Luxury Fleet",
+    "domain": "apexrentcardubai.com",
+    "emails": ["rent@apexrentcardubai.com", "info@apexrentcardubai.com"],
+    "city": "Dubai Downtown",
+    "industry": "Supercar & Chauffeur Hire",
+    "stage": "New Exotic Rental Brand"
+  },
+  {
+    "clientName": "Bilal",
+    "company": "Creek Abra Experience",
+    "domain": "creekabraexperience.com",
+    "emails": ["tours@creekabraexperience.com", "info@creekabraexperience.com"],
+    "city": "Old Dubai",
+    "industry": "Cultural Food & Boat Excursions",
+    "stage": "New Local Experience Provider"
+  },
+  {
+    "clientName": "Waleed",
+    "company": "Jet Ski Kings Jumeirah",
+    "domain": "jetskikingsdubai.com",
+    "emails": ["booking@jetskikingsdubai.com", "info@jetskikingsdubai.com"],
+    "city": "Dubai Jumeirah",
+    "industry": "Water Sports & Jet Ski Tours",
+    "stage": "New Water Sports Center"
+  },
+  {
+    "clientName": "Mustafa",
+    "company": "Hatta Escape Adventures",
+    "domain": "hattaescapeadventures.com",
+    "emails": ["info@hattaescapeadventures.com", "hello@hattaescapeadventures.com"],
+    "city": "Hatta / Dubai",
+    "industry": "Mountain Hiking, Biking & Camping",
+    "stage": "Newly Established Adventure Brand"
+  },
+  {
+    "clientName": "Irfan",
+    "company": "Dubai VIP Heli Tours",
+    "domain": "dubaiviphelitours.com",
+    "emails": ["charter@dubaiviphelitours.com", "info@dubaiviphelitours.com"],
+    "city": "Dubai",
+    "industry": "Helicopter Aerial Sightseeing",
+    "stage": "New Boutique Tour Agency"
+  },
+  {
+    "clientName": "Yousef",
+    "company": "Arabian Quad Hub",
+    "domain": "arabianquadhub.com",
+    "emails": ["info@arabianquadhub.com", "rentals@arabianquadhub.com"],
+    "city": "Lahbab Desert",
+    "industry": "Can-Am & Raptor Dune Buggy Rental",
+    "stage": "New Desert Garage Setup"
+  },
+  {
+    "clientName": "Tariq",
+    "company": "Sea Pearl Yacht Rental",
+    "domain": "seapearlyachtrental.com",
+    "emails": ["reservations@seapearlyachtrental.com", "info@seapearlyachtrental.com"],
+    "city": "Dubai Harbour",
+    "industry": "Private 48ft-65ft Yacht Charters",
+    "stage": "New Harbour Vessel Launch"
+  },
+  {
+    "clientName": "Omer",
+    "company": "Red Dune Quad Biking UAE",
+    "domain": "reddunequadbiking.com",
+    "emails": ["booking@reddunequadbiking.com", "info@reddunequadbiking.com"],
+    "city": "Dubai",
+    "industry": "Self-drive Dune Adventures",
+    "stage": "New Tourism Startup"
+  },
+  {
+    "clientName": "Daniyal",
+    "company": "Desert Star Night Camp",
+    "domain": "desertstarnightcamp.com",
+    "emails": ["contact@desertstarnightcamp.com", "info@desertstarnightcamp.com"],
+    "city": "Dubai / Sharjah",
+    "industry": "Eco-friendly Overnight Safari",
+    "stage": "New Boutique Camp"
+  },
+  {
+    "clientName": "Adeel",
+    "company": "Marina Cruise Nights",
+    "domain": "marinacruisenights.com",
+    "emails": ["info@marinacruisenights.com", "booking@marinacruisenights.com"],
+    "city": "Dubai Marina",
+    "industry": "Buffet Dinner & Sightseeing Cruise",
+    "stage": "New Leisure Vessel Service"
+  },
+  {
+    "clientName": "Farhan",
+    "company": "Emirates Chauffeur VIP",
+    "domain": "emirateschauffeurvip.com",
+    "emails": ["book@emirateschauffeurvip.com", "info@emirateschauffeurvip.com"],
+    "city": "Dubai",
+    "industry": "Airport VIP Transfers & City Tours",
+    "stage": "New Executive Fleet"
+  },
+  {
+    "clientName": "Suleman",
+    "company": "Dubai Deep Sea Trolling",
+    "domain": "dubaideepseatrolling.com",
+    "emails": ["captain@dubaideepseatrolling.com", "info@dubaideepseatrolling.com"],
+    "city": "Dubai Marina",
+    "industry": "Sport Fishing Trips",
+    "stage": "New Boat Charter"
+  }
+]
