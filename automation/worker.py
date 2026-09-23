@@ -114,6 +114,36 @@ def trigger_instant_sprint(background_tasks: BackgroundTasks, count: int = 10):
     background_tasks.add_task(run_sprint)
     return {"message": f"Manual sprint of {count} leads triggered successfully in background!"}
 
+@app.get("/test-email")
+def test_email_endpoint(to: str = "umar.mumtaz37@yahoo.com"):
+    cfg = load_config()
+    smtp_cfg = cfg.get("smtp", {})
+    from main import send_email
+    subject = "OfficialUM1 Outreach System Live Test"
+    body = f"""Hi Muhammad Umar,
+
+This is a live test email from the OfficialUM1 24/7 Cloud Outreach Engine.
+
+- Visible Sender: Muhammad Umar | OfficialUM1 LLC <hello@officialum1.com>
+- Reply-To: hello@officialum1.com
+- Domain: https://officialum1.com
+
+When you hit "Reply", it goes straight to your hello@officialum1.com inbox on Titan.
+
+Best regards,
+
+Muhammad Umar
+Founder & Principal Engineer | OfficialUM1 LLC
+Direct: hello@officialum1.com
+Website: https://officialum1.com
+"""
+    try:
+        send_email(smtp_cfg, to, subject, body)
+        return {"status": "SUCCESS", "message": f"Test email sent to {to}", "from": "hello@officialum1.com"}
+    except Exception as e:
+        return {"status": "FAILED", "error": str(e)}
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run("worker:app", host="0.0.0.0", port=port, reload=False)
