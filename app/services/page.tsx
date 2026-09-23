@@ -4,120 +4,196 @@ import ROICalculator from "@/components/ROICalculator";
 import SuccessRoadmap from "@/components/SuccessRoadmap";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/PageHero";
-import { Globe, MapPin, RefreshCw, Rocket, Search, Share2, ShieldCheck, ShoppingBag, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { 
+  Globe, 
+  MapPin, 
+  RefreshCw, 
+  Rocket, 
+  Search, 
+  Share2, 
+  ShieldCheck, 
+  ShoppingBag, 
+  Sparkles, 
+  TrendingUp, 
+  Zap, 
+  Smartphone, 
+  BarChart3, 
+  Bot, 
+  Layers, 
+  CheckCircle2, 
+  ArrowRight 
+} from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Services | Digital Marketing Agency in Sahiwal | OfficialUM1",
+  title: "Enterprise Digital Marketing & Web Engineering Services | OfficialUM1",
   description:
-    "OfficialUM1 provides SEO, web development, guest posting, and digital marketing services in Sahiwal, Pakistan for local and global businesses.",
+    "OfficialUM1 LLC provides full-stack Next.js web development, enterprise SEO, high-DA guest posting, performance ads, and conversion engineering for global brands across US, UK, and UAE.",
   keywords: [
-    "digital marketing agency sahiwal",
-    "digital marketing agency in sahiwal",
-    "SEO Services Sahiwal",
-    "Guest Posting Agency Sahiwal",
-    "Web Development Sahiwal",
+    "digital marketing agency",
+    "enterprise SEO services",
+    "Next.js web development",
+    "guest posting agency",
+    "WordPress speed optimization",
+    "e-commerce CRO",
+    "Google Ads management",
   ],
   alternates: { canonical: "https://officialum1.com/services" },
 };
 
-const services = [
+const servicePillars = [
   {
-    icon: Zap,
-    title: "WordPress Speed Optimization",
-    desc: "Guaranteed 90+ Google PageSpeed score and sub-1.5s load times with zero downtime.",
-    href: "/services/wordpress-speed-optimization",
-    cta: "Speed Up Site",
+    category: "1. Engineering & Headless Web",
+    badge: "Sub-500ms Speed",
+    description: "Next-gen web infrastructure, custom full-stack SaaS portals, and sub-second loading speeds that pass Core Web Vitals with 95+ scores.",
+    items: [
+      {
+        icon: Rocket,
+        title: "WordPress to Next.js 15 Migration",
+        desc: "Migrate legacy WordPress sites to ultra-fast Next.js headless platforms with guaranteed sub-500ms speeds and 0% downtime.",
+        href: "/services/wordpress-to-nextjs-migration",
+        cta: "Migrate to Next.js",
+      },
+      {
+        icon: Smartphone,
+        title: "Custom Web & Mobile App Development",
+        desc: "Bespoke SaaS platforms, client portals, and cross-platform Flutter/React Native mobile applications tailored for scale.",
+        href: "/services/outsource-web-development",
+        cta: "Build Custom App",
+      },
+      {
+        icon: Zap,
+        title: "WordPress Speed Optimization (90+ Score)",
+        desc: "Deep MySQL database re-indexing, LiteSpeed edge caching, and critical CSS extraction to lock 90+ mobile PageSpeed.",
+        href: "/services/wordpress-speed-optimization",
+        cta: "Speed Up Website",
+      },
+      {
+        icon: ShieldCheck,
+        title: "Malware Removal & Cloud Security",
+        desc: "Emergency 24-hour WordPress disinfection, backdoor eradication, and Google 'Deceptive Site' blacklist clearance.",
+        href: "/services/wordpress-malware-removal",
+        cta: "Clean Malware Now",
+      },
+    ]
   },
   {
-    icon: Rocket,
-    title: "WordPress to Next.js Migration",
-    desc: "Migrate clunky WordPress sites to high-speed, ultra-secure Next.js 14 App Router platforms.",
-    href: "/services/wordpress-to-nextjs-migration",
-    cta: "Migrate to Next.js",
+    category: "2. Organic Search & Local Dominance",
+    badge: "Top 1 Rankings",
+    description: "Data-engineered search engine optimization to capture purchase-ready organic buyer traffic across Google US, UK, and Dubai (Google.ae).",
+    items: [
+      {
+        icon: Search,
+        title: "Enterprise SEO Retainers (US, UK, UAE)",
+        desc: "Full-scale technical auditing, programmatic schema markup, competitor gap analysis, and compounding organic keyword rankings.",
+        href: "/services/seo-services-dubai",
+        cta: "Explore SEO Retainers",
+      },
+      {
+        icon: MapPin,
+        title: "Google Maps 3-Pack & Local SEO",
+        desc: "Dominate local map pack listings, neighborhood landing pages, and consistent inbound phone calls across prime metro locations.",
+        href: "/services/local-seo",
+        cta: "Rank in Local 3-Pack",
+      },
+      {
+        icon: Layers,
+        title: "White-Label Agency SEO Fulfillment",
+        desc: "Scalable, transparent, and invisible SEO execution designed for marketing agencies in North America, UK, and Australia.",
+        href: "/services/white-label-seo",
+        cta: "Partner as Agency",
+      },
+      {
+        icon: MapPin,
+        title: "High-NAP Citation Building",
+        desc: "100% manual business directory submissions with verified NAP consistency to boost local Google algorithm prominence.",
+        href: "/services/local-citations",
+        cta: "Build Local Citations",
+      },
+    ]
   },
   {
-    icon: ShieldCheck,
-    title: "Malware Removal & Security",
-    desc: "Emergency 24-hour WordPress malware cleanup, backdoor removal & 60-day hack-free warranty.",
-    href: "/services/wordpress-malware-removal",
-    cta: "Clean Malware",
+    category: "3. High-DA Link Building & Digital PR",
+    badge: "5,000+ Publishers",
+    description: "Acquire permanent, contextual DoFollow backlinks on real high-traffic publications with zero private blog networks (PBNs).",
+    items: [
+      {
+        icon: Globe,
+        title: "High DA Editorial Guest Posting",
+        desc: "DoFollow contextual links on 5,000+ verified news and industry publications with real Google organic traffic (DA 50–90+).",
+        href: "/services/guest-posting",
+        cta: "View Publisher Inventory",
+      },
+      {
+        icon: TrendingUp,
+        title: "Curated Niche Edits (In-Content Links)",
+        desc: "Fast-track link equity by placing contextual backlinks inside established, top-ranking Google articles with existing traffic.",
+        href: "/services/niche-edits",
+        cta: "Explore Niche Edits",
+      },
+      {
+        icon: Share2,
+        title: "Global Press Release Syndication",
+        desc: "Guaranteed brand features on AP News, Yahoo Finance, MarketWatch, and 350+ tier-1 international media outlets.",
+        href: "/services/press-release-distribution",
+        cta: "Distribute Press Release",
+      },
+      {
+        icon: Sparkles,
+        title: "Crypto, Web3 & FinTech Backlinks",
+        desc: "Specialized backlink outreach and digital PR across leading blockchain, DeFi, Bitcoin, and FinTech news magazines.",
+        href: "/services/crypto-guest-posting",
+        cta: "Explore Crypto Media",
+      },
+    ]
   },
   {
-    icon: ShoppingBag,
-    title: "E-Commerce CRO Optimization",
-    desc: "Turn visitors into buyers with 1-click checkouts, sticky carts, and average order value upsells.",
-    href: "/services/ecommerce-cro",
-    cta: "Boost Conversions",
-  },
-  {
-    icon: MapPin,
-    title: "Local SEO & Google Maps 3-Pack",
-    desc: "Dominate Google Maps local pack rankings, citations, and inbound calls for US/UK businesses.",
-    href: "/services/local-seo",
-    cta: "Rank Locally",
-  },
-  {
-    icon: Globe,
-    title: "High DA Guest Posting",
-    desc: "100% DoFollow editorial guest posts on 65,000+ verified websites with real Google traffic (DA 40-75+).",
-    href: "/services/guest-posting",
-    cta: "View Guest Posts",
-  },
-  {
-    icon: TrendingUp,
-    title: "Curated Niche Edits (Link Insertions)",
-    desc: "Fast-track ranking authority with in-content contextual links placed inside aged, indexed Google articles.",
-    href: "/services/niche-edits",
-    cta: "View Niche Edits",
-  },
-  {
-    icon: Sparkles,
-    title: "Crypto & Web3 Guest Posting",
-    desc: "Targeted blockchain, DeFi, Bitcoin & Web3 backlink placements across premier crypto media portals.",
-    href: "/services/crypto-guest-posting",
-    cta: "Explore Crypto Links",
-  },
-  {
-    icon: Share2,
-    title: "Press Release Distribution",
-    desc: "Guaranteed AP News, Yahoo Finance & Google News syndication across 350+ top global news portals.",
-    href: "/services/press-release-distribution",
-    cta: "Distribute PR",
-  },
-  {
-    icon: MapPin,
-    title: "Local SEO & Citation Building",
-    desc: "100% manual local business directory citations with strict NAP consistency to dominate Google 3-Pack.",
-    href: "/services/local-citations",
-    cta: "Build Citations",
-  },
-  {
-    icon: RefreshCw,
-    title: "Website Care & Maintenance",
-    desc: "Daily cloud backups, weekly safe updates, 24/7 uptime monitoring & dedicated developer hours.",
-    href: "/services/website-maintenance",
-    cta: "View Care Plans",
-  },
-  {
-    icon: Search,
-    title: "White Label Agency SEO",
-    desc: "Invisible, ultra-profitable SEO fulfillment and technical execution for marketing agencies.",
-    href: "/services/white-label-seo",
-    cta: "Agency Partner",
-  },
+    category: "4. Conversion, Paid Scale & Automation",
+    badge: "Maximizing ROI",
+    description: "Turn incoming traffic into closed deals with psychological CRO checkout funnels, precision PPC ads, and automated workflows.",
+    items: [
+      {
+        icon: ShoppingBag,
+        title: "E-Commerce CRO & Checkout Funnels",
+        desc: "Engineered 1-click slide-out carts, sticky mobile buy bars, and post-purchase upsells that double store conversion rates.",
+        href: "/services/ecommerce-cro",
+        cta: "Boost Store Sales",
+      },
+      {
+        icon: BarChart3,
+        title: "Performance Google & Meta Ads Management",
+        desc: "High-ROI paid search and social ad campaigns targeting purchase-ready commercial search queries with positive ROAS.",
+        href: "/contact?service=Paid+Ads",
+        cta: "Scale Paid Acquisition",
+      },
+      {
+        icon: Bot,
+        title: "AI Business Workflows & CRM Automation",
+        desc: "Automated instant lead response systems, AI chatbots, and CRM integrations that follow up with inbound prospects in seconds.",
+        href: "/contact?service=AI+Automation",
+        cta: "Automate Workflows",
+      },
+      {
+        icon: RefreshCw,
+        title: "Enterprise Website Care & Maintenance",
+        desc: "24/7 uptime monitoring, daily automated cloud snapshots, security hardening, and dedicated monthly senior developer hours.",
+        href: "/services/website-maintenance",
+        cta: "View Care Plans",
+      },
+    ]
+  }
 ];
 
 export default function ServicesPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    serviceType: "Digital Marketing & Web Development",
+    serviceType: "Full-Service Digital Marketing & Web Engineering",
     provider: {
       "@id": "https://officialum1.com/#organization",
     },
-    areaServed: "Worldwide",
+    areaServed: ["United States", "United Kingdom", "United Arab Emirates", "Worldwide"],
     description:
-      "Premium SEO, web development, guest posting, and social growth services tailored for global brands.",
+      "Enterprise Next.js web development, technical SEO, high-DA guest posting, and performance marketing tailored for global brands.",
     url: "https://officialum1.com/services",
   };
 
@@ -128,91 +204,123 @@ export default function ServicesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
       />
+      
       <div style={{ paddingTop: "80px" }}>
         <PageHero
           breadcrumbs={[{ label: "Home", href: "/" }, { label: "Services" }]}
-          label="Services"
-          title="What We Build For You"
-          description="High-performance websites, SEO engines, guest posting, and growth systems designed to convert."
+          label="Full-Stack Digital Solutions"
+          title="Engineered to Scale Revenue"
+          description="Sub-500ms web architectures, dominant organic search engines, high-DA digital PR, and conversion systems built for high-growth global brands."
         />
 
-        <section className="py-[96px]" style={{ background: "var(--bg-base)" }}>
+        {/* 4 Pillars Section */}
+        <section className="py-[80px]" style={{ background: "var(--bg-base)" }}>
           <div className="container">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {services.map((service) => (
-                <article
-                  key={service.title}
-                  className="group rounded-xl border p-7 transition duration-300 hover:-translate-y-1"
-                  style={{
-                    background: "#fff",
-                    borderColor: "var(--border-subtle)",
-                    boxShadow: "0 12px 30px rgba(24,32,38,0.06)",
-                  }}
-                >
-                  <div
-                    className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg"
-                    style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
-                  >
-                    <service.icon className="h-6 w-6" />
+            <div className="space-y-20">
+              {servicePillars.map((pillar, pillarIdx) => (
+                <div key={pillarIdx} className="space-y-8">
+                  {/* Pillar Header */}
+                  <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-[var(--border-subtle)] pb-6">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-2" style={{ background: "rgba(20,108,120,0.12)", color: "var(--accent-blue)" }}>
+                        {pillar.badge}
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-black" style={{ color: "var(--text-primary)" }}>
+                        {pillar.category}
+                      </h2>
+                      <p className="text-sm md:text-base text-gray-500 max-w-2xl mt-1 font-medium">
+                        {pillar.description}
+                      </p>
+                    </div>
                   </div>
-                  <h2 className="mb-3 text-2xl font-black" style={{ color: "var(--text-primary)" }}>
-                    {service.title}
-                  </h2>
-                  <p className="mb-6 text-sm leading-7" style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-                    {service.desc}
-                  </p>
-                  <a
-                    href={service.href}
-                    className="inline-flex items-center text-sm font-bold"
-                    style={{ color: "var(--accent-blue)", textDecoration: "none" }}
-                  >
-                    {service.cta} -&gt;
-                  </a>
-                </article>
+
+                  {/* Grid Cards */}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {pillar.items.map((service, itemIdx) => (
+                      <article
+                        key={itemIdx}
+                        className="group flex flex-col justify-between rounded-2xl border p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+                        style={{
+                          background: "#ffffff",
+                          borderColor: "var(--border-subtle)",
+                          boxShadow: "0 10px 28px rgba(24,32,38,0.05)",
+                        }}
+                      >
+                        <div>
+                          <div
+                            className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110"
+                            style={{ background: "rgba(20,108,120,0.10)", color: "var(--accent-blue)" }}
+                          >
+                            <service.icon className="h-6 w-6" />
+                          </div>
+                          <h3 className="mb-2.5 text-lg font-black leading-snug" style={{ color: "var(--text-primary)" }}>
+                            {service.title}
+                          </h3>
+                          <p className="text-xs md:text-sm leading-relaxed text-gray-500 font-medium mb-6">
+                            {service.desc}
+                          </p>
+                        </div>
+                        
+                        <a
+                          href={service.href}
+                          className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider transition-colors hover:underline"
+                          style={{ color: "var(--accent-blue)", textDecoration: "none" }}
+                        >
+                          <span>{service.cta}</span>
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                        </a>
+                      </article>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-[88px]" style={{ background: "var(--bg-section)" }}>
+        {/* Enterprise Call to Action Banner */}
+        <section className="py-[80px]" style={{ background: "var(--bg-section)" }}>
           <div className="container">
             <div
-              className="rounded-2xl border p-8 md:p-12"
+              className="rounded-3xl border p-8 md:p-14"
               style={{
-                background: "linear-gradient(135deg, #ffffff, #eef4f2)",
-                borderColor: "var(--border-subtle)",
-                boxShadow: "0 18px 44px rgba(24,32,38,0.08)",
+                background: "linear-gradient(135deg, #182026 0%, #0c1217 100%)",
+                borderColor: "rgba(255,255,255,0.08)",
+                boxShadow: "0 22px 50px rgba(24, 32, 38, 0.2)",
+                color: "#ffffff"
               }}
             >
               <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <span
-                    className="text-xs font-bold uppercase"
-                    style={{ color: "var(--accent-blue)", letterSpacing: 0 }}
+                    className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4"
+                    style={{ background: "rgba(20, 108, 120, 0.4)", color: "#5eead4" }}
                   >
-                    Instant Scale
+                    Enterprise Growth Roadmap
                   </span>
-                  <h2 className="mt-4 text-3xl font-black md:text-5xl">
-                    Ready to scale faster?
+                  <h2 className="text-3xl font-black md:text-5xl leading-tight">
+                    Ready to scale your digital presence?
                   </h2>
-                  <p className="max-w-2xl text-base" style={{ color: "var(--text-muted)", fontWeight: 500 }}>
-                    We will map your next 30 days: what to build, what to rank, and what to automate.
+                  <p className="max-w-2xl text-base text-gray-400 mt-2 font-medium">
+                    Schedule a free 1-on-1 strategic consultation with our senior engineers. We’ll map out your technical architecture, search keywords, and revenue roadmap.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col sm:flex-row gap-4 shrink-0">
                   <a
                     href="/work"
-                    className="rounded-lg border px-6 py-3 text-center font-bold"
-                    style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
+                    className="rounded-xl border border-white/20 px-7 py-4 text-center font-bold text-white transition-all hover:bg-white/10"
                   >
-                    View Work
+                    View Portfolio & Case Studies
                   </a>
                   <a
                     href="/contact"
-                    className="rounded-lg px-6 py-3 text-center font-bold text-white"
-                    style={{ background: "var(--gradient)" }}
+                    className="rounded-xl px-8 py-4 text-center font-black text-white transition-all hover:scale-105"
+                    style={{ 
+                      background: "linear-gradient(135deg, var(--accent-blue) 0%, #14808e 100%)",
+                      boxShadow: "0 10px 25px rgba(20, 108, 120, 0.4)"
+                    }}
                   >
-                    Talk to Expert
+                    Request Custom Scope →
                   </a>
                 </div>
               </div>
@@ -220,6 +328,7 @@ export default function ServicesPage() {
           </div>
         </section>
 
+        {/* Roadmap & ROI Calculator */}
         <section className="py-[96px]" style={{ background: "var(--bg-base)" }}>
           <div className="container">
             <SuccessRoadmap />
@@ -232,6 +341,7 @@ export default function ServicesPage() {
           </div>
         </section>
       </div>
+
       <Footer />
     </main>
   );
