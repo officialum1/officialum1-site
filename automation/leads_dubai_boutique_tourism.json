@@ -1,0 +1,182 @@
+[
+  {
+    "clientName": "Adil",
+    "company": "Dune Buggy Dubai Adventure",
+    "domain": "dunebuggydubaiadventure.com",
+    "emails": ["info@dunebuggydubaiadventure.com", "booking@dunebuggydubaiadventure.com"],
+    "city": "Dubai",
+    "niche": "Independent Dune Buggy & Quad Biking",
+    "type": "Boutique Operator"
+  },
+  {
+    "clientName": "Farooq",
+    "company": "Desert Fox Safari Dubai",
+    "domain": "desertfoxsafari.com",
+    "emails": ["contact@desertfoxsafari.com", "tours@desertfoxsafari.com"],
+    "city": "Dubai",
+    "niche": "Private Camp & Evening Safari",
+    "type": "Boutique Safari"
+  },
+  {
+    "clientName": "Kashif",
+    "company": "Marina Star Yacht Rental",
+    "domain": "marinastaryacht.com",
+    "emails": ["booking@marinastaryacht.com", "info@marinastaryacht.com"],
+    "city": "Dubai Marina",
+    "niche": "Small 35ft-55ft Private Yacht Charters",
+    "type": "Independent Yacht Owner"
+  },
+  {
+    "clientName": "Rizwan",
+    "company": "Golden Dunes Tourism LLC",
+    "domain": "goldendunestourism.com",
+    "emails": ["info@goldendunestourism.com", "sales@goldendunestourism.com"],
+    "city": "Dubai",
+    "niche": "Overnight Desert Camping & Stargazing",
+    "type": "Local Safari Guide"
+  },
+  {
+    "clientName": "Waqas",
+    "company": "Dubai Speedboat Adventures",
+    "domain": "dubaispeedboatadventures.com",
+    "emails": ["info@dubaispeedboatadventures.com", "tours@dubaispeedboatadventures.com"],
+    "city": "Dubai Marina",
+    "niche": "Sightseeing Speedboat Tours",
+    "type": "Local Water Sports Operator"
+  },
+  {
+    "clientName": "Noman",
+    "company": "Al Marmoom Desert Experience",
+    "domain": "almarmoomexperience.com",
+    "emails": ["contact@almarmoomexperience.com", "info@almarmoomexperience.com"],
+    "city": "Dubai",
+    "niche": "Eco-friendly Camel Treks & Bedouin Dining",
+    "type": "Boutique Tour Host"
+  },
+  {
+    "clientName": "Sheraz",
+    "company": "Dubai Canal Cruise Boats",
+    "domain": "dubaicanalcruise.com",
+    "emails": ["info@dubaicanalcruise.com", "booking@dubaicanalcruise.com"],
+    "city": "Dubai",
+    "niche": "Abra Boat & Canal Dining Tours",
+    "type": "Small Cruise Company"
+  },
+  {
+    "clientName": "Moazzam",
+    "company": "Blue Ocean Yacht Charter Dubai",
+    "domain": "blueoceanyachtdubai.com",
+    "emails": ["charter@blueoceanyachtdubai.com", "info@blueoceanyachtdubai.com"],
+    "city": "Dubai Marina",
+    "niche": "Family Fishing & Sunset Boat Rental",
+    "type": "Independent Charter"
+  },
+  {
+    "clientName": "Shahid",
+    "company": "Red Sand Desert Safari",
+    "domain": "redsanddesertsafari.com",
+    "emails": ["booking@redsanddesertsafari.com", "info@redsanddesertsafari.com"],
+    "city": "Dubai / Sharjah",
+    "niche": "Self-drive Quad Biking & Sandboarding",
+    "type": "Direct Operator"
+  },
+  {
+    "clientName": "Irfan",
+    "company": "Dubai Heritage City Walks",
+    "domain": "dubaiheritagewalks.com",
+    "emails": ["info@dubaiheritagewalks.com", "tours@dubaiheritagewalks.com"],
+    "city": "Old Dubai (Al Fahidi)",
+    "niche": "Walking Tours & Street Food Guide",
+    "type": "Independent Tour Guide"
+  },
+  {
+    "clientName": "Danish",
+    "company": "Skyline Jet Ski Dubai",
+    "domain": "skylinejetskidubai.com",
+    "emails": ["rentals@skylinejetskidubai.com", "info@skylinejetskidubai.com"],
+    "city": "Dubai Jumeirah",
+    "niche": "Jet Ski & Water Activities",
+    "type": "Local Beach Operator"
+  },
+  {
+    "clientName": "Tanveer",
+    "company": "Desert Rider ATV Dubai",
+    "domain": "desertrideratv.com",
+    "emails": ["info@desertrideratv.com", "support@desertrideratv.com"],
+    "city": "Dubai",
+    "niche": "ATV & Buggy Rentals Lahbab",
+    "type": "Rental Operator"
+  },
+  {
+    "clientName": "Naveed",
+    "company": "Gulf Sunset Cruises",
+    "domain": "gulfsunsetcruises.com",
+    "emails": ["booking@gulfsunsetcruises.com", "info@gulfsunsetcruises.com"],
+    "city": "Dubai Creek",
+    "niche": "Affordable Traditional Dhow Dinners",
+    "type": "Family-run Tour Business"
+  },
+  {
+    "clientName": "Amir",
+    "company": "Dubai Falconry Experience",
+    "domain": "dubaifalconry.com",
+    "emails": ["info@dubaifalconry.com", "contact@dubaifalconry.com"],
+    "city": "Dubai Desert",
+    "niche": "Private Falconry & Wildlife Photography",
+    "type": "Specialty Boutique Tour"
+  },
+  {
+    "clientName": "Junaid",
+    "company": "Creek Boat Tours Dubai",
+    "domain": "creekboattours.com",
+    "emails": ["info@creekboattours.com", "sales@creekboattours.com"],
+    "city": "Dubai Deira",
+    "niche": "Creek Sightseeing & Abra Rentals",
+    "type": "Local Operator"
+  },
+  {
+    "clientName": "Bilal",
+    "company": "Hatta Mountain Safari Tours",
+    "domain": "hattamountainsafari.com",
+    "emails": ["info@hattamountainsafari.com", "tours@hattamountainsafari.com"],
+    "city": "Hatta / Dubai",
+    "niche": "Hatta Kayaking, Hiking & Mountain Safari",
+    "type": "Adventure Guide"
+  },
+  {
+    "clientName": "Rehan",
+    "company": "Luxury Ride Dubai Chauffeur",
+    "domain": "luxuryridedubai.com",
+    "emails": ["info@luxuryridedubai.com", "booking@luxuryridedubai.com"],
+    "city": "Dubai Downtown",
+    "niche": "Airport Transfer & VIP City Chauffeur",
+    "type": "Independent Chauffeur Fleet"
+  },
+  {
+    "clientName": "Sajid",
+    "company": "Marina Fishing Charters UAE",
+    "domain": "marinafishingcharters.com",
+    "emails": ["info@marinafishingcharters.com", "charter@marinafishingcharters.com"],
+    "city": "Dubai Marina",
+    "niche": "Deep Sea Game Fishing & Trolling",
+    "type": "Boat Captain & Owner"
+  },
+  {
+    "clientName": "Taimoor",
+    "company": "Arabian Quad Rentals",
+    "domain": "arabianquadrentals.com",
+    "emails": ["info@arabianquadrentals.com", "sales@arabianquadrentals.com"],
+    "city": "Dubai",
+    "niche": "Desert Quad Bikes & Dune Bashing",
+    "type": "Direct Garage/Rental"
+  },
+  {
+    "clientName": "Usman",
+    "company": "Ras Al Khaimah Desert Safari Club",
+    "domain": "rakdesertsafari.com",
+    "emails": ["info@rakdesertsafari.com", "booking@rakdesertsafari.com"],
+    "city": "Ras Al Khaimah / Dubai",
+    "niche": "RAK & Dubai Desert Excursions",
+    "type": "Local Safari Operator"
+  }
+]

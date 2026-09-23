@@ -1,0 +1,402 @@
+[
+  {
+    "clientName": "Tariq",
+    "company": "Arabian Adventures UAE",
+    "domain": "arabian-adventures.com",
+    "emails": ["info@arabian-adventures.com", "tours@arabian-adventures.com"],
+    "city": "Dubai",
+    "niche": "Desert Safari & City Tours"
+  },
+  {
+    "clientName": "Sultan",
+    "company": "Rayna Tours & Travels",
+    "domain": "raynatours.com",
+    "emails": ["inquiry@raynatours.com", "reservations@raynatours.com"],
+    "city": "Dubai",
+    "niche": "Luxury Dubai Excursions"
+  },
+  {
+    "clientName": "Faris",
+    "company": "Desert Safari Dubai Hub",
+    "domain": "desertsafaridubai.com",
+    "emails": ["booking@desertsafaridubai.com", "contact@desertsafaridubai.com"],
+    "city": "Dubai",
+    "niche": "VIP Desert Safari & Quad Biking"
+  },
+  {
+    "clientName": "Mansoor",
+    "company": "Platinum Heritage Luxury Safaris",
+    "domain": "platinum-heritage.com",
+    "emails": ["info@platinum-heritage.com", "reservations@platinum-heritage.com"],
+    "city": "Dubai",
+    "niche": "Heritage Desert Safari"
+  },
+  {
+    "clientName": "Rashid",
+    "company": "Xclusive Yachts Dubai Marina",
+    "domain": "xclusiveyachts.com",
+    "emails": ["book@xclusiveyachts.com", "charter@xclusiveyachts.com"],
+    "city": "Dubai",
+    "niche": "Luxury Yacht Rental Marina"
+  },
+  {
+    "clientName": "Adnan",
+    "company": "Royal Blue Coast Yachts",
+    "domain": "royalbluecoast.com",
+    "emails": ["info@royalbluecoast.com", "sales@royalbluecoast.com"],
+    "city": "Dubai",
+    "niche": "Private Yacht Charters"
+  },
+  {
+    "clientName": "Zubair",
+    "company": "Ocean Blue Yacht Rental",
+    "domain": "oceanblueyacht.com",
+    "emails": ["contact@oceanblueyacht.com", "support@oceanblueyacht.com"],
+    "city": "Dubai",
+    "niche": "Luxury Boat Charters"
+  },
+  {
+    "clientName": "Hamad",
+    "company": "Dubai Tour Pro",
+    "domain": "dubaitourpro.com",
+    "emails": ["info@dubaitourpro.com", "booking@dubaitourpro.com"],
+    "city": "Dubai",
+    "niche": "Sightseeing & Burj Khalifa Tickets"
+  },
+  {
+    "clientName": "Khalid",
+    "company": "Falcon Oasis Tourism",
+    "domain": "falconoasis.com",
+    "emails": ["info@falconoasis.com", "tours@falconoasis.com"],
+    "city": "Dubai",
+    "niche": "Inbound UAE Tourism"
+  },
+  {
+    "clientName": "Mustafa",
+    "company": "Cozmo Travel UAE",
+    "domain": "cozmotravel.com",
+    "emails": ["info@cozmotravel.com", "support@cozmotravel.com"],
+    "city": "Dubai",
+    "niche": "Corporate & Leisure Travel"
+  },
+  {
+    "clientName": "Kareem",
+    "company": "Al Boom Tourism Dubai",
+    "domain": "alboomtourism.com",
+    "emails": ["info@alboomtourism.com", "reservations@alboomtourism.com"],
+    "city": "Dubai",
+    "niche": "Dhow Cruise & City Sightseeing"
+  },
+  {
+    "clientName": "Nasser",
+    "company": "Oasis Palm Tourism LLC",
+    "domain": "oasispalmdubai.com",
+    "emails": ["info@oasispalmdubai.com", "sales@oasispalmdubai.com"],
+    "city": "Dubai",
+    "niche": "Desert Safari & Yacht Tours"
+  },
+  {
+    "clientName": "Waleed",
+    "company": "Dhow Cruise Marina Tours",
+    "domain": "dhowcruisedubai.com",
+    "emails": ["info@dhowcruisedubai.com", "booking@dhowcruisedubai.com"],
+    "city": "Dubai",
+    "niche": "Dinner Cruise & Marina Sightseeing"
+  },
+  {
+    "clientName": "Hassan",
+    "company": "VIP Tour Dubai Excursions",
+    "domain": "viptour.ae",
+    "emails": ["info@viptour.ae", "contact@viptour.ae"],
+    "city": "Dubai",
+    "niche": "VIP Chauffeur & Helicopter Tours"
+  },
+  {
+    "clientName": "Bilal",
+    "company": "Arabian Desert Adventures",
+    "domain": "arabiandesertadventures.com",
+    "emails": ["booking@arabiandesertadventures.com", "info@arabiandesertadventures.com"],
+    "city": "Dubai",
+    "niche": "Dune Buggy & Desert Camp"
+  },
+  {
+    "clientName": "Zayn",
+    "company": "Dubai City Tour Hub",
+    "domain": "dubaicitytour.net",
+    "emails": ["info@dubaicitytour.net", "sales@dubaicitytour.net"],
+    "city": "Dubai",
+    "niche": "Abu Dhabi & Dubai City Sightseeing"
+  },
+  {
+    "clientName": "Salim",
+    "company": "Big Bus Tours Dubai Agency",
+    "domain": "bigbustours.com",
+    "emails": ["info@bigbustours.com", "support@bigbustours.com"],
+    "city": "Dubai",
+    "niche": "Hop-On Hop-Off Sightseeing"
+  },
+  {
+    "clientName": "Mahmood",
+    "company": "Seven Yachts Dubai",
+    "domain": "sevenyachts.ae",
+    "emails": ["charter@sevenyachts.ae", "info@sevenyachts.ae"],
+    "city": "Dubai",
+    "niche": "Superyacht Charters"
+  },
+  {
+    "clientName": "Nabeel",
+    "company": "Luxury Desert Safari LLC",
+    "domain": "luxurydesertsafari.com",
+    "emails": ["info@luxurydesertsafari.com", "contact@luxurydesertsafari.com"],
+    "city": "Dubai",
+    "niche": "Private 5-Star Desert Safari"
+  },
+  {
+    "clientName": "Farhan",
+    "company": "Desert Leap Tourism",
+    "domain": "desertleap.com",
+    "emails": ["info@desertleap.com", "booking@desertleap.com"],
+    "city": "Dubai",
+    "niche": "Adventure Sports & Buggy Tours"
+  },
+  {
+    "clientName": "Imran",
+    "company": "Dubai Adventure Tours",
+    "domain": "dubaiadventure.net",
+    "emails": ["sales@dubaiadventure.net", "info@dubaiadventure.net"],
+    "city": "Dubai",
+    "niche": "Scuba Diving & Water Sports"
+  },
+  {
+    "clientName": "Sameer",
+    "company": "Elite Pearl Charter",
+    "domain": "elitepearlcharter.com",
+    "emails": ["info@elitepearlcharter.com", "booking@elitepearlcharter.com"],
+    "city": "Dubai",
+    "niche": "Private Yacht Rental Marina"
+  },
+  {
+    "clientName": "Majid",
+    "company": "Al Wasl Yachts Dubai",
+    "domain": "alwaslyachts.com",
+    "emails": ["info@alwaslyachts.com", "reservations@alwaslyachts.com"],
+    "city": "Dubai",
+    "niche": "Deep Sea Fishing & Yachts"
+  },
+  {
+    "clientName": "Yousef",
+    "company": "Orient Tours UAE",
+    "domain": "orient-tours-uae.com",
+    "emails": ["contact@orient-tours-uae.com", "info@orient-tours-uae.com"],
+    "city": "Sharjah / Dubai",
+    "niche": "Cultural & Heritage Tours"
+  },
+  {
+    "clientName": "Zaid",
+    "company": "Sharaf Travel LLC",
+    "domain": "sharaftravel.com",
+    "emails": ["info@sharaftravel.com", "holidays@sharaftravel.com"],
+    "city": "Dubai",
+    "niche": "Inbound & Outbound Holidays"
+  },
+  {
+    "clientName": "Kamran",
+    "company": "Happy Desert Safari",
+    "domain": "happydesertsafari.com",
+    "emails": ["info@happydesertsafari.com", "booking@happydesertsafari.com"],
+    "city": "Dubai",
+    "niche": "Budget & Evening Desert Safaris"
+  },
+  {
+    "clientName": "Ashraf",
+    "company": "Dubai Dune Buggy Excursions",
+    "domain": "dubaidunebuggy.com",
+    "emails": ["info@dubaidunebuggy.com", "sales@dubaidunebuggy.com"],
+    "city": "Dubai",
+    "niche": "Quad Bike & Buggy Rental"
+  },
+  {
+    "clientName": "Ehsan",
+    "company": "Alpha Tours Dubai",
+    "domain": "alphatoursdubai.com",
+    "emails": ["reservations@alphatoursdubai.com", "info@alphatoursdubai.com"],
+    "city": "Dubai",
+    "niche": "Helicopter & Luxury Excursions"
+  },
+  {
+    "clientName": "Saad",
+    "company": "Dubai Marina Yacht Club Charters",
+    "domain": "dubaimarinayachtcharter.com",
+    "emails": ["booking@dubaimarinayachtcharter.com", "info@dubaimarinayachtcharter.com"],
+    "city": "Dubai",
+    "niche": "Luxury Boat & Yacht Rentals"
+  },
+  {
+    "clientName": "Munir",
+    "company": "Al Jarf Tourism LLC",
+    "domain": "aljarftourism.com",
+    "emails": ["info@aljarftourism.com", "tours@aljarftourism.com"],
+    "city": "Dubai",
+    "niche": "Desert Safari & Musandam Tours"
+  },
+  {
+    "clientName": "Jasim",
+    "company": "Red Dunes Safari Dubai",
+    "domain": "reddunedubai.com",
+    "emails": ["info@reddunedubai.com", "booking@reddunedubai.com"],
+    "city": "Dubai",
+    "niche": "Lahbab Red Dune Safari"
+  },
+  {
+    "clientName": "Bashir",
+    "company": "Sun City Tours Dubai",
+    "domain": "suncitydubai.com",
+    "emails": ["info@suncitydubai.com", "sales@suncitydubai.com"],
+    "city": "Dubai",
+    "niche": "UAE Sightseeing Packages"
+  },
+  {
+    "clientName": "Anas",
+    "company": "Arabian Ranches Horse & Camel Tours",
+    "domain": "arabianhorseadventures.com",
+    "emails": ["info@arabianhorseadventures.com", "contact@arabianhorseadventures.com"],
+    "city": "Dubai",
+    "niche": "Equestrian & Camel Riding"
+  },
+  {
+    "clientName": "Rami",
+    "company": "Prime Yachts Dubai",
+    "domain": "primeyachtsdubai.com",
+    "emails": ["info@primeyachtsdubai.com", "charter@primeyachtsdubai.com"],
+    "city": "Dubai",
+    "niche": "Private Luxury Yachts"
+  },
+  {
+    "clientName": "Ziad",
+    "company": "Abu Dhabi Tour Specialist",
+    "domain": "abudhabitours.ae",
+    "emails": ["info@abudhabitours.ae", "booking@abudhabitours.ae"],
+    "city": "Abu Dhabi / Dubai",
+    "niche": "Grand Mosque & Louvre Tours"
+  },
+  {
+    "clientName": "Fawad",
+    "company": "Dubai Safari Champions",
+    "domain": "safarichampions.com",
+    "emails": ["info@safarichampions.com", "booking@safarichampions.com"],
+    "city": "Dubai",
+    "niche": "Desert Safari & VIP Camp"
+  },
+  {
+    "clientName": "Hatem",
+    "company": "Skyline Travel & Tourism",
+    "domain": "skylinetourism.ae",
+    "emails": ["info@skylinetourism.ae", "support@skylinetourism.ae"],
+    "city": "Dubai",
+    "niche": "VIP Tourism & Hotel Booking"
+  },
+  {
+    "clientName": "Asim",
+    "company": "Gold Yacht Rental Dubai",
+    "domain": "goldyachtdubai.com",
+    "emails": ["booking@goldyachtdubai.com", "info@goldyachtdubai.com"],
+    "city": "Dubai",
+    "niche": "Sunset Yacht Cruises"
+  },
+  {
+    "clientName": "Qasim",
+    "company": "Dubai Watersports Hub",
+    "domain": "dubaiwatersportshub.com",
+    "emails": ["info@dubaiwatersportshub.com", "sales@dubaiwatersportshub.com"],
+    "city": "Dubai",
+    "niche": "Jet Ski & Flyboard Rentals"
+  },
+  {
+    "clientName": "Fahad",
+    "company": "Desert Gate Tourism LLC",
+    "domain": "desertgate.ae",
+    "emails": ["info@desertgate.ae", "inbound@desertgate.ae"],
+    "city": "Dubai",
+    "niche": "DMC & Luxury Inbound Travel"
+  },
+  {
+    "clientName": "Ibrahim",
+    "company": "Lama Tours Dubai",
+    "domain": "lamadubai.com",
+    "emails": ["info@lamadubai.com", "reservations@lamadubai.com"],
+    "city": "Dubai",
+    "niche": "Desert Safari & Cruises"
+  },
+  {
+    "clientName": "Zain",
+    "company": "Luxury Chauffeur & Tour UAE",
+    "domain": "luxurychauffeurdubai.com",
+    "emails": ["info@luxurychauffeurdubai.com", "bookings@luxurychauffeurdubai.com"],
+    "city": "Dubai",
+    "niche": "VIP Rolls Royce & Maybach Tours"
+  },
+  {
+    "clientName": "Kashif",
+    "company": "Dubai Jet Ski Adventures",
+    "domain": "jetskidubai.ae",
+    "emails": ["info@jetskidubai.ae", "rentals@jetskidubai.ae"],
+    "city": "Dubai",
+    "niche": "Burj Al Arab Jet Ski Tours"
+  },
+  {
+    "clientName": "Shakir",
+    "company": "Arabian Nights Village Tours",
+    "domain": "arabiannights.ae",
+    "emails": ["reservations@arabiannights.ae", "info@arabiannights.ae"],
+    "city": "Abu Dhabi / Dubai",
+    "niche": "Traditional Desert Resort & Safaris"
+  },
+  {
+    "clientName": "Daniyal",
+    "company": "Al Tayer Travel Agency",
+    "domain": "altayertravel.com",
+    "emails": ["info@altayertravel.com", "holidays@altayertravel.com"],
+    "city": "Dubai",
+    "niche": "Premium Inbound UAE Holidays"
+  },
+  {
+    "clientName": "Rizwan",
+    "company": "Dubai Desert Buggy Kings",
+    "domain": "buggykingsdubai.com",
+    "emails": ["info@buggykingsdubai.com", "sales@buggykingsdubai.com"],
+    "city": "Dubai",
+    "niche": "Polaris & Can-Am Desert Tours"
+  },
+  {
+    "clientName": "Mazin",
+    "company": "Marina Dhow Cruise Events",
+    "domain": "marinadhowdinner.com",
+    "emails": ["booking@marinadhowdinner.com", "info@marinadhowdinner.com"],
+    "city": "Dubai",
+    "niche": "Luxury Dinner Cruises"
+  },
+  {
+    "clientName": "Waseem",
+    "company": "Gulf Ventures DMC Dubai",
+    "domain": "gulfventures.com",
+    "emails": ["info@gulfventures.com", "events@gulfventures.com"],
+    "city": "Dubai",
+    "niche": "Destination Management & Corporate Tours"
+  },
+  {
+    "clientName": "Ubaid",
+    "company": "Emirates Adventure Safari",
+    "domain": "emiratesadventures.com",
+    "emails": ["info@emiratesadventures.com", "booking@emiratesadventures.com"],
+    "city": "Dubai",
+    "niche": "4x4 Desert Dune Bashing"
+  },
+  {
+    "clientName": "Jawad",
+    "company": "Dubai VIP Yacht Charters LLC",
+    "domain": "dubaivipyachts.com",
+    "emails": ["charter@dubaivipyachts.com", "info@dubaivipyachts.com"],
+    "city": "Dubai",
+    "niche": "50ft to 120ft Luxury Yachts"
+  }
+]
