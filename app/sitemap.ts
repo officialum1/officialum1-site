@@ -28,6 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/services/web-development-usa`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${baseUrl}/services/wordpress-speed-optimization-uk`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
         { url: `${baseUrl}/services/seo-services-dubai`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+        { url: `${baseUrl}/services/tourism-seo-dubai`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.95 },
         { url: `${baseUrl}/press`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.85 },
         { url: `${baseUrl}/press/officialum1-launches-nextjs-speed-architecture-2026`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
         { url: `${baseUrl}/services/seo-services-usa`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
