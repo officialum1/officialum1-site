@@ -23,6 +23,7 @@ if _current_dir not in sys.path:
     sys.path.insert(0, _current_dir)
 
 from crm_sync import sync_outreach_to_crm
+from lead_validator import verify_lead_email
 
 CONFIG_FILE = os.path.join(_current_dir, "config.json")
 SENT_HISTORY_FILE = os.path.join(_current_dir, "sent_outreach_history.json")
@@ -295,6 +296,12 @@ def execute_outreach_batch(leads, max_count=30, delay_range=(15, 25)):
         if target_email.lower() in already_sent:
             continue
 
+        # 100% Real Email & DNS MX Verification (Zero-Mistake Protocol)
+        is_valid, reason = verify_lead_email(target_email)
+        if not is_valid:
+            print(f"  [Skipped Invalid Email] {target_email}: {reason}")
+            continue
+
         dataset_key = lead.get("_dataset_key", "NEW_BRANDS")
         template_key = (
             "NEW_BRANDS" if "NEW" in dataset_key else
@@ -306,9 +313,11 @@ def execute_outreach_batch(leads, max_count=30, delay_range=(15, 25)):
         )
         tmpl = PITCH_TEMPLATES.get(template_key, PITCH_TEMPLATES["NEW_BRANDS"])
 
-        client_name = lead.get("clientName", "Team")
-        company = lead.get("company", lead.get("domain", "your brand"))
-        domain = lead.get("domain", "your website")
+        # Natural formatting for client & company names
+        raw_name = lead.get("clientName", "Founder")
+        client_name = raw_name.strip() if raw_name and raw_name.lower() != "team" else "Founder"
+        company = lead.get("company", lead.get("domain", "your brand")).replace(" LLC", "").replace(" Ltd", "").replace(" Inc", "").strip()
+        domain = lead.get("domain", "your website").replace("https://", "").replace("http://", "").strip("/")
         location = lead.get("city", lead.get("country", "your market"))
         niche = lead.get("niche", lead.get("industry", "tourism & hospitality"))
 
