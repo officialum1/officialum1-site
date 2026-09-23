@@ -42,9 +42,9 @@ export const metadata: Metadata = {
 
 const servicePillars = [
   {
-    category: "1. Engineering & Headless Web",
-    badge: "Sub-500ms Speed",
-    description: "Next-gen web infrastructure, custom full-stack SaaS portals, and sub-second loading speeds that pass Core Web Vitals with 95+ scores.",
+    category: "1. Engineering: Next.js, WordPress & Custom HTML",
+    badge: "Full-Stack Development",
+    description: "From blazing-fast Next.js 15 web apps to bespoke WordPress/WooCommerce and pixel-perfect HTML5/CSS3 landing pages, we build platforms that convert.",
     items: [
       {
         icon: Rocket,
@@ -54,11 +54,18 @@ const servicePillars = [
         cta: "Migrate to Next.js",
       },
       {
+        icon: Globe,
+        title: "Custom WordPress & WooCommerce Builds",
+        desc: "Custom theme & plugin development, Elementor Pro design, WooCommerce store setup, and advanced PHP/MySQL customization.",
+        href: "/services/website-maintenance",
+        cta: "Explore WordPress Dev",
+      },
+      {
         icon: Smartphone,
-        title: "Custom Web & Mobile App Development",
-        desc: "Bespoke SaaS platforms, client portals, and cross-platform Flutter/React Native mobile applications tailored for scale.",
+        title: "Pixel-Perfect HTML5, CSS3 & React Landing Pages",
+        desc: "Figma/PSD to high-converting, mobile-responsive HTML5, Tailwind, Bootstrap, and React single-page applications.",
         href: "/services/outsource-web-development",
-        cta: "Build Custom App",
+        cta: "Build HTML/React Page",
       },
       {
         icon: Zap,
@@ -66,6 +73,13 @@ const servicePillars = [
         desc: "Deep MySQL database re-indexing, LiteSpeed edge caching, and critical CSS extraction to lock 90+ mobile PageSpeed.",
         href: "/services/wordpress-speed-optimization",
         cta: "Speed Up Website",
+      },
+      {
+        icon: Palmtree,
+        title: "Dubai Tourism & Direct Booking Engines",
+        desc: "High-converting booking engines for Desert Safari, Luxury Yacht Rentals, and Tour Agencies with 0% OTA commissions.",
+        href: "/services/tourism-seo-dubai",
+        cta: "Explore Tourism Solutions",
       },
       {
         icon: ShieldCheck,
