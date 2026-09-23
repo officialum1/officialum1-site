@@ -1,6 +1,6 @@
 """
-OfficialUM1 - Master Cold Outreach Campaign Manager
-Unified CLI control center to run & simulate Campaigns 1, 2, and 3.
+OfficialUM1 - Master High-Ticket Outreach Campaign Manager
+Unified CLI control center to run & simulate targeted client acquisition campaigns.
 """
 import os
 import sys
@@ -15,7 +15,7 @@ if sys.stdout.encoding != 'utf-8':
 
 def show_banner():
     print("=" * 72)
-    print(" [OFFICIALUM1 LLC] - MULTI-CAMPAIGN OUTREACH CONTROL CENTER")
+    print(" 🚀 [OFFICIALUM1 LLC] - HIGH-TICKET CLIENT ACQUISITION CONTROL CENTER")
     print("=" * 72)
 
 def show_stats():
@@ -28,58 +28,55 @@ def show_stats():
         except Exception:
             pass
 
+    new_brand_sent = sum(1 for h in history if "NEW_BRAND" in h.get("campaign", ""))
+    tourism_sent = sum(1 for h in history if "TOURISM" in h.get("campaign", ""))
     speed_sent = sum(1 for h in history if "SPEED" in h.get("campaign", ""))
-    pr_sent = sum(1 for h in history if "PR" in h.get("campaign", ""))
     auth_sent = sum(1 for h in history if "AUTHORITY" in h.get("campaign", "") or h.get("campaign") is None)
 
-    print(f" CAMPAIGN STATS:")
-    print(f"    - Total Delivered in History: {len(history)}")
-    print(f"    - [1] WordPress Speed Sent: {speed_sent}")
-    print(f"    - [2] Press Release Sent: {pr_sent}")
-    print(f"    - [3] Authority Links Sent: {auth_sent}")
+    print(f" CAMPAIGN PERFORMANCE & CRM SYNC:")
+    print(f"    - Total Delivered Leads in History: {len(history)}")
+    print(f"    - [🔥] New Brands 0-to-1 Growth: {new_brand_sent}")
+    print(f"    - [🇦🇪] Boutique Dubai Tourism: {tourism_sent}")
+    print(f"    - [⚡] WordPress Speed & Next.js: {speed_sent}")
+    print(f"    - [🔗] Agency Authority Backlinks: {auth_sent}")
     print("=" * 72)
 
 def main():
     show_banner()
     show_stats()
     
-    print("\nSelect an action to execute:")
-    print("  [1] [SPEED] Run WordPress Speed Campaign (Dry Run Simulation)")
-    print("  [2] [SPEED] Run WordPress Speed Campaign (LIVE SEND)")
-    print("  [3] [SPEED] Run WordPress Speed FOLLOW-UP (LIVE SEND)")
-    print("  ---")
-    print("  [4] [PR] Run Press Release Campaign (Dry Run Simulation)")
-    print("  [5] [PR] Run Press Release Campaign (LIVE SEND)")
-    print("  [6] [PR] Run Press Release FOLLOW-UP (LIVE SEND)")
-    print("  ---")
-    print("  [7] [AUTHORITY] Run Authority Links Campaign (Dry Run Simulation)")
-    print("  [8] [AUTHORITY] Run Authority Links Campaign (LIVE SEND)")
-    print("  [9] [AUTHORITY] Run Authority Links FOLLOW-UP (LIVE SEND)")
+    print("\nSelect High-Converting Campaign to Execute:")
+    print("  [1] 🌟 [NEW BRANDS] Run 0-to-1 Launch & Growth Outreach (New UAE/US/UK Brands)")
+    print("  [2] 🇦🇪 [DUBAI BOUTIQUE] Run Boutique Tourism & Yacht Charters Outreach")
+    print("  [3] 🔗 [AGENCY LINKS] Run White-Label Authority Link Building (US/UK Agencies)")
+    print("  [4] ⚡ [SPEED & CRO] Run WordPress Speed Optimization & Conversion Outreach")
+    print("  [5] 📊 [ALL] Run Multi-Channel Growth Sprint (Batch Send)")
     print("  ---")
     print("  [0] Exit\n")
 
     if len(sys.argv) > 1:
         choice = sys.argv[1]
     else:
-        choice = input("Enter choice (0-9): ").strip()
+        choice = input("Enter choice (0-5): ").strip()
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     actions = {
-        "1": ["python", os.path.join(script_dir, "send_speed_outreach.py")],
-        "2": ["python", os.path.join(script_dir, "send_speed_outreach.py"), "--live"],
-        "3": ["python", os.path.join(script_dir, "send_speed_outreach.py"), "--live", "--followup"],
-        "4": ["python", os.path.join(script_dir, "send_pr_outreach.py")],
-        "5": ["python", os.path.join(script_dir, "send_pr_outreach.py"), "--live"],
-        "6": ["python", os.path.join(script_dir, "send_pr_outreach.py"), "--live", "--followup"],
-        "7": ["python", os.path.join(script_dir, "send_authority_outreach.py")],
-        "8": ["python", os.path.join(script_dir, "send_authority_outreach.py"), "--live"],
-        "9": ["python", os.path.join(script_dir, "send_authority_outreach.py"), "--live", "--followup"],
+        "1": ["python", "-u", os.path.join(script_dir, "send_new_brand_growth_outreach.py"), "25"],
+        "2": ["python", "-u", os.path.join(script_dir, "send_dubai_tourism_outreach.py"), "25"],
+        "3": ["python", "-u", os.path.join(script_dir, "send_authority_outreach.py"), "--live"],
+        "4": ["python", "-u", os.path.join(script_dir, "send_speed_outreach.py"), "--live"],
     }
 
     if choice in actions:
-        print("\n" + ">" * 25 + f" EXECUTING CHOICE [{choice}] " + "<" * 25 + "\n")
+        print("\n" + ">" * 25 + f" EXECUTING CAMPAIGN [{choice}] " + "<" * 25 + "\n")
         subprocess.run(actions[choice])
+    elif choice == "5":
+        print("\n" + ">" * 20 + " EXECUTING MULTI-CHANNEL GROWTH SPRINT " + "<" * 20 + "\n")
+        print("1. Running New Brands Sprint...")
+        subprocess.run(actions["1"])
+        print("\n2. Running Boutique Dubai Tourism Sprint...")
+        subprocess.run(actions["2"])
     elif choice == "0":
         print("Goodbye!")
     else:
