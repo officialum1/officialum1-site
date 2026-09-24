@@ -1,10 +1,10 @@
 {
   "smtp": {
-    "host": "smtp.titan.email",
+    "host": "smtp.resend.com",
     "port": 465,
     "use_ssl": true,
-    "email": "hello@officialum1.com",
-    "password": "Speedo5753!$",
+    "email": "resend",
+    "password": "ENV_RESEND_API_KEY",
     "from_email": "hello@officialum1.com",
     "sender_name": "Muhammad Umar | OfficialUM1 LLC",
     "reply_to": "hello@officialum1.com"

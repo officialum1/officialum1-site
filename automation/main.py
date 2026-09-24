@@ -201,10 +201,27 @@ Website: https://officialum1.com/services/wordpress-speed-optimization
 }
 
 def load_config():
+    cfg = {}
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+            cfg = json.load(f)
+    
+    env_file = os.path.join(_current_dir, ".env")
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, "r", encoding="utf-8") as ef:
+                for line in ef:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        os.environ.setdefault(k.strip(), v.strip())
+        except Exception:
+            pass
+
+    env_pass = os.getenv("RESEND_API_KEY") or os.getenv("SMTP_PASSWORD")
+    if env_pass and "smtp" in cfg:
+        cfg["smtp"]["password"] = env_pass
+    return cfg
 
 def load_sent_history():
     if not os.path.exists(SENT_HISTORY_FILE):
@@ -262,15 +279,16 @@ def send_email(smtp_cfg, to_email, subject, body_text):
 
     msg.attach(MIMEText(body_text, "plain", "utf-8"))
 
+    envelope_from = from_email
     if smtp_cfg.get("use_ssl", True):
         with smtplib.SMTP_SSL(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
             server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(smtp_cfg["email"], [to_email], msg.as_string())
+            server.sendmail(envelope_from, [to_email], msg.as_string())
     else:
         with smtplib.SMTP(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
             server.starttls()
             server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(smtp_cfg["email"], [to_email], msg.as_string())
+            server.sendmail(envelope_from, [to_email], msg.as_string())
 
 def execute_outreach_batch(leads, max_count=30, delay_range=(15, 25)):
     cfg = load_config()
