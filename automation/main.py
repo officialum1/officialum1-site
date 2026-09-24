@@ -279,7 +279,7 @@ def send_email(smtp_cfg, to_email, subject, body_text):
 
     msg.attach(MIMEText(body_text, "plain", "utf-8"))
 
-    envelope_from = from_email
+    envelope_from = smtp_cfg.get("email", from_email)
     if smtp_cfg.get("use_ssl", True):
         with smtplib.SMTP_SSL(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
             server.login(smtp_cfg["email"], smtp_cfg["password"])
