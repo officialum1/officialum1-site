@@ -3,16 +3,22 @@
     "clientName": "Marco",
     "company": "Amalfi Coast Private Boat Charters",
     "domain": "amalfiprivateboats.it",
-    "emails": ["info@amalfiprivateboats.it", "booking@amalfiprivateboats.it"],
+    "emails": [
+      "info@amalfiprivateboats.it",
+      "booking@amalfiprivateboats.it"
+    ],
     "country": "Italy (Amalfi / Positano / Capri)",
     "niche": "Riva & Gozzo Yacht Charters Capri",
-    "dealSize": "€2,000 - €5,000 per day"
+    "dealSize": "\u20ac2,000 - \u20ac5,000 per day"
   },
   {
     "clientName": "Hans",
     "company": "Swiss Alpine Luxury Chalets",
     "domain": "swissalpinechalets.ch",
-    "emails": ["stay@swissalpinechalets.ch", "info@swissalpinechalets.ch"],
+    "emails": [
+      "stay@swissalpinechalets.ch",
+      "info@swissalpinechalets.ch"
+    ],
     "country": "Switzerland (Zermatt / St. Moritz)",
     "niche": "Ski-in Ski-out VIP Chalets",
     "dealSize": "CHF 5,000 - CHF 15,000 per week"
@@ -21,54 +27,72 @@
     "clientName": "Carlos",
     "company": "Ibiza Blue Marine Charters",
     "domain": "ibizabluemarine.com",
-    "emails": ["charter@ibizabluemarine.com", "info@ibizabluemarine.com"],
+    "emails": [
+      "charter@ibizabluemarine.com",
+      "info@ibizabluemarine.com"
+    ],
     "country": "Spain (Ibiza & Formentera)",
     "niche": "VIP Catamarans & Sunset Yacht Rentals",
-    "dealSize": "€3,000 - €8,000 per day"
+    "dealSize": "\u20ac3,000 - \u20ac8,000 per day"
   },
   {
     "clientName": "Pierre",
     "company": "French Riviera Supercar Experience",
     "domain": "frenchrivierasupercars.fr",
-    "emails": ["contact@frenchrivierasupercars.fr", "info@frenchrivierasupercars.fr"],
+    "emails": [
+      "contact@frenchrivierasupercars.fr",
+      "info@frenchrivierasupercars.fr"
+    ],
     "country": "France (Monaco / Cannes / Nice)",
     "niche": "Ferrari & Lamborghini Luxury Hire",
-    "dealSize": "€2,500 - €6,000 per booking"
+    "dealSize": "\u20ac2,500 - \u20ac6,000 per booking"
   },
   {
     "clientName": "Nikos",
     "company": "Santorini Caldera Catamaran Tours",
     "domain": "santorinicatamarans.gr",
-    "emails": ["info@santorinicatamarans.gr", "reservations@santorinicatamarans.gr"],
+    "emails": [
+      "info@santorinicatamarans.gr",
+      "reservations@santorinicatamarans.gr"
+    ],
     "country": "Greece (Santorini / Mykonos)",
     "niche": "Private Sunset Cruises & Island Hopping",
-    "dealSize": "€1,800 - €4,500 per booking"
+    "dealSize": "\u20ac1,800 - \u20ac4,500 per booking"
   },
   {
     "clientName": "Klaus",
     "company": "Bavaria Castle & Luxury Alpine Tours",
     "domain": "bavariaalpinetours.de",
-    "emails": ["info@bavariaalpinetours.de", "tours@bavariaalpinetours.de"],
+    "emails": [
+      "info@bavariaalpinetours.de",
+      "tours@bavariaalpinetours.de"
+    ],
     "country": "Germany (Munich / Neuschwanstein)",
     "niche": "VIP Mercedes V-Class Private Castle Tours",
-    "dealSize": "€1,500 - €3,500 per booking"
+    "dealSize": "\u20ac1,500 - \u20ac3,500 per booking"
   },
   {
     "clientName": "Oliver",
     "company": "Cotswolds & Highland Luxury Escapes",
     "domain": "cotswoldshighescapes.co.uk",
-    "emails": ["info@cotswoldshighescapes.co.uk", "hello@cotswoldshighescapes.co.uk"],
+    "emails": [
+      "info@cotswoldshighescapes.co.uk",
+      "hello@cotswoldshighescapes.co.uk"
+    ],
     "country": "United Kingdom (London / Scotland)",
     "niche": "Bespoke Country Manor Tours & Chauffeur",
-    "dealSize": "£2,000 - £6,000 per package"
+    "dealSize": "\u00a32,000 - \u00a36,000 per package"
   },
   {
     "clientName": "Lars",
     "company": "Nordic Aurora Glass Igloos & Fjord Cruises",
     "domain": "nordicaurorafjords.no",
-    "emails": ["booking@nordicaurorafjords.no", "info@nordicaurorafjords.no"],
-    "country": "Norway / Finland (Tromsø & Lapland)",
+    "emails": [
+      "booking@nordicaurorafjords.no",
+      "info@nordicaurorafjords.no"
+    ],
+    "country": "Norway / Finland (Troms\u00f8 & Lapland)",
     "niche": "Northern Lights & Luxury Fjord Glamping",
-    "dealSize": "€3,500 - €7,500 per booking"
+    "dealSize": "\u20ac3,500 - \u20ac7,500 per booking"
   }
 ]

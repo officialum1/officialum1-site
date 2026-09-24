@@ -3,7 +3,9 @@
     "clientName": "David Miller",
     "company": "EcoModern Home Decor",
     "domain": "ecomodernhome.com",
-    "emails": ["david@ecomodernhome.com"],
+    "emails": [
+      "david@ecomodernhome.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "32/100",
     "notes": "WooCommerce furniture & decor shop with high LCP delay on mobile."
@@ -12,7 +14,9 @@
     "clientName": "Sarah Jenkins",
     "company": "PureAura Wellness",
     "domain": "pureaurawellness.com",
-    "emails": ["sarah@pureaurawellness.com"],
+    "emails": [
+      "sarah@pureaurawellness.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "28/100",
     "notes": "Health supplements WooCommerce store with heavy JavaScript payload."
@@ -21,7 +25,9 @@
     "clientName": "Marcus Vance",
     "company": "PeakGear Athletics",
     "domain": "peakgearathletics.com",
-    "emails": ["marcus@peakgearathletics.com"],
+    "emails": [
+      "marcus@peakgearathletics.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "39/100",
     "notes": "Athletic apparel store suffering from unoptimized hero images."
@@ -30,7 +36,9 @@
     "clientName": "Elena Rostova",
     "company": "Artisan Craft Studio",
     "domain": "artisancraftstudio.com",
-    "emails": ["elena@artisancraftstudio.com"],
+    "emails": [
+      "elena@artisancraftstudio.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "35/100",
     "notes": "Jewelry design shop running on Elementor with slow TTFB."
@@ -39,7 +47,9 @@
     "clientName": "Jason Wright",
     "company": "Urban Roast Coffee",
     "domain": "urbanroastcoffee.com",
-    "emails": ["jason@urbanroastcoffee.com"],
+    "emails": [
+      "jason@urbanroastcoffee.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "29/100",
     "notes": "Subscription coffee brand losing mobile cart checkout conversions."
@@ -48,7 +58,9 @@
     "clientName": "Brian Foster",
     "company": "Apex Audio Gear",
     "domain": "apexaudiogear.com",
-    "emails": ["brian@apexaudiogear.com"],
+    "emails": [
+      "brian@apexaudiogear.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "31/100",
     "notes": "High-end headphone and speaker store with heavy slider plugins."
@@ -57,7 +69,9 @@
     "clientName": "Hannah Scott",
     "company": "GlowBotanica Organics",
     "domain": "glowbotanica.com",
-    "emails": ["hannah@glowbotanica.com"],
+    "emails": [
+      "hannah@glowbotanica.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "26/100",
     "notes": "Organic skincare line with uncompressed product catalog images."
@@ -66,7 +80,9 @@
     "clientName": "Tyler Nelson",
     "company": "Summit Trail Outfitters",
     "domain": "summittrailoutfitters.com",
-    "emails": ["tyler@summittrailoutfitters.com"],
+    "emails": [
+      "tyler@summittrailoutfitters.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "34/100",
     "notes": "Outdoor hiking and camping gear store with slow database queries."
@@ -75,7 +91,9 @@
     "clientName": "Olivia Martinez",
     "company": "Lumina Home Accents",
     "domain": "luminahomeaccents.com",
-    "emails": ["olivia@luminahomeaccents.com"],
+    "emails": [
+      "olivia@luminahomeaccents.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "37/100",
     "notes": "Modern lighting fixtures shop built on Divi builder."
@@ -84,7 +102,9 @@
     "clientName": "Kevin Zhang",
     "company": "VoltByte Electronics",
     "domain": "voltbyte.com",
-    "emails": ["kevin@voltbyte.com"],
+    "emails": [
+      "kevin@voltbyte.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "30/100",
     "notes": "Custom PC parts shop with heavy checkout script bloat."
@@ -93,7 +113,9 @@
     "clientName": "Rachel Adams",
     "company": "Velvet & Vine Boutique",
     "domain": "velvetandvine.com",
-    "emails": ["rachel@velvetandvine.com"],
+    "emails": [
+      "rachel@velvetandvine.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "24/100",
     "notes": "Women's fashion boutique losing customers on mobile product pages."
@@ -102,7 +124,9 @@
     "clientName": "Derek Coleman",
     "company": "Ironclad Fitness Supply",
     "domain": "ironcladfitness.com",
-    "emails": ["derek@ironcladfitness.com"],
+    "emails": [
+      "derek@ironcladfitness.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "33/100",
     "notes": "Commercial gym equipment store with unoptimized CDN caching."
@@ -111,7 +135,9 @@
     "clientName": "Chloe Bennett",
     "company": "Aura Sleep Solutions",
     "domain": "aurasleepsolutions.com",
-    "emails": ["chloe@aurasleepsolutions.com"],
+    "emails": [
+      "chloe@aurasleepsolutions.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "28/100",
     "notes": "Ergonomic pillow and bedding store with slow mobile render time."
@@ -120,7 +146,9 @@
     "clientName": "Nathan Drake",
     "company": "Pioneer Leather Co",
     "domain": "pioneerleatherco.com",
-    "emails": ["nathan@pioneerleatherco.com"],
+    "emails": [
+      "nathan@pioneerleatherco.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "36/100",
     "notes": "Handmade leather wallets and bags shop with render-blocking CSS."
@@ -129,7 +157,9 @@
     "clientName": "Megan Walsh",
     "company": "TerraNourish Superfoods",
     "domain": "terranourish.com",
-    "emails": ["megan@terranourish.com"],
+    "emails": [
+      "megan@terranourish.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "29/100",
     "notes": "Organic plant protein blends store with delayed font loading."
@@ -138,7 +168,9 @@
     "clientName": "Justin Bailey",
     "company": "Nordic Wave Eyewear",
     "domain": "nordicwaveeyewear.com",
-    "emails": ["justin@nordicwaveeyewear.com"],
+    "emails": [
+      "justin@nordicwaveeyewear.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "38/100",
     "notes": "Designer blue light and sunglasses store with third-party tracking scripts."
@@ -147,7 +179,9 @@
     "clientName": "Amber Collins",
     "company": "Sage & Stone Ceramics",
     "domain": "sageandstoneceramics.com",
-    "emails": ["amber@sageandstoneceramics.com"],
+    "emails": [
+      "amber@sageandstoneceramics.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "27/100",
     "notes": "Handcrafted pottery and kitchenware store with excessive DOM elements."
@@ -156,7 +190,9 @@
     "clientName": "Brandon Reed",
     "company": "GripLock Tool Supply",
     "domain": "griplocktools.com",
-    "emails": ["brandon@griplocktools.com"],
+    "emails": [
+      "brandon@griplocktools.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "32/100",
     "notes": "Contractor power tools distributor with slow WooCommerce AJAX cart."
@@ -165,7 +201,9 @@
     "clientName": "Sophia Taylor",
     "company": "Botanical Bliss Tea",
     "domain": "botanicalblisstea.com",
-    "emails": ["sophia@botanicalblisstea.com"],
+    "emails": [
+      "sophia@botanicalblisstea.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "25/100",
     "notes": "Artisan loose-leaf tea brand experiencing mobile bounce rates."
@@ -174,7 +212,9 @@
     "clientName": "Ethan Morales",
     "company": "AeroStrap Watches",
     "domain": "aerostrapwatches.com",
-    "emails": ["ethan@aerostrapwatches.com"],
+    "emails": [
+      "ethan@aerostrapwatches.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "34/100",
     "notes": "Chronograph watch store running unminified JavaScript bundles."
@@ -183,7 +223,9 @@
     "clientName": "Jessica Hayes",
     "company": "KiddieCraft Toys",
     "domain": "kiddiecrafttoys.com",
-    "emails": ["jessica@kiddiecrafttoys.com"],
+    "emails": [
+      "jessica@kiddiecrafttoys.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "31/100",
     "notes": "Montessori educational toys shop with slow server response time."
@@ -192,7 +234,9 @@
     "clientName": "Lucas Silva",
     "company": "BaristaPro Espresso",
     "domain": "baristaproespresso.com",
-    "emails": ["lucas@baristaproespresso.com"],
+    "emails": [
+      "lucas@baristaproespresso.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "29/100",
     "notes": "Italian espresso machine retailer suffering from uncompressed video hero."
@@ -201,7 +245,9 @@
     "clientName": "Claire Hughes",
     "company": "SilverOak Furniture",
     "domain": "silveroakfurniture.com",
-    "emails": ["claire@silveroakfurniture.com"],
+    "emails": [
+      "claire@silveroakfurniture.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "35/100",
     "notes": "Solid wood dining sets shop with multiple unoptimized slider libraries."
@@ -210,7 +256,9 @@
     "clientName": "Ryan Cooper",
     "company": "HydraFlow Water Systems",
     "domain": "hydraflowwater.com",
-    "emails": ["ryan@hydraflowwater.com"],
+    "emails": [
+      "ryan@hydraflowwater.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "28/100",
     "notes": "Whole-house water filtration systems site running on slow shared hosting."
@@ -219,7 +267,9 @@
     "clientName": "Vanessa King",
     "company": "PetZen Organics",
     "domain": "petzenorganics.com",
-    "emails": ["vanessa@petzenorganics.com"],
+    "emails": [
+      "vanessa@petzenorganics.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "33/100",
     "notes": "Holistic pet care and supplements store losing mobile traffic."
@@ -228,7 +278,9 @@
     "clientName": "Austin Powell",
     "company": "Veloce Cycling Goods",
     "domain": "velocecycling.com",
-    "emails": ["austin@velocecycling.com"],
+    "emails": [
+      "austin@velocecycling.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "30/100",
     "notes": "Road bike components and apparel store with heavy database queries."
@@ -237,7 +289,9 @@
     "clientName": "Lauren Mitchell",
     "company": "Silk & Cedar Decor",
     "domain": "silkandcedardecor.com",
-    "emails": ["lauren@silkandcedardecor.com"],
+    "emails": [
+      "lauren@silkandcedardecor.com"
+    ],
     "cms": "WordPress",
     "pageSpeedScore": "26/100",
     "notes": "Luxury linen and home fragrance shop with high First Contentful Paint."
@@ -246,7 +300,9 @@
     "clientName": "Gabriel Ortiz",
     "company": "NextGen Gaming Lounge",
     "domain": "nextgengamingstore.com",
-    "emails": ["gabriel@nextgengamingstore.com"],
+    "emails": [
+      "gabriel@nextgengamingstore.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "37/100",
     "notes": "Custom mechanical keyboard and mouse pad shop with unoptimized CSS."
@@ -255,7 +311,9 @@
     "clientName": "Brooke Reynolds",
     "company": "Equinox Jewelry Studio",
     "domain": "equinoxjewelrystudio.com",
-    "emails": ["brooke@equinoxjewelrystudio.com"],
+    "emails": [
+      "brooke@equinoxjewelrystudio.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "23/100",
     "notes": "Fine sterling silver jewelry shop suffering from heavy script overhead."
@@ -264,7 +322,9 @@
     "clientName": "Dominic Price",
     "company": "TacticalEdge Gear",
     "domain": "tacticaledgegear.com",
-    "emails": ["dominic@tacticaledgegear.com"],
+    "emails": [
+      "dominic@tacticaledgegear.com"
+    ],
     "cms": "WooCommerce",
     "pageSpeedScore": "32/100",
     "notes": "Outdoor survival and tactical flashlights shop with slow mobile checkout."

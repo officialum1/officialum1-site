@@ -3,7 +3,9 @@
     "clientName": "Jonathan Ross",
     "company": "Elevate Search Agency",
     "domain": "elevatesearch.co",
-    "emails": ["jonathan@elevatesearch.co"],
+    "emails": [
+      "jonathan@elevatesearch.co"
+    ],
     "title": "Head of SEO & Outreach",
     "notes": "Fast-growing digital marketing agency managing 25+ monthly client link campaigns."
   },
@@ -11,7 +13,9 @@
     "clientName": "Brett Harrison",
     "company": "Apex Digital Partners",
     "domain": "apexdigitalpartners.com",
-    "emails": ["brett@apexdigitalpartners.com"],
+    "emails": [
+      "brett@apexdigitalpartners.com"
+    ],
     "title": "Managing Director",
     "notes": "US-based performance marketing agency looking for wholesale DA60+ guest posting."
   },
@@ -19,7 +23,9 @@
     "clientName": "Samantha Reed",
     "company": "Verve Growth Marketing",
     "domain": "vervegrowth.io",
-    "emails": ["samantha@vervegrowth.io"],
+    "emails": [
+      "samantha@vervegrowth.io"
+    ],
     "title": "VP of Organic Growth",
     "notes": "SaaS growth agency requiring high-authority in-content niche edits."
   },
@@ -27,7 +33,9 @@
     "clientName": "Nate Gallagher",
     "company": "Foundry Interactive",
     "domain": "foundryinteractive.com",
-    "emails": ["nate@foundryinteractive.com"],
+    "emails": [
+      "nate@foundryinteractive.com"
+    ],
     "title": "Founder & CEO",
     "notes": "Full-service digital agency looking for white-label link building fulfillment."
   },
@@ -35,7 +43,9 @@
     "clientName": "Chloe Campbell",
     "company": "Catalyst Media Group",
     "domain": "catalystmediagrp.com",
-    "emails": ["chloe@catalystmediagrp.com"],
+    "emails": [
+      "chloe@catalystmediagrp.com"
+    ],
     "title": "Director of Client Services",
     "notes": "B2B tech marketing agency looking for guaranteed permanent editorial backlinks."
   },
@@ -43,7 +53,9 @@
     "clientName": "Adam Mitchell",
     "company": "Beacon Search Strategies",
     "domain": "beaconsearchstrat.com",
-    "emails": ["adam@beaconsearchstrat.com"],
+    "emails": [
+      "adam@beaconsearchstrat.com"
+    ],
     "title": "Senior SEO Strategist",
     "notes": "E-commerce SEO consultancy running link outreach for 15 direct-to-consumer clients."
   },
@@ -51,7 +63,9 @@
     "clientName": "Laura Henderson",
     "company": "Summit Organic SEO",
     "domain": "summitorganicseo.com",
-    "emails": ["laura@summitorganicseo.com"],
+    "emails": [
+      "laura@summitorganicseo.com"
+    ],
     "title": "Head of Link Acquisition",
     "notes": "Link building specialist agency seeking reliable DA50+ lifestyle & tech blogs."
   },
@@ -59,7 +73,9 @@
     "clientName": "Darren Brooks",
     "company": "Velocity Growth Lab",
     "domain": "velocitygrowthlab.io",
-    "emails": ["darren@velocitygrowthlab.io"],
+    "emails": [
+      "darren@velocitygrowthlab.io"
+    ],
     "title": "Founder",
     "notes": "SaaS and venture-backed startup SEO agency needing rapid link placements."
   },
@@ -67,7 +83,9 @@
     "clientName": "Megan Foster",
     "company": "Horizon Peak Media",
     "domain": "horizonpeakmedia.com",
-    "emails": ["megan@horizonpeakmedia.com"],
+    "emails": [
+      "megan@horizonpeakmedia.com"
+    ],
     "title": "Director of Outreach",
     "notes": "Healthcare and legal SEO agency requiring strict zero-PBN verified links."
   },
@@ -75,7 +93,9 @@
     "clientName": "Ryan Cooper",
     "company": "ScaleUp Search Partners",
     "domain": "scaleupsearchpartners.com",
-    "emails": ["ryan@scaleupsearchpartners.com"],
+    "emails": [
+      "ryan@scaleupsearchpartners.com"
+    ],
     "title": "Managing Partner",
     "notes": "Agency managing local and national SEO campaigns across UK & USA."
   },
@@ -83,7 +103,9 @@
     "clientName": "Hannah Phillips",
     "company": "Nexus SEO Collective",
     "domain": "nexusseocollective.com",
-    "emails": ["hannah@nexusseocollective.com"],
+    "emails": [
+      "hannah@nexusseocollective.com"
+    ],
     "title": "Lead Outreach Specialist",
     "notes": "Fintech & crypto content marketing agency seeking DA70+ finance placements."
   },
@@ -91,7 +113,9 @@
     "clientName": "Colin Stewart",
     "company": "IronClad Digital Marketing",
     "domain": "ironcladdigitalmktg.com",
-    "emails": ["colin@ironcladdigitalmktg.com"],
+    "emails": [
+      "colin@ironcladdigitalmktg.com"
+    ],
     "title": "Founder & SEO Director",
     "notes": "Home services & contractor SEO agency needing ongoing monthly niche edits."
   },
@@ -99,7 +123,9 @@
     "clientName": "Tara Jenkins",
     "company": "Silverline Web Solutions",
     "domain": "silverlinewebsolutions.com",
-    "emails": ["tara@silverlinewebsolutions.com"],
+    "emails": [
+      "tara@silverlinewebsolutions.com"
+    ],
     "title": "Client Success Manager",
     "notes": "Full service boutique agency looking to outsource backlink building."
   },
@@ -107,7 +133,9 @@
     "clientName": "Elliot Vance",
     "company": "Quantum Rank Media",
     "domain": "quantumrankmedia.com",
-    "emails": ["elliot@quantumrankmedia.com"],
+    "emails": [
+      "elliot@quantumrankmedia.com"
+    ],
     "title": "Head of SEO",
     "notes": "Agency optimizing high competition affiliate websites and e-commerce brands."
   },
@@ -115,7 +143,9 @@
     "clientName": "Brooke Taylor",
     "company": "BlueSky Organic Growth",
     "domain": "blueskygrowthagency.com",
-    "emails": ["brooke@blueskygrowthagency.com"],
+    "emails": [
+      "brooke@blueskygrowthagency.com"
+    ],
     "title": "VP of Marketing",
     "notes": "Hospitality and travel brand marketing team looking for niche editorial links."
   },
@@ -123,7 +153,9 @@
     "clientName": "Sean O'Donnell",
     "company": "Highland Search Advisory",
     "domain": "highlandsearchadv.com",
-    "emails": ["sean@highlandsearchadv.com"],
+    "emails": [
+      "sean@highlandsearchadv.com"
+    ],
     "title": "Founder",
     "notes": "UK and European B2B tech search consultancy looking for recurring publisher lists."
   },
@@ -131,7 +163,9 @@
     "clientName": "Kimberly Ward",
     "company": "NorthStar Media Group",
     "domain": "northstarmediagrp.com",
-    "emails": ["kimberly@northstarmediagrp.com"],
+    "emails": [
+      "kimberly@northstarmediagrp.com"
+    ],
     "title": "Director of Digital Strategy",
     "notes": "Automotive and industrial marketing firm needing DA60+ editorial guest posts."
   },
@@ -139,7 +173,9 @@
     "clientName": "Austin Miller",
     "company": "Vortex Digital Reach",
     "domain": "vortexdigitalreach.com",
-    "emails": ["austin@vortexdigitalreach.com"],
+    "emails": [
+      "austin@vortexdigitalreach.com"
+    ],
     "title": "Senior SEO Manager",
     "notes": "Cybersecurity and IT services marketing team needing high-trust tech backlinks."
   },
@@ -147,7 +183,9 @@
     "clientName": "Danielle Green",
     "company": "Frontline Growth Agency",
     "domain": "frontlinegrowthagency.com",
-    "emails": ["danielle@frontlinegrowthagency.com"],
+    "emails": [
+      "danielle@frontlinegrowthagency.com"
+    ],
     "title": "Operations Manager",
     "notes": "Fast scaling link building agency seeking reliable white-label fulfillment partner."
   },
@@ -155,7 +193,9 @@
     "clientName": "Zachary Scott",
     "company": "PeakRank Digital",
     "domain": "peakrankdigital.com",
-    "emails": ["zachary@peakrankdigital.com"],
+    "emails": [
+      "zachary@peakrankdigital.com"
+    ],
     "title": "Head of Outreach",
     "notes": "Direct response e-commerce brand builders requiring aged in-content links."
   },
@@ -163,7 +203,9 @@
     "clientName": "Jessica Burns",
     "company": "Optima Search Lab",
     "domain": "optimasearchlab.com",
-    "emails": ["jessica@optimasearchlab.com"],
+    "emails": [
+      "jessica@optimasearchlab.com"
+    ],
     "title": "Lead SEO Consultant",
     "notes": "Real estate & mortgage broker SEO agency needing high DA authority guest posts."
   },
@@ -171,7 +213,9 @@
     "clientName": "Trevor Hayes",
     "company": "Crestline Organic SEO",
     "domain": "crestlineorganic.com",
-    "emails": ["trevor@crestlineorganic.com"],
+    "emails": [
+      "trevor@crestlineorganic.com"
+    ],
     "title": "Founder",
     "notes": "Clean-tech and sustainable business growth agency seeking relevant green blogs."
   },
@@ -179,7 +223,9 @@
     "clientName": "Vanessa Cruz",
     "company": "Solstice Media Ventures",
     "domain": "solsticemediaventures.com",
-    "emails": ["vanessa@solsticemediaventures.com"],
+    "emails": [
+      "vanessa@solsticemediaventures.com"
+    ],
     "title": "Outreach Coordinator",
     "notes": "Health & wellness brand marketing group looking for 20+ monthly editorial links."
   },
@@ -187,7 +233,9 @@
     "clientName": "Miles Thornton",
     "company": "TrueNorth Search Partners",
     "domain": "truenorthsearchpartners.com",
-    "emails": ["miles@truenorthsearchpartners.com"],
+    "emails": [
+      "miles@truenorthsearchpartners.com"
+    ],
     "title": "Director of Client Growth",
     "notes": "B2B SaaS search engine optimization team looking for direct publisher inventory."
   },
@@ -195,7 +243,9 @@
     "clientName": "Gillian Ross",
     "company": "Aura Growth Partners",
     "domain": "auragrowthpartners.com",
-    "emails": ["gillian@auragrowthpartners.com"],
+    "emails": [
+      "gillian@auragrowthpartners.com"
+    ],
     "title": "Head of Organic Strategy",
     "notes": "Consumer electronics marketing agency seeking top-tier gadget & lifestyle sites."
   },
@@ -203,7 +253,9 @@
     "clientName": "Dominic Vance",
     "company": "Pinnacle Digital Edge",
     "domain": "pinnacledigitaledge.com",
-    "emails": ["dominic@pinnacledigitaledge.com"],
+    "emails": [
+      "dominic@pinnacledigitaledge.com"
+    ],
     "title": "Managing Director",
     "notes": "Full service Australian & US digital agency looking to scale monthly link packs."
   },
@@ -211,7 +263,9 @@
     "clientName": "Cynthia Morales",
     "company": "ClearPath Media Agency",
     "domain": "clearpathmediaagency.com",
-    "emails": ["cynthia@clearpathmediaagency.com"],
+    "emails": [
+      "cynthia@clearpathmediaagency.com"
+    ],
     "title": "VP of Operations",
     "notes": "Agency seeking fast-turnaround (48h) niche edits for law firm clients."
   },
@@ -219,7 +273,9 @@
     "clientName": "Kyle Washington",
     "company": "AlphaWave Marketing",
     "domain": "alphawavemarketing.io",
-    "emails": ["kyle@alphawavemarketing.io"],
+    "emails": [
+      "kyle@alphawavemarketing.io"
+    ],
     "title": "Founder & Lead SEO",
     "notes": "Performance SEO agency looking for DA50-DA75+ links with traffic guarantees."
   },
@@ -227,7 +283,9 @@
     "clientName": "Paige Sullivan",
     "company": "Silverstone Search Group",
     "domain": "silverstonesearchgrp.com",
-    "emails": ["paige@silverstonesearchgrp.com"],
+    "emails": [
+      "paige@silverstonesearchgrp.com"
+    ],
     "title": "Senior Outreach Lead",
     "notes": "Finance and insurance marketing firm seeking permanent editorial placements."
   },
@@ -235,7 +293,9 @@
     "clientName": "Mitchell Reed",
     "company": "ApexLink Agency",
     "domain": "apexlinkagency.com",
-    "emails": ["mitchell@apexlinkagency.com"],
+    "emails": [
+      "mitchell@apexlinkagency.com"
+    ],
     "title": "Partner",
     "notes": "Dedicated link building reseller agency looking for reliable US agency fulfillment."
   }

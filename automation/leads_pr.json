@@ -3,7 +3,9 @@
     "clientName": "Alex Rivera",
     "company": "OmniSync AI",
     "domain": "omnisync.ai",
-    "emails": ["alex@omnisync.ai"],
+    "emails": [
+      "alex@omnisync.ai"
+    ],
     "launchStage": "Product Hunt Launch",
     "notes": "B2B SaaS AI productivity platform seeking top-tier press coverage."
   },
@@ -11,7 +13,9 @@
     "clientName": "Liam Cooper",
     "company": "DexPay Protocol",
     "domain": "dexpay.io",
-    "emails": ["liam@dexpay.io"],
+    "emails": [
+      "liam@dexpay.io"
+    ],
     "launchStage": "Token Launch / Web3",
     "notes": "Decentralized payment gateway looking for Yahoo Finance and crypto media features."
   },
@@ -19,7 +23,9 @@
     "clientName": "Rachel Hayes",
     "company": "GlowNova Skincare",
     "domain": "glownovaskin.com",
-    "emails": ["rachel@glownovaskin.com"],
+    "emails": [
+      "rachel@glownovaskin.com"
+    ],
     "launchStage": "DTC Brand Scaling",
     "notes": "Organic beauty brand looking for 'As Seen On Fox, CBS, NBC' landing page badges."
   },
@@ -27,7 +33,9 @@
     "clientName": "Devon Parker",
     "company": "CloudTrace Security",
     "domain": "cloudtrace.io",
-    "emails": ["devon@cloudtrace.io"],
+    "emails": [
+      "devon@cloudtrace.io"
+    ],
     "launchStage": "Series A Enterprise Launch",
     "notes": "Cybersecurity startup announcing new SOC-2 compliance automation feature."
   },
@@ -35,7 +43,9 @@
     "clientName": "Tyler Brooks",
     "company": "Verda Solar Solutions",
     "domain": "verdasolar.com",
-    "emails": ["tyler@verdasolar.com"],
+    "emails": [
+      "tyler@verdasolar.com"
+    ],
     "launchStage": "Multi-State Expansion",
     "notes": "Clean-tech energy firm expanding nationwide seeking Google News distribution."
   },
@@ -43,7 +53,9 @@
     "clientName": "Maya Lin",
     "company": "FlowByte Analytics",
     "domain": "flowbyte.io",
-    "emails": ["maya@flowbyte.io"],
+    "emails": [
+      "maya@flowbyte.io"
+    ],
     "launchStage": "Seed Round Funding",
     "notes": "AI-powered product analytics tool announcing $2.5M seed funding round."
   },
@@ -51,7 +63,9 @@
     "clientName": "Connor Vance",
     "company": "BlockForge Labs",
     "domain": "blockforgelabs.com",
-    "emails": ["connor@blockforgelabs.com"],
+    "emails": [
+      "connor@blockforgelabs.com"
+    ],
     "launchStage": "Mainnet Launch",
     "notes": "Web3 infrastructure tooling provider seeking coverage on Yahoo Finance & Cointelegraph."
   },
@@ -59,7 +73,9 @@
     "clientName": "Elena Gomez",
     "company": "Kinetix Health App",
     "domain": "kinetixhealth.co",
-    "emails": ["elena@kinetixhealth.co"],
+    "emails": [
+      "elena@kinetixhealth.co"
+    ],
     "launchStage": "iOS / Android App Launch",
     "notes": "Personalized AI wellness coach launching on App Store seeking media wire blitz."
   },
@@ -67,7 +83,9 @@
     "clientName": "Julian Ross",
     "company": "PulseCore Energy",
     "domain": "pulsecoreenergy.com",
-    "emails": ["julian@pulsecoreenergy.com"],
+    "emails": [
+      "julian@pulsecoreenergy.com"
+    ],
     "launchStage": "CleanTech Innovation Award",
     "notes": "Commercial battery storage pioneer announcing clean energy breakthrough."
   },
@@ -75,7 +93,9 @@
     "clientName": "Sophie Turner",
     "company": "SilkBloom Organics",
     "domain": "silkbloomorganics.com",
-    "emails": ["sophie@silkbloomorganics.com"],
+    "emails": [
+      "sophie@silkbloomorganics.com"
+    ],
     "launchStage": "Retail Distribution Expansion",
     "notes": "DTC clean cosmetics brand expanding to 500+ retail stores across North America."
   },
@@ -83,7 +103,9 @@
     "clientName": "Marcus Sterling",
     "company": "ApexFlow CRM",
     "domain": "apexflowcrm.com",
-    "emails": ["marcus@apexflowcrm.com"],
+    "emails": [
+      "marcus@apexflowcrm.com"
+    ],
     "launchStage": "Product Hunt #1 Nominee",
     "notes": "Automated sales pipeline CRM for remote sales teams launching version 3.0."
   },
@@ -91,7 +113,9 @@
     "clientName": "Valerie Dupont",
     "company": "AeroDine Cloud Kitchens",
     "domain": "aerodinekitchens.com",
-    "emails": ["valerie@aerodinekitchens.com"],
+    "emails": [
+      "valerie@aerodinekitchens.com"
+    ],
     "launchStage": "Series Seed Announcement",
     "notes": "Ghost kitchen franchising platform expanding into 12 new metropolitan markets."
   },
@@ -99,7 +123,9 @@
     "clientName": "Tariq Mansoor",
     "company": "PayNova Global",
     "domain": "paynovaglobal.com",
-    "emails": ["tariq@paynovaglobal.com"],
+    "emails": [
+      "tariq@paynovaglobal.com"
+    ],
     "launchStage": "Cross-Border FinTech Rollout",
     "notes": "B2B international invoice settlement platform launching multi-currency debit card."
   },
@@ -107,7 +133,9 @@
     "clientName": "Samantha Cole",
     "company": "NovaBrite Dental Care",
     "domain": "novabritedental.com",
-    "emails": ["samantha@novabritedental.com"],
+    "emails": [
+      "samantha@novabritedental.com"
+    ],
     "launchStage": "Teeth Whitening Device Launch",
     "notes": "At-home LED oral care technology brand seeking FOX/NBC affiliate distribution."
   },
@@ -115,7 +143,9 @@
     "clientName": "Harrison Blake",
     "company": "NexusDrone Surveying",
     "domain": "nexusdronesurvey.com",
-    "emails": ["harrison@nexusdronesurvey.com"],
+    "emails": [
+      "harrison@nexusdronesurvey.com"
+    ],
     "launchStage": "Enterprise LiDAR Release",
     "notes": "Autonomous drone mapping software announcing enterprise defense partnership."
   },
@@ -123,7 +153,9 @@
     "clientName": "Zoe Chen",
     "company": "MindBridge AI Tutor",
     "domain": "mindbridgeai.com",
-    "emails": ["zoe@mindbridgeai.com"],
+    "emails": [
+      "zoe@mindbridgeai.com"
+    ],
     "launchStage": "EdTech Beta Launch",
     "notes": "K-12 personalized AI learning assistant opening public waitlist to 50k students."
   },
@@ -131,7 +163,9 @@
     "clientName": "Arthur Pendelton",
     "company": "Heritage Watch Works",
     "domain": "heritagewatchworks.com",
-    "emails": ["arthur@heritagewatchworks.com"],
+    "emails": [
+      "arthur@heritagewatchworks.com"
+    ],
     "launchStage": "Kickstarter Campaign ($500k+)",
     "notes": "Swiss movement mechanical chronograph watch brand scaling launch PR."
   },
@@ -139,7 +173,9 @@
     "clientName": "Leila Farouk",
     "company": "Zenith Real Estate Fund",
     "domain": "zenithrefund.com",
-    "emails": ["leila@zenithrefund.com"],
+    "emails": [
+      "leila@zenithrefund.com"
+    ],
     "launchStage": "Commercial Fund Launch",
     "notes": "Real estate investment syndication announcing $50M sunbelt multi-family acquisition."
   },
@@ -147,7 +183,9 @@
     "clientName": "Brandon Hayes",
     "company": "HyperDrive EV Chargers",
     "domain": "hyperdriveev.com",
-    "emails": ["brandon@hyperdriveev.com"],
+    "emails": [
+      "brandon@hyperdriveev.com"
+    ],
     "launchStage": "National Fast-Charging Grid",
     "notes": "Commercial EV infrastructure startup announcing partnership with municipal fleets."
   },
@@ -155,7 +193,9 @@
     "clientName": "Gabrielle Soto",
     "company": "Veritas Cyber Compliance",
     "domain": "veritascompliance.io",
-    "emails": ["gabrielle@veritascompliance.io"],
+    "emails": [
+      "gabrielle@veritascompliance.io"
+    ],
     "launchStage": "HIPAA & GDPR Tool Launch",
     "notes": "Healthcare data privacy platform releasing automated audit compliance engine."
   },
@@ -163,7 +203,9 @@
     "clientName": "Dominic Walsh",
     "company": "OmniLeads B2B Intelligence",
     "domain": "omnileadsb2b.com",
-    "emails": ["dominic@omnileadsb2b.com"],
+    "emails": [
+      "dominic@omnileadsb2b.com"
+    ],
     "launchStage": "AI Prospecting Platform",
     "notes": "B2B intent data provider launching sales trigger notifications for SDR teams."
   },
@@ -171,7 +213,9 @@
     "clientName": "Natalie Portman",
     "company": "TerraPure Clean Water",
     "domain": "terrapurewater.org",
-    "emails": ["natalie@terrapurewater.org"],
+    "emails": [
+      "natalie@terrapurewater.org"
+    ],
     "launchStage": "Global NGO Initiative",
     "notes": "Sustainable water purification nonprofit announcing mission milestone in 10 countries."
   },
@@ -179,7 +223,9 @@
     "clientName": "Sean O'Connor",
     "company": "CelticShield Cyber Insurance",
     "domain": "celticshield.io",
-    "emails": ["sean@celticshield.io"],
+    "emails": [
+      "sean@celticshield.io"
+    ],
     "launchStage": "InsurTech Series A",
     "notes": "Underwriting platform for ransomware protection raising institutional capital."
   },
@@ -187,7 +233,9 @@
     "clientName": "Kendra Lewis",
     "company": "SavorCraft Artisan Foods",
     "domain": "savorcraftfoods.com",
-    "emails": ["kendra@savorcraftfoods.com"],
+    "emails": [
+      "kendra@savorcraftfoods.com"
+    ],
     "launchStage": "Gourmet Snack Retail Rollout",
     "notes": "Non-GMO organic snack company announcing national distribution in Whole Foods."
   },
@@ -195,7 +243,9 @@
     "clientName": "Trevor Philips",
     "company": "AutoPilot Logistics AI",
     "domain": "autopilotlogistics.ai",
-    "emails": ["trevor@autopilotlogistics.ai"],
+    "emails": [
+      "trevor@autopilotlogistics.ai"
+    ],
     "launchStage": "Freight Dispatch Platform",
     "notes": "AI route optimization software for long-haul freight announcing carrier pilot."
   },
@@ -203,7 +253,9 @@
     "clientName": "Chloe Vance",
     "company": "LuxeHaven Boutique Stays",
     "domain": "luxehavenstays.com",
-    "emails": ["chloe@luxehavenstays.com"],
+    "emails": [
+      "chloe@luxehavenstays.com"
+    ],
     "launchStage": "Luxury Vacation Rental Brand",
     "notes": "Curated mountain resort properties launching private club membership."
   },
@@ -211,7 +263,9 @@
     "clientName": "Gavin Rhodes",
     "company": "SkyHigh Audio Systems",
     "domain": "skyhighaudio.com",
-    "emails": ["gavin@skyhighaudio.com"],
+    "emails": [
+      "gavin@skyhighaudio.com"
+    ],
     "launchStage": "Wireless Noise Cancelling Earbuds",
     "notes": "Audiophile gear company debuting patented spatial audio technology."
   },
@@ -219,7 +273,9 @@
     "clientName": "Priscilla Ward",
     "company": "BioVita Longevity Labs",
     "domain": "biovitalongevity.com",
-    "emails": ["priscilla@biovitalongevity.com"],
+    "emails": [
+      "priscilla@biovitalongevity.com"
+    ],
     "launchStage": "Anti-Aging Supplement Clinical Trial",
     "notes": "Cellular health formulation announcing peer-reviewed double-blind clinical results."
   },
@@ -227,7 +283,9 @@
     "clientName": "Damian Frost",
     "company": "AeroSpeed Drone Deliveries",
     "domain": "aerospeeddrone.com",
-    "emails": ["damian@aerospeeddrone.com"],
+    "emails": [
+      "damian@aerospeeddrone.com"
+    ],
     "launchStage": "FAA Regulatory Approval",
     "notes": "Last-mile medical drone delivery company receiving commercial flight authorization."
   },
@@ -235,7 +293,9 @@
     "clientName": "Miriam Gold",
     "company": "Solace Mental Wellness",
     "domain": "solacementalhealth.com",
-    "emails": ["miriam@solacementalhealth.com"],
+    "emails": [
+      "miriam@solacementalhealth.com"
+    ],
     "launchStage": "Tele-Therapy Platform Launch",
     "notes": "On-demand licensed counseling network expanding nationwide coverage."
   }
