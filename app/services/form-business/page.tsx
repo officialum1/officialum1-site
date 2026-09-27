@@ -336,7 +336,7 @@ export default function FormBusinessPage() {
                 body: JSON.stringify({
                     action: 'add',
                     clientName: formData.name,
-                    platform: `US ${mainService === 'formation' ? 'Formation' : 'Service'} (${formData.state})`,
+                    platform: `US Business Formation (${formData.state})`,
                     budget: totalBudget,
                     buyerEmail: formData.email,
                     notes: `Type: ${mainService} | Contact: ${formData.email} | Package: ${selectedOffering?.label || selectedOffering?.name || 'Standard'} | Speed: ${selectedMethod?.name || 'Standard'} | Entity: ${formData.entityType} | CT_ID: ${companyId} | Addons: EIN(${addOns.ein ? 'Yes' : 'No'}) OA(${addOns.agreement ? 'Yes' : 'No'}) Compliance(${addOns.compliance ? 'Yes' : 'No'}) Mail(${addOns.virtualOffice ? 'Yes' : 'No'}) | Breakdown: State($${stateCost}) RA($125) Service($50) | Params: ${JSON.stringify(formData.customFields)}`

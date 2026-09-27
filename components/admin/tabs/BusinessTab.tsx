@@ -31,10 +31,33 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
             const leadsData = await leadsRes.json();
             
             const rawLeads = Array.isArray(leadsData) ? leadsData : [];
-            const formationLeads = rawLeads.filter((l: any) => 
-                (l.platform && (l.platform.includes('US') || l.platform.includes('Formation') || l.platform.includes('Service'))) ||
-                (l.notes && (l.notes.includes('CT_ID') || l.notes.includes('Type: formation') || l.notes.includes('Type: ra') || l.notes.includes('Type: ein')))
-            );
+            const formationLeads = rawLeads.filter((l: any) => {
+                const platform = String(l.platform || '').trim();
+                const notes = String(l.notes || '');
+
+                // Exclude marketing outreach, speed optimization, SEO, guest posting, cart abandonment
+                if (
+                    platform.includes('WordPress') ||
+                    platform.includes('WP Speed') ||
+                    platform.includes('SEO') ||
+                    platform.includes('Growth USA') ||
+                    platform.includes('Media Agency') ||
+                    platform.includes('Outreach') ||
+                    platform.includes('Guest Posting') ||
+                    platform.includes('Abandoned Cart') ||
+                    notes.includes('Lead Hunter') ||
+                    notes.includes('Direct Booking Outreach')
+                ) {
+                    return false;
+                }
+
+                // Strictly match authentic US Formation submissions
+                return (
+                    platform.startsWith('US Formation') ||
+                    platform.startsWith('US Business Formation') ||
+                    (notes.includes('CT_ID:') && (notes.includes('Type: formation') || notes.includes('Type: ra') || notes.includes('Type: ein') || notes.includes('Type: compliance')))
+                );
+            });
 
             setFormations(formationLeads);
 
