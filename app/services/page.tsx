@@ -25,7 +25,9 @@ import {
   Palmtree,
   Crown,
   Server,
-  Mail
+  Mail,
+  Building2,
+  Landmark
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -231,6 +233,41 @@ const servicePillars = [
         desc: "Zero to fully operational company in 7 days: Domain + VPS Server + Custom Website + Inboxes + All Social Channels + Google Maps.",
         href: "/contact?service=Turnkey+Brand+Launch",
         cta: "Get Turnkey Brand Scope",
+      },
+    ]
+  },
+  {
+    category: "6. Global Corporate Formation & Business Hub",
+    badge: "Official US & UK Direct Incorporations",
+    description: "Form an official company in the United States (US LLC) or United Kingdom (UK LTD) with complete registered agent, London office address, EIN/UTR tax numbers, and Wise/Stripe business banking setup.",
+    items: [
+      {
+        icon: Building2,
+        title: "UK Limited Company (LTD) Formation",
+        desc: "24-48 hour direct Companies House incorporation with 1-Year London registered office, Certificate of Incorporation, CRN, and Wise/Stripe banking pack.",
+        href: "/services/uk-company-formation",
+        cta: "Form UK Company ($269)",
+      },
+      {
+        icon: Landmark,
+        title: "US LLC Formation & EIN Tax ID",
+        desc: "Official US state filing across NM, WY, DE, or FL. Includes Registered Agent, Articles of Organization, Operating Agreement, and IRS EIN filing.",
+        href: "/services/form-business",
+        cta: "Form US LLC ($299)",
+      },
+      {
+        icon: ShieldCheck,
+        title: "Global Multi-Currency Banking & Stripe Setup",
+        desc: "Guaranteed business merchant setup guidance for Wise Business, Payoneer, Mercury Bank, and verified UK/US Stripe accounts.",
+        href: "/services/uk-company-formation",
+        cta: "Explore Banking Packs",
+      },
+      {
+        icon: Server,
+        title: "UK VAT, EORI & Amazon UK Compliance",
+        desc: "Specialized corporate compliance for Amazon UK, Shopify Global, and cross-border sellers with HMRC VAT & EORI registration.",
+        href: "/services/uk-company-formation",
+        cta: "View E-Com Elite Pack",
       },
     ]
   }

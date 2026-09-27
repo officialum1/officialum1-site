@@ -100,6 +100,8 @@ export default function Navbar() {
         { href: "/services/crypto-guest-posting", label: "🪙 Crypto & Web3 Links" },
         { href: "/services/press-release-distribution", label: "📰 Press Release Distribution" },
         { href: "/services/local-citations", label: "📍 Local SEO Citations (8 Countries)" },
+        { href: "/services/uk-company-formation", label: "🇬🇧 UK Company Formation", highlight: true },
+        { href: "/services/form-business", label: "🇺🇸 US LLC Formation" },
         { href: "/shop", label: "Shop" },
         ...(user ? [{ href: "/my-orders", label: "Track Order" }] : []),
         { href: "/reviews", label: "Reviews" },

@@ -187,7 +187,7 @@ export default function UKCompanyFormationPage() {
             <Navbar />
             <Toaster position="top-right" richColors />
 
-            <main className="flex-1 py-12 md:py-20 relative overflow-hidden">
+            <main className="flex-1 pt-28 pb-16 md:pt-36 md:pb-24 relative overflow-hidden">
                 {/* Background Ambient Glows */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-gradient-to-b from-[#146c78]/10 via-[#c4472d]/5 to-transparent blur-3xl -z-10 pointer-events-none" />
 
