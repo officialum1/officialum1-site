@@ -1,108 +1,66 @@
 "use client";
 
-const techItems = [
-    "Next.js",
-    "React",
-    "TypeScript",
-    "Node.js",
-    "Tailwind CSS",
-    "Framer Motion",
-    "Figma",
-    "WordPress",
-    "Google Ads",
-    "Canva",
+const tickerItems = [
+    { label: "Next.js 15", category: "Tech" },
+    { label: "Companies House UK", category: "Gov" },
+    { label: "Yahoo Finance", category: "Media" },
+    { label: "Stripe Payments", category: "FinTech" },
+    { label: "MarketWatch", category: "Media" },
+    { label: "Wise Business", category: "Banking" },
+    { label: "AP News", category: "Media" },
+    { label: "TypeScript", category: "Tech" },
+    { label: "Google News", category: "Media" },
+    { label: "WordPress 90+ Score", category: "Speed" },
+    { label: "Payoneer UK", category: "Banking" },
+    { label: "Bloomberg Feed", category: "Media" },
 ];
 
 export default function TechTicker() {
-    const loop = [...techItems, ...techItems, ...techItems];
+    const loop = [...tickerItems, ...tickerItems, ...tickerItems];
 
     return (
         <section
-            aria-label="Technology stack ticker"
-            className="relative border-y"
+            aria-label="Technology and media authority ticker"
+            className="relative border-y overflow-hidden"
             style={{ background: "var(--bg-section)", borderColor: "var(--border-subtle)" }}
         >
             <div className="container py-6">
                 <p
-                    className="mb-4 text-center text-[0.75rem] font-semibold uppercase tracking-[0.3em]"
+                    className="mb-4 text-center text-[0.75rem] font-bold uppercase tracking-[0.25em]"
                     style={{ color: "var(--text-muted)" }}
                 >
-                    Powered by modern platforms & tools
+                    Enterprise Infrastructure &amp; Verified Media Network
                 </p>
 
                 <div className="relative overflow-hidden">
                     {/* Edge fades */}
                     <div
-                        className="pointer-events-none absolute inset-y-0 left-0 w-16"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-20 z-10"
                         style={{
                             background:
-                                "linear-gradient(90deg, var(--bg-section) 0%, rgba(17,17,24,0.4) 60%, transparent 100%)",
+                                "linear-gradient(90deg, var(--bg-section) 0%, transparent 100%)",
                         }}
                     />
                     <div
-                        className="pointer-events-none absolute inset-y-0 right-0 w-16"
+                        className="pointer-events-none absolute inset-y-0 right-0 w-20 z-10"
                         style={{
                             background:
-                                "linear-gradient(270deg, var(--bg-section) 0%, rgba(17,17,24,0.4) 60%, transparent 100%)",
+                                "linear-gradient(270deg, var(--bg-section) 0%, transparent 100%)",
                         }}
                     />
 
                     <div className="ticker-track">
                         <div className="ticker-inner">
                             {loop.map((item, index) => (
-                                <div key={`${item}-${index}`} className="ticker-pill">
+                                <div key={`${item.label}-${index}`} className="ticker-pill flex items-center gap-2">
                                     <span className="ticker-dot" />
-                                    <span>{item}</span>
+                                    <span className="font-semibold text-xs sm:text-sm text-[#182026] dark:text-gray-200">{item.label}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                .ticker-track {
-                    white-space: nowrap;
-                    overflow: hidden;
-                }
-                .ticker-inner {
-                    display: inline-flex;
-                    align-items: center;
-                    animation: ticker-scroll 32s linear infinite;
-                }
-                .ticker-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    color: var(--text-muted);
-                    font-size: 0.9rem;
-                    padding: 0.35rem 1.5rem;
-                }
-                .ticker-pill span {
-                    white-space: nowrap;
-                }
-                .ticker-dot {
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 999px;
-                    background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet));
-                    box-shadow: 0 0 14px rgba(79, 142, 247, 0.7);
-                    flex-shrink: 0;
-                }
-                @keyframes ticker-scroll {
-                    0% {
-                        transform: translateX(0);
-                    }
-                    100% {
-                        transform: translateX(-50%);
-                    }
-                }
-                @media (prefers-reduced-motion: reduce) {
-                    .ticker-inner {
-                        animation-duration: 0s;
-                    }
-                }
-            `}</style>
         </section>
     );
 }

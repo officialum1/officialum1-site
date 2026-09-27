@@ -4,13 +4,15 @@ import {
   CheckCircle2,
   ShieldCheck,
   Sparkles,
+  Star,
+  Users
 } from "lucide-react";
 
 const proofPoints = [
-  "US Registered Entity (LLC)",
+  "US & UK Registered Entity",
   "Sub-Second Next.js Stacks",
   "Data-Backed Organic SEO",
-  "High DA Guest Posting",
+  "65,000+ Verified Backlinks",
 ];
 
 export default function HomeHero() {
@@ -35,20 +37,28 @@ export default function HomeHero() {
 
       <div className="container relative z-10">
         <div className="max-w-4xl">
-          <div
-            className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider"
-            style={{
-              borderColor: "rgba(20,108,120,0.22)",
-              background: "rgba(255,255,255,0.92)",
-              color: "var(--accent-blue)",
-              boxShadow: "0 2px 10px rgba(20,108,120,0.06)",
-            }}
-          >
-            <ShieldCheck
-              aria-hidden="true"
-              className="h-4 w-4 flex-none text-emerald-600"
-            />
-            <span>OfficialUM1 LLC • US-Registered Advertising &amp; Marketing Agency</span>
+          {/* Live System Indicator Badge */}
+          <div className="mb-6 flex flex-wrap items-center gap-2.5">
+            <div
+              className="inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider"
+              style={{
+                borderColor: "rgba(20,108,120,0.22)",
+                background: "rgba(255,255,255,0.92)",
+                color: "var(--accent-blue)",
+                boxShadow: "0 2px 10px rgba(20,108,120,0.06)",
+              }}
+            >
+              <ShieldCheck
+                aria-hidden="true"
+                className="h-4 w-4 flex-none text-emerald-600"
+              />
+              <span>OfficialUM1 LLC • US &amp; UK Corporate Engineering Agency</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>24–48h Incorporation Active</span>
+            </div>
           </div>
 
           <h1
@@ -70,11 +80,7 @@ export default function HomeHero() {
             className="mb-8 max-w-3xl text-base leading-7 md:text-lg md:leading-8"
             style={{ color: "var(--text-muted)" }}
           >
-            <strong>OfficialUM1 LLC</strong> is a US-registered digital
-            marketing and software engineering agency. We build hyper-speed
-            Next.js web applications, data-backed SEO ranking systems,
-            authoritative guest posting campaigns, and revenue growth
-            infrastructure for global brands and ambitious enterprises.
+            <strong>OfficialUM1 LLC</strong> is a US-registered digital marketing, corporate formation, and software engineering agency. We build hyper-speed Next.js web platforms, dominant SEO ranking systems, authoritative PR outreach, and official US LLC / UK LTD formation infrastructure for global founders.
           </p>
 
           <ul className="mb-9 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -121,6 +127,29 @@ export default function HomeHero() {
             >
               Explore Client Services
             </Link>
+          </div>
+
+          {/* Social Proof & Client Rating Strip */}
+          <div className="mt-8 flex flex-wrap items-center gap-4 pt-6 border-t border-gray-200/60">
+            <div className="flex -space-x-2">
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-700 text-white text-xs font-bold ring-2 ring-white">US</span>
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#146c78] text-white text-xs font-bold ring-2 ring-white">UK</span>
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold ring-2 ring-white">AE</span>
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-stone-700 text-white text-xs font-bold ring-2 ring-white">PK</span>
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <div className="flex text-amber-500">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                ))}
+              </div>
+              <span className="text-sm font-bold text-gray-900">4.9/5</span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-gray-600 font-medium">
+              Trusted by <span className="font-bold text-gray-900">450+ founders</span> across US, UK, UAE &amp; Pakistan.
+            </p>
           </div>
         </div>
       </div>
