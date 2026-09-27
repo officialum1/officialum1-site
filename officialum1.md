@@ -333,5 +333,10 @@ git commit -m "feat: description of update"
 git push origin main
 ```
 
+## 11. Related Operational & Formation Handbooks
+
+- **US LLC Formation & Corporate Tools API Guide**: [`BUSINESS_FORMATION_DOCS.md`](file:///c:/Users/Abc/Desktop/officialum1/BUSINESS_FORMATION_DOCS.md)
+- **UK LTD Formation & Companies House Credit Account Guide**: [`UK_FORMATION_DOCS.md`](file:///c:/Users/Abc/Desktop/officialum1/UK_FORMATION_DOCS.md)
+
 ---
 *Maintained by OfficialUM1 Engineering Team. Last updated: September 2026.*
