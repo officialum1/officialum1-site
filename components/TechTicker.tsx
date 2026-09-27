@@ -1,18 +1,18 @@
 "use client";
 
 const tickerItems = [
-    { label: "Next.js 15", category: "Tech" },
-    { label: "Companies House UK", category: "Gov" },
-    { label: "Yahoo Finance", category: "Media" },
-    { label: "Stripe Payments", category: "FinTech" },
-    { label: "MarketWatch", category: "Media" },
-    { label: "Wise Business", category: "Banking" },
-    { label: "AP News", category: "Media" },
-    { label: "TypeScript", category: "Tech" },
-    { label: "Google News", category: "Media" },
-    { label: "WordPress 90+ Score", category: "Speed" },
-    { label: "Payoneer UK", category: "Banking" },
-    { label: "Bloomberg Feed", category: "Media" },
+    "Next.js 15",
+    "Companies House UK",
+    "Yahoo Finance",
+    "Stripe Payments",
+    "MarketWatch",
+    "Wise Business",
+    "AP News",
+    "TypeScript",
+    "Google News",
+    "WordPress 90+ Score",
+    "Payoneer UK",
+    "Bloomberg Feed",
 ];
 
 export default function TechTicker() {
@@ -35,14 +35,14 @@ export default function TechTicker() {
                 <div className="relative overflow-hidden">
                     {/* Edge fades */}
                     <div
-                        className="pointer-events-none absolute inset-y-0 left-0 w-20 z-10"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10"
                         style={{
                             background:
                                 "linear-gradient(90deg, var(--bg-section) 0%, transparent 100%)",
                         }}
                     />
                     <div
-                        className="pointer-events-none absolute inset-y-0 right-0 w-20 z-10"
+                        className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10"
                         style={{
                             background:
                                 "linear-gradient(270deg, var(--bg-section) 0%, transparent 100%)",
@@ -52,15 +52,60 @@ export default function TechTicker() {
                     <div className="ticker-track">
                         <div className="ticker-inner">
                             {loop.map((item, index) => (
-                                <div key={`${item.label}-${index}`} className="ticker-pill flex items-center gap-2">
+                                <div key={`${item}-${index}`} className="ticker-pill">
                                     <span className="ticker-dot" />
-                                    <span className="font-semibold text-xs sm:text-sm text-[#182026] dark:text-gray-200">{item.label}</span>
+                                    <span>{item}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .ticker-track {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    width: 100%;
+                }
+                .ticker-inner {
+                    display: inline-flex;
+                    align-items: center;
+                    animation: ticker-scroll 32s linear infinite;
+                    will-change: transform;
+                }
+                .ticker-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: var(--text-primary);
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    padding: 0.35rem 1.25rem;
+                    white-space: nowrap;
+                }
+                .ticker-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 999px;
+                    background: #146c78;
+                    box-shadow: 0 0 10px rgba(20, 108, 120, 0.6);
+                    flex-shrink: 0;
+                }
+                @keyframes ticker-scroll {
+                    0% {
+                        transform: translateX(0);
+                    }
+                    100% {
+                        transform: translateX(-33.333%);
+                    }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .ticker-inner {
+                        animation-duration: 0s;
+                    }
+                }
+            `}</style>
         </section>
     );
 }

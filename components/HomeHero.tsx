@@ -18,7 +18,7 @@ const proofPoints = [
 export default function HomeHero() {
   return (
     <section
-      className="homeHero relative overflow-hidden px-0 py-24 sm:py-28 md:py-36"
+      className="homeHero relative overflow-hidden px-0 pt-28 pb-20 sm:pt-32 sm:pb-24 md:pt-40 md:pb-32"
       aria-labelledby="home-hero-title"
       style={{
         background: "linear-gradient(180deg, #f8faf7 0%, #eef4f2 100%)",
