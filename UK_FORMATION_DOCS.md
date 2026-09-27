@@ -91,3 +91,31 @@ sequenceDiagram
 Under the updated UK regulations:
 - Formation agents performing identity verification on behalf of company directors must register as an **Authorised Corporate Service Provider (ACSP)** and be supervised under UK Anti-Money Laundering (AML) regulations (e.g., HMRC AML supervision).
 - For standard agency operations, formations can also be filed directly through authenticated corporate filing software or certified wholesale partner channels.
+
+---
+
+## 7. Direct Debit Mandate & Banking Details (Barclays UK)
+
+For the monthly fee-bearing credit account settlement with Companies House, the following UK Direct Debit profile is configured:
+
+| Field | Configured Value |
+| :--- | :--- |
+| **Account Holder** | Muhammad Umar Mumtaz / OfficialUM1 LLC |
+| **Bank Name** | Barclays Bank PLC |
+| **Bank Address** | Level 25, 1 Churchill Place, London E14 5HP |
+| **Sort Code** | `23-14-86` |
+| **Account Number** | `03905664` |
+| **Transfer Type** | UK Faster Payments / Direct Debit |
+| **Application Script** | [`scripts/fill_companies_house_form.py`](file:///c:/Users/Abc/Desktop/officialum1/scripts/fill_companies_house_form.py) |
+| **Completed PDF** | [`OfficialUM1_Companies_House_Credit_Account_FILLED.pdf`](file:///c:/Users/Abc/Desktop/officialum1/OfficialUM1_Companies_House_Credit_Account_FILLED.pdf) |
+
+---
+
+## 8. Hostinger Agency Partner Integration
+
+OfficialUM1 is registered as a **Hostinger Certified Agency Partner**:
+- **Directory Listing:** Receives inbound client leads looking for web design & agency infrastructure.
+- **Agency Discounts:** 20% discount on agency hosting & servers.
+- **Recurring Revenue:** 20% to 40% recurring commission on client renewals.
+- **Wholesale Domains:** Wholesale .com domains ($4.99 - $9.99) bundled into formation & web development packages.
+- **Codebase MCP:** Integrated via `hostinger-agency-hosting` & `hostinger-domains` tools.
