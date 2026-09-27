@@ -28,6 +28,12 @@ export default function StaffDashboard() {
     const [showAddPost, setShowAddPost] = useState(false);
     const [newPost, setNewPost] = useState({ content: '', platform: 'Twitter' });
 
+    const openSaleFor = (item: any) => {
+        setSelectedItem(item);
+        setShowSaleForm(true);
+        setDeliveryInfo(null);
+    };
+
     useEffect(() => {
         // 1. Check Session
         const stored = localStorage.getItem('staff_user');

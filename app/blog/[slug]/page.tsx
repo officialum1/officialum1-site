@@ -51,7 +51,7 @@ async function getPost(slug: string): Promise<BlogPostRow | null> {
         excerpt: match.excerpt,
         content: match.content,
         slug: match.slug,
-        read_time: match.readTime || match.read_time,
+        read_time: (match as any).read_time || match.readTime || "5 min read",
         date: match.date,
         meta_title: match.meta_title,
         meta_description: match.meta_description,

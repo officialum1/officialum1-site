@@ -90,6 +90,7 @@ officialum1/
 | `/` | `app/page.tsx` | Master Homepage (Hero, Services, US Business, Case Studies, Reviews, CTA). |
 | `/services` | `app/services/page.tsx` | Services catalog (Development, Speed Optimization, SEO, Cloud). |
 | `/services/form-business` | `app/services/form-business/page.tsx` | US LLC & Business Formation Hub (Dynamic Northwest State Schemas). |
+| `/services/uk-company-formation` | `app/services/uk-company-formation/page.tsx` | UK LTD Formation Hub (Companies House live search, 3 tiered packages $269–$499, London Office, Banking Pack). |
 | `/shop` | `app/shop/page.tsx` | Digital assets & service marketplace with category filtering and search. |
 | `/shop/[id]` | `app/shop/[id]/page.tsx` | Individual product detail page with instant buy & review submission. |
 | `/shop/compare` | `app/shop/compare/page.tsx` | Side-by-side product & service feature comparison table. |

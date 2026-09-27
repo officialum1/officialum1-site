@@ -303,7 +303,7 @@ export default function SpeedAuditQuoteForm() {
                 color: "var(--text-primary)",
               }}
             >
-              <option value="Mobile load time > 4s">Mobile load time > 4 seconds (High bounce rate)</option>
+              <option value="Mobile load time &gt; 4s">Mobile load time &gt; 4 seconds (High bounce rate)</option>
               <option value="Failing Google Core Web Vitals (LCP/CLS)">Failing Google Core Web Vitals (LCP/CLS)</option>
               <option value="Slow WooCommerce Checkout & Cart">Slow WooCommerce Checkout & Cart</option>
               <option value="High TTFB / Slow Server Response">High TTFB / Slow Server Response</option>

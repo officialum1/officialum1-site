@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import { PageHero } from '@/components/ui/PageHero';
@@ -368,7 +369,52 @@ export default function FormBusinessPage() {
                 />
             </div>
 
-            <div className="container" style={{ paddingTop: '2rem', paddingBottom: '96px', maxWidth: '860px' }}>
+            <div className="container" style={{ paddingTop: '1.5rem', paddingBottom: '96px', maxWidth: '860px' }}>
+
+                {/* Country Jurisdiction Switcher Bar */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        padding: '6px',
+                        borderRadius: '16px',
+                        background: 'var(--bg-alt)',
+                        border: '1px solid var(--border-subtle)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.04)'
+                    }}>
+                        <div style={{
+                            padding: '8px 18px',
+                            borderRadius: '12px',
+                            background: 'var(--primary)',
+                            color: '#ffffff',
+                            fontWeight: '700',
+                            fontSize: '0.85rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 12px rgba(20, 108, 120, 0.25)'
+                        }}>
+                            <span>🇺🇸</span> US LLC Formation
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }}></span>
+                        </div>
+                        <Link 
+                            href="/services/uk-company-formation" 
+                            style={{
+                                padding: '8px 18px',
+                                borderRadius: '12px',
+                                color: 'var(--text-muted)',
+                                fontWeight: '600',
+                                fontSize: '0.85rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                textDecoration: 'none',
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            <span>🇬🇧</span> UK LTD Formation
+                        </Link>
+                    </div>
+                </div>
 
                 {/* Modern Step Indicator */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', gap: '8px' }}>

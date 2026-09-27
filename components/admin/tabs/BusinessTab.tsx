@@ -23,10 +23,12 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
     const [adminNotes, setAdminNotes] = useState<string>('');
     const [isSaving, setIsSaving] = useState(false);
 
+    const [jurisdictionFilter, setJurisdictionFilter] = useState<'all' | 'us' | 'uk'>('all');
+
     const loadAllData = async () => {
         setLoading(true);
         try {
-            // 1. Fetch CRM Leads for US Formations
+            // 1. Fetch CRM Leads for US & UK Formations
             const leadsRes = await fetch('/api/leads');
             const leadsData = await leadsRes.json();
             
@@ -51,10 +53,13 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                     return false;
                 }
 
-                // Strictly match authentic US Formation submissions
+                // Match authentic US & UK Formation submissions
                 return (
                     platform.startsWith('US Formation') ||
                     platform.startsWith('US Business Formation') ||
+                    platform.startsWith('UK Formation') ||
+                    platform.includes('UK LTD Formation') ||
+                    notes.includes('UK LTD FORMATION CASE') ||
                     (notes.includes('CT_ID:') && (notes.includes('Type: formation') || notes.includes('Type: ra') || notes.includes('Type: ein') || notes.includes('Type: compliance')))
                 );
             });
@@ -86,8 +91,17 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
     const parseLeadDetails = (notes: string) => {
         if (!notes) return {};
         const details: any = {};
+
+        // Extract UK Metadata JSON if present
+        const ukJsonMatch = notes.match(/METADATA_JSON:\s*(\{[\s\S]*\})/);
+        if (ukJsonMatch && ukJsonMatch[1]) {
+            try {
+                details.ukMeta = JSON.parse(ukJsonMatch[1]);
+                details.isUK = true;
+            } catch (e) {}
+        }
         
-        // Extract JSON params if present
+        // Extract US JSON params if present
         const paramsMatch = notes.match(/Params:\s*(\{.*\})/);
         if (paramsMatch && paramsMatch[1]) {
             try {
@@ -100,23 +114,23 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
         if (ctMatch) details.companyId = ctMatch[1];
 
         // Extract Package
-        const pkgMatch = notes.match(/Package:\s*([^|]+)/);
+        const pkgMatch = notes.match(/Package:\s*([^|\n]+)/);
         if (pkgMatch) details.package = pkgMatch[1].trim();
 
         // Extract Speed
-        const speedMatch = notes.match(/Speed:\s*([^|]+)/);
+        const speedMatch = notes.match(/Speed:\s*([^|\n]+)/);
         if (speedMatch) details.speed = speedMatch[1].trim();
 
         // Extract Entity
-        const entityMatch = notes.match(/Entity:\s*([^|]+)/);
+        const entityMatch = notes.match(/Entity:\s*([^|\n]+)/);
         if (entityMatch) details.entity = entityMatch[1].trim();
 
         // Extract Addons
-        const addonsMatch = notes.match(/Addons:\s*([^|]+)/);
+        const addonsMatch = notes.match(/Addons:\s*([^|\n]+)/);
         if (addonsMatch) details.addons = addonsMatch[1].trim();
 
         // Extract Breakdown
-        const breakdownMatch = notes.match(/Breakdown:\s*([^|]+)/);
+        const breakdownMatch = notes.match(/Breakdown:\s*([^|\n]+)/);
         if (breakdownMatch) details.breakdown = breakdownMatch[1].trim();
 
         return details;
@@ -126,21 +140,30 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
     const filteredFormations = useMemo(() => {
         return formations.filter((f) => {
             const query = searchQuery.toLowerCase();
+            const platform = (f.platform || '').toLowerCase();
+            const notes = (f.notes || '').toLowerCase();
+
+            const isUK = platform.includes('uk') || notes.includes('uk ltd');
+            const isUS = !isUK;
+
+            if (jurisdictionFilter === 'us' && !isUS) return false;
+            if (jurisdictionFilter === 'uk' && !isUK) return false;
+
             const matchesSearch = 
                 (f.clientName || '').toLowerCase().includes(query) ||
                 (f.buyerEmail || '').toLowerCase().includes(query) ||
-                (f.platform || '').toLowerCase().includes(query) ||
-                (f.notes || '').toLowerCase().includes(query);
+                platform.includes(query) ||
+                notes.includes(query);
 
             const matchesStatus = statusFilter === 'all' || 
                 (statusFilter === 'missing_info' && (f.status === 'Missing Information' || f.status === 'Action Required')) ||
-                (statusFilter === 'new' && (f.status === 'New' || !f.status)) ||
-                (statusFilter === 'in_progress' && (f.status === 'In Progress' || f.status === 'Reviewing' || f.status === 'Submitted to State')) ||
-                (statusFilter === 'completed' && (f.status === 'Completed' || f.status === 'Active'));
+                (statusFilter === 'new' && (f.status === 'New' || f.status === 'New Case' || !f.status)) ||
+                (statusFilter === 'in_progress' && (f.status === 'In Progress' || f.status === 'Reviewing' || f.status === 'Submitted to State' || f.status === 'processing')) ||
+                (statusFilter === 'completed' && (f.status === 'Completed' || f.status === 'Active' || f.status === 'paid'));
 
             return matchesSearch && matchesStatus;
         });
-    }, [formations, searchQuery, statusFilter]);
+    }, [formations, searchQuery, statusFilter, jurisdictionFilter]);
 
     const handleSelectLead = (lead: any) => {
         setSelectedItem(lead);
@@ -222,10 +245,10 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                             </div>
                             <div>
                                 <h2 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
-                                    US Business & LLC Formations Hub
+                                    US & UK Business Formations Hub
                                 </h2>
                                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '2px 0 0' }}>
-                                    Live intake, state compliance details, Northwest Registered Agent verification, and client outreach.
+                                    Live intake, Northwest Registered Agent US compliance, UK Companies House filings, and client outreach.
                                 </p>
                             </div>
                         </div>
@@ -267,24 +290,78 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                 </div>
             </div>
 
-            {/* Controls Bar: Search & Status Filters */}
+            {/* Controls Bar: Search, Jurisdiction Toggle & Status Filters */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '450px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input
-                        type="text"
-                        placeholder="Search by company name, client name, email, or state..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="input-field"
-                        style={{ width: '100%', paddingLeft: '40px', borderRadius: '12px', background: '#ffffff' }}
-                    />
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {/* Jurisdiction Switcher Tabs */}
+                    <div style={{ display: 'inline-flex', padding: '4px', borderRadius: '12px', background: 'var(--bg-alt)', border: '1px solid var(--border-subtle)' }}>
+                        <button
+                            onClick={() => setJurisdictionFilter('all')}
+                            style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                border: 'none',
+                                background: jurisdictionFilter === 'all' ? 'var(--primary)' : 'transparent',
+                                color: jurisdictionFilter === 'all' ? '#ffffff' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🌐 All ({statsTotal})
+                        </button>
+                        <button
+                            onClick={() => setJurisdictionFilter('us')}
+                            style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                border: 'none',
+                                background: jurisdictionFilter === 'us' ? 'var(--primary)' : 'transparent',
+                                color: jurisdictionFilter === 'us' ? '#ffffff' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🇺🇸 US LLCs
+                        </button>
+                        <button
+                            onClick={() => setJurisdictionFilter('uk')}
+                            style={{
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                fontSize: '0.82rem',
+                                fontWeight: '700',
+                                border: 'none',
+                                background: jurisdictionFilter === 'uk' ? 'var(--primary)' : 'transparent',
+                                color: jurisdictionFilter === 'uk' ? '#ffffff' : 'var(--text-muted)',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            🇬🇧 UK LTDs
+                        </button>
+                    </div>
+
+                    <div style={{ position: 'relative', minWidth: '240px' }}>
+                        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                        <input
+                            type="text"
+                            placeholder="Search company, client, email..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="input-field"
+                            style={{ width: '100%', paddingLeft: '36px', borderRadius: '10px', background: '#ffffff', fontSize: '0.85rem' }}
+                        />
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     {[
-                        { id: 'all', label: 'All Cases' },
-                        { id: 'new', label: 'New Submissions' },
+                        { id: 'all', label: 'All Statuses' },
+                        { id: 'new', label: 'New' },
                         { id: 'missing_info', label: '⚠️ Action Required' },
                         { id: 'in_progress', label: 'In Progress' },
                         { id: 'completed', label: 'Completed' }
@@ -293,9 +370,9 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                             key={st.id}
                             onClick={() => setStatusFilter(st.id)}
                             style={{
-                                padding: '6px 14px',
-                                borderRadius: '10px',
-                                fontSize: '0.85rem',
+                                padding: '5px 12px',
+                                borderRadius: '8px',
+                                fontSize: '0.8rem',
                                 fontWeight: '600',
                                 border: statusFilter === st.id ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)',
                                 background: statusFilter === st.id ? 'var(--primary)' : '#ffffff',
@@ -316,8 +393,8 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                             <tr style={{ background: 'var(--bg-alt)', borderBottom: '1px solid var(--border-subtle)' }}>
-                                <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>COMPANY & CLIENT</th>
-                                <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>STATE & TYPE</th>
+                                <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>JURISDICTION & COMPANY</th>
+                                <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>PACKAGE / SERVICE</th>
                                 <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>CASE VALUE</th>
                                 <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>STATUS</th>
                                 <th style={{ padding: '1rem 1.25rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase' }}>DATE</th>
@@ -328,6 +405,7 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                             {filteredFormations.map((lead: any) => {
                                 const parsed = parseLeadDetails(lead.notes);
                                 const isMissing = lead.status === 'Missing Information' || lead.status === 'Action Required';
+                                const isUK = parsed.isUK || (lead.platform || '').toLowerCase().includes('uk');
 
                                 return (
                                     <tr 
@@ -340,11 +418,16 @@ export default function BusinessTab({ fetchData }: BusinessTabProps) {
                                         className="hover:bg-slate-50"
                                     >
                                         <td style={{ padding: '1.2rem 1.25rem' }}>
-                                            <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '0.98rem' }}>
-                                                {lead.clientName}
-                                            </div>
-                                            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
-                                                <Mail size={13} /> {lead.buyerEmail || 'No email provided'}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontSize: '1.2rem' }}>{isUK ? '🇬🇧' : '🇺🇸'}</span>
+                                                <div>
+                                                    <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '0.98rem' }}>
+                                                        {parsed.ukMeta?.companyName || lead.clientName}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                                        <Mail size={13} /> {lead.buyerEmail || lead.email || 'No email provided'}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
 
