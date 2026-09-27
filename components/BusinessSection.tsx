@@ -6,9 +6,9 @@ import Link from "next/link";
 import { Globe, FileDigit, Shield, FileCheck, Lock, Zap } from "lucide-react";
 
 const formationOptions = [
-  { id: "wyoming", state: "Wyoming", total: "$220", note: "Global Standard" },
-  { id: "delaware", state: "Delaware", total: "$210", note: "Startups Hub" },
-  { id: "texas", state: "Texas", total: "$420", note: "Enterprise Choice" },
+  { id: "wyoming", state: "Wyoming", total: "$275", note: "Global Standard" },
+  { id: "delaware", state: "Delaware", total: "$265", note: "Startups Hub" },
+  { id: "texas", state: "Texas", total: "$475", note: "Enterprise Choice" },
 ];
 
 const features = [

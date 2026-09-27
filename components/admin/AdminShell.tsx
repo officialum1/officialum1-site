@@ -10,7 +10,7 @@ import {
   LineChart, CreditCard, Briefcase, FileText, Settings, 
   Search, Bell, RefreshCw, LogOut, Percent, BookOpen,
   Activity, Layout, CloudLightning, Gamepad2, ShoppingBag,
-  Mail, FileEdit, Receipt, Sparkles
+  Mail, FileEdit, Receipt, Sparkles, Building2
 } from "lucide-react";
 
 type NavItem = {
@@ -38,6 +38,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "STORE & CLIENT ORDERS",
     items: [
       { id: "orders", label: "Orders & Deliveries", href: "/admin/orders", icon: Package },
+      { id: "business", label: "US LLC Formations", href: "/admin/business", icon: Building2 },
       { id: "catalog", label: "Services & Catalog", href: "/admin/catalog", icon: Store },
       { id: "stock", label: "Inventory Stock", href: "/admin/stock", icon: Database },
       { id: "bundles", label: "Service Bundles", href: "/admin/bundles", icon: Boxes },

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 import { PageHero } from '@/components/ui/PageHero';
 import { Badge } from '@/components/ui/Badge';
-import { Building2, CheckCircle2, FileText, ShieldCheck, UserRound } from 'lucide-react';
+import { Building2, CheckCircle2, FileText, ShieldCheck, UserRound, ArrowRight, ArrowLeft, Check, Sparkles, Mail, MapPin, Zap } from 'lucide-react';
 
 const US_STATES = [
     { code: 'AL', name: 'Alabama', fee: 236 }, { code: 'AK', name: 'Alaska', fee: 250 }, { code: 'AZ', name: 'Arizona', fee: 50 },
@@ -47,7 +47,7 @@ export default function FormBusinessPage() {
     const [selectedMethod, setSelectedMethod] = useState<any>(null);
     const [mainService, setMainService] = useState<'formation' | 'ra' | 'ein' | 'compliance'>('formation');
     const [addOns, setAddOns] = useState({ ein: false, agreement: false, compliance: false, virtualOffice: false });
-    const [subStep, setSubStep] = useState(1); // For Step 2 multi-part form
+    const [subStep, setSubStep] = useState(1);
 
     useEffect(() => {
         const stored = localStorage.getItem('buyer_user');
@@ -104,7 +104,7 @@ export default function FormBusinessPage() {
 
             setOfferings(filteredOfferings);
 
-            // Skip package selection screen entirely if 'Form a Company' is found or only 1 package was found
+            // Skip package selection screen if 'Form a Company' is found or only 1 package
             const primaryOption = filteredOfferings.find((o: any) => o.name && o.name.toLowerCase() === 'form a company');
             if (primaryOption) {
                 await handleSelectOffering(primaryOption, cId);
@@ -175,31 +175,31 @@ export default function FormBusinessPage() {
         const isBooleany = field.type === 'boolean' || displayLabel.toLowerCase().includes('is a company') || displayLabel.toLowerCase().includes('is company');
         const isSelecty = field.type === 'select' || field.type === 'radio' || isManagementType || isBooleany;
 
-        // Hide Registered Agent section as we provide it
+        // Hide Registered Agent section as we provide Northwest RA natively
         if (displayLabel.toLowerCase().includes('registered agent')) {
             return (
                 <div key={fieldKey} style={{
-                    border: '1px solid rgba(0, 195, 255, 0.3)',
+                    border: '1px solid rgba(20, 108, 120, 0.25)',
                     padding: '1.5rem',
-                    borderRadius: '24px',
-                    marginTop: '2rem',
-                    background: 'rgba(0, 195, 255, 0.05)',
+                    borderRadius: '18px',
+                    marginTop: '1.5rem',
+                    background: 'rgba(20, 108, 120, 0.04)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '15px',
+                    gap: '16px',
                     position: 'relative',
-                    overflow: 'hidden'
                 }}>
-                    <div style={{ position: 'absolute', right: '-10px', top: '-10px', fontSize: '4rem', opacity: 0.05, transform: 'rotate(15deg)' }}>🛡️</div>
-                    <div style={{ width: '48px', height: '48px', background: 'rgba(0, 195, 255, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>🛡️</div>
+                    <div style={{ width: '48px', height: '48px', minWidth: '48px', background: 'rgba(20, 108, 120, 0.12)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                        <ShieldCheck size={26} />
+                    </div>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <h4 style={{ fontSize: '1rem', color: '#00c3ff', margin: 0, fontWeight: 'bold' }}>OfficialUM1 Registered Agent Service</h4>
-                            <span style={{ background: '#00c3ff', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontSize: '0.6rem', fontWeight: 'bold' }}>VERIFIED</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0, fontWeight: '700' }}>OfficialUM1 Registered Agent Service</h4>
+                            <span style={{ background: 'var(--primary)', color: '#fff', padding: '2px 8px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: 'bold' }}>VERIFIED</span>
                         </div>
-                        <p style={{ fontSize: '0.8rem', color: '#888', margin: '4px 0 0', lineHeight: '1.4' }}>
-                            We are using our <strong>Northwest Registered Agent</strong> professional address. <br />
-                            No additional details or filings are required from your side.
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: '1.4' }}>
+                            We provide our official <strong>Northwest Registered Agent</strong> commercial street address in {formData.state}. <br />
+                            No personal address exposure or extra filing required from your side.
                         </p>
                     </div>
                 </div>
@@ -219,16 +219,16 @@ export default function FormBusinessPage() {
             const isMailing = displayLabel.toLowerCase().includes('mailing address');
             return (
                 <div key={fieldKey} style={{
-                    border: '1px solid rgba(0, 255, 136, 0.15)',
+                    border: '1px solid var(--border-subtle)',
                     padding: '1.5rem',
-                    borderRadius: '20px',
+                    borderRadius: '18px',
                     marginTop: '1.5rem',
-                    background: 'rgba(0, 255, 136, 0.02)',
+                    background: 'var(--bg-alt)',
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '4px', height: '18px', background: '#00ff88', borderRadius: '2px' }}></div>
-                            <h4 style={{ fontSize: '1rem', color: '#00ff88', margin: 0, fontWeight: 'bold' }}>{displayLabel}</h4>
+                            <div style={{ width: '4px', height: '18px', background: 'var(--primary)', borderRadius: '2px' }}></div>
+                            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0, fontWeight: '700' }}>{displayLabel}</h4>
                         </div>
                         {isMailing && (
                             <button
@@ -240,9 +240,9 @@ export default function FormBusinessPage() {
                                         newFields[k.replace('principal_address', 'mailing_address')] = v;
                                     });
                                     setFormData({ ...formData, customFields: newFields });
-                                    toast.success("Address copied!");
+                                    toast.success("Address copied from Principal Address!");
                                 }}
-                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', cursor: 'pointer' }}
+                                style={{ background: '#ffffff', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', padding: '5px 12px', borderRadius: '8px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: '600' }}
                             >
                                 Copy from Principal
                             </button>
@@ -256,16 +256,15 @@ export default function FormBusinessPage() {
         }
 
         return (
-            <div key={fieldKey} style={{ marginBottom: '0.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: '#999', marginBottom: '0.6rem', fontWeight: '500' }}>
-                    {displayLabel} {field.required && <span style={{ color: '#ff4444' }}>*</span>}
+            <div key={fieldKey} style={{ marginBottom: '0.6rem' }}>
+                <label style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text-primary)', marginBottom: '0.4rem', fontWeight: '600' }}>
+                    {displayLabel} {field.required && <span style={{ color: 'var(--primary-2)' }}>*</span>}
                 </label>
 
                 {isBooleany ? (
                     <select
                         required={field.required}
-                        className="input-field"
-                        style={{ width: '100%', padding: '0.9rem' }}
+                        className="business-input"
                         value={formData.customFields[fieldKey] || ''}
                         onChange={e => setFormData({
                             ...formData,
@@ -279,8 +278,7 @@ export default function FormBusinessPage() {
                 ) : isSelecty ? (
                     <select
                         required={field.required}
-                        className="input-field"
-                        style={{ width: '100%', padding: '0.9rem' }}
+                        className="business-input"
                         value={formData.customFields[fieldKey] || ''}
                         onChange={e => setFormData({
                             ...formData,
@@ -293,8 +291,8 @@ export default function FormBusinessPage() {
                         )) : (
                             isManagementType ? (
                                 <>
-                                    <option value="member-managed">Member-Managed</option>
-                                    <option value="manager-managed">Manager-Managed</option>
+                                    <option value="member-managed">Member-Managed (Standard for single/multiple owners)</option>
+                                    <option value="manager-managed">Manager-Managed (Managed by appointed managers)</option>
                                 </>
                             ) : null
                         )}
@@ -303,9 +301,8 @@ export default function FormBusinessPage() {
                     <input
                         required={field.required}
                         type={field.type === 'email' ? 'email' : 'text'}
-                        className="input-field"
+                        className="business-input"
                         placeholder={`Enter ${displayLabel.toLowerCase()}...`}
-                        style={{ width: '100%', padding: '0.9rem' }}
                         value={formData.customFields[fieldKey] || ''}
                         onChange={e => setFormData({
                             ...formData,
@@ -313,8 +310,8 @@ export default function FormBusinessPage() {
                         })}
                     />
                 )}
-                {field.help_text && <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '0.5rem', lineHeight: '1.5' }}>{field.help_text}</p>}
-                {field.description && <p style={{ fontSize: '0.75rem', color: '#555', marginTop: '0.4rem', lineHeight: '1.4' }}>{field.description}</p>}
+                {field.help_text && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: '1.4' }}>{field.help_text}</p>}
+                {field.description && <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.35rem', lineHeight: '1.4' }}>{field.description}</p>}
             </div>
         );
     };
@@ -329,8 +326,10 @@ export default function FormBusinessPage() {
             if (addOns.compliance) addOnTotal += 100;
             if (addOns.virtualOffice) addOnTotal += 29;
 
-            const totalBudget = 20 + 125 + (selectedMethod?.cost || 0) + addOnTotal; // $20 Service + $125 RA + State Fee + Addons
-            // Save as Lead
+            const stateCost = selectedMethod?.cost || (US_STATES.find(s => s.name === formData.state)?.fee || 0);
+            const totalBudget = 50 + 125 + stateCost + addOnTotal; // $50 Service + $125 RA + State Fee + Addons
+
+            // Save as Lead in CRM
             await fetch('/api/leads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -340,20 +339,23 @@ export default function FormBusinessPage() {
                     platform: `US ${mainService === 'formation' ? 'Formation' : 'Service'} (${formData.state})`,
                     budget: totalBudget,
                     buyerEmail: formData.email,
-                    notes: `Type: ${mainService} | Contact: ${formData.email} | Package: ${selectedOffering?.label || selectedOffering?.name} | Speed: ${selectedMethod?.name} | Entity: ${formData.entityType} | CT_ID: ${companyId} | Addons: EIN(${addOns.ein}) OA(${addOns.agreement}) Compliance(${addOns.compliance}) Mail(${addOns.virtualOffice}) | Breakdown: State($${selectedMethod?.cost}) RA($125) Service($20) | Params: ${JSON.stringify(formData.customFields)}`
+                    notes: `Type: ${mainService} | Contact: ${formData.email} | Package: ${selectedOffering?.label || selectedOffering?.name || 'Standard'} | Speed: ${selectedMethod?.name || 'Standard'} | Entity: ${formData.entityType} | CT_ID: ${companyId} | Addons: EIN(${addOns.ein ? 'Yes' : 'No'}) OA(${addOns.agreement ? 'Yes' : 'No'}) Compliance(${addOns.compliance ? 'Yes' : 'No'}) Mail(${addOns.virtualOffice ? 'Yes' : 'No'}) | Breakdown: State($${stateCost}) RA($125) Service($50) | Params: ${JSON.stringify(formData.customFields)}`
                 })
             });
             setStep(3);
-            toast.success("Lead captured! Our agent will contact you shortly.");
+            toast.success("Application successfully submitted! Our team will contact you shortly.");
         } catch (error) {
-            toast.error("Failed to save lead.");
+            toast.error("Failed to submit formation application.");
         } finally {
             setLoading(false);
         }
     };
 
+    const currentStateFee = selectedMethod?.cost || (US_STATES.find(s => s.name === formData.state)?.fee || 0);
+    const calculatedTotal = 50 + 125 + currentStateFee + (addOns.ein ? 50 : 0) + (addOns.agreement ? 40 : 0) + (addOns.compliance ? 100 : 0) + (addOns.virtualOffice ? 29 : 0);
+
     return (
-        <main style={{ minHeight: '100vh' }}>
+        <main className="inner-page" style={{ minHeight: '100vh', background: 'var(--bg-base)' }}>
             <Navbar />
             <Toaster position="top-right" richColors />
 
@@ -362,130 +364,163 @@ export default function FormBusinessPage() {
                     breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: 'US Business Hub' }]}
                     label="Services"
                     title="US Business Hub"
-                    description="All-in-one platform for US business formation and compliance."
+                    description="Launch and scale your US company with Northwest Registered Agent verified compliance."
                 />
             </div>
 
-            <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '96px', maxWidth: '900px' }}>
+            <div className="container" style={{ paddingTop: '2rem', paddingBottom: '96px', maxWidth: '860px' }}>
 
-                {/* Progress Bar */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '3rem' }}>
-                    {[1, 1.5, 2, 3].map(i => (
-                        <div key={i} style={{
-                            flex: 1,
-                            height: '4px',
-                            background: step >= i ? 'rgba(79,70,229,0.85)' : 'rgba(2,6,23,0.10)',
-                            borderRadius: '2px',
-                            transition: 'all 0.5s ease'
-                        }} />
+                {/* Modern Step Indicator */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem', gap: '8px' }}>
+                    {[
+                        { stepIndex: 0, label: "Select Service" },
+                        { stepIndex: 1, label: "Company Details" },
+                        { stepIndex: 2, label: "Filing Specifics" },
+                        { stepIndex: 3, label: "Confirmation" }
+                    ].map((st, idx) => (
+                        <div key={st.stepIndex} style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '8px' }}>
+                            <div style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                background: step >= st.stepIndex ? 'var(--primary)' : 'var(--border-subtle)',
+                                color: step >= st.stepIndex ? '#ffffff' : 'var(--text-muted)',
+                                transition: 'all 0.3s ease'
+                            }}>
+                                {step > st.stepIndex ? '✓' : idx + 1}
+                            </div>
+                            <span style={{ fontSize: '0.82rem', fontWeight: step >= st.stepIndex ? '700' : '500', color: step >= st.stepIndex ? 'var(--text-primary)' : 'var(--text-muted)' }} className="hidden sm:inline">
+                                {st.label}
+                            </span>
+                            {idx < 3 && <div style={{ flex: 1, height: '2px', background: step > st.stepIndex ? 'var(--primary)' : 'var(--border-subtle)', transition: 'all 0.3s ease' }} />}
+                        </div>
                     ))}
                 </div>
 
                 <AnimatePresence mode="wait">
+                    {/* STEP 0: Choose Service */}
                     {step === 0 && (
                         <motion.div
                             key="step0"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="card"
-                            style={{ padding: 'clamp(1.5rem, 5vw, 3.0rem)', borderRadius: '24px', textAlign: 'center' }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            className="business-card"
+                            style={{ padding: 'clamp(1.5rem, 5vw, 3rem)', textAlign: 'center' }}
                         >
-                            <h1 style={{ fontSize: 'clamp(2rem, 8vw, 2.6rem)', marginBottom: '0.75rem', fontWeight: '900', color: 'var(--fg)' }}>Choose a service</h1>
-                            <p style={{ color: 'var(--muted)', marginBottom: '2rem', fontSize: 'clamp(0.95rem, 2.7vw, 1.1rem)' }}>
-                                Start a new company, update an existing one, or stay compliant—step by step.
+                            <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', marginBottom: '0.6rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                Choose a Service
+                            </h1>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '1.05rem' }}>
+                                Fast, compliant US formation and legal support tailored for international and domestic entrepreneurs.
                             </p>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', textAlign: 'left' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem', textAlign: 'left' }}>
                                 {[
-                                    { id: 'formation', icon: <Building2 size={22} />, title: 'Start New Business', desc: 'LLC or Corporation formation in any US state.' },
-                                    { id: 'ra', icon: <UserRound size={22} />, title: 'Registered Agent', desc: 'Secure, reliable agent for your existing company.' },
-                                    { id: 'ein', icon: <FileText size={22} />, title: 'Get EIN / Tax ID', desc: 'Fast Tax ID processing for domestic/international users.' },
-                                    { id: 'compliance', icon: <ShieldCheck size={22} />, title: 'Annual Reports', desc: 'Stay in good standing with state-level compliance.' }
+                                    { id: 'formation', icon: <Building2 size={24} />, title: 'Start New Business', desc: 'LLC or Corporation formation in any of the 50 US states.' },
+                                    { id: 'ra', icon: <UserRound size={24} />, title: 'Registered Agent', desc: 'Secure, professional registered agent for your existing company.' },
+                                    { id: 'ein', icon: <FileText size={24} />, title: 'Get EIN / Tax ID', desc: 'Federal Tax ID processing with IRS for non-residents and US citizens.' },
+                                    { id: 'compliance', icon: <ShieldCheck size={24} />, title: 'Annual Reports', desc: 'Stay in good standing with state-level compliance and filings.' }
                                 ].map((sv) => (
                                     <div
                                         key={sv.id}
                                         onClick={() => { setMainService(sv.id as any); setStep(1); }}
-                                        className="service-type-card"
+                                        className="service-selection-card"
                                         style={{
-                                            padding: '2rem',
-                                            borderRadius: '24px',
-                                            border: mainService === sv.id ? '2px solid rgba(79,70,229,0.65)' : '1px solid var(--border)',
-                                            background: mainService === sv.id ? 'rgba(79,70,229,0.06)' : 'rgba(255,255,255,0.60)',
+                                            padding: '1.75rem',
+                                            borderRadius: '20px',
+                                            border: mainService === sv.id ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                            background: '#ffffff',
                                             cursor: 'pointer',
-                                            transition: 'all 0.3s ease'
+                                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+                                            transition: 'all 0.25s ease'
                                         }}
                                     >
-                                        <div style={{ width: 44, height: 44, borderRadius: 16, border: '1px solid var(--border)', display: 'grid', placeItems: 'center', background: 'rgba(79,70,229,0.06)', color: 'var(--indigo)', marginBottom: '1rem' }}>
+                                        <div style={{ width: 48, height: 48, borderRadius: 14, display: 'grid', placeItems: 'center', background: 'rgba(20, 108, 120, 0.08)', color: 'var(--primary)', marginBottom: '1.2rem' }}>
                                             {sv.icon}
                                         </div>
-                                        <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--fg)', fontWeight: 900 }}>{sv.title}</h3>
-                                        <p style={{ fontSize: '0.92rem', color: 'var(--muted)', lineHeight: '1.5' }}>{sv.desc}</p>
+                                        <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: '700' }}>{sv.title}</h3>
+                                        <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>{sv.desc}</p>
                                     </div>
                                 ))}
                             </div>
                         </motion.div>
                     )}
 
+                    {/* STEP 1: Basic Info */}
                     {step === 1 && (
                         <motion.div
                             key="step1"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="card"
-                            style={{ padding: 'clamp(1.5rem, 5vw, 3.0rem)', borderRadius: '24px' }}
+                            className="business-card"
+                            style={{ padding: 'clamp(1.5rem, 5vw, 3rem)' }}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                <h2 style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', margin: 0, color: 'var(--fg)', fontWeight: 900 }}>Basic Information</h2>
-                                <Badge>{mainService.replace('_', ' ')}</Badge>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.8rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.75rem', margin: 0, color: 'var(--text-primary)', fontWeight: '800', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>Basic Information</h2>
+                                    <p style={{ color: 'var(--text-muted)', margin: '4px 0 0', fontSize: '0.9rem' }}>Choose your jurisdiction state and desired company legal name.</p>
+                                </div>
+                                <span style={{ background: 'rgba(20, 108, 120, 0.1)', color: 'var(--primary)', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                    {mainService.toUpperCase()}
+                                </span>
                             </div>
 
                             <form onSubmit={handleInitialSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
-                                        {mainService === 'formation' ? 'Desired Business Name' : 'Existing Business Name'}
+                                    <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem', fontWeight: '600' }}>
+                                        {mainService === 'formation' ? 'Desired Business Name' : 'Existing Business Name'} <span style={{ color: 'var(--primary-2)' }}>*</span>
                                     </label>
                                     <input
                                         required
                                         type="text"
-                                        className="input-field"
-                                        placeholder="e.g. Acme Ventures LLC"
-                                        style={{ width: '100%', fontSize: '1.1rem', padding: '1rem' }}
+                                        className="business-input"
+                                        placeholder="e.g. Acme Innovations LLC"
+                                        style={{ width: '100%', fontSize: '1.05rem', padding: '0.9rem 1.1rem' }}
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                     />
                                 </div>
 
-                                <div className="responsive-grid">
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Jurisdiction (State)</label>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem', fontWeight: '600' }}>
+                                            Jurisdiction (US State)
+                                        </label>
                                         <select
-                                            className="input-field"
-                                            style={{ width: '100%', padding: '1rem' }}
+                                            className="business-input"
+                                            style={{ width: '100%' }}
                                             value={formData.state}
                                             onChange={e => setFormData({ ...formData, state: e.target.value })}
                                         >
                                             {US_STATES.map(s => <option key={s.code} value={s.name}>{s.name}</option>)}
                                         </select>
-                                        <div style={{ marginTop: '0.8rem', fontSize: '0.85rem', color: '#00ff88', fontWeight: 'bold' }}>
-                                            Est. State Fee: ${US_STATES.find(s => s.name === formData.state)?.fee || 0}
+                                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--primary)', fontWeight: '700' }}>
+                                            State Government Fee: ${US_STATES.find(s => s.name === formData.state)?.fee || 0}
                                         </div>
                                     </div>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Entity Type</label>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem', fontWeight: '600' }}>
+                                            Entity Type
+                                        </label>
                                         <select
-                                            className="input-field"
-                                            style={{ width: '100%', padding: '1rem' }}
+                                            className="business-input"
+                                            style={{ width: '100%' }}
                                             value={formData.entityType}
                                             onChange={e => setFormData({ ...formData, entityType: e.target.value })}
                                         >
-                                            <option value="Limited Liability Company">LLC</option>
-                                            <option value="Corporation">Corporation</option>
-                                            <option value="Nonprofit Corporation">Nonprofit</option>
-                                            <option value="Limited Partnership">LP</option>
-                                            <option value="Limited Liability Partnership">LLP</option>
-                                            <option value="Professional Limited Liability Company">PLLC</option>
+                                            <option value="Limited Liability Company">Limited Liability Company (LLC)</option>
+                                            <option value="Corporation">Corporation (C-Corp / S-Corp)</option>
+                                            <option value="Nonprofit Corporation">Nonprofit Corporation</option>
+                                            <option value="Limited Partnership">Limited Partnership (LP)</option>
+                                            <option value="Limited Liability Partnership">Limited Liability Partnership (LLP)</option>
+                                            <option value="Professional Limited Liability Company">Professional LLC (PLLC)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -493,44 +528,50 @@ export default function FormBusinessPage() {
                                 <button
                                     disabled={loading}
                                     type="submit"
-                                    className="btn btn-primary"
-                                    style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', marginTop: '1rem' }}
+                                    className="business-cta-btn"
+                                    style={{ width: '100%', padding: '1rem', fontSize: '1.05rem', marginTop: '0.5rem' }}
                                 >
-                                    {loading ? 'Processing...' : (mainService === 'formation' ? 'Review Formation Packages →' : 'See Service Pricing →')}
+                                    {loading ? 'Connecting to Northwest API...' : (mainService === 'formation' ? 'Continue to Filing Options →' : 'See Service Pricing →')}
                                 </button>
 
-                                <button type="button" onClick={() => setStep(0)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '0.9rem', marginTop: '1rem' }}>
-                                    ← Back to Hub
+                                <button type="button" onClick={() => setStep(0)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.9rem', textAlign: 'center' }}>
+                                    ← Back to Services
                                 </button>
                             </form>
                         </motion.div>
                     )}
 
+                    {/* STEP 1.5: Package Selection (if multiple) */}
                     {step === 1.5 && (
                         <motion.div
                             key="step1.5"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="glass"
-                            style={{ padding: 'clamp(1.5rem, 5vw, 3rem)', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.1)' }}
+                            className="business-card"
+                            style={{ padding: 'clamp(1.5rem, 5vw, 3rem)' }}
                         >
-                            <h2 className="text-gradient" style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', marginBottom: '1rem' }}>Choose Your Package</h2>
-                            <p style={{ color: '#aaa', marginBottom: '2.5rem', fontSize: '0.9rem' }}>Available formation packages for {formData.state}. Select the one that fits your needs.</p>
+                            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--text-primary)', fontWeight: '800', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                Choose Your Package
+                            </h2>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '0.95rem' }}>
+                                Available formation packages for {formData.state}. Select the one that matches your requirements.
+                            </p>
 
-                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                            <div style={{ display: 'grid', gap: '1.25rem' }}>
                                 {offerings.map((offering: any) => (
                                     <div
                                         key={offering.id}
                                         onClick={() => handleSelectOffering(offering)}
-                                        className="package-card"
+                                        className="package-choice-card"
                                         style={{
                                             padding: '1.5rem',
                                             borderRadius: '16px',
-                                            border: '1px solid rgba(255,255,255,0.1)',
-                                            background: 'rgba(255,255,255,0.02)',
+                                            border: '1px solid var(--border-subtle)',
+                                            background: '#ffffff',
                                             cursor: 'pointer',
-                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+                                            transition: 'all 0.2s ease',
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
@@ -539,123 +580,180 @@ export default function FormBusinessPage() {
                                         }}
                                     >
                                         <div style={{ flex: '1 1 200px' }}>
-                                            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff' }}>{offering.label || offering.name}</h3>
-                                            <p style={{ margin: '0.3rem 0 0', fontSize: '0.85rem', color: '#666' }}>{offering.description || 'Full formation service included.'}</p>
+                                            <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: '700' }}>{offering.label || offering.name}</h3>
+                                            <p style={{ margin: '0.3rem 0 0', fontSize: '0.88rem', color: 'var(--text-muted)' }}>{offering.description || 'Full statutory formation & compliance included.'}</p>
                                         </div>
                                         <div style={{ textAlign: 'right', flex: '0 0 auto' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#00ff88' }}>${offering.price}</div>
-                                            {offering.retail_price && <div style={{ fontSize: '0.8rem', textDecoration: 'line-through', color: '#444' }}>${offering.retail_price}</div>}
+                                            <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary)' }}>${offering.price}</div>
+                                            {offering.retail_price && <div style={{ fontSize: '0.8rem', textDecoration: 'line-through', color: 'var(--text-muted)' }}>${offering.retail_price}</div>}
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
                             {loading && (
-                                <div style={{ marginTop: '2rem', textAlign: 'center', color: '#00ff88' }}>
-                                    Initializing {formData.name}... This takes a few seconds.
+                                <div style={{ marginTop: '1.5rem', textAlign: 'center', color: 'var(--primary)', fontWeight: '600' }}>
+                                    Initializing {formData.name}...
                                 </div>
                             )}
 
-                            <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '0.9rem', marginTop: '2rem' }}>
-                                ← Change State/Name
+                            <button onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.9rem', marginTop: '1.5rem' }}>
+                                ← Change State or Name
                             </button>
                         </motion.div>
                     )}
 
+                    {/* STEP 2: Filing Information & Breakdown */}
                     {step === 2 && (
                         <motion.div
                             key="step2"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="glass"
-                            style={{ padding: '3rem', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.1)' }}
+                            className="business-card"
+                            style={{ padding: 'clamp(1.5rem, 5vw, 3rem)' }}
                         >
-                            <h2 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Filing Information</h2>
-                            <p style={{ color: '#aaa', marginBottom: '2rem' }}>Full name and details for {formData.state} {formData.entityType} ({selectedOffering?.label || selectedOffering?.name}).</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                <div>
+                                    <h2 style={{ fontSize: '1.75rem', margin: 0, color: 'var(--text-primary)', fontWeight: '800', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                        Filing Information
+                                    </h2>
+                                    <p style={{ color: 'var(--text-muted)', margin: '4px 0 0', fontSize: '0.9rem' }}>
+                                        Details for {formData.state} {formData.entityType} ({formData.name}).
+                                    </p>
+                                </div>
+                                <span style={{ background: 'rgba(20, 108, 120, 0.1)', color: 'var(--primary)', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '700' }}>
+                                    STEP {subStep} OF 2
+                                </span>
+                            </div>
 
-                            {/* Price Breakdown Card */}
+                            {/* Crisp Price Breakdown Card */}
                             <div style={{
-                                background: 'rgba(255,255,255,0.03)',
+                                background: '#ffffff',
                                 padding: '1.5rem',
-                                borderRadius: '16px',
-                                border: '1px solid rgba(255,255,255,0.05)',
-                                marginBottom: '2.5rem'
+                                borderRadius: '18px',
+                                border: '1px solid var(--border-subtle)',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
+                                marginBottom: '2rem'
                             }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
-                                    <span style={{ color: '#aaa' }}>OfficialUM1 Service Fee</span>
-                                    <span style={{ color: '#00ff88', fontWeight: 'bold' }}>$20.00</span>
+                                <h3 style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Case Fee Breakdown
+                                </h3>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', fontSize: '0.92rem' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>OfficialUM1 Service Fee</span>
+                                    <span style={{ color: 'var(--primary)', fontWeight: '700' }}>$50.00</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
-                                    <span style={{ color: '#aaa' }}>Registered Agent Service (Included)</span>
-                                    <span style={{ color: '#fff' }}>$125.00</span>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', fontSize: '0.92rem' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Northwest Registered Agent Service (Included)</span>
+                                    <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>$125.00</span>
                                 </div>
-                                <div style={{ background: 'rgba(0,255,136,0.1)', padding: '10px 15px', borderRadius: '10px', marginBottom: '1.5rem', border: '1px solid rgba(0,255,136,0.2)' }}>
-                                    <p style={{ fontSize: '0.75rem', color: '#00ff88', margin: 0, fontWeight: '500' }}>
-                                        🔄 Automatic Renewal: $125/year (Agent Fee).
-                                    </p>
-                                    <p style={{ fontSize: '0.65rem', color: '#aaa', marginTop: '4px' }}>
-                                        Registered Agent at Northwest address included.
-                                    </p>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', fontSize: '0.92rem' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>State Government Fee ({formData.state})</span>
+                                    <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>${currentStateFee}</span>
                                 </div>
-                                {(selectedMethod?.cost >= 0) && filingMethods.length > 0 && (
-                                    <>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                                            <span style={{ color: '#aaa' }}>State Fee ({formData.state})</span>
-                                            <span style={{ color: '#fff' }}>${Math.min(...filingMethods.map((m: any) => m.cost))}</span>
-                                        </div>
-                                        {selectedMethod.cost - Math.min(...filingMethods.map((m: any) => m.cost)) > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', fontSize: '0.9rem' }}>
-                                                <span style={{ color: '#aaa' }}>Speed Upgrade ({selectedMethod.name})</span>
-                                                <span style={{ color: '#fff' }}>${selectedMethod.cost - Math.min(...filingMethods.map((m: any) => m.cost))}</span>
-                                            </div>
-                                        )}
-                                        {selectedMethod.cost - Math.min(...filingMethods.map((m: any) => m.cost)) === 0 && (
-                                            <div style={{ marginBottom: '1.2rem' }} />
-                                        )}
-                                    </>
+
+                                {selectedMethod && selectedMethod.cost - (filingMethods.length > 0 ? Math.min(...filingMethods.map((m: any) => m.cost)) : 0) > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', fontSize: '0.92rem' }}>
+                                        <span style={{ color: 'var(--text-muted)' }}>Speed Upgrade ({selectedMethod.name})</span>
+                                        <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>
+                                            +${selectedMethod.cost - Math.min(...filingMethods.map((m: any) => m.cost))}
+                                        </span>
+                                    </div>
                                 )}
 
-                                {/* Modern Add-ons */}
-                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.2rem', marginBottom: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '0.85rem', marginBottom: '1rem', color: '#888' }}>Recommended Add-ons</h4>
-                                    <div style={{ display: 'grid', gap: '10px' }}>
+                                {/* Recommended Add-ons */}
+                                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '1.2rem', marginTop: '1rem', marginBottom: '1.2rem' }}>
+                                    <h4 style={{ fontSize: '0.85rem', marginBottom: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Recommended Add-ons</h4>
+                                    <div style={{ display: 'grid', gap: '8px' }}>
                                         <div
                                             onClick={() => setAddOns({ ...addOns, ein: !addOns.ein })}
-                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 15px', borderRadius: '12px', background: addOns.ein ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (addOns.ein ? '#00ff88' : 'rgba(255,255,255,0.05)'), cursor: 'pointer' }}
+                                            className="addon-row"
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderRadius: '12px',
+                                                background: addOns.ein ? 'rgba(20, 108, 120, 0.06)' : '#ffffff',
+                                                border: addOns.ein ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
                                         >
-                                            <span style={{ fontSize: '0.85rem' }}>{addOns.ein ? '✅' : '➕'} EIN Tax ID Service</span>
-                                            <span style={{ fontWeight: 'bold' }}>+$50.00</span>
+                                            <span style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                {addOns.ein ? '✅' : '➕'} EIN Federal Tax ID Service
+                                            </span>
+                                            <span style={{ fontWeight: '700', color: 'var(--primary)' }}>+$50.00</span>
                                         </div>
+
                                         <div
                                             onClick={() => setAddOns({ ...addOns, agreement: !addOns.agreement })}
-                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 15px', borderRadius: '12px', background: addOns.agreement ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (addOns.agreement ? '#00ff88' : 'rgba(255,255,255,0.05)'), cursor: 'pointer' }}
+                                            className="addon-row"
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderRadius: '12px',
+                                                background: addOns.agreement ? 'rgba(20, 108, 120, 0.06)' : '#ffffff',
+                                                border: addOns.agreement ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
                                         >
-                                            <span style={{ fontSize: '0.85rem' }}>{addOns.agreement ? '✅' : '➕'} Custom Operating Agreement</span>
-                                            <span style={{ fontWeight: 'bold' }}>+$40.00</span>
+                                            <span style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                {addOns.agreement ? '✅' : '➕'} Custom Operating Agreement
+                                            </span>
+                                            <span style={{ fontWeight: '700', color: 'var(--primary)' }}>+$40.00</span>
                                         </div>
+
                                         <div
                                             onClick={() => setAddOns({ ...addOns, compliance: !addOns.compliance })}
-                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 15px', borderRadius: '12px', background: addOns.compliance ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (addOns.compliance ? '#00ff88' : 'rgba(255,255,255,0.05)'), cursor: 'pointer' }}
+                                            className="addon-row"
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderRadius: '12px',
+                                                background: addOns.compliance ? 'rgba(20, 108, 120, 0.06)' : '#ffffff',
+                                                border: addOns.compliance ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
                                         >
-                                            <span style={{ fontSize: '0.85rem' }}>{addOns.compliance ? '✅' : '➕'} Full Compliance Service</span>
-                                            <span style={{ fontWeight: 'bold' }}>+$100.00</span>
+                                            <span style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                {addOns.compliance ? '✅' : '➕'} Annual Compliance & Corporate Veil
+                                            </span>
+                                            <span style={{ fontWeight: '700', color: 'var(--primary)' }}>+$100.00</span>
                                         </div>
+
                                         <div
                                             onClick={() => setAddOns({ ...addOns, virtualOffice: !addOns.virtualOffice })}
-                                            style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 15px', borderRadius: '12px', background: addOns.virtualOffice ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (addOns.virtualOffice ? '#00ff88' : 'rgba(255,255,255,0.05)'), cursor: 'pointer' }}
+                                            className="addon-row"
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderRadius: '12px',
+                                                background: addOns.virtualOffice ? 'rgba(20, 108, 120, 0.06)' : '#ffffff',
+                                                border: addOns.virtualOffice ? '1.5px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease'
+                                            }}
                                         >
-                                            <span style={{ fontSize: '0.85rem' }}>{addOns.virtualOffice ? '✅' : '➕'} Virtual Office / Mail Scanning</span>
-                                            <span style={{ fontWeight: 'bold' }}>+$29.00</span>
+                                            <span style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                {addOns.virtualOffice ? '✅' : '➕'} Virtual Office / Mail Scanning
+                                            </span>
+                                            <span style={{ fontWeight: '700', color: 'var(--primary)' }}>+$29.00</span>
                                         </div>
                                     </div>
                                 </div>
 
-
-                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                                    <span style={{ fontWeight: 'bold' }}>Total Case Value</span>
-                                    <span style={{ fontWeight: 'bold', color: '#00ff88', fontSize: '1.5rem' }}>
-                                        ${20 + 125 + (selectedMethod?.cost || 0) + (addOns.ein ? 50 : 0) + (addOns.agreement ? 40 : 0) + (addOns.compliance ? 100 : 0) + (addOns.virtualOffice ? 29 : 0)}
+                                <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '1.05rem' }}>Total Case Value</span>
+                                    <span style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '1.6rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                        ${calculatedTotal}
                                     </span>
                                 </div>
                             </div>
@@ -663,17 +761,18 @@ export default function FormBusinessPage() {
                             <form onSubmit={(e) => { e.preventDefault(); subStep === 1 ? setSubStep(2) : handleFinalSubmit(e); }} style={{ display: 'grid', gap: '1.5rem' }}>
                                 {subStep === 1 ? (
                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                        {/* Speed Selection Cards - Only show if there are multiple options */}
+                                        {/* Speed Selection */}
                                         {filingMethods.length > 1 && (
-                                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(0,255,136,0.1)', marginBottom: '2rem' }}>
-                                                <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <span style={{ background: '#00ff88', color: '#000', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold' }}>1</span>
+                                            <div style={{ background: '#ffffff', padding: '1.75rem', borderRadius: '18px', border: '1px solid var(--border-subtle)', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+                                                <h3 style={{ fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-primary)', fontWeight: '700' }}>
+                                                    <span style={{ background: 'var(--primary)', color: '#fff', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '0.8rem', fontWeight: 'bold' }}>1</span>
                                                     Choose Filing Speed
                                                 </h3>
                                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                                                     {filingMethods.map((m: any) => {
                                                         const baseCost = Math.min(...filingMethods.map(fm => fm.cost));
                                                         const upgradeCost = m.cost - baseCost;
+                                                        const isSelected = selectedMethod?.id === m.id;
 
                                                         return (
                                                             <div
@@ -685,22 +784,21 @@ export default function FormBusinessPage() {
                                                                     setSchema(schemaData.result);
                                                                 }}
                                                                 style={{
-                                                                    padding: '1.5rem',
-                                                                    borderRadius: '16px',
-                                                                    border: selectedMethod?.id === m.id ? '2px solid #00ff88' : '1px solid rgba(255,255,255,0.05)',
-                                                                    background: selectedMethod?.id === m.id ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.02)',
+                                                                    padding: '1.25rem',
+                                                                    borderRadius: '14px',
+                                                                    border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
+                                                                    background: isSelected ? 'rgba(20, 108, 120, 0.05)' : '#ffffff',
                                                                     cursor: 'pointer',
                                                                     textAlign: 'center',
-                                                                    transition: 'all 0.3s ease'
+                                                                    transition: 'all 0.2s ease'
                                                                 }}
                                                             >
-                                                                <div style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{m.name}</div>
-                                                                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.2rem' }}>
-                                                                    {upgradeCost === 0 ? 'FREE' : `+$${upgradeCost}`}
+                                                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>{m.name}</div>
+                                                                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '0.2rem' }}>
+                                                                    {upgradeCost === 0 ? 'STANDARD' : `+$${upgradeCost}`}
                                                                 </div>
-                                                                <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '0.5rem' }}>Speed Upgrade</div>
-                                                                <div style={{ fontSize: '0.85rem', color: '#00ff88', fontWeight: 'bold' }}>
-                                                                    {m.name.toLowerCase().includes('standard') ? '6 Business Days' : `${m.docs_in?.days || 0} Business Days`}
+                                                                <div style={{ fontSize: '0.82rem', color: 'var(--primary)', fontWeight: '700' }}>
+                                                                    {m.name.toLowerCase().includes('standard') ? '5-7 Business Days' : `${m.docs_in?.days || 2} Business Days`}
                                                                 </div>
                                                             </div>
                                                         );
@@ -709,44 +807,52 @@ export default function FormBusinessPage() {
                                             </div>
                                         )}
 
-                                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '24px', marginBottom: '2rem' }}>
-                                            <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span style={{ background: '#00c3ff', color: '#000', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontWeight: 'bold' }}>
+                                        {/* Contact Email */}
+                                        <div style={{ background: '#ffffff', border: '1px solid var(--border-subtle)', padding: '1.75rem', borderRadius: '18px', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+                                            <h3 style={{ fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-primary)', fontWeight: '700' }}>
+                                                <span style={{ background: 'var(--primary)', color: '#fff', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                                     {filingMethods.length > 1 ? '2' : '1'}
                                                 </span>
-                                                Contact Email
+                                                Contact Email & Notifications
                                             </h3>
                                             <div>
-                                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#999', marginBottom: '0.8rem', fontWeight: '500' }}>Your Email Address</label>
+                                                <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-primary)', marginBottom: '0.5rem', fontWeight: '600' }}>
+                                                    Your Primary Email Address <span style={{ color: 'var(--primary-2)' }}>*</span>
+                                                </label>
                                                 <input
                                                     required
                                                     type="email"
-                                                    className="input-field"
-                                                    placeholder="admin@example.com"
-                                                    style={{ width: '100%', padding: '1.1rem' }}
+                                                    className="business-input"
+                                                    placeholder="youremail@company.com"
+                                                    style={{ width: '100%', padding: '0.9rem 1.1rem' }}
                                                     value={formData.email}
                                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                                 />
+                                                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                                                    Articles of Organization, State Certificates, and EIN will be delivered to this address.
+                                                </p>
                                             </div>
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={() => setSubStep(2)}
-                                            className="btn btn-primary"
-                                            style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem' }}
+                                            className="business-cta-btn"
+                                            style={{ width: '100%', padding: '1rem', fontSize: '1.05rem' }}
                                         >
-                                            Continue to Company Details →
+                                            Continue to State Questions →
                                         </button>
                                     </div>
                                 ) : (
                                     <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <span style={{ width: '32px', height: '32px', background: '#00c3ff', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', fontWeight: 'bold' }}>3</span>
-                                                Final Specifics
+                                        <div style={{ background: '#ffffff', padding: '1.75rem', borderRadius: '18px', border: '1px solid var(--border-subtle)', boxShadow: '0 4px 16px rgba(0,0,0,0.03)' }}>
+                                            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '700' }}>
+                                                <span style={{ width: '26px', height: '26px', background: 'var(--primary)', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                                    {filingMethods.length > 1 ? '3' : '2'}
+                                                </span>
+                                                {formData.state} Statutory Specifics
                                             </h3>
-                                            <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                            <div style={{ display: 'grid', gap: '1.25rem' }}>
                                                 {schema && schema.map((field: any) => renderField(field))}
                                             </div>
                                         </div>
@@ -754,114 +860,106 @@ export default function FormBusinessPage() {
                                         <button
                                             disabled={loading}
                                             type="submit"
-                                            className="btn btn-primary"
-                                            style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', marginTop: '1rem' }}
+                                            className="business-cta-btn"
+                                            style={{ width: '100%', padding: '1.1rem', fontSize: '1.1rem', marginTop: '0.5rem' }}
                                         >
-                                            {loading ? 'Submitting Details...' : 'Submit Formation & Register Agent ✔'}
+                                            {loading ? 'Submitting Application...' : 'Submit Formation Application ✔'}
                                         </button>
 
-                                        <button type="button" onClick={() => setSubStep(1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                            ← Back to Options
+                                        <button type="button" onClick={() => setSubStep(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.9rem', textAlign: 'center' }}>
+                                            ← Back to Contact & Speed Options
                                         </button>
                                     </div>
                                 )}
 
-                                <button
-                                    disabled={loading}
-                                    type="submit"
-                                    className="btn btn-primary"
-                                    style={{ width: '100%', padding: '1.2rem', fontSize: '1.1rem', marginTop: '1rem' }}
-                                >
-                                    {loading ? 'Submitting Details...' : 'Submit Formation & Register Agent ✔'}
-                                </button>
-
-                                <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                    ← Go Back
+                                <button type="button" onClick={() => setStep(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'center', marginTop: '0.5rem' }}>
+                                    ← Change Business Name or State
                                 </button>
                             </form>
                         </motion.div>
                     )}
 
+                    {/* STEP 3: Confirmation */}
                     {step === 3 && (
                         <motion.div
                             key="step3"
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="glass"
-                            style={{ padding: '4rem 3rem', borderRadius: '24px', border: '1px solid #00ff88', textAlign: 'center' }}
+                            className="business-card"
+                            style={{ padding: 'clamp(2rem, 6vw, 3.5rem)', textAlign: 'center' }}
                         >
-                            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🏢</div>
-                            <h2 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>Request Received!</h2>
-                            <p style={{ color: '#aaa', fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '2rem' }}>
-                                Your business formation details for <strong>{formData.name}</strong> have been successfully submitted.<br /><br />
-                                Our business formation agents are now reviewing the requirements for <strong>{formData.state}</strong>.<br />
-                                We will contact you at <strong>{formData.email}</strong> within 12-24 hours with the next steps and payment link.
+                            <div style={{ width: '70px', height: '70px', background: 'rgba(20, 108, 120, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', margin: '0 auto 1.5rem' }}>
+                                <CheckCircle2 size={40} />
+                            </div>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '0.75rem', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                Application Received!
+                            </h2>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                                Your business formation case for <strong>{formData.name}</strong> ({formData.state}) has been successfully submitted to OfficialUM1 Business Registry.<br /><br />
+                                Our filing specialists are reviewing your state specifics. We will send the final confirmation and invoice breakdown to <strong>{formData.email}</strong> shortly.
                             </p>
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="btn btn-outline"
-                                style={{ padding: '1rem 3rem' }}
+                                className="business-cta-btn"
+                                style={{ padding: '0.9rem 2.5rem', display: 'inline-block' }}
                             >
-                                Return Home
+                                Return to Home
                             </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                <div style={{ marginTop: '4rem', textAlign: 'center' }}>
-                    <p style={{ color: '#444', fontSize: '0.8rem' }}>
-                        Managed by OfficialUM1 Business Services. All rights reserved.
-                    </p>
-                </div>
             </div>
 
             <Footer />
 
             <style jsx>{`
-                .glass {
-                    background: rgba(255, 255, 255, 0.03);
-                    backdrop-filter: blur(10px);
+                .business-card {
+                    background: #ffffff;
+                    border: 1px solid var(--border-subtle);
+                    border-radius: 24px;
+                    box-shadow: 0 12px 34px rgba(20, 108, 120, 0.06);
                 }
-                .text-gradient {
-                    background: linear-gradient(135deg, #fff 0%, #00ff88 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                }
-                .input-field {
-                    background: rgba(255,255,255,0.05);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    color: #fff;
+                .business-input {
+                    background: #ffffff;
+                    border: 1px solid var(--border-subtle);
+                    color: var(--text-primary);
                     border-radius: 12px;
+                    padding: 0.85rem 1rem;
+                    font-size: 0.95rem;
                     outline: none;
-                    transition: all 0.3s;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                    box-sizing: border-box;
                 }
-                .input-field:focus {
-                    border-color: #00ff88;
-                    background: rgba(255,255,255,0.08);
+                .business-input:focus {
+                    border-color: var(--primary);
+                    box-shadow: 0 0 0 3px rgba(20, 108, 120, 0.12);
                 }
-                .package-card:hover {
-                    background: rgba(0, 255, 136, 0.05) !important;
-                    border-color: rgba(0, 255, 136, 0.3) !important;
+                .business-cta-btn {
+                    background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet));
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 9999px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    box-shadow: 0 8px 24px rgba(20, 108, 120, 0.25);
+                }
+                .business-cta-btn:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 12px 30px rgba(20, 108, 120, 0.35);
+                }
+                .business-cta-btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+                .service-selection-card:hover {
+                    border-color: var(--primary) !important;
+                    transform: translateY(-3px);
+                    box-shadow: 0 10px 25px rgba(20, 108, 120, 0.08) !important;
+                }
+                .package-choice-card:hover {
+                    border-color: var(--primary) !important;
                     transform: translateY(-2px);
-                }
-                .responsive-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 1.5rem;
-                }
-                @media (max-width: 640px) {
-                    .responsive-grid {
-                        grid-template-columns: 1fr;
-                    }
-                    .glass {
-                        padding: 1.5rem !important;
-                    }
-                    main {
-                        padding-top: 80px !important;
-                    }
-                }
-                @media (max-width: 768px) {
-                    .glass { padding: 2rem !important; }
                 }
             `}</style>
         </main>

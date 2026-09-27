@@ -1081,5 +1081,455 @@
     "campaign": "AUTHORITY_INITIAL",
     "status": "DELIVERED",
     "timestamp": "2026-09-16 20:46:05"
+  },
+  {
+    "clientName": "Tariq",
+    "company": "Arabian Adventures UAE",
+    "domain": "arabian-adventures.com",
+    "email": "info@arabian-adventures.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:11:36"
+  },
+  {
+    "clientName": "Sultan",
+    "company": "Rayna Tours & Travels",
+    "domain": "raynatours.com",
+    "email": "inquiry@raynatours.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:12:03"
+  },
+  {
+    "clientName": "Faris",
+    "company": "Desert Safari Dubai Hub",
+    "domain": "desertsafaridubai.com",
+    "email": "booking@desertsafaridubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:12:25"
+  },
+  {
+    "clientName": "Mansoor",
+    "company": "Platinum Heritage Luxury Safaris",
+    "domain": "platinum-heritage.com",
+    "email": "info@platinum-heritage.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:12:55"
+  },
+  {
+    "clientName": "Rashid",
+    "company": "Xclusive Yachts Dubai Marina",
+    "domain": "xclusiveyachts.com",
+    "email": "book@xclusiveyachts.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:13:17"
+  },
+  {
+    "clientName": "Adnan",
+    "company": "Royal Blue Coast Yachts",
+    "domain": "royalbluecoast.com",
+    "email": "info@royalbluecoast.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:13:39"
+  },
+  {
+    "clientName": "Zubair",
+    "company": "Ocean Blue Yacht Rental",
+    "domain": "oceanblueyacht.com",
+    "email": "contact@oceanblueyacht.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:14:08"
+  },
+  {
+    "clientName": "Hamad",
+    "company": "Dubai Tour Pro",
+    "domain": "dubaitourpro.com",
+    "email": "info@dubaitourpro.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:14:37"
+  },
+  {
+    "clientName": "Khalid",
+    "company": "Falcon Oasis Tourism",
+    "domain": "falconoasis.com",
+    "email": "info@falconoasis.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:14:59"
+  },
+  {
+    "clientName": "Mustafa",
+    "company": "Cozmo Travel UAE",
+    "domain": "cozmotravel.com",
+    "email": "info@cozmotravel.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:15:18"
+  },
+  {
+    "clientName": "Kareem",
+    "company": "Al Boom Tourism Dubai",
+    "domain": "alboomtourism.com",
+    "email": "info@alboomtourism.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:15:37"
+  },
+  {
+    "clientName": "Nasser",
+    "company": "Oasis Palm Tourism LLC",
+    "domain": "oasispalmdubai.com",
+    "email": "info@oasispalmdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:15:56"
+  },
+  {
+    "clientName": "Waleed",
+    "company": "Dhow Cruise Marina Tours",
+    "domain": "dhowcruisedubai.com",
+    "email": "info@dhowcruisedubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:16:17"
+  },
+  {
+    "clientName": "Hassan",
+    "company": "VIP Tour Dubai Excursions",
+    "domain": "viptour.ae",
+    "email": "info@viptour.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:16:44"
+  },
+  {
+    "clientName": "Bilal",
+    "company": "Arabian Desert Adventures",
+    "domain": "arabiandesertadventures.com",
+    "email": "booking@arabiandesertadventures.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:17:06"
+  },
+  {
+    "clientName": "Zayn",
+    "company": "Dubai City Tour Hub",
+    "domain": "dubaicitytour.net",
+    "email": "info@dubaicitytour.net",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:17:30"
+  },
+  {
+    "clientName": "Salim",
+    "company": "Big Bus Tours Dubai Agency",
+    "domain": "bigbustours.com",
+    "email": "info@bigbustours.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:17:50"
+  },
+  {
+    "clientName": "Mahmood",
+    "company": "Seven Yachts Dubai",
+    "domain": "sevenyachts.ae",
+    "email": "charter@sevenyachts.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-09-23 00:18:10"
+  },
+  {
+    "clientName": "Nabeel",
+    "company": "Luxury Desert Safari LLC",
+    "domain": "luxurydesertsafari.com",
+    "email": "info@luxurydesertsafari.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@luxurydesertsafari.com': (550, b'5.4.6 Send",
+    "timestamp": "2026-09-23 00:18:34"
+  },
+  {
+    "clientName": "Farhan",
+    "company": "Desert Leap Tourism",
+    "domain": "desertleap.com",
+    "email": "info@desertleap.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@desertleap.com': (550, b'5.4.6 Sender Hourl",
+    "timestamp": "2026-09-23 00:18:37"
+  },
+  {
+    "clientName": "Imran",
+    "company": "Dubai Adventure Tours",
+    "domain": "dubaiadventure.net",
+    "email": "sales@dubaiadventure.net",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'sales@dubaiadventure.net': (550, b'5.4.6 Sender ",
+    "timestamp": "2026-09-23 00:18:41"
+  },
+  {
+    "clientName": "Sameer",
+    "company": "Elite Pearl Charter",
+    "domain": "elitepearlcharter.com",
+    "email": "info@elitepearlcharter.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@elitepearlcharter.com': (550, b'5.4.6 Sende",
+    "timestamp": "2026-09-23 00:18:44"
+  },
+  {
+    "clientName": "Majid",
+    "company": "Al Wasl Yachts Dubai",
+    "domain": "alwaslyachts.com",
+    "email": "info@alwaslyachts.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@alwaslyachts.com': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:18:48"
+  },
+  {
+    "clientName": "Yousef",
+    "company": "Orient Tours UAE",
+    "domain": "orient-tours-uae.com",
+    "email": "contact@orient-tours-uae.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'contact@orient-tours-uae.com': (550, b'5.4.6 Sen",
+    "timestamp": "2026-09-23 00:18:51"
+  },
+  {
+    "clientName": "Zaid",
+    "company": "Sharaf Travel LLC",
+    "domain": "sharaftravel.com",
+    "email": "info@sharaftravel.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@sharaftravel.com': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:18:55"
+  },
+  {
+    "clientName": "Kamran",
+    "company": "Happy Desert Safari",
+    "domain": "happydesertsafari.com",
+    "email": "info@happydesertsafari.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@happydesertsafari.com': (550, b'5.4.6 Sende",
+    "timestamp": "2026-09-23 00:18:58"
+  },
+  {
+    "clientName": "Ashraf",
+    "company": "Dubai Dune Buggy Excursions",
+    "domain": "dubaidunebuggy.com",
+    "email": "info@dubaidunebuggy.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@dubaidunebuggy.com': (550, b'5.4.6 Sender H",
+    "timestamp": "2026-09-23 00:19:01"
+  },
+  {
+    "clientName": "Ehsan",
+    "company": "Alpha Tours Dubai",
+    "domain": "alphatoursdubai.com",
+    "email": "reservations@alphatoursdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'reservations@alphatoursdubai.com': (550, b'5.4.6",
+    "timestamp": "2026-09-23 00:19:05"
+  },
+  {
+    "clientName": "Saad",
+    "company": "Dubai Marina Yacht Club Charters",
+    "domain": "dubaimarinayachtcharter.com",
+    "email": "booking@dubaimarinayachtcharter.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'booking@dubaimarinayachtcharter.com': (550, b'5.",
+    "timestamp": "2026-09-23 00:19:08"
+  },
+  {
+    "clientName": "Munir",
+    "company": "Al Jarf Tourism LLC",
+    "domain": "aljarftourism.com",
+    "email": "info@aljarftourism.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@aljarftourism.com': (550, b'5.4.6 Sender Ho",
+    "timestamp": "2026-09-23 00:19:12"
+  },
+  {
+    "clientName": "Jasim",
+    "company": "Red Dunes Safari Dubai",
+    "domain": "reddunedubai.com",
+    "email": "info@reddunedubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@reddunedubai.com': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:19:16"
+  },
+  {
+    "clientName": "Bashir",
+    "company": "Sun City Tours Dubai",
+    "domain": "suncitydubai.com",
+    "email": "info@suncitydubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@suncitydubai.com': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:19:19"
+  },
+  {
+    "clientName": "Anas",
+    "company": "Arabian Ranches Horse & Camel Tours",
+    "domain": "arabianhorseadventures.com",
+    "email": "info@arabianhorseadventures.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@arabianhorseadventures.com': (550, b'5.4.6 ",
+    "timestamp": "2026-09-23 00:19:22"
+  },
+  {
+    "clientName": "Rami",
+    "company": "Prime Yachts Dubai",
+    "domain": "primeyachtsdubai.com",
+    "email": "info@primeyachtsdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@primeyachtsdubai.com': (550, b'5.4.6 Sender",
+    "timestamp": "2026-09-23 00:19:26"
+  },
+  {
+    "clientName": "Ziad",
+    "company": "Abu Dhabi Tour Specialist",
+    "domain": "abudhabitours.ae",
+    "email": "info@abudhabitours.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@abudhabitours.ae': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:19:30"
+  },
+  {
+    "clientName": "Fawad",
+    "company": "Dubai Safari Champions",
+    "domain": "safarichampions.com",
+    "email": "info@safarichampions.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@safarichampions.com': (550, b'5.4.6 Sender ",
+    "timestamp": "2026-09-23 00:19:33"
+  },
+  {
+    "clientName": "Hatem",
+    "company": "Skyline Travel & Tourism",
+    "domain": "skylinetourism.ae",
+    "email": "info@skylinetourism.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@skylinetourism.ae': (550, b'5.4.6 Sender Ho",
+    "timestamp": "2026-09-23 00:19:37"
+  },
+  {
+    "clientName": "Asim",
+    "company": "Gold Yacht Rental Dubai",
+    "domain": "goldyachtdubai.com",
+    "email": "booking@goldyachtdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'booking@goldyachtdubai.com': (550, b'5.4.6 Sende",
+    "timestamp": "2026-09-23 00:19:40"
+  },
+  {
+    "clientName": "Qasim",
+    "company": "Dubai Watersports Hub",
+    "domain": "dubaiwatersportshub.com",
+    "email": "info@dubaiwatersportshub.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@dubaiwatersportshub.com': (550, b'5.4.6 Sen",
+    "timestamp": "2026-09-23 00:19:44"
+  },
+  {
+    "clientName": "Fahad",
+    "company": "Desert Gate Tourism LLC",
+    "domain": "desertgate.ae",
+    "email": "info@desertgate.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@desertgate.ae': (550, b'5.4.6 Sender Hourly",
+    "timestamp": "2026-09-23 00:19:47"
+  },
+  {
+    "clientName": "Ibrahim",
+    "company": "Lama Tours Dubai",
+    "domain": "lamadubai.com",
+    "email": "info@lamadubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@lamadubai.com': (550, b'5.4.6 Sender Hourly",
+    "timestamp": "2026-09-23 00:19:51"
+  },
+  {
+    "clientName": "Zain",
+    "company": "Luxury Chauffeur & Tour UAE",
+    "domain": "luxurychauffeurdubai.com",
+    "email": "info@luxurychauffeurdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@luxurychauffeurdubai.com': (550, b'5.4.6 Se",
+    "timestamp": "2026-09-23 00:19:54"
+  },
+  {
+    "clientName": "Kashif",
+    "company": "Dubai Jet Ski Adventures",
+    "domain": "jetskidubai.ae",
+    "email": "info@jetskidubai.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@jetskidubai.ae': (550, b'5.4.6 Sender Hourl",
+    "timestamp": "2026-09-23 00:19:57"
+  },
+  {
+    "clientName": "Shakir",
+    "company": "Arabian Nights Village Tours",
+    "domain": "arabiannights.ae",
+    "email": "reservations@arabiannights.ae",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'reservations@arabiannights.ae': (550, b'5.4.6 Se",
+    "timestamp": "2026-09-23 00:20:01"
+  },
+  {
+    "clientName": "Daniyal",
+    "company": "Al Tayer Travel Agency",
+    "domain": "altayertravel.com",
+    "email": "info@altayertravel.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@altayertravel.com': (550, b'5.4.6 Sender Ho",
+    "timestamp": "2026-09-23 00:20:05"
+  },
+  {
+    "clientName": "Rizwan",
+    "company": "Dubai Desert Buggy Kings",
+    "domain": "buggykingsdubai.com",
+    "email": "info@buggykingsdubai.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@buggykingsdubai.com': (550, b'5.4.6 Sender ",
+    "timestamp": "2026-09-23 00:20:08"
+  },
+  {
+    "clientName": "Mazin",
+    "company": "Marina Dhow Cruise Events",
+    "domain": "marinadhowdinner.com",
+    "email": "booking@marinadhowdinner.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'booking@marinadhowdinner.com': (550, b'5.4.6 Sen",
+    "timestamp": "2026-09-23 00:20:12"
+  },
+  {
+    "clientName": "Waseem",
+    "company": "Gulf Ventures DMC Dubai",
+    "domain": "gulfventures.com",
+    "email": "info@gulfventures.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@gulfventures.com': (550, b'5.4.6 Sender Hou",
+    "timestamp": "2026-09-23 00:20:15"
+  },
+  {
+    "clientName": "Ubaid",
+    "company": "Emirates Adventure Safari",
+    "domain": "emiratesadventures.com",
+    "email": "info@emiratesadventures.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'info@emiratesadventures.com': (550, b'5.4.6 Send",
+    "timestamp": "2026-09-23 00:20:19"
+  },
+  {
+    "clientName": "Jawad",
+    "company": "Dubai VIP Yacht Charters LLC",
+    "domain": "dubaivipyachts.com",
+    "email": "charter@dubaivipyachts.com",
+    "campaign": "DUBAI_TOURISM_INITIAL",
+    "status": "FAILED: {'charter@dubaivipyachts.com': (550, b'5.4.6 Sende",
+    "timestamp": "2026-09-23 00:20:22"
   }
 ]
