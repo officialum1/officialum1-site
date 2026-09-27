@@ -6,16 +6,17 @@ import Link from "next/link";
 import { Globe, FileDigit, Shield, FileCheck, Lock, Zap } from "lucide-react";
 
 const formationOptions = [
-  { id: "wyoming", state: "Wyoming", total: "$275", note: "Global Standard" },
-  { id: "delaware", state: "Delaware", total: "$265", note: "Startups Hub" },
-  { id: "texas", state: "Texas", total: "$475", note: "Enterprise Choice" },
+  { id: "uk-ltd", state: "🇬🇧 UK LTD Company", total: "$269", note: "London Office & CRN Included", href: "/services/uk-company-formation" },
+  { id: "wyoming", state: "🇺🇸 Wyoming US LLC", total: "$275", note: "Global Zero State Tax Standard", href: "/services/form-business" },
+  { id: "delaware", state: "🇺🇸 Delaware US LLC", total: "$265", note: "Startups & VC Hub", href: "/services/form-business" },
+  { id: "texas", state: "🇺🇸 Texas US LLC", total: "$475", note: "Enterprise Commercial Choice", href: "/services/form-business" },
 ];
 
 const features = [
-  { icon: Globe, label: "Global Identity" },
-  { icon: FileDigit, label: "Tax & EIN" },
-  { icon: Shield, label: "Legal Agent" },
-  { icon: FileCheck, label: "Compliance" },
+  { icon: Globe, label: "Global Corporate Identity" },
+  { icon: FileDigit, label: "Tax & EIN / UTR ID" },
+  { icon: Shield, label: "Registered Agent & London Office" },
+  { icon: FileCheck, label: "Wise & Stripe Banking Ready" },
 ];
 
 export default function BusinessSection() {
@@ -59,8 +60,7 @@ export default function BusinessSection() {
               className="mb-8 max-w-lg text-sm md:text-base leading-relaxed"
               style={{ color: "var(--text-muted)" }}
             >
-              Launch and scale a US company from anywhere in the world. We streamline formation, tax, and compliance so
-              you can focus on building the product and serving your customers.
+              Launch and scale an official US LLC or UK LTD company from anywhere in the world. We streamline government incorporation, London/US registered office, tax numbers (EIN/UTR), and Wise / Stripe merchant banking setup.
             </p>
 
             {/* Feature rows */}
@@ -77,7 +77,7 @@ export default function BusinessSection() {
                   <div
                     className="flex h-9 w-9 items-center justify-center rounded-xl"
                     style={{
-                      background: "rgba(79,142,247,0.18)",
+                      background: "rgba(20,108,120,0.12)",
                     }}
                   >
                     <Icon className="h-4 w-4" style={{ color: "var(--accent-blue)" }} />
@@ -93,23 +93,34 @@ export default function BusinessSection() {
                       className="text-[0.75rem]"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      Expert support so you never navigate US regulations alone.
+                      Official government direct filings with guaranteed compliance.
                     </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <Link
-              href="/services/form-business"
-              className="inline-flex w-fit items-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(79,142,247,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              style={{
-                background: "linear-gradient(135deg, var(--accent-blue), var(--accent-violet))",
-              }}
-              aria-label="Launch Your Business"
-            >
-              Launch Your Business →
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/services/uk-company-formation"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm md:text-base font-bold text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(20,108,120,0.4)]"
+                style={{
+                  background: "#146c78",
+                }}
+              >
+                🇬🇧 Form UK LTD ($269) →
+              </Link>
+              <Link
+                href="/services/form-business"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm md:text-base font-bold transition-all duration-300 border hover:bg-[#146c78]/5"
+                style={{
+                  borderColor: "rgba(20,108,120,0.3)",
+                  color: "#146c78",
+                }}
+              >
+                🇺🇸 Form US LLC ($275) →
+              </Link>
+            </div>
 
             {/* Trust badges */}
             <div className="mt-6 flex flex-wrap gap-3 text-xs font-medium">
@@ -141,7 +152,7 @@ export default function BusinessSection() {
                   color: "var(--text-muted)",
                 }}
               >
-                ⚡ Fast Turnaround
+                ⚡ 24-48h Fast Turnaround
               </span>
             </div>
           </motion.div>
@@ -158,30 +169,26 @@ export default function BusinessSection() {
               Formation Pricing Explorer
             </p>
             {formationOptions.map((opt) => (
-              <button
+              <Link
                 key={opt.id}
-                type="button"
-                onClick={() => setSelected(opt.id)}
-                className="business-formation-card w-full rounded-2xl p-5 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                href={opt.href}
+                className="business-formation-card block w-full rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 style={{
                   background: "#fff",
                   border:
-                    selected === opt.id
-                      ? "1px solid rgba(20, 108, 120, 0.45)"
+                    opt.id === 'uk-ltd'
+                      ? "1.5px solid rgba(20, 108, 120, 0.45)"
                       : "1px solid var(--border-subtle)",
-                  boxShadow:
-                    selected === opt.id
-                      ? "0 14px 34px rgba(20, 108, 120, 0.14)"
-                      : "0 0 0 rgba(0,0,0,0)",
+                  boxShadow: "0 4px 16px rgba(24,32,38,0.04)",
                 }}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div
-                      className="text-lg font-bold"
+                      className="text-lg font-bold flex items-center gap-2"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {opt.state} Formation
+                      {opt.state}
                     </div>
                     <div
                       className="text-xs uppercase tracking-wide"
@@ -201,7 +208,7 @@ export default function BusinessSection() {
                     {opt.total}
                   </div>
                 </div>
-              </button>
+              </Link>
             ))}
           </motion.div>
         </div>
