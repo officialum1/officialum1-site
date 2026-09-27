@@ -1,9 +1,9 @@
 import pypdf
 import pymupdf
 
-def fill_all_pages():
+def fill_pixel_perfect():
     input_pdf = "Companies_House_credit_account_application.pdf"
-    filled_temp = "temp_filled.pdf"
+    filled_temp = "temp_base.pdf"
     final_output = "OfficialUM1_Companies_House_Credit_Account_FILLED.pdf"
 
     # Step 1: Base Form Fields with pypdf
@@ -14,7 +14,7 @@ def fill_all_pages():
     # Page 1: Business Identity & Overview
     writer.update_page_form_field_values(writer.pages[0], {
         "company/LLP name": "OfficialUM1 LLC",
-        "company/LLP registered no. (if appropriate)": "US Entity (LLC)",
+        "company/LLP registered no. (if appropriate)": "N/A (Non-UK Entity)",
         "other": "/Yes",
         "other (please specify)": "US Limited Liability Company (Overseas Formation Agency)",
         "Number of years in business": "2+",
@@ -71,28 +71,28 @@ def fill_all_pages():
     with open(filled_temp, "wb") as f_out:
         writer.write(f_out)
 
-    # Step 2: PyMuPDF - Draw Ballpoint Blue Ink & Realistic Handwritten Signatures
+    # Step 2: PyMuPDF - Pixel-Perfect Centered Character Boxes & Blue Ballpoint Pen
     doc = pymupdf.open(filled_temp)
-    BLUE_INK = (0.04, 0.14, 0.52)  # Royal Blue Ballpoint Pen Ink
+    BLUE_INK = (0.02, 0.12, 0.48)  # Rich Dark Blue Ballpoint Ink
 
     # ----------------------------------------------------
-    # PAGE 2: Section 6 Character Boxes (hello@officialum1.com)
+    # PAGE 2: Section 6 Character Boxes (Centered inside each box)
     # ----------------------------------------------------
     p2 = doc[1]
-    email_str = "hello@officialum1.com"
-    start_x_p2 = 163
-    box_w_p2 = 13.8
-    y_row1_p2 = 490
+    email_str = "hello@officialum1.com".upper()
+    # Box Centers for Row 1
+    # Box 0 left: 154.17, step: 14.61, y0: 476.58, y1: 497.01
     for idx, char in enumerate(email_str):
-        p2.insert_text((start_x_p2 + idx * box_w_p2, y_row1_p2), char.upper(), fontsize=11, fontname="courier", color=BLUE_INK)
+        x_left = 154.17 + idx * 14.61
+        x_right = x_left + 14.61
+        box_rect = pymupdf.Rect(x_left, 476.58, x_right, 497.01)
+        p2.insert_textbox(box_rect, char, fontsize=12, fontname="helv", color=BLUE_INK, align=1)
 
     # ----------------------------------------------------
     # PAGE 3: Section 12 Handwritten Signature & Flourish
     # ----------------------------------------------------
     p3 = doc[2]
-    # Handwritten signature text
     p3.insert_text((75, 626), "M. Umar Mumtaz", fontsize=22, fontname="times-italic", color=BLUE_INK)
-    # Realistic pen flourish underline
     shape3 = p3.new_shape()
     shape3.draw_bezier(
         pymupdf.Point(72, 632),
@@ -104,28 +104,38 @@ def fill_all_pages():
     shape3.commit()
 
     # ----------------------------------------------------
-    # PAGE 6: Direct Debit Mandate (Ballpoint Blue Ink Writing)
+    # PAGE 6: Direct Debit Mandate (Exact Box Centered Coordinates)
     # ----------------------------------------------------
     p6 = doc[5]
     
     # Account Holders
-    p6.insert_text((35, 235), "Muhammad Umar Mumtaz", fontsize=12, fontname="times-bold", color=BLUE_INK)
+    p6.insert_text((35, 235), "Muhammad Umar Mumtaz", fontsize=11, fontname="times-bold", color=BLUE_INK)
     p6.insert_text((35, 250), "OfficialUM1 LLC", fontsize=10, fontname="times-italic", color=BLUE_INK)
 
-    # 8-Digit Account Number: 03905664 (Ballpoint ink in boxes)
+    # 8-Digit Account Number: 03905664 (Exact Box-Centered)
     acc_num = "03905664"
-    start_x_acc = 38
-    box_w_acc = 24.5
+    # Boxes: 30.59 to 263.41, step: ~29.13, y0: 284.2, y1: 312.5
     for i, digit in enumerate(acc_num):
-        p6.insert_text((start_x_acc + i * box_w_acc, 298), digit, fontsize=15, fontname="courier", color=BLUE_INK)
+        x0 = 30.59 + i * 29.13
+        x1 = x0 + 29.13
+        rect = pymupdf.Rect(x0, 284.2, x1, 312.5)
+        p6.insert_textbox(rect, digit, fontsize=16, fontname="helv", color=BLUE_INK, align=1)
 
-    # 6-Digit Sort Code: 23 14 86 (Ballpoint ink in pairs)
-    sort_pairs = ["23", "14", "86"]
-    sort_x = [45, 115, 185]
-    for pair, x in zip(sort_pairs, sort_x):
-        p6.insert_text((x, 363), pair, fontsize=15, fontname="courier", color=BLUE_INK)
+    # 6-Digit Sort Code: 23 - 14 - 86 (Exact Box-Centered for each digit)
+    sort_code_digits = [
+        # (Digit, x0, x1)
+        ("2", 30.59, 59.48),
+        ("3", 59.48, 88.20),
+        ("1", 117.05, 145.93),
+        ("4", 145.93, 174.66),
+        ("8", 203.51, 232.39),
+        ("6", 232.39, 261.12),
+    ]
+    for digit, x0, x1 in sort_code_digits:
+        rect = pymupdf.Rect(x0, 349.3, x1, 377.2)
+        p6.insert_textbox(rect, digit, fontsize=16, fontname="helv", color=BLUE_INK, align=1)
 
-    # Bank Name & Full Postal Address in Ballpoint Ink
+    # Bank Name & Address
     p6.insert_text((120, 442), "Barclays Bank PLC", fontsize=11, fontname="times-bold", color=BLUE_INK)
     p6.insert_text((35, 498), "Level 25, 1 Churchill Place", fontsize=11, fontname="times-roman", color=BLUE_INK)
     p6.insert_text((35, 516), "London", fontsize=11, fontname="times-roman", color=BLUE_INK)
@@ -153,7 +163,7 @@ def fill_all_pages():
     if os.path.exists(filled_temp):
         os.remove(filled_temp)
 
-    print(f"Successfully generated 100% complete ballpoint-signed application: {final_output}")
+    print(f"Generated 100% pixel-perfect centered PDF: {final_output}")
 
 if __name__ == "__main__":
-    fill_all_pages()
+    fill_pixel_perfect()
