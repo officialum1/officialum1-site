@@ -1,12 +1,12 @@
 import pypdf
 import pymupdf
 
-def fill_and_sign():
+def fill_all_pages():
     input_pdf = "Companies_House_credit_account_application.pdf"
     filled_temp = "temp_filled.pdf"
     final_output = "OfficialUM1_Companies_House_Credit_Account_FILLED.pdf"
 
-    # Step 1: Fill Form Fields using pypdf
+    # Step 1: Base Form Fields with pypdf
     reader = pypdf.PdfReader(input_pdf)
     writer = pypdf.PdfWriter()
     writer.append(reader)
@@ -21,10 +21,13 @@ def fill_and_sign():
         "Number of employees": "5",
         "Main business activity": "Corporate Formation, IT & Business Advisory Services",
         "Annual turnover": "$100,000+",
+        "direct mail": "/Off",
+        "exhibition": "/Off",
         "Companies House website": "/Yes",
+        "advertisement": "/Off"
     }, auto_regenerate=True)
 
-    # Page 2: Primary Contact & Invoicing
+    # Page 2: Primary Contact
     writer.update_page_form_field_values(writer.pages[1], {
         "title": "Mr.",
         "forenames": "Muhammad Umar",
@@ -68,44 +71,80 @@ def fill_and_sign():
     with open(filled_temp, "wb") as f_out:
         writer.write(f_out)
 
-    # Step 2: Visual Direct Debit & Signature stamping with PyMuPDF
+    # Step 2: PyMuPDF - Draw Ballpoint Blue Ink & Realistic Handwritten Signatures
     doc = pymupdf.open(filled_temp)
+    BLUE_INK = (0.04, 0.14, 0.52)  # Royal Blue Ballpoint Pen Ink
 
-    # Page 3 Signature
+    # ----------------------------------------------------
+    # PAGE 2: Section 6 Character Boxes (hello@officialum1.com)
+    # ----------------------------------------------------
+    p2 = doc[1]
+    email_str = "hello@officialum1.com"
+    start_x_p2 = 163
+    box_w_p2 = 13.8
+    y_row1_p2 = 490
+    for idx, char in enumerate(email_str):
+        p2.insert_text((start_x_p2 + idx * box_w_p2, y_row1_p2), char.upper(), fontsize=11, fontname="courier", color=BLUE_INK)
+
+    # ----------------------------------------------------
+    # PAGE 3: Section 12 Handwritten Signature & Flourish
+    # ----------------------------------------------------
     p3 = doc[2]
-    sig_rect_p3 = pymupdf.Rect(65, 608, 320, 638)
-    p3.insert_textbox(sig_rect_p3, "Muhammad Umar Mumtaz", fontsize=18, fontname="times-italic", color=(0.05, 0.15, 0.45))
+    # Handwritten signature text
+    p3.insert_text((75, 626), "M. Umar Mumtaz", fontsize=22, fontname="times-italic", color=BLUE_INK)
+    # Realistic pen flourish underline
+    shape3 = p3.new_shape()
+    shape3.draw_bezier(
+        pymupdf.Point(72, 632),
+        pymupdf.Point(140, 638),
+        pymupdf.Point(210, 628),
+        pymupdf.Point(265, 633)
+    )
+    shape3.finish(color=BLUE_INK, width=1.4)
+    shape3.commit()
 
-    # Page 6: Direct Debit Mandate
+    # ----------------------------------------------------
+    # PAGE 6: Direct Debit Mandate (Ballpoint Blue Ink Writing)
+    # ----------------------------------------------------
     p6 = doc[5]
     
     # Account Holders
-    p6.insert_text((35, 235), "Muhammad Umar Mumtaz / OfficialUM1 LLC", fontsize=11, fontname="helv", color=(0, 0, 0))
+    p6.insert_text((35, 235), "Muhammad Umar Mumtaz", fontsize=12, fontname="times-bold", color=BLUE_INK)
+    p6.insert_text((35, 250), "OfficialUM1 LLC", fontsize=10, fontname="times-italic", color=BLUE_INK)
 
-    # Account Number: 03905664 (8 digits spaced across boxes)
+    # 8-Digit Account Number: 03905664 (Ballpoint ink in boxes)
     acc_num = "03905664"
-    start_x = 38
-    box_width = 24.5
-    for i, ch in enumerate(acc_num):
-        p6.insert_text((start_x + i * box_width, 298), ch, fontsize=14, fontname="helv", color=(0, 0, 0))
+    start_x_acc = 38
+    box_w_acc = 24.5
+    for i, digit in enumerate(acc_num):
+        p6.insert_text((start_x_acc + i * box_w_acc, 298), digit, fontsize=15, fontname="courier", color=BLUE_INK)
 
-    # Sort Code: 23 14 86 (3 pairs of 2 digits)
+    # 6-Digit Sort Code: 23 14 86 (Ballpoint ink in pairs)
     sort_pairs = ["23", "14", "86"]
     sort_x = [45, 115, 185]
     for pair, x in zip(sort_pairs, sort_x):
-        p6.insert_text((x, 363), pair, fontsize=14, fontname="helv", color=(0, 0, 0))
+        p6.insert_text((x, 363), pair, fontsize=15, fontname="courier", color=BLUE_INK)
 
-    # Bank Name & Address
-    p6.insert_text((120, 442), "Barclays Bank PLC", fontsize=11, fontname="helv", color=(0, 0, 0))
-    p6.insert_text((35, 500), "Level 25, 1 Churchill Place", fontsize=11, fontname="helv", color=(0, 0, 0))
-    p6.insert_text((35, 518), "London", fontsize=11, fontname="helv", color=(0, 0, 0))
-    p6.insert_text((85, 558), "E14 5HP", fontsize=11, fontname="helv", color=(0, 0, 0))
+    # Bank Name & Full Postal Address in Ballpoint Ink
+    p6.insert_text((120, 442), "Barclays Bank PLC", fontsize=11, fontname="times-bold", color=BLUE_INK)
+    p6.insert_text((35, 498), "Level 25, 1 Churchill Place", fontsize=11, fontname="times-roman", color=BLUE_INK)
+    p6.insert_text((35, 516), "London", fontsize=11, fontname="times-roman", color=BLUE_INK)
+    p6.insert_text((85, 558), "E14 5HP", fontsize=11, fontname="times-bold", color=BLUE_INK)
 
-    # Page 6 Signature & Date
-    sig_rect_p6 = pymupdf.Rect(320, 498, 520, 528)
-    p6.insert_textbox(sig_rect_p6, "Muhammad Umar Mumtaz", fontsize=18, fontname="times-italic", color=(0.05, 0.15, 0.45))
+    # Handwritten Signature on Page 6
+    p6.insert_text((325, 516), "M. Umar Mumtaz", fontsize=22, fontname="times-italic", color=BLUE_INK)
+    shape6 = p6.new_shape()
+    shape6.draw_bezier(
+        pymupdf.Point(322, 523),
+        pymupdf.Point(380, 528),
+        pymupdf.Point(440, 520),
+        pymupdf.Point(485, 524)
+    )
+    shape6.finish(color=BLUE_INK, width=1.4)
+    shape6.commit()
 
-    p6.insert_text((320, 560), "27/09/2026", fontsize=11, fontname="helv", color=(0, 0, 0))
+    # Date in Ballpoint Ink
+    p6.insert_text((325, 560), "27 / 09 / 2026", fontsize=12, fontname="times-roman", color=BLUE_INK)
 
     doc.save(final_output)
     doc.close()
@@ -114,7 +153,7 @@ def fill_and_sign():
     if os.path.exists(filled_temp):
         os.remove(filled_temp)
 
-    print(f"Generated 100% complete and signed application: {final_output}")
+    print(f"Successfully generated 100% complete ballpoint-signed application: {final_output}")
 
 if __name__ == "__main__":
-    fill_and_sign()
+    fill_all_pages()
