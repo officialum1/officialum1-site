@@ -61,7 +61,8 @@ A **Companies House Credit Account** provides a dedicated **Presenter ID** and *
 
 ### Step 4: Turnaround Time & Credentials
 - **Processing Time:** 3 to 5 business days.
-- **Outcome:** Companies House issues a **Presenter ID** and sends the **Presenter Authentication Code** to your registered address/email.
+- **Application Status:** **SUBMITTED** (Sent on 27 September 2026 to `chdfinance@companieshouse.gov.uk`).
+- **Awaiting:** Presenter ID & Presenter Authentication Code.
 
 ---
 
