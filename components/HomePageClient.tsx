@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import HomeHero from "@/components/HomeHero";
 import TechTicker from "@/components/TechTicker";
 import ServicesSection from "@/components/ServicesSection";
-import FeaturedProductsSection from "@/components/FeaturedProductsSection";
 import BusinessSection from "@/components/BusinessSection";
 import StatsSocialProof from "@/components/StatsSocialProof";
 import FreeAuditSection from "@/components/FreeAuditSection";
@@ -26,10 +25,7 @@ export default function HomePageClient() {
       {/* 3. Core Agency Services: 4 Primary Pillars */}
       <ServicesSection />
 
-      {/* 4. Digital Assets Hub: Top Verified Accounts & Assets */}
-      <FeaturedProductsSection />
-
-      {/* 5. Corporate Formation Hub: US LLC & UK LTD with Banking */}
+      {/* 4. Corporate Formation Hub: US LLC & UK LTD with Banking */}
       <BusinessSection />
 
       {/* 6. Social Proof & Performance Metrics */}
