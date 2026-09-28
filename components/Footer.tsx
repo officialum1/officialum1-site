@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getDomainUrls } from '@/lib/navigation-urls';
 
 export default function Footer() {
     const [email, setEmail] = useState('');
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [domainUrls, setDomainUrls] = useState(() => getDomainUrls());
+
+    useEffect(() => {
+        setDomainUrls(getDomainUrls());
+    }, []);
 
     const handleSubscribe = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -216,7 +222,7 @@ export default function Footer() {
                                 { name: 'Next.js 15 Migration', href: '/services/wordpress-to-nextjs-migration' },
                             ].map((link, index) => (
                                 <li key={index}>
-                                    <a href={link.href} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
+                                    <a href={domainUrls.mainUrl(link.href)} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
                                         <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover/link:opacity-100 transition-all duration-300" />
                                         {link.name}
                                     </a>
@@ -239,7 +245,7 @@ export default function Footer() {
                                 { name: 'Contact Us', href: '/contact' }
                             ].map((link, index) => (
                                 <li key={index}>
-                                    <a href={link.href} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
+                                    <a href={domainUrls.mainUrl(link.href)} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
                                         <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover/link:opacity-100 transition-all duration-300" />
                                         {link.name}
                                     </a>
@@ -262,7 +268,7 @@ export default function Footer() {
                                 { name: 'Terms of Service', href: '/terms' },
                                 { name: 'Privacy Policy', href: '/privacy' }
                             ].map((link, index) => (
-                                <a key={index} href={link.href} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
+                                <a key={index} href={domainUrls.mainUrl(link.href)} className="text-gray-400 hover:text-white hover:pl-1 flex items-center gap-2 group/link transition-all duration-300">
                                     <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover/link:opacity-100 transition-all duration-300" />
                                     {link.name}
                                 </a>
@@ -305,11 +311,11 @@ export default function Footer() {
 
                         <div className="flex items-center justify-between md:justify-end gap-6 flex-wrap">
                             <div className="flex flex-wrap items-center gap-4 text-xs">
-                                <a href="/privacy" className="hover:text-[var(--text-primary)] transition-colors">Privacy Policy</a>
-                                <a href="/terms" className="hover:text-[var(--text-primary)] transition-colors">Terms of Service</a>
-                                <a href="/refund" className="hover:text-[var(--text-primary)] transition-colors">Refund Policy</a>
-                                <a href="/delivery-policy" className="hover:text-[var(--text-primary)] transition-colors">Delivery Policy</a>
-                                <a href="/contact" className="hover:text-[var(--text-primary)] transition-colors">Customer Support</a>
+                                <a href={domainUrls.mainUrl("/privacy")} className="hover:text-[var(--text-primary)] transition-colors">Privacy Policy</a>
+                                <a href={domainUrls.mainUrl("/terms")} className="hover:text-[var(--text-primary)] transition-colors">Terms of Service</a>
+                                <a href={domainUrls.mainUrl("/refund")} className="hover:text-[var(--text-primary)] transition-colors">Refund Policy</a>
+                                <a href={domainUrls.mainUrl("/delivery-policy")} className="hover:text-[var(--text-primary)] transition-colors">Delivery Policy</a>
+                                <a href={domainUrls.mainUrl("/contact")} className="hover:text-[var(--text-primary)] transition-colors">Customer Support</a>
                             </div>
 
                             <button 

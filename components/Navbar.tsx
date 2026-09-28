@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { useWishlist } from "@/app/context/WishlistContext";
 import { usePathname } from "next/navigation";
 import { Bell, ChevronDown, Download, Heart, Menu, Search, ShoppingCart, Smartphone, Sparkles, X } from "lucide-react";
+import { getDomainUrls } from "@/lib/navigation-urls";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -15,9 +16,14 @@ export default function Navbar() {
     const [showNotifications, setShowNotifications] = useState(false);
     const unreadCount = notifications.filter(n => !n.is_read).length;
     const pathname = usePathname();
+    const [domainUrls, setDomainUrls] = useState(() => getDomainUrls());
 
     const { toggleCart, cartCount } = useCart() as any;
     const { wishlist } = useWishlist();
+
+    useEffect(() => {
+        setDomainUrls(getDomainUrls());
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -68,51 +74,55 @@ export default function Navbar() {
     const handleLogout = () => {
         localStorage.removeItem('buyer_user');
         setUser(null);
-        window.location.href = '/';
+        window.location.href = domainUrls.mainUrl('/');
     };
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             const term = (e.target as HTMLInputElement).value;
             if (term.trim()) {
-                window.location.href = `/shop?search=${encodeURIComponent(term)}`;
+                window.location.href = `${domainUrls.shopUrl()}?search=${encodeURIComponent(term)}`;
                 setIsOpen(false);
             }
         }
     };
 
     const navLinks = [
-        { href: "/", label: "Home" },
-        { href: "/services", label: "Services" },
-        { href: "/shop", label: "Shop" },
-        { href: "/store", label: "Rentals" },
-        { href: "/reviews", label: "Reviews" },
-        { href: "/blog", label: "Blog" },
-        { href: "/about", label: "About" },
-        { href: "/services/form-business", label: "Business Hub", highlight: true },
+        { href: domainUrls.mainUrl("/"), label: "Home" },
+        { href: domainUrls.mainUrl("/services"), label: "Services" },
+        { href: domainUrls.shopUrl(), label: "Shop" },
+        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+        { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
+        { href: domainUrls.mainUrl("/blog"), label: "Blog" },
+        { href: domainUrls.mainUrl("/about"), label: "About" },
+        { href: domainUrls.mainUrl("/services/form-business"), label: "Business Hub", highlight: true },
     ];
 
     const mobileNavLinks = [
-        { href: "/download-app", label: "📱 Download Android App", highlight: true },
-        { href: "/services", label: "All Services" },
-        { href: "/services/guest-posting", label: "🔗 High-DA Guest Posting" },
-        { href: "/services/niche-edits", label: "⚡ Aged Niche Edits" },
-        { href: "/services/crypto-guest-posting", label: "🪙 Crypto & Web3 Links" },
-        { href: "/services/press-release-distribution", label: "📰 Press Release Distribution" },
-        { href: "/services/local-citations", label: "📍 Local SEO Citations (8 Countries)" },
-        { href: "/services/uk-company-formation", label: "🇬🇧 UK Company Formation", highlight: true },
-        { href: "/services/form-business", label: "🇺🇸 US LLC Formation" },
-        { href: "/shop", label: "Shop" },
-        ...(user ? [{ href: "/my-orders", label: "Track Order" }] : []),
-        { href: "/reviews", label: "Reviews" },
-        { href: "/store", label: "Rentals" },
-        { href: "/blog", label: "Blog" },
-        { href: "/faq", label: "FAQ" },
-        { href: "/about", label: "About" },
-        { href: "/services/form-business", label: "Business Hub", highlight: true },
+        { href: domainUrls.mainUrl("/download-app"), label: "📱 Download Android App", highlight: true },
+        { href: domainUrls.mainUrl("/services"), label: "All Services" },
+        { href: domainUrls.mainUrl("/services/guest-posting"), label: "🔗 High-DA Guest Posting" },
+        { href: domainUrls.mainUrl("/services/niche-edits"), label: "⚡ Aged Niche Edits" },
+        { href: domainUrls.mainUrl("/services/crypto-guest-posting"), label: "🪙 Crypto & Web3 Links" },
+        { href: domainUrls.mainUrl("/services/press-release-distribution"), label: "📰 Press Release Distribution" },
+        { href: domainUrls.mainUrl("/services/local-citations"), label: "📍 Local SEO Citations (8 Countries)" },
+        { href: domainUrls.mainUrl("/services/uk-company-formation"), label: "🇬🇧 UK Company Formation", highlight: true },
+        { href: domainUrls.mainUrl("/services/form-business"), label: "🇺🇸 US LLC Formation" },
+        { href: domainUrls.shopUrl(), label: "Shop" },
+        ...(user ? [{ href: domainUrls.mainUrl("/my-orders"), label: "Track Order" }] : []),
+        { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
+        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+        { href: domainUrls.mainUrl("/blog"), label: "Blog" },
+        { href: domainUrls.mainUrl("/faq"), label: "FAQ" },
+        { href: domainUrls.mainUrl("/about"), label: "About" },
+        { href: domainUrls.mainUrl("/services/form-business"), label: "Business Hub", highlight: true },
     ];
 
     const isActive = (href: string) => {
+        if (domainUrls.isShopHost) {
+            if (href === domainUrls.shopUrl() || href === "/" || href === "/shop") return true;
+            return false;
+        }
         if (href === "/") return pathname === "/";
         return pathname === href || pathname.startsWith(href + "/");
     };
@@ -129,7 +139,7 @@ export default function Navbar() {
             <div className="container flex h-20 items-center justify-between gap-4">
                 {/* Logo + Admin badge */}
                 <div className="flex flex-shrink-0 items-center gap-3 pr-4">
-                    <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap">
+                    <Link href={domainUrls.mainUrl("/")} className="flex items-center gap-2.5 whitespace-nowrap">
                         <div className="relative h-9 w-9 flex-shrink-0">
                             <img
                                 src="/logo.jpg"
@@ -157,7 +167,7 @@ export default function Navbar() {
                 {/* Center nav */}
                 <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex px-2">
                     <Link
-                        href="/services"
+                        href={domainUrls.mainUrl("/services")}
                         className={`relative flex-shrink-0 whitespace-nowrap px-2 py-2 text-[12.5px] 2xl:text-[13.5px] font-semibold transition-colors ${
                             isActive("/services") && pathname === "/services"
                                 ? "text-[var(--accent-blue)]"
@@ -187,25 +197,25 @@ export default function Navbar() {
                                     <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">DA Authority Packs</div>
                                     <ul className="space-y-1 text-[12.5px] font-semibold text-gray-700 mb-4">
                                         <li>
-                                            <Link href="/services/guest-posting" className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
+                                            <Link href={domainUrls.mainUrl("/services/guest-posting")} className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
                                                 <span>DA50+ Package</span>
                                                 <span className="text-[11px] font-bold text-gray-400">$299+</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/guest-posting" className="p-2 rounded-xl bg-amber-50/50 hover:bg-amber-100/60 flex items-center justify-between transition-all font-bold text-[var(--text-primary)]">
+                                            <Link href={domainUrls.mainUrl("/services/guest-posting")} className="p-2 rounded-xl bg-amber-50/50 hover:bg-amber-100/60 flex items-center justify-between transition-all font-bold text-[var(--text-primary)]">
                                                 <span className="flex items-center gap-1">DA60+ Powerhouse <span className="text-[10px] text-amber-600">⭐ Best</span></span>
                                                 <span className="text-[11px] text-amber-700 font-black">$1,499</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/guest-posting" className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
+                                            <Link href={domainUrls.mainUrl("/services/guest-posting")} className="p-2 rounded-xl hover:bg-blue-50/60 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all">
                                                 <span>DA70+ Elite Pack</span>
                                                 <span className="text-[11px] font-bold text-gray-400">$2,499</span>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/niche-edits" className="p-2 rounded-xl bg-indigo-50/40 hover:bg-indigo-100/60 flex items-center justify-between transition-all text-indigo-700 font-bold">
+                                            <Link href={domainUrls.mainUrl("/services/niche-edits")} className="p-2 rounded-xl bg-indigo-50/40 hover:bg-indigo-100/60 flex items-center justify-between transition-all text-indigo-700 font-bold">
                                                 <span>Aged Niche Edits ⚡</span>
                                                 <span className="text-[11px] text-indigo-600 font-black">$599+</span>
                                             </Link>
@@ -214,9 +224,9 @@ export default function Navbar() {
 
                                     <div className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">Crypto &amp; Web3 Packs</div>
                                     <ul className="space-y-1 text-[12px] font-semibold text-gray-700">
-                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Starter Pack</span><span className="text-[10px] text-gray-400">$899</span></Link></li>
-                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Growth Pack</span><span className="text-[10px] text-gray-400">$1,899</span></Link></li>
-                                        <li><Link href="/services/crypto-guest-posting" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Elite Pack</span><span className="text-[10px] text-gray-400">$3,499</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/crypto-guest-posting")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Starter Pack</span><span className="text-[10px] text-gray-400">$899</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/crypto-guest-posting")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Growth Pack</span><span className="text-[10px] text-gray-400">$1,899</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/crypto-guest-posting")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>Crypto Elite Pack</span><span className="text-[10px] text-gray-400">$3,499</span></Link></li>
                                     </ul>
                                 </div>
 
@@ -227,13 +237,13 @@ export default function Navbar() {
                                     </div>
                                     <ul className="space-y-2 text-[12.5px] font-semibold text-gray-700">
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
+                                            <Link href={domainUrls.mainUrl("/services/press-release-distribution")} className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
                                                 <div className="font-extrabold text-[var(--text-primary)]">National Wire (250+ Sites)</div>
                                                 <div className="text-[11px] text-gray-500 font-normal mt-0.5">Google News, NBC, CBS &bull; <strong className="text-[var(--text-primary)]">$399</strong></div>
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl bg-blue-50/40 hover:bg-blue-100/60 border border-blue-100 block transition-all">
+                                            <Link href={domainUrls.mainUrl("/services/press-release-distribution")} className="p-2.5 rounded-xl bg-blue-50/40 hover:bg-blue-100/60 border border-blue-100 block transition-all">
                                                 <div className="font-extrabold text-[var(--accent-blue)] flex items-center justify-between">
                                                     <span>Global Authority Wire ⭐</span>
                                                     <span className="text-[11px] font-black">$799</span>
@@ -242,13 +252,13 @@ export default function Navbar() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/services/press-release-distribution" className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
+                                            <Link href={domainUrls.mainUrl("/services/press-release-distribution")} className="p-2.5 rounded-xl hover:bg-gray-50 border border-gray-100/80 hover:border-gray-200 block transition-all">
                                                 <div className="font-extrabold text-[var(--text-primary)]">Enterprise Financial PR</div>
                                                 <div className="text-[11px] text-gray-500 font-normal mt-0.5">Stock &amp; Crypto Terminals &bull; <strong className="text-[var(--text-primary)]">$1,499</strong></div>
                                             </Link>
                                         </li>
                                         <li className="pt-2">
-                                            <Link href="/press" className="p-2 rounded-xl hover:bg-blue-50 text-[11.5px] text-[var(--accent-blue)] font-extrabold flex items-center gap-1 transition-all">
+                                            <Link href={domainUrls.mainUrl("/press")} className="p-2 rounded-xl hover:bg-blue-50 text-[11.5px] text-[var(--accent-blue)] font-extrabold flex items-center gap-1 transition-all">
                                                 <span>&rarr; Visit Corporate Press Room</span>
                                             </Link>
                                         </li>
@@ -261,14 +271,14 @@ export default function Navbar() {
                                         <span>📍</span> Local SEO (Citations)
                                     </div>
                                     <ul className="space-y-1 text-[12px] font-semibold text-gray-700">
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇺🇸 USA Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇬🇧 UK Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇨🇦 Canada Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇺 Australia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇪 Dubai Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇸🇬 Singapore Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇵🇭 Philippines Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
-                                        <li><Link href="/services/local-citations" className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇮🇩 Indonesia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇺🇸 USA Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇬🇧 UK Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇨🇦 Canada Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇺 Australia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇦🇪 Dubai Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇸🇬 Singapore Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇵🇭 Philippines Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
+                                        <li><Link href={domainUrls.mainUrl("/services/local-citations")} className="p-1.5 px-2 rounded-lg hover:bg-gray-100 hover:text-[var(--accent-blue)] flex items-center justify-between transition-all"><span>🇮🇩 Indonesia Local Listings</span><span className="text-[10px] text-gray-400">$149+</span></Link></li>
                                     </ul>
                                 </div>
                             </div>
@@ -278,7 +288,7 @@ export default function Navbar() {
                                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                     100% Verified Manual Placement &bull; 365-Day Replacement Warranty
                                 </span>
-                                <Link href="/store" className="font-extrabold text-[var(--accent-blue)] hover:underline flex items-center gap-1">
+                                <Link href={domainUrls.mainUrl("/store")} className="font-extrabold text-[var(--accent-blue)] hover:underline flex items-center gap-1">
                                     Browse Digital Store &rarr;
                                 </Link>
                             </div>
@@ -286,14 +296,14 @@ export default function Navbar() {
                     </div>
 
                     {[
-                        { href: "/shop", label: "Shop" },
-                        { href: "/reviews", label: "Reviews" },
-                        { href: "/store", label: "Rentals" },
-                        { href: "/blog", label: "Blog" },
-                        { href: "/services/form-business", label: "Business Hub", highlight: true },
+                        { href: domainUrls.shopUrl(), label: "Shop" },
+                        { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
+                        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+                        { href: domainUrls.mainUrl("/blog"), label: "Blog" },
+                        { href: domainUrls.mainUrl("/services/form-business"), label: "Business Hub", highlight: true },
                     ].map((l) => (
                         <Link
-                            key={l.href}
+                            key={l.label}
                             href={l.href}
                             className={`relative flex-shrink-0 whitespace-nowrap px-2 py-2 text-[12.5px] 2xl:text-[13.5px] font-semibold transition-colors ${
                                 isActive(l.href)
@@ -322,7 +332,7 @@ export default function Navbar() {
                     ))}
                     {user && (user.role === "admin" || user.role === "staff") && (
                         <Link
-                            href="/admin/inventory"
+                            href={domainUrls.mainUrl("/admin/inventory")}
                             className={`relative flex-shrink-0 whitespace-nowrap px-2 py-2 text-[13px] font-semibold transition-colors ${
                                 isActive("/admin")
                                     ? "text-[var(--accent-blue)]"
@@ -346,7 +356,7 @@ export default function Navbar() {
                     )}
                     {user && user.role === "seller" && (
                         <Link
-                            href="/dashboard/seller"
+                            href={domainUrls.mainUrl("/dashboard/seller")}
                             className={`relative flex-shrink-0 whitespace-nowrap px-2 py-2 text-[13px] font-semibold transition-colors ${
                                 isActive("/dashboard/seller")
                                     ? "text-[var(--accent-blue)]"
@@ -455,7 +465,7 @@ export default function Navbar() {
 
                     {/* Download App Badge */}
                     <Link
-                        href="/download-app"
+                        href={domainUrls.mainUrl("/download-app")}
                         className="hidden lg:inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-[12px] font-bold transition hover:bg-[rgba(20,108,120,0.08)]"
                         style={{
                             borderColor: "rgba(20,108,120,0.25)",
@@ -470,7 +480,7 @@ export default function Navbar() {
 
                     {/* Wishlist */}
                     <Link
-                        href="/wishlist"
+                        href={domainUrls.mainUrl("/wishlist")}
                         className="navWishlist relative inline-flex h-10 w-10 items-center justify-center rounded-full border bg-white transition hover:bg-[var(--bg-section-alt)]"
                         style={{ borderColor: "var(--border-subtle)" }}
                         aria-label="Wishlist"
@@ -503,7 +513,7 @@ export default function Navbar() {
                         {user ? (
                             <>
                                 <Link
-                                    href="/dashboard"
+                                    href={domainUrls.mainUrl("/dashboard")}
                                     className="whitespace-nowrap rounded-full border px-3.5 py-2 text-[13px] font-semibold transition-colors"
                                     style={{
                                         borderColor: "var(--border-subtle)",
@@ -526,7 +536,7 @@ export default function Navbar() {
                         ) : (
                             <>
                                 <Link
-                                    href="/login"
+                                    href={domainUrls.mainUrl("/login")}
                                     className="whitespace-nowrap rounded-full border px-3.5 py-2 text-[13px] font-semibold transition-colors"
                                     style={{
                                         borderColor: "var(--border-subtle)",
@@ -536,7 +546,7 @@ export default function Navbar() {
                                     Login
                                 </Link>
                                 <Link
-                                    href="/register"
+                                    href={domainUrls.mainUrl("/register")}
                                     className="whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-200"
                                     style={{
                                         background: "linear-gradient(135deg, var(--accent-blue), var(--accent-violet))",
@@ -581,7 +591,7 @@ export default function Navbar() {
                         }}
                     >
                         <div className="flex items-center justify-between">
-                            <Link href="/" onClick={() => setIsOpen(false)} className="flex items-center gap-3">
+                            <Link href={domainUrls.mainUrl("/")} onClick={() => setIsOpen(false)} className="flex items-center gap-3">
                                 <img
                                     src="/logo.jpg"
                                     alt="OfficialUM1 Logo"
@@ -626,7 +636,7 @@ export default function Navbar() {
                             <div className="grid gap-2 text-left">
                                 {mobileNavLinks.map((l) => (
                                     <Link
-                                        key={l.href}
+                                        key={l.label}
                                         href={l.href}
                                         onClick={() => setIsOpen(false)}
                                         className={`w-full rounded-2xl border px-4 py-3 text-[1rem] font-semibold tracking-normal transition ${
@@ -640,7 +650,7 @@ export default function Navbar() {
                                 ))}
                                 {user && (user.role === "admin" || user.role === "staff") && (
                                     <Link
-                                        href="/admin/inventory"
+                                        href={domainUrls.mainUrl("/admin/inventory")}
                                         onClick={() => setIsOpen(false)}
                                         className={`w-full rounded-2xl border px-4 py-3 text-[1rem] font-semibold tracking-normal ${
                                             isActive("/admin")
@@ -653,7 +663,7 @@ export default function Navbar() {
                                 )}
                                 {user && user.role === "seller" && (
                                     <Link
-                                        href="/dashboard/seller"
+                                        href={domainUrls.mainUrl("/dashboard/seller")}
                                         onClick={() => setIsOpen(false)}
                                         className={`w-full rounded-2xl border px-4 py-3 text-[1rem] font-semibold tracking-normal ${
                                             isActive("/dashboard/seller")
@@ -671,7 +681,7 @@ export default function Navbar() {
                             {user ? (
                                 <>
                                     <Link
-                                        href="/dashboard"
+                                        href={domainUrls.mainUrl("/dashboard")}
                                         onClick={() => setIsOpen(false)}
                                         className="block w-full rounded-full border px-4 py-3 text-center text-[14px] font-semibold"
                                         style={{
@@ -698,7 +708,7 @@ export default function Navbar() {
                             ) : (
                                 <>
                                     <Link
-                                        href="/login"
+                                        href={domainUrls.mainUrl("/login")}
                                         onClick={() => setIsOpen(false)}
                                         className="block w-full rounded-full border px-4 py-3 text-center text-[14px] font-semibold"
                                         style={{
@@ -709,7 +719,7 @@ export default function Navbar() {
                                         Login
                                     </Link>
                                     <Link
-                                        href="/register"
+                                        href={domainUrls.mainUrl("/register")}
                                         onClick={() => setIsOpen(false)}
                                         className="block w-full rounded-full px-4 py-3 text-center text-[14px] font-semibold text-white"
                                         style={{

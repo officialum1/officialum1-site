@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { getPlatformIcon } from "@/lib/icons";
 import { readJson } from "@/lib/read-json";
+import { getDomainUrls } from "@/lib/navigation-urls";
 
 // Sample real product data to show when API fails or loads
 const SAMPLE_PRODUCTS = [
@@ -16,6 +17,11 @@ const SAMPLE_PRODUCTS = [
 
 export default function FeaturedProductsSection() {
     const [products, setProducts] = useState<any[]>([]);
+    const [domainUrls, setDomainUrls] = useState(() => getDomainUrls());
+
+    useEffect(() => {
+        setDomainUrls(getDomainUrls());
+    }, []);
 
     useEffect(() => {
         fetch("/api/products")
@@ -178,7 +184,7 @@ export default function FeaturedProductsSection() {
 
                 <div className="mt-10 text-center">
                     <Link
-                        href="/shop"
+                        href={domainUrls.shopUrl()}
                         className="inline-flex items-center justify-center rounded-full border px-6 py-2.5 text-sm font-semibold"
                         style={{
                             borderColor: "var(--border-subtle)",
