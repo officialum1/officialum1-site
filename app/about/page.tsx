@@ -14,7 +14,9 @@ const TEAM_MEMBERS = [
         name: "Muhammad Umar Mumtaz",
         role: "Founder, CEO & Principal Architect",
         tag: "Executive Leadership",
+        initials: "UM",
         image: "/founder.jpg",
+        icon: "⚡",
         bio: "Digital entrepreneur and systems architect with 6+ years spearheading high-performance web engineering, technical SEO pipelines, and digital asset valuation for global enterprise clients.",
         specialties: ["Next.js Architecture", "Search Engine Algorithms", "Venture Growth", "Asset Escrow"],
         social: {
@@ -23,11 +25,12 @@ const TEAM_MEMBERS = [
         }
     },
     {
-        name: "Aayan Farooq",
+        name: "Marcus Vance",
         role: "VP of Engineering & Cloud Infrastructure",
         tag: "Core Engineering",
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-        bio: "Cloud solutions architect leading the full-stack engineering team. Specializes in edge runtime delivery, headless CMS migrations, and sub-second rendering web apps.",
+        initials: "MV",
+        icon: "⚡",
+        bio: "Cloud solutions architect leading the full-stack engineering team. Specializes in edge runtime delivery, headless CMS migrations, and sub-second rendering web applications.",
         specialties: ["Next.js 15 App Router", "Node.js Microservices", "Vercel / AWS DevOps", "TypeScript"],
         social: {
             linkedin: "#",
@@ -35,11 +38,12 @@ const TEAM_MEMBERS = [
         }
     },
     {
-        name: "Zainab Tariq",
+        name: "Sophia Reynolds",
         role: "Head of Organic Growth & Technical SEO",
         tag: "SEO & Traffic Growth",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
-        bio: "SEO veteran with a proven record of ranking enterprise sites in competitive international markets across the US, UK, and UAE with white-hat link acquisition and semantic schema.",
+        initials: "SR",
+        icon: "📈",
+        bio: "SEO veteran with a proven record of ranking enterprise websites in competitive international markets across the US, UK, and UAE with white-hat link acquisition and semantic schema.",
         specialties: ["Entity SEO", "Crawl Budget Optimization", "Topical Authority", "Backlink Strategy"],
         social: {
             linkedin: "#",
@@ -47,10 +51,11 @@ const TEAM_MEMBERS = [
         }
     },
     {
-        name: "Hamza Rafiq",
+        name: "David Sterling",
         role: "Head of Formations & Legal Compliance",
         tag: "Corporate Formations",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        initials: "DS",
+        icon: "🏛️",
         bio: "Corporate specialist managing US LLC and UK LTD company incorporations, IRS EIN filings, FinCEN BOI compliance, and multi-currency global banking setups for international founders.",
         specialties: ["US LLC (MT/WY/DE/NM)", "UK Companies House", "IRS Form 1120/5472", "Banking KYC"],
         social: {
@@ -59,10 +64,11 @@ const TEAM_MEMBERS = [
         }
     },
     {
-        name: "Elena Vance",
+        name: "Elena Cruz",
         role: "Director of Asset Security & Escrow",
         tag: "Security & Operations",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
+        initials: "EC",
+        icon: "🛡️",
         bio: "Risk management and cyber verification specialist ensuring 100% secure escrow transactions, automated domain transfers, and authenticated digital asset verification.",
         specialties: ["Escrow Protocols", "Asset Ownership Audits", "Fraud Prevention", "Security Auditing"],
         social: {
@@ -71,10 +77,11 @@ const TEAM_MEMBERS = [
         }
     },
     {
-        name: "Daniyal Malik",
+        name: "Lucas Meyer",
         role: "Director of Client Success & Global Solutions",
         tag: "Client Success",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+        initials: "LM",
+        icon: "🤝",
         bio: "Dedicated client partner ensuring seamless project delivery, rapid turnaround SLAs, and customized B2B growth consulting for enterprise and startup partners worldwide.",
         specialties: ["Client SLA Management", "Growth Consulting", "B2B Retainers", "Sprint Coordination"],
         social: {
@@ -482,21 +489,49 @@ export default function AboutPage() {
                                 }}
                             >
                                 <div style={{ padding: '2rem 2rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                                    <div style={{
-                                        width: '80px',
-                                        height: '80px',
-                                        borderRadius: '20px',
-                                        overflow: 'hidden',
-                                        flexShrink: 0,
-                                        border: '2px solid var(--border-subtle)',
-                                        boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
-                                    }}>
-                                        <img 
-                                            src={member.image} 
-                                            alt={member.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        />
-                                    </div>
+                                    {/* Monogram / Profile Badge (No stock images) */}
+                                    {member.image ? (
+                                        <div style={{
+                                            width: '76px',
+                                            height: '76px',
+                                            borderRadius: '20px',
+                                            overflow: 'hidden',
+                                            flexShrink: 0,
+                                            border: '2px solid var(--accent-blue)',
+                                            boxShadow: '0 8px 20px rgba(20,108,120,0.15)'
+                                        }}>
+                                            <img 
+                                                src={member.image} 
+                                                alt={member.name}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div style={{
+                                            width: '76px',
+                                            height: '76px',
+                                            borderRadius: '20px',
+                                            flexShrink: 0,
+                                            background: 'linear-gradient(135deg, rgba(20,108,120,0.12) 0%, rgba(196,71,45,0.12) 100%)',
+                                            border: '1.5px solid var(--border-subtle)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            boxShadow: '0 8px 20px rgba(0,0,0,0.04)'
+                                        }}>
+                                            <span style={{ 
+                                                fontSize: '1.4rem', 
+                                                fontWeight: '900', 
+                                                color: 'var(--accent-blue)',
+                                                fontFamily: 'var(--font-space-grotesk), sans-serif',
+                                                letterSpacing: '0.05em'
+                                            }}>
+                                                {member.initials}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <div>
                                         <span style={{ 
                                             display: 'inline-block',
