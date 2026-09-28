@@ -90,7 +90,7 @@ export default function Navbar() {
     const navLinks = [
         { href: domainUrls.mainUrl("/"), label: "Home" },
         { href: domainUrls.mainUrl("/services"), label: "Services" },
-        { href: domainUrls.shopUrl(), label: "Shop" },
+        { href: domainUrls.shopUrl(), label: "Marketplace" },
         { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
         { href: domainUrls.mainUrl("/blog"), label: "Blog" },
@@ -108,7 +108,7 @@ export default function Navbar() {
         { href: domainUrls.mainUrl("/services/local-citations"), label: "📍 Local SEO Citations (8 Countries)" },
         { href: domainUrls.mainUrl("/services/uk-company-formation"), label: "🇬🇧 UK Company Formation", highlight: true },
         { href: domainUrls.mainUrl("/services/form-business"), label: "🇺🇸 US LLC Formation" },
-        { href: domainUrls.shopUrl(), label: "Shop" },
+        { href: domainUrls.shopUrl(), label: "🛍️ Digital Marketplace" },
         ...(user ? [{ href: domainUrls.mainUrl("/my-orders"), label: "Track Order" }] : []),
         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
         { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
@@ -296,7 +296,7 @@ export default function Navbar() {
                     </div>
 
                     {[
-                        { href: domainUrls.shopUrl(), label: "Shop" },
+                        { href: domainUrls.shopUrl(), label: "Marketplace" },
                         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
                         { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
                         { href: domainUrls.mainUrl("/blog"), label: "Blog" },

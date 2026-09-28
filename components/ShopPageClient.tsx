@@ -112,10 +112,10 @@ export default function ShopPageClient({ initialProducts }: { initialProducts: a
             <Navbar />
             <div style={{ paddingTop: '80px' }}>
                 <PageHero
-                    breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Shop' }]}
-                    label="Shop"
-                    title={<>Premium Digital <span style={{color: 'var(--accent-violet)'}}>Assets</span></>}
-                    description="Buy high-quality digital products instantly. Filter by category, compare offers, and check out in minutes."
+                    breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Marketplace' }]}
+                    label="Digital Marketplace"
+                    title={<>Digital Assets &amp; <span style={{color: 'var(--accent-violet)'}}>Accounts Marketplace</span></>}
+                    description="Browse verified digital products, aged platforms, and developer assets with instant delivery and secure checkout."
                 />
 
                 <div className="container" style={{ paddingTop: '3rem' }}>
