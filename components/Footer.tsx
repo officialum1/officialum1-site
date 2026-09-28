@@ -239,7 +239,6 @@ export default function Footer() {
                             {[
                                 { name: 'About Us', href: '/about' },
                                 { name: 'Executive Team', href: '/team' },
-                                { name: 'Press Room', href: '/press' },
                                 { name: 'Portfolio Hub', href: '/work' },
                                 { name: 'Digital Store', href: '/store' },
                                 { name: 'Client Reviews', href: '/reviews' },

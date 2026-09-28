@@ -258,8 +258,8 @@ export default function Navbar() {
                                             </Link>
                                         </li>
                                         <li className="pt-2">
-                                            <Link href={domainUrls.mainUrl("/press")} className="p-2 rounded-xl hover:bg-blue-50 text-[11.5px] text-[var(--accent-blue)] font-extrabold flex items-center gap-1 transition-all">
-                                                <span>&rarr; Visit Corporate Press Room</span>
+                                            <Link href={domainUrls.mainUrl("/services/press-release-distribution")} className="p-2 rounded-xl hover:bg-blue-50 text-[11.5px] text-[var(--accent-blue)] font-extrabold flex items-center gap-1 transition-all">
+                                                <span>&rarr; View All PR Syndication Tiers</span>
                                             </Link>
                                         </li>
                                     </ul>
