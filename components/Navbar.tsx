@@ -91,7 +91,7 @@ export default function Navbar() {
         { href: domainUrls.mainUrl("/"), label: "Home" },
         { href: domainUrls.mainUrl("/services"), label: "Services" },
         { href: domainUrls.shopUrl(), label: "Shop" },
-        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+        { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
         { href: domainUrls.mainUrl("/blog"), label: "Blog" },
         { href: domainUrls.mainUrl("/about"), label: "About" },
@@ -111,7 +111,7 @@ export default function Navbar() {
         { href: domainUrls.shopUrl(), label: "Shop" },
         ...(user ? [{ href: domainUrls.mainUrl("/my-orders"), label: "Track Order" }] : []),
         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
-        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+        { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
         { href: domainUrls.mainUrl("/blog"), label: "Blog" },
         { href: domainUrls.mainUrl("/faq"), label: "FAQ" },
         { href: domainUrls.mainUrl("/about"), label: "About" },
@@ -289,7 +289,7 @@ export default function Navbar() {
                                     100% Verified Manual Placement &bull; 365-Day Replacement Warranty
                                 </span>
                                 <Link href={domainUrls.mainUrl("/store")} className="font-extrabold text-[var(--accent-blue)] hover:underline flex items-center gap-1">
-                                    Browse Digital Store &rarr;
+                                    Browse All SEO Packages &rarr;
                                 </Link>
                             </div>
                         </div>
@@ -298,7 +298,7 @@ export default function Navbar() {
                     {[
                         { href: domainUrls.shopUrl(), label: "Shop" },
                         { href: domainUrls.mainUrl("/reviews"), label: "Reviews" },
-                        { href: domainUrls.mainUrl("/store"), label: "Rentals" },
+                        { href: domainUrls.mainUrl("/store"), label: "SEO Packages" },
                         { href: domainUrls.mainUrl("/blog"), label: "Blog" },
                         { href: domainUrls.mainUrl("/services/form-business"), label: "Business Hub", highlight: true },
                     ].map((l) => (

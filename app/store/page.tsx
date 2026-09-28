@@ -119,10 +119,10 @@ export default function StorePage() {
 
       <div style={{ paddingTop: '80px' }}>
         <PageHero
-          breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Store & Digital Assets' }]}
-          label="Digital Inventory & Authority Store"
-          title={<>Premium Digital Assets &amp; <span style={{ color: "var(--accent-blue)" }}>Authority Packs</span></>}
-          description="Direct access to verified high-DA backlink inventory, aged niche placements, and enterprise digital marketing assets."
+          breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'SEO Packages' }]}
+          label="Pre-Packaged SEO & Organic Growth Solutions"
+          title={<>Enterprise SEO &amp; <span style={{ color: "var(--accent-blue)" }}>Authority Growth Packages</span></>}
+          description="Scalable DoFollow link building packages, high-DA editorial outreach, and turnkey organic search campaigns engineered for modern businesses."
         />
 
         {/* Tab Filters */}
@@ -137,7 +137,7 @@ export default function StorePage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                All Digital Inventory
+                All SEO Packages
               </button>
               <button
                 onClick={() => setActiveTab('links')}
@@ -147,7 +147,7 @@ export default function StorePage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                🔗 Authority Link Packs (DA 40-75+)
+                🔗 Link Building Packages (DA 40-75+)
               </button>
               <button
                 onClick={() => setActiveTab('assets')}
@@ -157,7 +157,7 @@ export default function StorePage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                🌐 Pre-Ranked Site Rentals
+                🌐 Turnkey Web &amp; Managed Portals
               </button>
             </div>
 
@@ -273,23 +273,23 @@ export default function StorePage() {
                   <Globe2 className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-black text-[var(--text-primary)]">
-                  Pre-Ranked Digital Assets &amp; Turnkey Websites
+                  Turnkey Enterprise Portals &amp; Managed Web Assets
                 </h3>
                 <p className="text-xs text-[var(--text-muted)] max-w-lg mx-auto mt-2 leading-relaxed">
-                  All active pre-ranked niche sites are currently under client lease agreements. If you are looking for turnkey pre-ranked local lead-generation assets or specific domain acquisitions, join our priority waitlist.
+                  Custom high-performance web portals, organic landing ecosystems, and managed enterprise solutions built for continuous inbound growth and high search visibility.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                   <Link
-                    href="/contact?service=Rent+a+Site&subject=Priority+Asset+Waitlist"
+                    href="/contact?service=Managed+Web+Portal&subject=Inquiry+for+Enterprise+Portal"
                     className="px-6 py-3 rounded-full bg-[var(--accent-blue)] text-white font-bold text-xs hover:opacity-90 transition shadow-md shadow-blue-500/20"
                   >
-                    Join Asset Waitlist
+                    Request Managed Portal
                   </Link>
                   <Link
                     href="/services/guest-posting"
                     className="px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs transition"
                   >
-                    Explore Authority Link Packs
+                    Explore Link Building Packages
                   </Link>
                 </div>
               </div>
