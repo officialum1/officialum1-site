@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PageHero } from '@/components/ui/PageHero';
 import { Bell, ShoppingCart, X } from 'lucide-react';
 import { readJson } from '@/lib/read-json';
+import { getDomainUrls } from '@/lib/navigation-urls';
 
 export default function ShopPageClient({ initialProducts }: { initialProducts: any[] }) {
     const [products, setProducts] = useState<any[]>(initialProducts ?? []);
@@ -19,6 +20,11 @@ export default function ShopPageClient({ initialProducts }: { initialProducts: a
     const [loading, setLoading] = useState(!(initialProducts && initialProducts.length > 0));
     const [shareId, setShareId] = useState<string | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [domainUrls, setDomainUrls] = useState(() => getDomainUrls());
+
+    useEffect(() => {
+        setDomainUrls(getDomainUrls());
+    }, []);
 
     // New Features: Search, Sort, Notify
     const [searchQuery, setSearchQuery] = useState('');
@@ -140,7 +146,7 @@ export default function ShopPageClient({ initialProducts }: { initialProducts: a
                             Combine any 2+ assets and get an instant <span style={{color: 'var(--accent-violet)', fontWeight: 'bold'}}>15% discount</span> applied automatically at checkout.
                         </p>
                     </div>
-                    <Link href="/bundles" style={{ 
+                    <Link href={domainUrls.mainUrl("/bundles")} style={{ 
                         padding: '1rem 2.5rem', 
                         fontSize: '1rem', 
                         fontWeight: '800', 
@@ -283,14 +289,14 @@ export default function ShopPageClient({ initialProducts }: { initialProducts: a
                                                 <div style={{ position: 'absolute', top: '15px', right: '15px', background: '#fff', backdropFilter: 'blur(10px)', border: '1px solid var(--border-subtle)', color: 'var(--accent-blue)', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.65rem', fontWeight: '800', zIndex: 10 }}>ACTIVE</div>
                                             )}
 
-                                            <Link href={`/shop/${item.id}`} style={{ padding: '3rem 2rem', display: 'flex', justifyContent: 'center', background: 'var(--bg-section-alt)', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)' }}>
+                                            <Link href={domainUrls.mainUrl(`/shop/${item.id}`)} style={{ padding: '3rem 2rem', display: 'flex', justifyContent: 'center', background: 'var(--bg-section-alt)', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)' }}>
                                                 <img src={getPlatformIcon(item.platform, item.image)} alt={item.platform} style={{ width: '70px', height: '70px', objectFit: 'contain', filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.2))' }} />
                                             </Link>
                                             <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: '800' }}>
                                                     {item.platform}
                                                 </div>
-                                                <Link href={`/shop/${item.id}`} style={{ textDecoration: 'none' }}>
+                                                <Link href={domainUrls.mainUrl(`/shop/${item.id}`)} style={{ textDecoration: 'none' }}>
                                                     <h3 style={{ marginBottom: '0.5rem', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1.25rem', fontWeight: '800' }}>{item.name}</h3>
                                                 </Link>
                                                 <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.95rem', lineHeight: '1.6' }}>{item.description?.substring(0, 80)}{item.description?.length > 80 ? '...' : ''}</p>
@@ -321,7 +327,7 @@ export default function ShopPageClient({ initialProducts }: { initialProducts: a
                                                     {totalStock > 0 ? (
                                                         <>
                                                             <Link
-                                                                href={`/checkout?id=${item.id}`}
+                                                                href={domainUrls.mainUrl(`/checkout?id=${item.id}`)}
                                                                 style={{ 
                                                                     flex: 1, 
                                                                     textAlign: 'center', 
