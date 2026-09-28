@@ -35,12 +35,39 @@ export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
     const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname || '';
     const isShopSubdomain = host.startsWith('shop.') || host.startsWith('shop.localhost');
+    const isProduction = !host.includes('localhost') && !host.includes('127.0.0.1');
+    const mainOrigin = isProduction ? 'https://officialum1.com' : 'http://localhost:3000';
+    const shopOrigin = isProduction ? 'https://shop.officialum1.com' : 'http://shop.localhost:3000';
 
-    // 1. Subdomain Rewrite for shop.officialum1.com and shop.localhost
+    // 1. Subdomain Routing Logic
     if (isShopSubdomain) {
         if (path === '/') {
             const shopUrl = new URL('/shop', request.url);
             return NextResponse.rewrite(shopUrl);
+        }
+        if (path === '/shop') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+
+        const isShopRoute = 
+            path.startsWith('/product') || 
+            path.startsWith('/checkout') || 
+            path.startsWith('/cart') || 
+            path.startsWith('/order-success') || 
+            path.startsWith('/api') || 
+            path.startsWith('/_next') ||
+            path.includes('.');
+
+        // If user on shop.officialum1.com clicks an agency page (Services, Blog, Reviews, etc.), redirect to main domain
+        if (!isShopRoute) {
+            const targetUrl = new URL(`${mainOrigin}${path}${request.nextUrl.search}`);
+            return NextResponse.redirect(targetUrl);
+        }
+    } else {
+        // If user on officialum1.com navigates to /shop, redirect to dedicated shop subdomain in production
+        if (isProduction && (path === '/shop' || path.startsWith('/shop/'))) {
+            const targetUrl = new URL(`${shopOrigin}${path === '/shop' ? '/' : path.replace(/^\/shop/, '')}${request.nextUrl.search}`);
+            return NextResponse.redirect(targetUrl);
         }
     }
 
