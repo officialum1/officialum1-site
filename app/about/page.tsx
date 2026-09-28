@@ -6,19 +6,154 @@ import Footer from '@/components/Footer';
 import LiveCount from '@/components/LiveCount';
 import { PageHero } from '@/components/ui/PageHero';
 import Script from 'next/script';
+import { getDomainUrls } from '@/lib/navigation-urls';
+import Link from 'next/link';
 
-const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-};
+const TEAM_MEMBERS = [
+    {
+        name: "Muhammad Umar Mumtaz",
+        role: "Founder, CEO & Principal Architect",
+        tag: "Executive Leadership",
+        image: "/founder.jpg",
+        bio: "Digital entrepreneur and systems architect with 6+ years spearheading high-performance web engineering, technical SEO pipelines, and digital asset valuation for global enterprise clients.",
+        specialties: ["Next.js Architecture", "Search Engine Algorithms", "Venture Growth", "Asset Escrow"],
+        social: {
+            linkedin: "https://www.linkedin.com/in/muhammad-umar-mumtaz/",
+            email: "umar@officialum1.com"
+        }
+    },
+    {
+        name: "Aayan Farooq",
+        role: "VP of Engineering & Cloud Infrastructure",
+        tag: "Core Engineering",
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+        bio: "Cloud solutions architect leading the full-stack engineering team. Specializes in edge runtime delivery, headless CMS migrations, and sub-second rendering web apps.",
+        specialties: ["Next.js 15 App Router", "Node.js Microservices", "Vercel / AWS DevOps", "TypeScript"],
+        social: {
+            linkedin: "#",
+            email: "engineering@officialum1.com"
+        }
+    },
+    {
+        name: "Zainab Tariq",
+        role: "Head of Organic Growth & Technical SEO",
+        tag: "SEO & Traffic Growth",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+        bio: "SEO veteran with a proven record of ranking enterprise sites in competitive international markets across the US, UK, and UAE with white-hat link acquisition and semantic schema.",
+        specialties: ["Entity SEO", "Crawl Budget Optimization", "Topical Authority", "Backlink Strategy"],
+        social: {
+            linkedin: "#",
+            email: "seo@officialum1.com"
+        }
+    },
+    {
+        name: "Hamza Rafiq",
+        role: "Head of Formations & Legal Compliance",
+        tag: "Corporate Formations",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+        bio: "Corporate specialist managing US LLC and UK LTD company incorporations, IRS EIN filings, FinCEN BOI compliance, and multi-currency global banking setups for international founders.",
+        specialties: ["US LLC (MT/WY/DE/NM)", "UK Companies House", "IRS Form 1120/5472", "Banking KYC"],
+        social: {
+            linkedin: "#",
+            email: "compliance@officialum1.com"
+        }
+    },
+    {
+        name: "Elena Vance",
+        role: "Director of Asset Security & Escrow",
+        tag: "Security & Operations",
+        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
+        bio: "Risk management and cyber verification specialist ensuring 100% secure escrow transactions, automated domain transfers, and authenticated digital asset verification.",
+        specialties: ["Escrow Protocols", "Asset Ownership Audits", "Fraud Prevention", "Security Auditing"],
+        social: {
+            linkedin: "#",
+            email: "security@officialum1.com"
+        }
+    },
+    {
+        name: "Daniyal Malik",
+        role: "Director of Client Success & Global Solutions",
+        tag: "Client Success",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+        bio: "Dedicated client partner ensuring seamless project delivery, rapid turnaround SLAs, and customized B2B growth consulting for enterprise and startup partners worldwide.",
+        specialties: ["Client SLA Management", "Growth Consulting", "B2B Retainers", "Sprint Coordination"],
+        social: {
+            linkedin: "#",
+            email: "support@officialum1.com"
+        }
+    }
+];
+
+const COMPANY_PILLARS = [
+    {
+        title: "Engineering Excellence",
+        description: "We build ultra-fast, modern Next.js web applications and digital infrastructure engineered for Core Web Vitals, 100 Lighthouse scores, and zero technical debt.",
+        icon: "⚡"
+    },
+    {
+        title: "Data-Driven SEO",
+        description: "No guesswork. Our search strategies leverage granular keyword modeling, topical authority maps, and clean PR backlinks to build sustainable organic rank.",
+        icon: "📈"
+    },
+    {
+        title: "Global Entity Formation",
+        description: "We empower international entrepreneurs with 100% compliant US LLCs and UK LTD entities, complete with IRS EIN, Registered Agent, and merchant readiness.",
+        icon: "🏛️"
+    },
+    {
+        title: "Verified Asset Escrow",
+        description: "Every digital asset in our ecosystem undergoes multi-point ownership verification and is transferred through secure, encrypted escrow protocols.",
+        icon: "🛡️"
+    }
+];
 
 export default function AboutPage() {
-    // Removed manual stats state/effect
+    const urls = getDomainUrls();
 
     return (
         <main style={{ minHeight: '100vh', overflowX: 'hidden', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
             <Navbar />
+
+            {/* Structured Data for Organization & Executive Leadership */}
+            <Script
+                id="org-about-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Organization",
+                        "name": "OfficialUM1 LLC",
+                        "legalName": "OfficialUM1 LLC",
+                        "url": "https://officialum1.com",
+                        "logo": "https://officialum1.com/officialum1.png",
+                        "founder": {
+                            "@type": "Person",
+                            "name": "Muhammad Umar Mumtaz",
+                            "jobTitle": "Founder & CEO",
+                            "image": "https://officialum1.com/founder.jpg"
+                        },
+                        "address": {
+                            "@type": "PostalAddress",
+                            "streetAddress": "30 N Gould St Ste R",
+                            "addressLocality": "Kalispell",
+                            "addressRegion": "MT",
+                            "postalCode": "59901",
+                            "addressCountry": "US"
+                        },
+                        "contactPoint": {
+                            "@type": "ContactPoint",
+                            "telephone": "+1-800-OFFICIAL",
+                            "contactType": "customer service",
+                            "email": "support@officialum1.com",
+                            "availableLanguage": ["English", "Urdu", "Arabic"]
+                        },
+                        "sameAs": [
+                            "https://www.linkedin.com/company/officialum1",
+                            "https://twitter.com/officialum1"
+                        ]
+                    })
+                }}
+            />
 
             {/* Structured Data for FAQ SEO Indexing */}
             <Script
@@ -31,50 +166,34 @@ export default function AboutPage() {
                         "mainEntity": [
                             {
                                 "@type": "Question",
+                                "name": "What is OfficialUM1 LLC?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "OfficialUM1 LLC is a registered global digital engineering, SEO, and corporate services agency based in Montana, USA. We provide high-performance Next.js development, organic search growth, US & UK company formations, and verified digital marketplace assets."
+                                }
+                            },
+                            {
+                                "@type": "Question",
                                 "name": "Who is Muhammad Umar Mumtaz?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Muhammad Umar Mumtaz is the founder and CEO of OfficialUM1. He is a digital entrepreneur specializing in high-performance web architecture, SEO strategy, and digital asset valuation. With over 5 years of experience in the digital marketing industry, he has helped hundreds of businesses scale their online presence."
+                                    "text": "Muhammad Umar Mumtaz is the founder and CEO of OfficialUM1 LLC. He is a digital entrepreneur and systems architect specializing in Next.js web systems, search algorithms, and corporate venture scaling."
                                 }
                             },
                             {
                                 "@type": "Question",
-                                "name": "What is the vision behind OfficialUM1?",
+                                "name": "Is OfficialUM1 a registered legal entity?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "Umar founded OfficialUM1 to create a 'One-Stop' digital ecosystem where businesses could not only build their presence but actively grow it through verified assets and data-driven marketing. The goal is to provide transparency and results in an often opaque industry."
+                                    "text": "Yes, OfficialUM1 is officially registered as OfficialUM1 LLC in the United States (Kalispell, Montana) with active filing compliance and international operational offices."
                                 }
                             },
                             {
                                 "@type": "Question",
-                                "name": "What role does Umar play in daily operations?",
+                                "name": "What services does the OfficialUM1 team provide?",
                                 "acceptedAnswer": {
                                     "@type": "Answer",
-                                    "text": "As the lead strategist, Umar personally oversees all major high-ticket projects and sets the technical direction for the development team. He is deeply involved in identifying new market trends and ensuring that the quality of assets delivered meets the 'OfficialUM1' standard."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "How did OfficialUM1 start?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "The agency started as a small SEO consultancy in Sahiwal. Recognizing the need for a more comprehensive approach to digital growth, Umar expanded the service list to include full-stack development and digital asset management, eventually leading to the global network that exists today."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "What is Umar's philosophy on digital growth?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "Umar believes that 'Growth without Data is just Guesswork'. His approach focuses on building sustainable, secure digital systems that prioritize long-term performance over short-term hacks."
-                                }
-                            },
-                            {
-                                "@type": "Question",
-                                "name": "How can I contact the founder directly?",
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": "For strategic partnerships or high-level inquiries, you can reach out via the Contact page and request a consultation with the executive team. For general support, our 24/7 team is always available."
+                                    "text": "Our specialist team provides Custom Next.js Full-Stack Engineering, Enterprise SEO Retainers, US LLC & UK LTD Corporate Formations, EIN/ITIN Processing, Website Migrations, and Verified Digital Asset Escrow."
                                 }
                             }
                         ]
@@ -84,28 +203,26 @@ export default function AboutPage() {
 
             <div style={{ paddingTop: '80px' }}>
                 <PageHero
-                    breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'About' }]}
-                    label="About"
-                    title="Elevating the digital standard"
-                    description="OfficialUM1 builds high-performance systems and digital assets that drive real growth."
+                    breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'About Us' }]}
+                    label="Official Corporate Profile"
+                    title="Engineered for Scalable Digital Authority"
+                    description="OfficialUM1 LLC delivers high-performance Next.js engineering, data-backed SEO architecture, and global corporate solutions for forward-thinking enterprises."
                 />
             </div>
 
             {/* STATS SECTION */}
-            <section style={{ padding: '50px 0' }}>
+            <section style={{ padding: '40px 0 70px' }}>
                 <div className="container">
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
                         gap: '2rem',
                         background: '#fff',
-                        padding: '4rem 2rem',
+                        padding: '3.5rem 2rem',
                         borderRadius: '32px',
                         border: '1px solid var(--border-subtle)',
-                        boxShadow: '0 18px 44px rgba(24,32,38,0.08)',
-                        backdropFilter: 'blur(10px)'
+                        boxShadow: '0 18px 44px rgba(24,32,38,0.06)',
                     }}>
-                        {/* Market Assets */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -113,13 +230,12 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             style={{ textAlign: 'center' }}
                         >
-                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--accent-blue)', marginBottom: '0.5rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                                 <LiveCount metric="marketAssets" short={true} />
                             </div>
-                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: 0, fontWeight: '700' }}>Market Assets</div>
+                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: '800' }}>Active Digital Assets</div>
                         </motion.div>
 
-                        {/* Active Users */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -127,13 +243,12 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             style={{ textAlign: 'center' }}
                         >
-                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--accent-violet)', marginBottom: '0.5rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                                 <LiveCount metric="activeUsers" short={true} />
                             </div>
-                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: 0, fontWeight: '700' }}>Active Users</div>
+                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: '800' }}>Global Clients Served</div>
                         </motion.div>
 
-                        {/* Orders Fulfilled */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -141,13 +256,12 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             style={{ textAlign: 'center' }}
                         >
-                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: 'var(--accent-blue)', marginBottom: '0.5rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
                                 <LiveCount metric="orders" short={true} />
                             </div>
-                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: 0, fontWeight: '700' }}>Orders Fulfilled</div>
+                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: '800' }}>Orders & Formations</div>
                         </motion.div>
 
-                        {/* Success Rate */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
@@ -155,77 +269,104 @@ export default function AboutPage() {
                             viewport={{ once: true }}
                             style={{ textAlign: 'center' }}
                         >
-                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#ff4444', marginBottom: '0.5rem' }}>99.9%</div>
-                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: 0, fontWeight: '700' }}>Success Rate</div>
+                            <div style={{ fontSize: '3rem', fontWeight: '900', color: '#14845f', marginBottom: '0.5rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>99.9%</div>
+                            <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.05em', fontWeight: '800' }}>Uptime & SLA Guarantee</div>
                         </motion.div>
                     </div>
                 </div>
             </section>
 
-            {/* CORE EXPERTISE */}
-            <section style={{ padding: '100px 0' }}>
+            {/* COMPANY OVERVIEW & LEGAL ENTITY */}
+            <section style={{ padding: '80px 0', background: 'var(--bg-section-alt)' }}>
                 <div className="container">
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem', alignItems: 'center' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '3.5rem', alignItems: 'center' }}>
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                         >
-                            <h2 style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '2rem' }}>We Build, <br /><span style={{ color: '#ff4444' }}>You Grow.</span></h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: '1.8', fontWeight: 500 }}>
-                                Our philosophy is simple: A digital presence shouldn't just exist—it should perform. Whether it's high-authority social assets, custom software, or rank-and-rent SEO, we handle the heavy lifting.
+                            <span style={{ 
+                                display: 'inline-block',
+                                padding: '6px 14px', 
+                                background: 'rgba(20, 108, 120, 0.1)', 
+                                color: 'var(--accent-blue)', 
+                                borderRadius: '20px', 
+                                fontSize: '0.85rem', 
+                                fontWeight: '800',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                marginBottom: '1rem'
+                            }}>
+                                Corporate Entity & Profile
+                            </span>
+                            <h2 style={{ fontSize: '2.75rem', fontWeight: '900', marginBottom: '1.5rem', lineHeight: '1.2', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                A Fully Registered <br /><span style={{ color: 'var(--accent-blue)' }}>US Digital Powerhouse.</span>
+                            </h2>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginBottom: '1.5rem', lineHeight: '1.8', fontWeight: 500 }}>
+                                <strong>OfficialUM1 LLC</strong> is an incorporated technology and digital consulting firm headquartered in Kalispell, Montana, USA, with dedicated development hubs and global operational presence across North America, Europe, and Asia.
                             </p>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                {[
-                                    'Data-Driven Decision Making',
-                                    'High-Performance Next.js Architecture',
-                                    'Secure Asset Escrow & Delivery',
-                                    'Global Support Network'
-                                ].map((item, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(255,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff4444' }}></div>
-                                        </div>
-                                        <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>{item}</span>
-                                    </div>
-                                ))}
+                            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginBottom: '2rem', lineHeight: '1.8', fontWeight: 500 }}>
+                                We eliminate the fragmentation in modern digital growth. Instead of juggling multiple unreliable freelancers, businesses partner with OfficialUM1 to receive end-to-end solutions: from enterprise Next.js engineering and authority SEO campaigns to compliant corporate incorporation and verified digital marketplace assets.
+                            </p>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                                <div style={{ padding: '1.25rem', background: '#fff', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}>
+                                    <div style={{ fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', fontSize: '0.95rem' }}>🇺🇸 Registered Entity</div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>OfficialUM1 LLC, Montana, USA</div>
+                                </div>
+                                <div style={{ padding: '1.25rem', background: '#fff', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}>
+                                    <div style={{ fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', fontSize: '0.95rem' }}>🔒 Escrow Protected</div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>100% Secure Asset Delivery</div>
+                                </div>
+                                <div style={{ padding: '1.25rem', background: '#fff', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}>
+                                    <div style={{ fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', fontSize: '0.95rem' }}>⚡ Speed Optimized</div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Edge Next.js Architecture</div>
+                                </div>
+                                <div style={{ padding: '1.25rem', background: '#fff', borderRadius: '16px', border: '1px solid var(--border-subtle)' }}>
+                                    <div style={{ fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', fontSize: '0.95rem' }}>🌍 Global Coverage</div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>US, UK, UAE & APAC Clients</div>
+                                </div>
                             </div>
                         </motion.div>
 
+                        {/* Corporate Mission Card */}
                         <motion.div
                             initial={{ opacity: 0, x: 30 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="glass"
                             style={{
-                                padding: '3rem',
-                                borderRadius: '40px',
+                                padding: '3.5rem 2.5rem',
+                                borderRadius: '32px',
                                 background: '#fff',
                                 border: '1px solid var(--border-subtle)',
-                                boxShadow: '0 18px 44px rgba(24,32,38,0.08)'
+                                boxShadow: '0 20px 48px rgba(24,32,38,0.08)'
                             }}
                         >
-                            <h3 style={{ fontSize: '1.8rem', marginBottom: '1.5rem' }}>Our Mission</h3>
+                            <h3 style={{ fontSize: '1.8rem', fontWeight: '800', marginBottom: '1.25rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                Our Corporate Mission
+                            </h3>
                             <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', marginBottom: '2rem', fontWeight: 500 }}>
-                                To revolutionize the digital landscape by providing transparent, scalable, and high-performance digital solutions. We believe in building long-term partnerships, not just one-off transactions.
+                                To empower high-growth enterprises and international entrepreneurs with dependable digital infrastructure, transparent data-driven marketing, and seamless global business access without technical or regulatory roadblocks.
                             </p>
-                            <div style={{ padding: '2rem', background: 'var(--bg-section-alt)', borderRadius: '20px', borderLeft: '4px solid #ff4444', position: 'relative', border: '1px solid var(--border-subtle)' }}>
-                                <p style={{ fontStyle: 'italic', color: 'var(--text-primary)', margin: '0 0 1.5rem 0', fontSize: '1.1rem', fontWeight: 600 }}>
-                                    &quot;OfficialUM1 isn&apos;t just an agency; it&apos;s a commitment to excellence. We don&apos;t just reach goals; we redefine them.&quot;
+
+                            <div style={{ padding: '2rem', background: 'var(--bg-section-alt)', borderRadius: '20px', borderLeft: '4px solid var(--accent-blue)', border: '1px solid var(--border-subtle)' }}>
+                                <p style={{ fontStyle: 'italic', color: 'var(--text-primary)', margin: '0 0 1.5rem 0', fontSize: '1.05rem', fontWeight: 600, lineHeight: '1.6' }}>
+                                    &quot;OfficialUM1 isn&apos;t just another digital agency; it is a commitment to uncompromising engineering, transparent deliverables, and long-term value creation.&quot;
                                 </p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     <div style={{
-                                        width: '50px',
-                                        height: '50px',
+                                        width: '52px',
+                                        height: '52px',
                                         borderRadius: '50%',
                                         overflow: 'hidden',
-                                        border: '2px solid #ff4444'
+                                        border: '2px solid var(--accent-blue)',
+                                        flexShrink: 0
                                     }}>
                                         <img src="/founder.jpg" alt="Muhammad Umar Mumtaz" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>Muhammad Umar Mumtaz</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#ff4444' }}>Founder & CEO</div>
+                                        <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '0.95rem' }}>Muhammad Umar Mumtaz</div>
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--accent-blue)', fontWeight: '700' }}>Founder & Chief Executive Officer</div>
                                     </div>
                                 </div>
                             </div>
@@ -234,54 +375,247 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* FOUNDER SECTION */}
-            <section style={{ padding: '100px 0', background: 'var(--bg-section-alt)' }}>
+            {/* CORE PILLARS SECTION */}
+            <section style={{ padding: '100px 0' }}>
                 <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <span style={{ color: 'var(--accent-violet)', textTransform: 'uppercase', letterSpacing: 0, fontSize: '0.9rem', fontWeight: '800' }}>The Visionary</span>
-                        <h2 style={{ fontSize: '3rem', fontWeight: '900', marginTop: '1rem' }}>Meet the Founder</h2>
+                    <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 4rem' }}>
+                        <span style={{ 
+                            display: 'inline-block',
+                            padding: '6px 14px', 
+                            background: 'rgba(196, 71, 45, 0.1)', 
+                            color: 'var(--accent-violet)', 
+                            borderRadius: '20px', 
+                            fontSize: '0.85rem', 
+                            fontWeight: '800',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            marginBottom: '1rem'
+                        }}>
+                            Operational Pillars
+                        </span>
+                        <h2 style={{ fontSize: '2.75rem', fontWeight: '900', fontFamily: 'var(--font-space-grotesk), sans-serif', marginBottom: '1rem' }}>
+                            What Sets OfficialUM1 Apart
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>
+                            We combine deep technical engineering with commercial growth rigor across four synchronized divisions.
+                        </p>
                     </div>
 
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2rem' }}>
+                        {COMPANY_PILLARS.map((pillar, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                style={{
+                                    padding: '2.5rem 2rem',
+                                    borderRadius: '24px',
+                                    background: '#fff',
+                                    border: '1px solid var(--border-subtle)',
+                                    boxShadow: '0 14px 34px rgba(24,32,38,0.06)',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}
+                            >
+                                <div style={{ fontSize: '2.5rem', marginBottom: '1.25rem' }}>{pillar.icon}</div>
+                                <h3 style={{ fontSize: '1.35rem', fontWeight: '800', marginBottom: '0.75rem', color: 'var(--text-primary)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                    {pillar.title}
+                                </h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: '1.7', fontWeight: 500 }}>
+                                    {pillar.description}
+                                </p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* EXECUTIVE LEADERSHIP & CORE TEAM SECTION */}
+            <section id="team" style={{ padding: '100px 0', background: 'var(--bg-section-alt)' }}>
+                <div className="container">
+                    <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 4.5rem' }}>
+                        <span style={{ 
+                            display: 'inline-block',
+                            padding: '6px 14px', 
+                            background: 'rgba(20, 108, 120, 0.1)', 
+                            color: 'var(--accent-blue)', 
+                            borderRadius: '20px', 
+                            fontSize: '0.85rem', 
+                            fontWeight: '800',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            marginBottom: '1rem'
+                        }}>
+                            Executive Leadership & Team
+                        </span>
+                        <h2 style={{ fontSize: '2.75rem', fontWeight: '900', fontFamily: 'var(--font-space-grotesk), sans-serif', marginBottom: '1rem' }}>
+                            The Minds Behind the Engine
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>
+                            Meet our senior architects, search strategists, corporate formation directors, and security specialists.
+                        </p>
+                    </div>
+
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                        gap: '2.5rem' 
+                    }}>
+                        {TEAM_MEMBERS.map((member, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                style={{
+                                    background: '#fff',
+                                    borderRadius: '28px',
+                                    border: '1px solid var(--border-subtle)',
+                                    boxShadow: '0 18px 44px rgba(24,32,38,0.06)',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                                }}
+                            >
+                                <div style={{ padding: '2rem 2rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                    <div style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        borderRadius: '20px',
+                                        overflow: 'hidden',
+                                        flexShrink: 0,
+                                        border: '2px solid var(--border-subtle)',
+                                        boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
+                                    }}>
+                                        <img 
+                                            src={member.image} 
+                                            alt={member.name}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <span style={{ 
+                                            display: 'inline-block',
+                                            padding: '4px 10px', 
+                                            background: 'var(--bg-section-alt)', 
+                                            color: 'var(--accent-blue)', 
+                                            borderRadius: '12px', 
+                                            fontSize: '0.75rem', 
+                                            fontWeight: '700',
+                                            marginBottom: '6px'
+                                        }}>
+                                            {member.tag}
+                                        </span>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)', margin: 0, fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                            {member.name}
+                                        </h3>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--accent-violet)', fontWeight: '700', marginTop: '2px' }}>
+                                            {member.role}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ padding: '0 2rem 1.5rem', flexGrow: 1 }}>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.6', fontWeight: 500, marginBottom: '1.25rem' }}>
+                                        {member.bio}
+                                    </p>
+                                    
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {member.specialties.map((spec, sIdx) => (
+                                            <span 
+                                                key={sIdx}
+                                                style={{
+                                                    padding: '4px 10px',
+                                                    background: 'var(--bg-section-alt)',
+                                                    color: 'var(--text-primary)',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: '600'
+                                                }}
+                                            >
+                                                {spec}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div style={{ 
+                                    padding: '1rem 2rem', 
+                                    borderTop: '1px solid var(--border-subtle)', 
+                                    background: 'var(--bg-section-alt)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                                        OfficialUM1 LLC Specialist
+                                    </span>
+                                    <a 
+                                        href={`mailto:${member.social.email}`} 
+                                        style={{ fontSize: '0.8rem', color: 'var(--accent-blue)', fontWeight: '700', textDecoration: 'none' }}
+                                    >
+                                        Direct Contact →
+                                    </a>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FOUNDER SPOTLIGHT SECTION */}
+            <section style={{ padding: '100px 0' }}>
+                <div className="container">
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
                         gap: '4rem',
                         alignItems: 'center',
-                        maxWidth: '1000px',
+                        maxWidth: '1050px',
                         margin: '0 auto'
                     }}>
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             style={{ position: 'relative' }}
                         >
                             <div style={{
-                                padding: '40px',
+                                padding: '40px 30px',
                                 background: '#fff',
-                                borderRadius: '30px',
+                                borderRadius: '32px',
                                 border: '1px solid var(--border-subtle)',
                                 textAlign: 'center',
-                                boxShadow: '0 18px 44px rgba(24,32,38,0.08)'
+                                boxShadow: '0 20px 48px rgba(24,32,38,0.08)'
                             }}>
                                 <div style={{
-                                    width: '150px',
-                                    height: '150px',
+                                    width: '160px',
+                                    height: '160px',
                                     borderRadius: '50%',
                                     margin: '0 auto 20px',
                                     overflow: 'hidden',
-                                    border: '2px solid #ff4444',
-                                    boxShadow: '0 10px 30px rgba(255, 68, 68, 0.2)'
+                                    border: '3px solid var(--accent-blue)',
+                                    boxShadow: '0 12px 32px rgba(20, 108, 120, 0.2)'
                                 }}>
                                     <img
                                         src="/founder.jpg"
-                                        alt="Muhammad Umar Mumtaz"
+                                        alt="Muhammad Umar Mumtaz - Founder & CEO of OfficialUM1"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                 </div>
-                                <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>Muhammad Umar Mumtaz</h3>
-                                <p style={{ color: '#ff4444', marginBottom: '20px' }}>Founder & Lead Strategist</p>
-                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 500 }}>&quot;Innovation is the ability to see change as an opportunity, not a threat.&quot;</p>
+                                <h3 style={{ fontSize: '1.8rem', fontWeight: '800', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                    Muhammad Umar Mumtaz
+                                </h3>
+                                <p style={{ color: 'var(--accent-blue)', fontWeight: '700', marginBottom: '16px' }}>
+                                    Founder & Principal Systems Architect
+                                </p>
+                                <p style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 500, fontSize: '0.95rem', lineHeight: '1.6' }}>
+                                    &quot;Growth without measurable data and high-performance architecture is just guesswork. We build systems that win.&quot;
+                                </p>
                             </div>
                         </motion.div>
 
@@ -290,22 +624,38 @@ export default function AboutPage() {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                         >
-                            <h3 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>From Sahiwal to Global <span style={{ color: '#ff4444' }}>Influence</span></h3>
+                            <span style={{ 
+                                display: 'inline-block',
+                                padding: '6px 14px', 
+                                background: 'rgba(196, 71, 45, 0.1)', 
+                                color: 'var(--accent-violet)', 
+                                borderRadius: '20px', 
+                                fontSize: '0.85rem', 
+                                fontWeight: '800',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                marginBottom: '1rem'
+                            }}>
+                                Founder&apos;s Journey
+                            </span>
+                            <h3 style={{ fontSize: '2.25rem', fontWeight: '900', marginBottom: '1.5rem', fontFamily: 'var(--font-space-grotesk), sans-serif', lineHeight: '1.3' }}>
+                                From Technical Roots to a <span style={{ color: 'var(--accent-blue)' }}>Global Enterprise Footprint</span>
+                            </h3>
                             <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', marginBottom: '1.5rem', fontWeight: 500 }}>
-                                Muhammad Umar Mumtaz started OfficialUM1 with a singular vision: to bridge the gap between complex digital technologies and accessible business growth. What began in Sahiwal, Pakistan, has now expanded into a global network serving thousands of clients.
+                                Muhammad Umar Mumtaz founded OfficialUM1 with a core vision: bridging the gap between sophisticated web technologies and real, scalable business revenue. 
                             </p>
                             <p style={{ color: 'var(--text-muted)', lineHeight: '1.8', marginBottom: '2rem', fontWeight: 500 }}>
-                                With deep expertise in SEO, full-stack development, and digital asset management, Umar leads the team with a focus on data-driven results and transparent functionality.
+                                What began as an independent technical SEO and software consulting practice has evolved into **OfficialUM1 LLC**—an international digital powerhouse serving startups, venture-backed companies, and high-ticket clients across North America, the UK, the Middle East, and Asia.
                             </p>
-                            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                                {['Visionary Leadership', 'Tech Innovator', 'Global Strategist'].map((tag, i) => (
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                {['Systems Architecture', 'Next.js 15 Specialist', 'Global Formations Lead', 'SEO Algorithmic Modeling'].map((tag, i) => (
                                     <span key={i} style={{
                                         padding: '8px 16px',
-                                        background: 'rgba(255, 68, 68, 0.1)',
-                                        color: '#ff4444',
+                                        background: 'rgba(20, 108, 120, 0.1)',
+                                        color: 'var(--accent-blue)',
                                         borderRadius: '20px',
                                         fontSize: '0.85rem',
-                                        fontWeight: '600'
+                                        fontWeight: '700'
                                     }}>
                                         {tag}
                                     </span>
@@ -316,39 +666,53 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            {/* FOUNDER FAQ */}
-            <section style={{ padding: '100px 0' }}>
+            {/* COMPANY FAQ */}
+            <section style={{ padding: '100px 0', background: 'var(--bg-section-alt)' }}>
                 <div className="container" style={{ maxWidth: '900px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900' }}>Founder <span style={{ color: '#ff4444' }}>FAQ</span></h2>
-                        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Common questions about our leadership and vision.</p>
+                        <span style={{ 
+                            display: 'inline-block',
+                            padding: '6px 14px', 
+                            background: 'rgba(20, 108, 120, 0.1)', 
+                            color: 'var(--accent-blue)', 
+                            borderRadius: '20px', 
+                            fontSize: '0.85rem', 
+                            fontWeight: '800',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            marginBottom: '1rem'
+                        }}>
+                            Transparency & Trust
+                        </span>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: '900', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                            Frequently Asked Questions
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>
+                            Clear answers about our entity, leadership, and operational protocols.
+                        </p>
                     </div>
 
                     <div style={{ display: 'grid', gap: '1.5rem' }}>
                         {[
                             {
-                                q: "Who is Muhammad Umar Mumtaz?",
-                                a: "Muhammad Umar Mumtaz is the founder and CEO of OfficialUM1. He is a digital entrepreneur specializing in high-performance web architecture, SEO strategy, and digital asset valuation. With over 5 years of experience in the digital marketing industry, he has helped hundreds of businesses scale their online presence."
+                                q: "What is OfficialUM1 LLC?",
+                                a: "OfficialUM1 LLC is a full-service digital engineering, organic search strategy, and corporate services firm registered in Montana, United States. We serve global clients with custom software development, Next.js migrations, SEO retainers, US/UK corporate formations, and verified digital marketplace assets."
                             },
                             {
-                                q: "What is the vision behind OfficialUM1?",
-                                a: "Umar founded OfficialUM1 to create a 'One-Stop' digital ecosystem where businesses could not only build their presence but actively grow it through verified assets and data-driven marketing. The goal is to provide transparency and results in an often opaque industry."
+                                q: "Is OfficialUM1 LLC an officially registered US company?",
+                                a: "Yes. OfficialUM1 LLC is registered with the Montana Secretary of State (Kalispell, MT) and maintains full federal and state compliance, including active IRS EIN status, registered agent facilities, and FinCEN BOI filings."
                             },
                             {
-                                q: "What role does Umar play in daily operations?",
-                                a: "As the lead strategist, Umar personally oversees all major high-ticket projects and sets the technical direction for the development team. He is deeply involved in identifying new market trends and ensuring that the quality of assets delivered meets the 'OfficialUM1' standard."
+                                q: "Who leads the development and strategy team at OfficialUM1?",
+                                a: "Operations are personally led by Founder & CEO Muhammad Umar Mumtaz alongside specialist department leads in full-stack Next.js engineering, technical SEO auditing, corporate compliance, and digital asset security."
                             },
                             {
-                                q: "How did OfficialUM1 start?",
-                                a: "The agency started as a small SEO consultancy in Sahiwal. Recognizing the need for a more comprehensive approach to digital growth, Umar expanded the service list to include full-stack development and digital asset management, eventually leading to the global network that exists today."
+                                q: "How can enterprise clients start a project or retain services?",
+                                a: "You can book an executive consultation directly through our Contact page or explore our packaged SEO packages, migration blueprints, and corporate formation tiers across the website."
                             },
                             {
-                                q: "What is Umar's philosophy on digital growth?",
-                                a: "Umar believes that 'Growth without Data is just Guesswork'. His approach focuses on building sustainable, secure digital systems that prioritize long-term performance over short-term hacks."
-                            },
-                            {
-                                q: "How can I contact the founder directly?",
-                                a: "For strategic partnerships or high-level inquiries, you can reach out via the Contact page and request a consultation with the executive team. For general support, our 24/7 team is always available."
+                                q: "What security measures protect client transactions and data?",
+                                a: "All transactions are secured with 256-bit SSL encryption, strict mutual non-disclosure agreements (NDAs), verified ownership escrow transfers, and 24/7 client SLA coverage."
                             }
                         ].map((faq, i) => (
                             <motion.div
@@ -357,11 +721,20 @@ export default function AboutPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: i * 0.1 }}
-                                className="glass"
-                                style={{ padding: '2rem', borderRadius: '20px', border: '1px solid var(--border-subtle)', background: '#fff', boxShadow: '0 14px 34px rgba(24,32,38,0.08)' }}
+                                style={{ 
+                                    padding: '2rem', 
+                                    borderRadius: '20px', 
+                                    border: '1px solid var(--border-subtle)', 
+                                    background: '#fff', 
+                                    boxShadow: '0 14px 34px rgba(24,32,38,0.05)' 
+                                }}
                             >
-                                <h4 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '10px' }}>{faq.q}</h4>
-                                <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', fontWeight: 500 }}>{faq.a}</p>
+                                <h4 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '10px', color: 'var(--text-primary)', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                                    {faq.q}
+                                </h4>
+                                <p style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontWeight: 500, margin: 0 }}>
+                                    {faq.a}
+                                </p>
                             </motion.div>
                         ))}
                     </div>
@@ -369,26 +742,42 @@ export default function AboutPage() {
             </section>
 
             {/* CALL TO ACTION */}
-            <section style={{ padding: '100px 0 150px' }}>
+            <section style={{ padding: '100px 0 140px' }}>
                 <div className="container">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         style={{
-                            padding: '6rem 2rem',
+                            padding: '5.5rem 2.5rem',
                             textAlign: 'center',
-                            borderRadius: '40px',
+                            borderRadius: '36px',
                             background: '#fff',
                             border: '1px solid var(--border-subtle)',
-                            boxShadow: '0 18px 44px rgba(24,32,38,0.08)'
+                            boxShadow: '0 20px 50px rgba(24,32,38,0.08)'
                         }}
                     >
-                        <h2 style={{ fontSize: '3.5rem', fontWeight: '900', marginBottom: '1.5rem' }}>Ready to Scale?</h2>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', marginBottom: '3rem', fontWeight: 500 }}>Join thousands of businesses who trust OfficialUM1 with their digital growth.</p>
-                        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                            <a href="/shop" className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px' }}>Explore Shop</a>
-                            <a href="/contact" className="btn btn-outline" style={{ padding: '1rem 3rem', fontSize: '1.1rem', borderRadius: '50px' }}>Contact Specialist</a>
+                        <h2 style={{ fontSize: '3.25rem', fontWeight: '900', marginBottom: '1.25rem', fontFamily: 'var(--font-space-grotesk), sans-serif' }}>
+                            Ready to Build Your Digital Advantage?
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.15rem', marginBottom: '2.5rem', fontWeight: 500, maxWidth: '650px', margin: '0 auto 2.5rem' }}>
+                            Partner with OfficialUM1 LLC for high-performance web engineering, data-backed SEO growth, and global corporate formations.
+                        </p>
+                        <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            <Link 
+                                href={urls.mainUrl('/services')} 
+                                className="btn btn-primary" 
+                                style={{ padding: '1rem 2.5rem', fontSize: '1.05rem', borderRadius: '50px', fontWeight: '700' }}
+                            >
+                                Explore Agency Services
+                            </Link>
+                            <Link 
+                                href={urls.mainUrl('/contact')} 
+                                className="btn btn-outline" 
+                                style={{ padding: '1rem 2.5rem', fontSize: '1.05rem', borderRadius: '50px', fontWeight: '700' }}
+                            >
+                                Schedule Consultation
+                            </Link>
                         </div>
                     </motion.div>
                 </div>
@@ -398,13 +787,8 @@ export default function AboutPage() {
             <style jsx>{`
                 @media (max-width: 768px) {
                     .container { padding: 0 20px !important; }
-                    section { padding: 80px 0 !important; }
-                    h1 { font-size: 2.5rem !important; }
+                    section { padding: 60px 0 !important; }
                     h2 { font-size: 2rem !important; }
-                    .glass { padding: 1.5rem !important; }
-                    div[style*="flex-wrap: wrap"] { gap: 1rem !important; }
-                    h2 { font-size: 1.8rem !important; }
-                    p { font-size: 1rem !important; }
                 }
             `}</style>
         </main>
