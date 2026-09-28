@@ -78,7 +78,7 @@ const packages = [
       "Custom Next.js 14 App Router build",
       "Headless WordPress / CMS sync",
       "100% SEO & URL redirection mapping",
-      "Sub-1s guaranteed load time",
+      "Sub-500ms guaranteed global edge speed",
       "Global Edge CDN deployment",
       "30 days post-launch support",
     ],

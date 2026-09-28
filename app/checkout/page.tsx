@@ -21,7 +21,7 @@ function CheckoutContent() {
     const [product, setProduct] = useState<any>(null);
     const [user, setUser] = useState<any>(null);
     const [email, setEmail] = useState(''); // Guest Email
-    const [paymentMethod, setPaymentMethod] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('cryptomus');
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Promo Code State
@@ -309,90 +309,90 @@ function CheckoutContent() {
                             Payment Method
                         </h3>
 
-                        {isCartMode && (
-                            <div style={{ marginBottom: '1.5rem', background: 'rgba(255,170,0,0.1)', border: '1px solid rgba(255,170,0,0.2)', padding: '1rem', borderRadius: '12px', display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
-                                <span style={{ fontSize: '1.2rem' }}>⚠️</span>
-                                <span style={{ color: '#d97706', fontSize: '0.9rem' }}>Bulk Checkout is currently available via <b>Wallet Balance</b> only.</span>
-                            </div>
-                        )}
-
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                             {gateways.binance === true && (
                                 <button
+                                    type="button"
                                     onClick={() => setPaymentMethod('binance')}
-                                    disabled={isCartMode}
                                     style={{
                                         position: 'relative',
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         border: paymentMethod === 'binance' ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                                        background: paymentMethod === 'binance' ? 'rgba(20, 108, 120, 0.05)' : 'var(--bg-base)',
+                                        background: paymentMethod === 'binance' ? 'rgba(20, 108, 120, 0.08)' : 'var(--bg-base)',
                                         color: 'var(--text-primary)',
-                                        cursor: isCartMode ? 'not-allowed' : 'pointer',
-                                        opacity: isCartMode ? 0.3 : 1,
+                                        cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         textAlign: 'center'
                                     }}
                                 >
                                     <div style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>🔸</div>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Binance Pay</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Binance Pay</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Instant Zero-Fee</div>
                                 </button>
                             )}
 
                             {gateways.crypto === true && (
                                 <button
+                                    type="button"
                                     onClick={() => setPaymentMethod('cryptomus')}
-                                    disabled={isCartMode}
                                     style={{
                                         position: 'relative',
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         border: paymentMethod === 'cryptomus' ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                                        background: paymentMethod === 'cryptomus' ? 'rgba(20, 108, 120, 0.05)' : 'var(--bg-base)',
+                                        background: paymentMethod === 'cryptomus' ? 'rgba(20, 108, 120, 0.08)' : 'var(--bg-base)',
                                         color: 'var(--text-primary)',
-                                        cursor: isCartMode ? 'not-allowed' : 'pointer',
-                                        opacity: isCartMode ? 0.3 : 1,
+                                        cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         textAlign: 'center'
                                     }}
                                 >
                                     <div style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>₿</div>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Crypto</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Crypto (Cryptomus)</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>USDT, BTC, ETH, LTC</div>
                                 </button>
                             )}
 
                             {gateways.stripe === true && (
                                 <button
+                                    type="button"
                                     onClick={() => setPaymentMethod('stripe')}
-                                    disabled={isCartMode}
                                     style={{
                                         position: 'relative',
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         border: paymentMethod === 'stripe' ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                                        background: paymentMethod === 'stripe' ? 'rgba(20, 108, 120, 0.05)' : 'var(--bg-base)',
+                                        background: paymentMethod === 'stripe' ? 'rgba(20, 108, 120, 0.08)' : 'var(--bg-base)',
                                         color: 'var(--text-primary)',
-                                        cursor: isCartMode ? 'not-allowed' : 'pointer',
-                                        opacity: isCartMode ? 0.3 : 1,
+                                        cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         textAlign: 'center'
                                     }}
                                 >
                                     <div style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>💳</div>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Credit Card</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Credit / Debit Card</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>Visa, MC, Amex (Stripe)</div>
                                 </button>
                             )}
 
                             {gateways.wallet !== false && (
                                 <button
+                                    type="button"
                                     key={'wallet'}
-                                    onClick={() => setPaymentMethod('wallet')}
+                                    onClick={() => {
+                                        if (!user) {
+                                            alert('Please log in to your account to pay using your Wallet Balance. For guest checkout, please select Crypto, Binance Pay, or Credit Card.');
+                                        } else {
+                                            setPaymentMethod('wallet');
+                                        }
+                                    }}
                                     style={{
                                         position: 'relative',
                                         padding: '1.5rem',
                                         borderRadius: '16px',
                                         border: paymentMethod === 'wallet' ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
-                                        background: paymentMethod === 'wallet' ? 'rgba(20, 108, 120, 0.05)' : 'var(--bg-base)',
+                                        background: paymentMethod === 'wallet' ? 'rgba(20, 108, 120, 0.08)' : 'var(--bg-base)',
                                         color: 'var(--text-primary)',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
@@ -400,7 +400,10 @@ function CheckoutContent() {
                                     }}
                                 >
                                     <div style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>💼</div>
-                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Wallet</div>
+                                    <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Wallet Balance</div>
+                                    <div style={{ fontSize: '0.75rem', color: user ? 'var(--success)' : 'var(--text-muted)', marginTop: '4px' }}>
+                                        {user ? `Balance: $${user.wallet || '0.00'}` : 'Login Required'}
+                                    </div>
                                 </button>
                             )}
                         </div>
@@ -520,8 +523,28 @@ function CheckoutContent() {
                         >
                             {isProcessing ? 'Processing Transaction...' : 'Complete Secure Payment'}
                         </button>
-                        <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                            <span>🔒</span> 256-Bit SSL Encrypted Payment
+                        {/* Trust & Guarantee Badges */}
+                        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1rem', background: 'var(--bg-base)', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', color: 'var(--text-primary)', fontWeight: 600 }}>
+                                <span>🛡️</span> 30-Day Money-Back Guarantee
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                <span>⚡</span> Instant Delivery & SLA Order Tracking
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                <span>🔒</span> 256-Bit SSL Encrypted Gateway Checkout
+                            </div>
+                        </div>
+
+                        {/* Policy Links */}
+                        <div style={{ textAlign: 'center', marginTop: '1.2rem', fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                            <Link href="/refund" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Refund Policy</Link>
+                            <span>•</span>
+                            <Link href="/terms" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Terms of Service</Link>
+                            <span>•</span>
+                            <Link href="/privacy" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Privacy Policy</Link>
+                            <span>•</span>
+                            <Link href="/contact" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>24/7 Support</Link>
                         </div>
                     </div>
                 </div>

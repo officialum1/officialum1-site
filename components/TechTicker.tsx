@@ -49,63 +49,18 @@ export default function TechTicker() {
                         }}
                     />
 
-                    <div className="ticker-track">
-                        <div className="ticker-inner">
+                    <div className="tech-ticker-track" style={{ whiteSpace: 'nowrap', overflow: 'hidden', width: '100%' }}>
+                        <div className="tech-ticker-inner" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', whiteSpace: 'nowrap', width: 'max-content' }}>
                             {loop.map((item, index) => (
-                                <div key={`${item}-${index}`} className="ticker-pill">
-                                    <span className="ticker-dot" />
-                                    <span>{item}</span>
+                                <div key={`${item}-${index}`} className="tech-ticker-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', flexShrink: 0, padding: '0.35rem 1.25rem' }}>
+                                    <span className="tech-ticker-dot" style={{ width: '6px', height: '6px', borderRadius: '999px', background: '#146c78', flexShrink: 0 }} />
+                                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{item}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                .ticker-track {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    width: 100%;
-                }
-                .ticker-inner {
-                    display: inline-flex;
-                    align-items: center;
-                    animation: ticker-scroll 35s linear infinite;
-                    will-change: transform;
-                }
-                .ticker-pill {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    color: var(--text-primary);
-                    font-size: 0.85rem;
-                    font-weight: 700;
-                    padding: 0.35rem 1.25rem;
-                    white-space: nowrap;
-                }
-                .ticker-dot {
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 999px;
-                    background: #146c78;
-                    box-shadow: 0 0 10px rgba(20, 108, 120, 0.6);
-                    flex-shrink: 0;
-                }
-                @keyframes ticker-scroll {
-                    0% {
-                        transform: translateX(0);
-                    }
-                    100% {
-                        transform: translateX(-33.333%);
-                    }
-                }
-                @media (prefers-reduced-motion: reduce) {
-                    .ticker-inner {
-                        animation-duration: 0s;
-                    }
-                }
-            `}</style>
         </section>
     );
 }

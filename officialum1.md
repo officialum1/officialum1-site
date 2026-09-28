@@ -334,7 +334,31 @@ git commit -m "feat: description of update"
 git push origin main
 ```
 
-## 11. Related Operational & Formation Handbooks
+## 11. Multi-Domain & Subdomain Architecture (`shop.officialum1.com`)
+
+The OfficialUM1 ecosystem utilizes smart domain isolation to distinguish high-ticket agency services from instant digital asset transactions:
+
+1. **Main Domain (`https://officialum1.com`)**:
+   * Pure B2B Agency & Enterprise Engineering Portal.
+   * Highlights: Custom WordPress, Next.js 15, Enterprise SEO, US LLC & UK LTD Corporate Formations.
+2. **Shop Subdomain (`https://shop.officialum1.com`)**:
+   * Dedicated Digital Asset & Verified Account Marketplace.
+   * Routed dynamically in single codebase via `middleware.ts` (`request.headers.get('host')`).
+   * Backed by Cloudflare CNAME record (`shop` -> `officialum1.com`, proxied).
+   * Shares unified MySQL database, user accounts, and Admin ERP backend (`/admin`).
+
+---
+
+## 12. Checkout & Payment Gateway Architecture
+
+* **Universal Bulk & Single Checkout (`app/checkout/page.tsx`)**:
+  * Supports Binance Pay, Cryptomus (USDT/BTC/ETH/LTC), Stripe (Credit/Debit Cards), and Account Wallet.
+  * Guest checkout fully enabled across all payment gateways.
+  * 30-Day Money-Back Guarantee, SLA order tracking, and direct legal links (`/refund`, `/terms`, `/privacy`) attached to summary cards.
+
+---
+
+## 13. Related Operational & Formation Handbooks
 
 - **US LLC Formation & Corporate Tools API Guide**: [`BUSINESS_FORMATION_DOCS.md`](file:///c:/Users/Abc/Desktop/officialum1/BUSINESS_FORMATION_DOCS.md)
 - **UK LTD Formation & Companies House Credit Account Guide**: [`UK_FORMATION_DOCS.md`](file:///c:/Users/Abc/Desktop/officialum1/UK_FORMATION_DOCS.md)

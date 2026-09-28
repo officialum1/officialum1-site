@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { MessageSquare, Send, HelpCircle, CheckCircle2, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
+import { PageHero } from '@/components/ui/PageHero';
 
 export default function SupportPage() {
-    const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [tickets, setTickets] = useState<any[]>([]);
+    const [email, setEmail] = useState('');
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [attachment, setAttachment] = useState('');
@@ -18,10 +20,14 @@ export default function SupportPage() {
 
     useEffect(() => {
         const stored = localStorage.getItem('buyer_user');
-        if (!stored) { router.push('/login'); return; }
-        const u = JSON.parse(stored);
-        setUser(u);
-        fetchTickets(u.id);
+        if (stored) {
+            try {
+                const u = JSON.parse(stored);
+                setUser(u);
+                setEmail(u.email || '');
+                fetchTickets(u.id);
+            } catch { }
+        }
     }, []);
 
     const fetchTickets = async (userId: string) => {
@@ -38,12 +44,22 @@ export default function SupportPage() {
             await fetch('/api/tickets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, email: user.email, subject, message, attachment })
+                body: JSON.stringify({
+                    userId: user ? user.id : 'guest',
+                    email: user ? user.email : email,
+                    subject,
+                    message,
+                    attachment
+                })
             });
-            setSubject(''); setMessage(''); setAttachment('');
-            fetchTickets(user.id);
-            alert('Ticket Created');
-        } catch { alert('Failed to create ticket'); }
+            setSubject('');
+            setMessage('');
+            setAttachment('');
+            if (user) fetchTickets(user.id);
+            alert('Your support ticket has been submitted successfully. We will reply via email shortly.');
+        } catch {
+            alert('Failed to create ticket. Please contact hello@officialum1.com');
+        }
         setIsSubmitting(false);
     };
 
@@ -56,86 +72,211 @@ export default function SupportPage() {
                 body: JSON.stringify({ action: 'reply', ticketId, message: replyMsg, sender: 'user' })
             });
             setReplyMsg('');
-            fetchTickets(user.id);
-        } catch { alert('Failed to send reply'); }
+            if (user) fetchTickets(user.id);
+        } catch {
+            alert('Failed to send reply');
+        }
     };
 
-    if (!user) return null;
-
     return (
-        <main>
+        <main style={{ minHeight: '100vh', background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
             <Navbar />
-            <div className="container" style={{ paddingTop: '150px', paddingBottom: '100px', minHeight: '80vh' }}>
-                <h1 style={{ fontFamily: 'var(--font-outfit)', fontSize: '3rem', marginBottom: '1rem' }}>Support Center</h1>
-                <p style={{ color: '#aaa', marginBottom: '3rem' }}>Need help? Create a ticket and we'll get back to you efficiently.</p>
+            
+            <div style={{ paddingTop: '80px' }}>
+                <PageHero
+                    breadcrumbs={[
+                        { label: "Home", href: "/" },
+                        { label: "Support Desk" }
+                    ]}
+                    label="24/7 Client Assistance"
+                    title={<>OfficialUM1 <span style={{ color: "var(--accent-blue)" }}>Priority Support</span> Center</>}
+                    description="Submit technical tickets, inquire about delivery updates, or request assistance with payment and custom development services."
+                    right={
+                        <Link
+                            href="/faq"
+                            className="inline-flex items-center gap-2 rounded-xl px-6 py-4 text-sm font-black text-white"
+                            style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
+                        >
+                            <HelpCircle className="h-4 w-4" /> Browse FAQ
+                        </Link>
+                    }
+                />
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
+                <section className="py-20 sm:py-28" style={{ background: "var(--bg-base)" }}>
+                    <div className="container mx-auto px-4 max-w-6xl">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-                    {/* Create Ticket */}
-                    <div>
-                        <div className="glass" style={{ padding: '2rem', borderRadius: '24px' }}>
-                            <h2 style={{ marginBottom: '1.5rem' }}>Create New Ticket</h2>
-                            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <input placeholder="Subject" value={subject} onChange={e => setSubject(e.target.value)} className="input-field" required />
-                                <textarea placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} className="input-field" style={{ height: '150px' }} required />
-                                <input placeholder="Attachment URL (Screenshot/Discord link - Optional)" value={attachment} onChange={e => setAttachment(e.target.value)} className="input-field" />
-                                <button type="submit" disabled={isSubmitting} className="btn btn-primary">{isSubmitting ? 'Sending...' : 'Submit Ticket'}</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    {/* My Tickets */}
-                    <div>
-                        <h2 style={{ marginBottom: '1.5rem' }}>My Tickets</h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {tickets.length === 0 && <p style={{ color: '#666' }}>No tickets yet.</p>}
-                            {tickets.map(t => (
-                                <div key={t.id} className="glass" style={{ padding: '1.5rem', borderRadius: '16px', borderLeft: t.status === 'open' ? '4px solid #00ff88' : '4px solid #555' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', cursor: 'pointer' }} onClick={() => setActiveTicket(activeTicket === t.id ? null : t.id)}>
-                                        <h4 style={{ color: '#fff' }}>{t.subject}</h4>
-                                        <span style={{ fontSize: '0.8rem', color: t.status === 'open' ? '#00ff88' : '#888' }}>{t.status.toUpperCase()}</span>
+                            {/* Create Ticket */}
+                            <div
+                                className="rounded-3xl border p-8 sm:p-10"
+                                style={{
+                                    background: "#ffffff",
+                                    borderColor: "var(--border-subtle)",
+                                    boxShadow: "0 12px 30px rgba(24,32,38,0.06)"
+                                }}
+                            >
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                                        <MessageSquare className="h-5 w-5" />
                                     </div>
+                                    <h2 className="text-xl font-black text-gray-900" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                                        Create New Support Ticket
+                                    </h2>
+                                </div>
 
-                                    {activeTicket === t.id && (
-                                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', color: '#ccc', marginBottom: '1rem' }}>
-                                                {t.message}
-                                            </div>
-
-                                            {t.attachment && (
-                                                <div style={{ marginBottom: '1rem' }}>
-                                                    <a href={t.attachment} target="_blank" rel="noopener noreferrer" style={{ color: '#00ff88', fontSize: '0.8rem', textDecoration: 'underline' }}>
-                                                        📎 View Attachment
-                                                    </a>
-                                                </div>
-                                            )}
-
-                                            {/* Replies */}
-                                            {t.replies && t.replies.map((r: any, i: number) => (
-                                                <div key={i} style={{ marginBottom: '0.5rem', textAlign: r.sender === 'user' ? 'right' : 'left' }}>
-                                                    <span style={{ fontSize: '0.8rem', color: '#666' }}>{r.sender === 'user' ? 'You' : 'Admin'}</span>
-                                                    <div style={{ background: r.sender === 'user' ? '#06b6d4' : '#333', color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', display: 'inline-block', maxWidth: '80%' }}>
-                                                        {r.message}
-                                                    </div>
-                                                </div>
-                                            ))}
-
-                                            {/* Reply Box */}
-                                            {t.status === 'open' && (
-                                                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                    <input placeholder="Reply..." value={replyMsg} onChange={e => setReplyMsg(e.target.value)} className="input-field" style={{ flex: 1 }} />
-                                                    <button onClick={() => handleReply(t.id)} className="btn btn-outline">Send</button>
-                                                </div>
-                                            )}
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    {!user && (
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1.5">Your Email Address</label>
+                                            <input
+                                                type="email"
+                                                placeholder="name@company.com"
+                                                value={email}
+                                                onChange={e => setEmail(e.target.value)}
+                                                className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                style={{ borderColor: "var(--border-subtle)", background: "var(--bg-base)" }}
+                                                required
+                                            />
                                         </div>
                                     )}
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1.5">Subject</label>
+                                        <input
+                                            placeholder="Order inquiry, technical fix, or general question..."
+                                            value={subject}
+                                            onChange={e => setSubject(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            style={{ borderColor: "var(--border-subtle)", background: "var(--bg-base)" }}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1.5">Detailed Message</label>
+                                        <textarea
+                                            placeholder="Please provide details regarding your query or order ID..."
+                                            value={message}
+                                            onChange={e => setMessage(e.target.value)}
+                                            rows={5}
+                                            className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            style={{ borderColor: "var(--border-subtle)", background: "var(--bg-base)" }}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-700 mb-1.5">Attachment URL (Optional)</label>
+                                        <input
+                                            placeholder="https://imgur.com/... or Google Drive link"
+                                            value={attachment}
+                                            onChange={e => setAttachment(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            style={{ borderColor: "var(--border-subtle)", background: "var(--bg-base)" }}
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full py-4 rounded-xl text-sm font-extrabold text-white shadow-md transition-all flex items-center justify-center gap-2"
+                                        style={{ background: "var(--gradient)", boxShadow: "var(--glow-blue)" }}
+                                    >
+                                        <Send className="h-4 w-4" /> {isSubmitting ? 'Submitting Ticket...' : 'Submit Priority Ticket'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Ticket History / Contact Options */}
+                            <div className="space-y-6">
+                                {user && (
+                                    <div
+                                        className="rounded-3xl border p-8"
+                                        style={{
+                                            background: "#ffffff",
+                                            borderColor: "var(--border-subtle)",
+                                            boxShadow: "0 12px 30px rgba(24,32,38,0.06)"
+                                        }}
+                                    >
+                                        <h2 className="text-xl font-black text-gray-900 mb-4" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                                            My Active Tickets
+                                        </h2>
+
+                                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                                            {tickets.length === 0 && (
+                                                <p className="text-xs text-gray-400 py-4 text-center">No active tickets found.</p>
+                                            )}
+                                            {tickets.map(t => (
+                                                <div
+                                                    key={t.id}
+                                                    className="p-4 rounded-2xl border transition-all cursor-pointer"
+                                                    style={{
+                                                        background: "var(--bg-base)",
+                                                        borderColor: t.status === 'open' ? "var(--primary)" : "var(--border-subtle)"
+                                                    }}
+                                                    onClick={() => setActiveTicket(activeTicket === t.id ? null : t.id)}
+                                                >
+                                                    <div className="flex justify-between items-center">
+                                                        <h4 className="text-sm font-bold text-gray-900">{t.subject}</h4>
+                                                        <span className={`text-xs px-2 py-0.5 rounded font-extrabold ${t.status === 'open' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-200 text-gray-700'}`}>
+                                                            {t.status.toUpperCase()}
+                                                        </span>
+                                                    </div>
+
+                                                    {activeTicket === t.id && (
+                                                        <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">
+                                                            <p className="mb-2">{t.message}</p>
+                                                            {t.attachment && (
+                                                                <a href={t.attachment} target="_blank" rel="noopener noreferrer" className="text-primary font-bold underline">
+                                                                    📎 View Attachment
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Direct Contact Card */}
+                                <div
+                                    className="rounded-3xl border p-8"
+                                    style={{
+                                        background: "#ffffff",
+                                        borderColor: "var(--border-subtle)",
+                                        boxShadow: "0 12px 30px rgba(24,32,38,0.06)"
+                                    }}
+                                >
+                                    <h3 className="text-lg font-black text-gray-900 mb-4" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+                                        Direct Communication Channels
+                                    </h3>
+                                    <div className="space-y-4 text-xs text-gray-600">
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <Mail className="h-5 w-5 text-primary" />
+                                            <div>
+                                                <div className="font-bold text-gray-900">Email Desk</div>
+                                                <div>hello@officialum1.com</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <ShieldCheck className="h-5 w-5 text-primary" />
+                                            <div>
+                                                <div className="font-bold text-gray-900">Guaranteed Response SLA</div>
+                                                <div>Under 2 Hours for Active Clients</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
+
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
+
             <Footer />
         </main>
     );
 }
+

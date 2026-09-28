@@ -33,6 +33,16 @@ function estimateTokens(text: string): string {
 
 export function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || request.nextUrl.hostname || '';
+    const isShopSubdomain = host.startsWith('shop.') || host.startsWith('shop.localhost');
+
+    // 1. Subdomain Rewrite for shop.officialum1.com and shop.localhost
+    if (isShopSubdomain) {
+        if (path === '/') {
+            const shopUrl = new URL('/shop', request.url);
+            return NextResponse.rewrite(shopUrl);
+        }
+    }
 
     if (path === '/' && wantsMarkdown(request)) {
         const md = homepageMarkdown();
