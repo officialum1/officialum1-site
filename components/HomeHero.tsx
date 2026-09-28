@@ -5,14 +5,18 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
-  Users
+  Globe,
+  Code2,
+  Layers,
+  Rocket
 } from "lucide-react";
 
 const proofPoints = [
-  "US & UK Registered Entity",
-  "Sub-Second Next.js Stacks",
-  "Data-Backed Organic SEO",
-  "65,000+ Verified Backlinks",
+  "Custom WordPress & WooCommerce",
+  "Full-Stack Web & Next.js Apps",
+  "Pixel-Perfect HTML5/CSS3 UI",
+  "Enterprise SEO & 65k+ Backlinks",
+  "Official US LLC & UK LTD Hub",
 ];
 
 export default function HomeHero() {
@@ -37,7 +41,7 @@ export default function HomeHero() {
 
       <div className="container relative z-10">
         <div className="max-w-4xl">
-          {/* Live System Indicator Badge */}
+          {/* Live Agency Indicator Badge */}
           <div className="mb-6 flex flex-wrap items-center gap-2.5">
             <div
               className="inline-flex max-w-full items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wider"
@@ -52,12 +56,12 @@ export default function HomeHero() {
                 aria-hidden="true"
                 className="h-4 w-4 flex-none text-emerald-600"
               />
-              <span>OfficialUM1 LLC • US &amp; UK Corporate Engineering Agency</span>
+              <span>OfficialUM1 LLC • Full-Stack Web, WordPress &amp; Growth Agency</span>
             </div>
 
             <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>24–48h Incorporation Active</span>
+              <span>Available for Global Client Projects</span>
             </div>
           </div>
 
@@ -70,9 +74,9 @@ export default function HomeHero() {
               color: "var(--text-primary)",
             }}
           >
-            Architecting high-speed{" "}
+            Custom WordPress, Full-Stack Web &amp;{" "}
             <span style={{ color: "var(--accent-blue)" }}>
-              web systems &amp; exponential revenue.
+              Revenue Growth Engineering.
             </span>
           </h1>
 
@@ -80,14 +84,14 @@ export default function HomeHero() {
             className="mb-8 max-w-3xl text-base leading-7 md:text-lg md:leading-8"
             style={{ color: "var(--text-muted)" }}
           >
-            <strong>OfficialUM1 LLC</strong> is a US-registered digital marketing, corporate formation, and software engineering agency. We build hyper-speed Next.js web platforms, dominant SEO ranking systems, authoritative PR outreach, and official US LLC / UK LTD formation infrastructure for global founders.
+            <strong>OfficialUM1 LLC</strong> is a full-service digital engineering powerhouse. From <strong>custom WordPress &amp; WooCommerce development</strong> and <strong>pixel-perfect HTML5/CSS3 landing pages</strong> to <strong>high-performance Next.js full-stack applications</strong>, enterprise SEO, and official US &amp; UK company formations.
           </p>
 
-          <ul className="mb-9 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="mb-9 grid max-w-4xl grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {proofPoints.map((point) => (
               <li
                 key={point}
-                className="flex min-h-12 items-center gap-2 rounded-lg border bg-white px-3 py-3 text-sm font-semibold shadow-sm transition-transform duration-150 hover:-translate-y-0.5"
+                className="flex items-center gap-2.5 rounded-xl border bg-white px-3.5 py-3 text-xs sm:text-sm font-bold shadow-sm transition-transform duration-150 hover:-translate-y-0.5"
                 style={{
                   borderColor: "var(--border-subtle)",
                   color: "var(--text-primary)",
@@ -95,8 +99,7 @@ export default function HomeHero() {
               >
                 <CheckCircle2
                   aria-hidden="true"
-                  className="h-4 w-4 flex-none"
-                  style={{ color: "var(--accent-blue)" }}
+                  className="h-4 w-4 flex-none text-emerald-600"
                 />
                 <span>{point}</span>
               </li>
@@ -105,7 +108,7 @@ export default function HomeHero() {
 
           <div className="flex w-full flex-col gap-3 sm:max-w-xl sm:flex-row">
             <Link
-              href="#audit"
+              href="/contact"
               className="inline-flex min-h-14 items-center justify-center gap-2 rounded-lg px-6 py-4 text-center text-base font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
               style={{
                 background: "var(--gradient)",
@@ -113,7 +116,7 @@ export default function HomeHero() {
               }}
             >
               <Sparkles aria-hidden="true" className="h-5 w-5 flex-none" />
-              <span>Get Free SEO &amp; Speed Audit</span>
+              <span>Start Your Web Project</span>
               <ArrowRight aria-hidden="true" className="h-5 w-5 flex-none" />
             </Link>
 
@@ -125,7 +128,7 @@ export default function HomeHero() {
                 color: "var(--text-primary)",
               }}
             >
-              Explore Client Services
+              Explore All 20+ Services
             </Link>
           </div>
 
@@ -148,7 +151,7 @@ export default function HomeHero() {
             </div>
 
             <p className="text-xs sm:text-sm text-gray-600 font-medium">
-              Trusted by <span className="font-bold text-gray-900">450+ founders</span> across US, UK, UAE &amp; Pakistan.
+              Trusted by <span className="font-bold text-gray-900">450+ founders</span> for WordPress, Full-Stack Web &amp; SEO Growth.
             </p>
           </div>
         </div>

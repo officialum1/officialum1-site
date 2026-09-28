@@ -1,18 +1,18 @@
 "use client";
 
 const tickerItems = [
-    "Next.js 15",
+    "WordPress & WooCommerce",
+    "Next.js 15 & React",
+    "Pixel-Perfect HTML5/CSS3",
+    "PHP & MySQL",
+    "TypeScript & Node.js",
+    "Elementor Pro & Theme Dev",
+    "Google Maps 3-Pack SEO",
+    "65,000+ Verified Backlinks",
     "Companies House UK",
-    "Yahoo Finance",
-    "Stripe Payments",
-    "MarketWatch",
-    "Wise Business",
-    "AP News",
-    "TypeScript",
-    "Google News",
-    "WordPress 90+ Score",
-    "Payoneer UK",
-    "Bloomberg Feed",
+    "US State LLC Filing",
+    "Stripe & Wise Banking",
+    "Yahoo Finance & AP News",
 ];
 
 export default function TechTicker() {
@@ -20,7 +20,7 @@ export default function TechTicker() {
 
     return (
         <section
-            aria-label="Technology and media authority ticker"
+            aria-label="Technology, WordPress and media authority ticker"
             className="relative border-y overflow-hidden"
             style={{ background: "var(--bg-section)", borderColor: "var(--border-subtle)" }}
         >
@@ -29,7 +29,7 @@ export default function TechTicker() {
                     className="mb-4 text-center text-[0.75rem] font-bold uppercase tracking-[0.25em]"
                     style={{ color: "var(--text-muted)" }}
                 >
-                    Enterprise Infrastructure &amp; Verified Media Network
+                    Full-Stack Stacks • WordPress Ecosystem • Global Media &amp; Corporate Networks
                 </p>
 
                 <div className="relative overflow-hidden">
@@ -71,7 +71,7 @@ export default function TechTicker() {
                 .ticker-inner {
                     display: inline-flex;
                     align-items: center;
-                    animation: ticker-scroll 32s linear infinite;
+                    animation: ticker-scroll 35s linear infinite;
                     will-change: transform;
                 }
                 .ticker-pill {
@@ -80,7 +80,7 @@ export default function TechTicker() {
                     gap: 0.5rem;
                     color: var(--text-primary);
                     font-size: 0.85rem;
-                    font-weight: 600;
+                    font-weight: 700;
                     padding: 0.35rem 1.25rem;
                     white-space: nowrap;
                 }

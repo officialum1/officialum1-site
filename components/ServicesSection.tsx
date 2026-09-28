@@ -13,11 +13,57 @@ import {
   ShoppingBag,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
-  Sparkles
+  Code2,
+  Layout,
+  Sparkles,
+  Smartphone
 } from "lucide-react";
 
 const ALL_SERVICES = [
+  {
+    id: "wordpress-dev",
+    category: "webdev",
+    badge: "WordPress & WooCommerce",
+    icon: Layout,
+    title: "Custom WordPress & WooCommerce Dev",
+    desc: "Custom theme/plugin engineering, Elementor Pro design, WooCommerce store setup, bug fixes, and PHP/MySQL builds.",
+    price: "From $199",
+    href: "/services/website-maintenance",
+    cta: "Explore WordPress Dev"
+  },
+  {
+    id: "html-landing",
+    category: "webdev",
+    badge: "Pixel-Perfect UI",
+    icon: Smartphone,
+    title: "HTML5, CSS3, Tailwind & React Landing Pages",
+    desc: "Figma/PSD to ultra-clean, mobile-responsive HTML5, Bootstrap, Tailwind, and React single-page conversion funnels.",
+    price: "From $149",
+    href: "/services/outsource-web-development",
+    cta: "Build HTML / React Page"
+  },
+  {
+    id: "nextjs-fullstack",
+    category: "fullstack",
+    badge: "Full-Stack Architecture",
+    icon: Rocket,
+    title: "Next.js 15 Full-Stack & SaaS Engineering",
+    desc: "Ultra-fast headless React web applications, custom CRM portals, and database-backed platforms with sub-500ms speed.",
+    price: "Custom Scope",
+    href: "/services/wordpress-to-nextjs-migration",
+    cta: "Explore Full-Stack"
+  },
+  {
+    id: "speed-optimization",
+    category: "webdev",
+    badge: "90+ Score Guaranteed",
+    icon: Zap,
+    title: "WordPress Speed Optimization",
+    desc: "Deep MySQL index tuning, LiteSpeed server cache, and critical CSS extraction to lock 90+ mobile Core Web Vitals.",
+    price: "From $99",
+    href: "/services/wordpress-speed-optimization",
+    cta: "Speed Up Website"
+  },
   {
     id: "uk-formation",
     category: "formation",
@@ -42,7 +88,7 @@ const ALL_SERVICES = [
   },
   {
     id: "guest-posting",
-    category: "links",
+    category: "seo",
     badge: "65,000+ Publishers",
     icon: Globe2,
     title: "High-DA Editorial Guest Posting",
@@ -50,39 +96,6 @@ const ALL_SERVICES = [
     price: "From $49",
     href: "/services/guest-posting",
     cta: "View DA Inventory"
-  },
-  {
-    id: "nextjs-migration",
-    category: "engineering",
-    badge: "Sub-500ms Speed",
-    icon: Rocket,
-    title: "WordPress to Next.js 15 Migration",
-    desc: "Migrate legacy slow CMS sites to headless React architectures with 0% downtime and guaranteed 95+ PageSpeed.",
-    price: "Custom Scope",
-    href: "/services/wordpress-to-nextjs-migration",
-    cta: "Explore Architecture"
-  },
-  {
-    id: "speed-optimization",
-    category: "engineering",
-    badge: "90+ Score Guaranteed",
-    icon: Zap,
-    title: "WordPress Speed Optimization",
-    desc: "Deep MySQL index tuning, LiteSpeed server cache, and critical CSS extraction to lock 90+ mobile Core Web Vitals.",
-    price: "From $99",
-    href: "/services/wordpress-speed-optimization",
-    cta: "Speed Up Website"
-  },
-  {
-    id: "press-release",
-    category: "links",
-    badge: "Tier-1 Media",
-    icon: Share2,
-    title: "Global Press Release Syndication",
-    desc: "Guaranteed brand distribution across AP News, Yahoo Finance, MarketWatch, and 350+ international media outlets.",
-    price: "From $199",
-    href: "/services/press-release-distribution",
-    cta: "Distribute Press Release"
   },
   {
     id: "local-seo",
@@ -94,26 +107,15 @@ const ALL_SERVICES = [
     price: "From $79",
     href: "/services/local-citations",
     cta: "Rank in Map Pack"
-  },
-  {
-    id: "ecommerce-cro",
-    category: "engineering",
-    badge: "2x Checkout Rate",
-    icon: ShoppingBag,
-    title: "E-Commerce CRO & Funnel Engineering",
-    desc: "Engineered 1-click slide carts, Apple Pay / Tabby integration, and high-conversion mobile checkout experiences.",
-    price: "Custom Scope",
-    href: "/services/ecommerce-cro",
-    cta: "Optimize Funnels"
   }
 ];
 
 const TABS = [
   { id: "all", label: "🌐 All Capabilities" },
+  { id: "webdev", label: "🛠️ WordPress & HTML/CSS" },
+  { id: "fullstack", label: "⚡ Full-Stack & Next.js" },
+  { id: "seo", label: "📈 Organic SEO & Backlinks" },
   { id: "formation", label: "🏛️ US & UK Formations" },
-  { id: "engineering", label: "⚡ Web Engineering" },
-  { id: "links", label: "🔗 Link Building & PR" },
-  { id: "seo", label: "📈 Organic SEO" },
 ];
 
 export default function ServicesSection() {
@@ -133,16 +135,16 @@ export default function ServicesSection() {
               className="mb-3 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#146c78]/10 text-[#146c78]"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              Full-Stack Agency Capabilities
+              Full-Service Digital Powerhouse
             </div>
             <h2
               className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight"
               style={{ color: "var(--text-primary)", fontFamily: "var(--font-space-grotesk), sans-serif" }}
             >
-              Engineered For <span style={{ color: "var(--accent-blue)" }}>Exponential Growth</span>
+              WordPress, Full-Stack Web &amp; <span style={{ color: "var(--accent-blue)" }}>Global Growth</span>
             </h2>
             <p className="mt-4 text-base text-gray-600 dark:text-gray-400 leading-relaxed">
-              Ultra-fast web platforms, guaranteed high-DA link building, enterprise SEO, and official US &amp; UK corporate formation pipelines.
+              From bespoke WordPress/WooCommerce and custom HTML5/CSS3 landing pages to high-scale Next.js full-stack architectures, SEO, and US/UK corporate entity filings.
             </p>
           </div>
 
