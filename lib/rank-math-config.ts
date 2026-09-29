@@ -129,7 +129,7 @@ export const DEFAULT_RANK_MATH_CONFIG: RankMathConfig = {
     linkedin_url: "https://linkedin.com/company/officialum1",
     youtube_url: "",
     pinterest_url: "",
-    extra_same_as: "https://www.trustpilot.com/review/officialum1.com\nhttps://github.com/officialum1\nhttps://x.com/officialum1\nhttps://twitter.com/officialum1\nhttps://clutch.co/profile/officialum1\nhttps://www.reddit.com/r/officialum1/",
+    extra_same_as: "https://www.tiktok.com/@officialum1\nhttps://www.crunchbase.com/organization/officialum1\nhttps://www.trustpilot.com/review/officialum1.com\nhttps://github.com/officialum1\nhttps://x.com/officialum1\nhttps://twitter.com/officialum1\nhttps://clutch.co/profile/officialum1\nhttps://www.reddit.com/r/officialum1/",
   },
   schema: {
     enable_organization: true,
