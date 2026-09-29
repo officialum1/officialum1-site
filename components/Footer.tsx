@@ -214,6 +214,7 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-3.5 text-[13.5px]">
                             {[
+                                { name: 'Digital Marketing Pakistan 🇵🇰', href: '/services/digital-marketing-agency-in-pakistan' },
                                 { name: 'High DA Guest Posts', href: '/services/guest-posting' },
                                 { name: 'Curated Niche Edits', href: '/services/niche-edits' },
                                 { name: 'Crypto & Web3 Links', href: '/services/crypto-guest-posting' },

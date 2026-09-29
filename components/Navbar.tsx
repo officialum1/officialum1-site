@@ -100,7 +100,7 @@ export default function Navbar() {
 
     const mobileNavLinks = [
         { href: domainUrls.mainUrl("/download-app"), label: "📱 Download Android App", highlight: true },
-        { href: domainUrls.mainUrl("/services"), label: "All Services" },
+        { href: domainUrls.mainUrl("/services/digital-marketing-agency-in-pakistan"), label: "🇵🇰 Digital Marketing Pakistan", highlight: true },
         { href: domainUrls.mainUrl("/services/guest-posting"), label: "🔗 High-DA Guest Posting" },
         { href: domainUrls.mainUrl("/services/niche-edits"), label: "⚡ Aged Niche Edits" },
         { href: domainUrls.mainUrl("/services/crypto-guest-posting"), label: "🪙 Crypto & Web3 Links" },
