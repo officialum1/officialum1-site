@@ -57,7 +57,7 @@ const TEAM_MEMBERS = [
         initials: "DS",
         icon: "🏛️",
         bio: "Corporate specialist managing US LLC and UK LTD company incorporations, IRS EIN filings, FinCEN BOI compliance, and multi-currency global banking setups for international founders.",
-        specialties: ["US LLC (MT/WY/DE/NM)", "UK Companies House", "IRS Form 1120/5472", "Banking KYC"],
+        specialties: ["US LLC (MT/WY/DE/NM)", "UK Companies House Presenter", "IRS Form 1120/5472", "Banking KYC"],
         social: {
             linkedin: "#",
             email: "compliance@officialum1.com"
@@ -104,7 +104,7 @@ const COMPANY_PILLARS = [
     },
     {
         title: "Global Entity Formation",
-        description: "We empower international entrepreneurs with 100% compliant US LLCs and UK LTD entities, complete with IRS EIN, Registered Agent, and merchant readiness.",
+        description: "We empower international entrepreneurs with 100% compliant US LLCs and UK LTD entities as an authorized UK Companies House presenter, complete with IRS EIN, London registered office, and merchant readiness.",
         icon: "🏛️"
     },
     {

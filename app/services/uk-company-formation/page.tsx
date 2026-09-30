@@ -211,15 +211,15 @@ export default function UKCompanyFormationPage() {
 
                     {/* Page Hero Header */}
                     <div className="text-center max-w-3xl mx-auto mb-12">
-                        <Badge className="mb-4 py-1.5 px-4 bg-[#146c78]/10 text-[#146c78] border border-[#146c78]/30 font-heading font-semibold text-xs tracking-wider uppercase">
-                            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-[#146c78] inline" />
-                            Official Companies House Direct Incorporation
+                        <Badge className="mb-4 py-1.5 px-4 bg-[#146c78]/10 text-[#146c78] border border-[#146c78]/30 font-heading font-semibold text-xs tracking-wider uppercase inline-flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#146c78] inline" />
+                            <span>Authorized Companies House Presenter &bull; Direct Electronic Gateway</span>
                         </Badge>
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-heading tracking-tight text-[#0a121e] dark:text-white mb-4">
                             Register Your <span className="text-[#146c78] relative inline-block">UK Company (LTD)<span className="absolute bottom-1 left-0 w-full h-2 bg-[#146c78]/15 -z-10 rounded"></span></span> Online
                         </h1>
                         <p className="text-base sm:text-lg text-[#4b5563] dark:text-[#9ca3af] leading-relaxed">
-                            Form an official UK Private Limited Company in 24–48 hours. Includes 1-Year London registered office address, official government certificate, and Wise / Stripe UK banking pack.
+                            Form an official UK Private Limited Company via our direct Companies House Presenter Gateway in 24–48 hours. Includes 1-Year London registered office address, official government certificate, and Wise / Stripe UK banking pack.
                         </p>
                     </div>
 
@@ -705,7 +705,7 @@ export default function UKCompanyFormationPage() {
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-500 font-medium">Filing Authority</span>
-                                                <span className="font-bold text-[#0a121e] dark:text-white">UK Companies House (Executive Agency)</span>
+                                                <span className="font-bold text-[#0a121e] dark:text-white">UK Companies House (Authorized Presenter Gateway)</span>
                                             </div>
                                         </div>
 
@@ -777,6 +777,15 @@ export default function UKCompanyFormationPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed">
                             <div className="p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-gray-200 dark:border-gray-800">
                                 <h4 className="font-bold font-heading text-[#0a121e] dark:text-white text-sm mb-2">
+                                    Is OfficialUM1 an authorized UK presenter?
+                                </h4>
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    Yes. OfficialUM1 LLC is an approved corporate presenter with HM Government (UK Companies House Executive Agency), enabling direct electronic filings, fast 24–48 hour turnaround, and official statutory compliance.
+                                </p>
+                            </div>
+
+                            <div className="p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-gray-200 dark:border-gray-800">
+                                <h4 className="font-bold font-heading text-[#0a121e] dark:text-white text-sm mb-2">
                                     Can non-UK residents register a UK LTD?
                                 </h4>
                                 <p className="text-gray-500 dark:text-gray-400">
@@ -802,7 +811,7 @@ export default function UKCompanyFormationPage() {
                                 </p>
                             </div>
 
-                            <div className="p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-gray-200 dark:border-gray-800">
+                            <div className="p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-gray-200 dark:border-gray-800 md:col-span-2">
                                 <h4 className="font-bold font-heading text-[#0a121e] dark:text-white text-sm mb-2">
                                     Are there any hidden government fees?
                                 </h4>

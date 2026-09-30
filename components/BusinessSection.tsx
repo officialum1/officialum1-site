@@ -6,7 +6,7 @@ const formationOptions = [
     id: "uk-ltd",
     state: "🇬🇧 UK LTD Company",
     total: "$269",
-    note: "London Office & CRN Included",
+    note: "London Office & Direct Presenter Filing",
     href: "/services/uk-company-formation",
   },
   {
