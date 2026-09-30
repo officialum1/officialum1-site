@@ -62,7 +62,7 @@ A **Companies House Credit Account** provides a dedicated **Presenter ID** and *
 ### Step 4: Turnaround Time & Credentials
 - **Processing Time:** Approved on 29 September 2026.
 - **Application Status:** **APPROVED** (Companies House Credit Control `chdfinance@companieshouse.gov.uk`).
-- **Presenter ID:** `00531858`
+- **Presenter ID:** `[CONFIDENTIAL - SECURE VAULT]`
 - **Authentication Code:** Issued (Pending UK Bacs Direct Debit bank update).
 
 ---
