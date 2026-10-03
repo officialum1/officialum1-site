@@ -31,17 +31,17 @@ app = FastAPI(
     description="Automated high-ticket client acquisition engine for Dubai, Africa, Europe, US & UK."
 )
 
-# Global Worker State - Defaults to SAFETY_PAUSE to protect Titan mailbox limit
+# Global Worker State
 STATE = {
-    "status": "SAFETY_PAUSED",
-    "is_paused": True, # Paused to allow Titan bounceback counter to reset
+    "status": "AUTOPILOT_ACTIVE",
+    "is_paused": False,
     "started_at": datetime.utcnow().isoformat(),
     "last_batch_time": None,
     "next_batch_scheduled": None,
     "total_delivered": 0,
     "active_batch_running": False,
     "last_batch_result": None,
-    "safety_message": "Outreach safely paused to let Titan 24-hour bounceback limit counter reset."
+    "safety_message": "Zero-bounce filter active. Verified leads only."
 }
 
 def background_autopilot_loop():
