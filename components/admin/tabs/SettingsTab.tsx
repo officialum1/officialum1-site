@@ -228,11 +228,61 @@ export default function SettingsTab({
                                 </select>
                             </div>
 
-                            <h4 style={{ color: '#aaa', marginTop: '1rem' }}>Corporate Tools (LLC Formation)</h4>
+                            <h4 style={{ color: '#aaa', marginTop: '1rem' }}>Corporate Tools (US LLC Formation)</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Access Key</label><input value={settings.corptools_access_key || ''} onChange={e => setSettings({ ...settings, corptools_access_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
                                 <div><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Secret Key</label><input type="password" value={settings.corptools_secret_key || ''} onChange={e => setSettings({ ...settings, corptools_secret_key: e.target.value })} className="input-field" style={{ width: '100%' }} /></div>
                                 <div style={{ gridColumn: 'span 2' }}><label style={{ color: '#aaa', fontSize: '0.8rem' }}>Account ID</label><input value={settings.corptools_account_id || ''} onChange={e => setSettings({ ...settings, corptools_account_id: e.target.value })} className="input-field" style={{ width: '100%' }} placeholder="Wholesale Account ID" /></div>
+                            </div>
+
+                            {/* UK Companies House Electronic Filing & Presenter Account */}
+                            <div style={{ marginTop: '1.5rem', padding: '1.25rem', background: 'linear-gradient(135deg, rgba(0, 128, 128, 0.15), rgba(20, 108, 120, 0.1))', borderRadius: '12px', border: '1px solid rgba(0, 229, 163, 0.3)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h4 style={{ color: '#00e5a3', margin: 0, fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        🇬🇧 UK Companies House (Electronic Presenter & Credit Account)
+                                    </h4>
+                                    <span style={{ fontSize: '0.75rem', background: settings.ch_presenter_id ? 'rgba(0, 229, 163, 0.2)' : 'rgba(255, 255, 255, 0.1)', color: settings.ch_presenter_id ? '#00e5a3' : '#aaa', padding: '3px 10px', borderRadius: '12px', fontWeight: 600 }}>
+                                        {settings.ch_presenter_id ? '🟢 Active Presenter' : '⚪ Not Set'}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#fff', fontWeight: 600, marginBottom: '0.3rem' }}>Presenter ID</label>
+                                        <input
+                                            type="text"
+                                            placeholder="From Letter 1"
+                                            value={settings.ch_presenter_id || ''}
+                                            onChange={e => setSettings({ ...settings, ch_presenter_id: e.target.value })}
+                                            className="input-field"
+                                            style={{ width: '100%', fontFamily: 'monospace' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#fff', fontWeight: 600, marginBottom: '0.3rem' }}>Presenter Auth Code</label>
+                                        <input
+                                            type="password"
+                                            placeholder="From Letter 2"
+                                            value={settings.ch_auth_code || ''}
+                                            onChange={e => setSettings({ ...settings, ch_auth_code: e.target.value })}
+                                            className="input-field"
+                                            style={{ width: '100%', fontFamily: 'monospace' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.8rem', color: '#fff', fontWeight: 600, marginBottom: '0.3rem' }}>Credit Account No</label>
+                                        <input
+                                            type="text"
+                                            placeholder="From Letter 1"
+                                            value={settings.ch_credit_account_no || ''}
+                                            onChange={e => setSettings({ ...settings, ch_credit_account_no: e.target.value })}
+                                            className="input-field"
+                                            style={{ width: '100%', fontFamily: 'monospace' }}
+                                        />
+                                    </div>
+                                </div>
+                                <p style={{ fontSize: '0.72rem', color: '#888', margin: '0.6rem 0 0 0' }}>
+                                    Used for automated wholesale fee-bearing incorporations (£100 / LTD) and statutory CS01 filings without per-transaction cards.
+                                </p>
                             </div>
 
                             <h4 style={{ color: '#aaa', marginTop: '1rem' }}>SMTP Email Server</h4>
