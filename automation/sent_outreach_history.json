@@ -1666,5 +1666,95 @@
     "campaign": "GUEST_POST_INITIAL",
     "status": "DELIVERED",
     "timestamp": "2026-10-05 00:40:29"
+  },
+  {
+    "clientName": "Rania Qureshi",
+    "company": "Oasis Health Technologies",
+    "domain": "oasishealthtech.ae",
+    "email": "rania@oasishealthtech.ae",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:40:51"
+  },
+  {
+    "clientName": "Brian Foster",
+    "company": "Apex Ranking Labs",
+    "domain": "apexrankinglabs.com",
+    "email": "brian@apexrankinglabs.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:41:17"
+  },
+  {
+    "clientName": "Lucas Silva",
+    "company": "RoastCraft Specialty",
+    "domain": "roastcraftspecialty.com",
+    "email": "lucas@roastcraftspecialty.com",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:41:35"
+  },
+  {
+    "clientName": "Rachel Hayes",
+    "company": "Hayes Digital Inbound",
+    "domain": "hayesdigitalinbound.com",
+    "email": "rachel@hayesdigitalinbound.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:41:58"
+  },
+  {
+    "clientName": "Harrison Blake",
+    "company": "SkyDrone Surveys",
+    "domain": "skydronesurveys.com",
+    "email": "harrison@skydronesurveys.com",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:42:20"
+  },
+  {
+    "clientName": "Megan Walsh",
+    "company": "NourishPure Organics",
+    "domain": "nourishpureorganics.com",
+    "email": "megan@nourishpureorganics.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:42:43"
+  },
+  {
+    "clientName": "Tariq Mansoor",
+    "company": "Gulf Horizon Realty",
+    "domain": "gulfhorizonrealty.ae",
+    "email": "tariq@gulfhorizonrealty.ae",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:42:59"
+  },
+  {
+    "clientName": "Lauren Mitchell",
+    "company": "Mitchell Media Outreach",
+    "domain": "mitchellmediaoutreach.co.uk",
+    "email": "lauren@mitchellmediaoutreach.co.uk",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:43:18"
+  },
+  {
+    "clientName": "Tyler Nelson",
+    "company": "Summit Trail Outdoors",
+    "domain": "summittrailgear.com",
+    "email": "tyler@summittrailgear.com",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:43:37"
+  },
+  {
+    "clientName": "Jessica Hayes",
+    "company": "SparkRank Link Agency",
+    "domain": "sparkrankagency.com",
+    "email": "jessica@sparkrankagency.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:44:01"
   }
 ]
