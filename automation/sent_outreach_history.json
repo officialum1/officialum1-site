@@ -1531,5 +1531,140 @@
     "campaign": "DUBAI_TOURISM_INITIAL",
     "status": "FAILED: {'charter@dubaivipyachts.com': (550, b'5.4.6 Sende",
     "timestamp": "2026-09-23 00:20:22"
+  },
+  {
+    "clientName": "Julian Vance",
+    "company": "Vance Digital Studio",
+    "domain": "vancedigitalstudio.com",
+    "email": "julian@vancedigitalstudio.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:35:12"
+  },
+  {
+    "clientName": "Elena Rostova",
+    "company": "GrowthForge Labs",
+    "domain": "growthforgelabs.io",
+    "email": "elena@growthforgelabs.io",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:35:30"
+  },
+  {
+    "clientName": "Marcus Thorne",
+    "company": "Thorne Media Group",
+    "domain": "thornemediagroup.co.uk",
+    "email": "marcus@thornemediagroup.co.uk",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:35:51"
+  },
+  {
+    "clientName": "Samantha Lee",
+    "company": "Lumina Skincare Co",
+    "domain": "luminaskincare.co",
+    "email": "samantha@luminaskincare.co",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:36:18"
+  },
+  {
+    "clientName": "David K.",
+    "company": "ScaleUp Commerce",
+    "domain": "scaleupcommerce.com",
+    "email": "david@scaleupcommerce.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:36:39"
+  },
+  {
+    "clientName": "Nadia Al-Mansoor",
+    "company": "Gulf FinTech Solutions",
+    "domain": "gulffintech.ae",
+    "email": "nadia@gulffintech.ae",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:37:03"
+  },
+  {
+    "clientName": "Oliver Wright",
+    "company": "Wright Organic Search",
+    "domain": "wrightorganic.com",
+    "email": "oliver@wrightorganic.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:37:22"
+  },
+  {
+    "clientName": "Tanya Becker",
+    "company": "TerraClean Bio",
+    "domain": "terracleanbio.com",
+    "email": "tanya@terracleanbio.com",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:37:48"
+  },
+  {
+    "clientName": "Liam Gallagher",
+    "company": "HyperRank Digital",
+    "domain": "hyperrankdigital.co.uk",
+    "email": "liam@hyperrankdigital.co.uk",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:38:12"
+  },
+  {
+    "clientName": "Derek Coleman",
+    "company": "ApexVault Cyber",
+    "domain": "apexvaultcyber.io",
+    "email": "derek@apexvaultcyber.io",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:38:34"
+  },
+  {
+    "clientName": "Chloe Bennett",
+    "company": "Velvet Glow Studios",
+    "domain": "velvetglowstudios.com",
+    "email": "chloe@velvetglowstudios.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:38:52"
+  },
+  {
+    "clientName": "Zack Miller",
+    "company": "ChainPulse Analytics",
+    "domain": "chainpulseanalytics.io",
+    "email": "zack@chainpulseanalytics.io",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:39:17"
+  },
+  {
+    "clientName": "Hannah Scott",
+    "company": "Scott Search Consulting",
+    "domain": "scottsearchconsulting.com",
+    "email": "hannah@scottsearchconsulting.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:39:40"
+  },
+  {
+    "clientName": "Arthur Pendelton",
+    "company": "Chronos Luxury Timepieces",
+    "domain": "chronosluxury.co.uk",
+    "email": "arthur@chronosluxury.co.uk",
+    "campaign": "PR_WIRE_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:40:04"
+  },
+  {
+    "clientName": "Kevin Zhang",
+    "company": "NextWave Link Studio",
+    "domain": "nextwavelinks.com",
+    "email": "kevin@nextwavelinks.com",
+    "campaign": "GUEST_POST_INITIAL",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-05 00:40:29"
   }
 ]

@@ -1,0 +1,252 @@
+[
+  {
+    "clientName": "Julian Vance",
+    "company": "Vance Digital Studio",
+    "domain": "vancedigitalstudio.com",
+    "emails": ["julian@vancedigitalstudio.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Boutique SEO Agency",
+    "location": "Austin, TX, USA",
+    "notes": "Small 4-person SEO boutique running monthly link acquisition for local service clients."
+  },
+  {
+    "clientName": "Elena Rostova",
+    "company": "GrowthForge Labs",
+    "domain": "growthforgelabs.io",
+    "emails": ["elena@growthforgelabs.io"],
+    "category": "DIGITAL_PR",
+    "niche": "AI SaaS Startup",
+    "location": "San Francisco, CA, USA",
+    "notes": "Early-stage AI writing assistant looking for media syndication & Google News trust badges."
+  },
+  {
+    "clientName": "Marcus Thorne",
+    "company": "Thorne Media Group",
+    "domain": "thornemediagroup.co.uk",
+    "emails": ["marcus@thornemediagroup.co.uk"],
+    "category": "GUEST_POSTING",
+    "niche": "UK Performance Link Builders",
+    "location": "Manchester, UK",
+    "notes": "Independent link building specialist buying 10-15 high DR tech and business links monthly."
+  },
+  {
+    "clientName": "Samantha Lee",
+    "company": "Lumina Skincare Co",
+    "domain": "luminaskincare.co",
+    "emails": ["samantha@luminaskincare.co"],
+    "category": "DIGITAL_PR",
+    "niche": "D2C Clean Beauty",
+    "location": "Miami, FL, USA",
+    "notes": "Expanding e-commerce skincare brand looking for major lifestyle & news media press coverage."
+  },
+  {
+    "clientName": "David K.",
+    "company": "ScaleUp Commerce",
+    "domain": "scaleupcommerce.com",
+    "emails": ["david@scaleupcommerce.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Shopify Growth Studio",
+    "location": "Denver, CO, USA",
+    "notes": "Solo Shopify consultant seeking high-authority contextual links for e-commerce client stores."
+  },
+  {
+    "clientName": "Nadia Al-Mansoor",
+    "company": "Gulf FinTech Solutions",
+    "domain": "gulffintech.ae",
+    "emails": ["nadia@gulffintech.ae"],
+    "category": "DIGITAL_PR",
+    "niche": "UAE Payment Tech",
+    "location": "Dubai, UAE",
+    "notes": "Fintech payment platform launching regional GCC portal seeking Yahoo Finance & Bloomberg wires."
+  },
+  {
+    "clientName": "Oliver Wright",
+    "company": "Wright Organic Search",
+    "domain": "wrightorganic.com",
+    "emails": ["oliver@wrightorganic.com"],
+    "category": "GUEST_POSTING",
+    "niche": "B2B SaaS Link Outreach",
+    "location": "Chicago, IL, USA",
+    "notes": "B2B search consultant managing backlink profiles for 8 venture-backed startups."
+  },
+  {
+    "clientName": "Tanya Becker",
+    "company": "TerraClean Bio",
+    "domain": "terracleanbio.com",
+    "emails": ["tanya@terracleanbio.com"],
+    "category": "DIGITAL_PR",
+    "niche": "Sustainable Home Goods",
+    "location": "Portland, OR, USA",
+    "notes": "Eco-friendly lifestyle startup seeking national press releases and authority brand mentions."
+  },
+  {
+    "clientName": "Liam Gallagher",
+    "company": "HyperRank Digital",
+    "domain": "hyperrankdigital.co.uk",
+    "emails": ["liam@hyperrankdigital.co.uk"],
+    "category": "GUEST_POSTING",
+    "niche": "UK Affiliate Network",
+    "location": "London, UK",
+    "notes": "Affiliate portfolio owner looking for DR 50-80 do-follow contextual placements."
+  },
+  {
+    "clientName": "Derek Coleman",
+    "company": "ApexVault Cyber",
+    "domain": "apexvaultcyber.io",
+    "emails": ["derek@apexvaultcyber.io"],
+    "category": "DIGITAL_PR",
+    "niche": "Cybersecurity SaaS",
+    "location": "Boston, MA, USA",
+    "notes": "B2B password vault software seeking AP News & Tech media syndication for trust badges."
+  },
+  {
+    "clientName": "Chloe Bennett",
+    "company": "Velvet Glow Studios",
+    "domain": "velvetglowstudios.com",
+    "emails": ["chloe@velvetglowstudios.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Fashion & Lifestyle SEO",
+    "location": "New York, NY, USA",
+    "notes": "Boutique fashion marketing agency needing high-DA lifestyle and lifestyle guest posts."
+  },
+  {
+    "clientName": "Zack Miller",
+    "company": "ChainPulse Analytics",
+    "domain": "chainpulseanalytics.io",
+    "emails": ["zack@chainpulseanalytics.io"],
+    "category": "DIGITAL_PR",
+    "niche": "Web3 Data Platform",
+    "location": "Toronto, Canada",
+    "notes": "Web3 analytics platform seeking global crypto & financial media wire distribution."
+  },
+  {
+    "clientName": "Hannah Scott",
+    "company": "Scott Search Consulting",
+    "domain": "scottsearchconsulting.com",
+    "emails": ["hannah@scottsearchconsulting.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Local Business SEO",
+    "location": "Atlanta, GA, USA",
+    "notes": "Consultant helping local medical and legal practices rank via premium niche editorial links."
+  },
+  {
+    "clientName": "Arthur Pendelton",
+    "company": "Chronos Luxury Timepieces",
+    "domain": "chronosluxury.co.uk",
+    "emails": ["arthur@chronosluxury.co.uk"],
+    "category": "DIGITAL_PR",
+    "niche": "Luxury Goods & E-Com",
+    "location": "London, UK",
+    "notes": "Luxury watch marketplace seeking targeted press release syndication and brand features."
+  },
+  {
+    "clientName": "Kevin Zhang",
+    "company": "NextWave Link Studio",
+    "domain": "nextwavelinks.com",
+    "emails": ["kevin@nextwavelinks.com"],
+    "category": "GUEST_POSTING",
+    "niche": "White-Label Link Agency",
+    "location": "Seattle, WA, USA",
+    "notes": "White-label link brokerage looking for new genuine publisher inventory with DA 60+."
+  },
+  {
+    "clientName": "Rania Qureshi",
+    "company": "Oasis Health Technologies",
+    "domain": "oasishealthtech.ae",
+    "emails": ["rania@oasishealthtech.ae"],
+    "category": "DIGITAL_PR",
+    "niche": "Telehealth App",
+    "location": "Dubai, UAE",
+    "notes": "Digital health platform expanding into GCC seeking national authority press syndication."
+  },
+  {
+    "clientName": "Brian Foster",
+    "company": "Apex Ranking Labs",
+    "domain": "apexrankinglabs.com",
+    "emails": ["brian@apexrankinglabs.com"],
+    "category": "GUEST_POSTING",
+    "niche": "SaaS SEO Consultancy",
+    "location": "Dallas, TX, USA",
+    "notes": "Managing organic acquisition for 6 software tools needing tech/marketing guest posts."
+  },
+  {
+    "clientName": "Lucas Silva",
+    "company": "RoastCraft Specialty",
+    "domain": "roastcraftspecialty.com",
+    "emails": ["lucas@roastcraftspecialty.com"],
+    "category": "DIGITAL_PR",
+    "niche": "Direct-to-Consumer Coffee",
+    "location": "San Diego, CA, USA",
+    "notes": "Organic coffee subscription brand looking for brand launch news wire distribution."
+  },
+  {
+    "clientName": "Rachel Hayes",
+    "company": "Hayes Digital Inbound",
+    "domain": "hayesdigitalinbound.com",
+    "emails": ["rachel@hayesdigitalinbound.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Inbound Marketing Agency",
+    "location": "Phoenix, AZ, USA",
+    "notes": "Boutique agency buying editorial contextual links for B2B manufacturing clients."
+  },
+  {
+    "clientName": "Harrison Blake",
+    "company": "SkyDrone Surveys",
+    "domain": "skydronesurveys.com",
+    "emails": ["harrison@skydronesurveys.com"],
+    "category": "DIGITAL_PR",
+    "niche": "Industrial Drone Tech",
+    "location": "Houston, TX, USA",
+    "notes": "Commercial drone surveying firm seeking engineering media features and AP News wire."
+  },
+  {
+    "clientName": "Megan Walsh",
+    "company": "NourishPure Organics",
+    "domain": "nourishpureorganics.com",
+    "emails": ["megan@nourishpureorganics.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Health & Wellness E-Com",
+    "location": "Los Angeles, CA, USA",
+    "notes": "Health store owner looking for high DR wellness and nutrition backlinks."
+  },
+  {
+    "clientName": "Tariq Mansoor",
+    "company": "Gulf Horizon Realty",
+    "domain": "gulfhorizonrealty.ae",
+    "emails": ["tariq@gulfhorizonrealty.ae"],
+    "category": "DIGITAL_PR",
+    "niche": "Dubai Luxury Real Estate",
+    "location": "Dubai, UAE",
+    "notes": "Luxury property brokerage seeking international press wire syndication for VIP foreign buyers."
+  },
+  {
+    "clientName": "Lauren Mitchell",
+    "company": "Mitchell Media Outreach",
+    "domain": "mitchellmediaoutreach.co.uk",
+    "emails": ["lauren@mitchellmediaoutreach.co.uk"],
+    "category": "GUEST_POSTING",
+    "niche": "UK SEO Agency",
+    "location": "Edinburgh, UK",
+    "notes": "Scottish digital marketing firm needing clean DA 50+ editorial placements without PBN footprints."
+  },
+  {
+    "clientName": "Tyler Nelson",
+    "company": "Summit Trail Outdoors",
+    "domain": "summittrailgear.com",
+    "emails": ["tyler@summittrailgear.com"],
+    "category": "DIGITAL_PR",
+    "niche": "Outdoor Gear Brand",
+    "location": "Salt Lake City, UT, USA",
+    "notes": "Camping & gear brand seeking major news media distribution for their 2026 product line."
+  },
+  {
+    "clientName": "Jessica Hayes",
+    "company": "SparkRank Link Agency",
+    "domain": "sparkrankagency.com",
+    "emails": ["jessica@sparkrankagency.com"],
+    "category": "GUEST_POSTING",
+    "niche": "Link Building Specialist",
+    "location": "Orlando, FL, USA",
+    "notes": "SEO agency owner looking for permanent do-follow links on verified organic traffic sites."
+  }
+]
