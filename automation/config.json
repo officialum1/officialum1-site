@@ -15,8 +15,9 @@
     "max_leads_per_batch": 10
   },
   "outreach": {
-    "min_delay_seconds": 15,
-    "max_delay_seconds": 30,
+    "min_delay_seconds": 90,
+    "max_delay_seconds": 180,
+    "max_emails_per_hour": 10,
     "auto_sync_crm": true
   }
 }
