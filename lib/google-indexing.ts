@@ -39,33 +39,10 @@ export async function getUrlStatus(url: string) {
     }
 }
 
+import { submitToIndexNow } from './indexnow';
+
 export async function notifyIndexNowBing(url: string | string[]) {
-    try {
-        const urlList = Array.isArray(url) ? url : [url];
-        const payload = {
-            host: INDEXNOW_HOST,
-            key: INDEXNOW_KEY,
-            keyLocation: `https://${INDEXNOW_HOST}/${INDEXNOW_KEY}.txt`,
-            urlList: urlList,
-        };
-
-        const res = await fetch('https://api.indexnow.org/indexnow', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
-            body: JSON.stringify(payload),
-        });
-
-        if (res.status === 200 || res.status === 202) {
-            console.log(`[INDEXNOW BING] Successfully pushed ${urlList.length} URL(s)`);
-            return true;
-        } else {
-            console.warn(`[INDEXNOW BING] Response status ${res.status}`);
-            return false;
-        }
-    } catch (e: any) {
-        console.error('[INDEXNOW BING] Failed to push:', e.message);
-        return false;
-    }
+    return submitToIndexNow(url);
 }
 
 export async function notifyGoogleIndexing(url: string, type: 'URL_UPDATED' | 'URL_DELETED' = 'URL_UPDATED') {

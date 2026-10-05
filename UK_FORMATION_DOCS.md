@@ -121,3 +121,64 @@ OfficialUM1 is registered as a **Hostinger Certified Agency Partner**:
 - **Recurring Revenue:** 20% to 40% recurring commission on client renewals.
 - **Wholesale Domains:** Wholesale .com domains ($4.99 - $9.99) bundled into formation & web development packages.
 - **Codebase MCP:** Integrated via `hostinger-agency-hosting` & `hostinger-domains` tools.
+
+---
+
+## 9. Live Operations & Presenter ID Fulfillment Workflow
+
+When a client places an order on `/services/uk-company-formation`:
+
+### Step 1: Customer Order Intake
+- Customer chooses package ($269 Starter / $349 Stripe Pro).
+- Customer inputs: Company Name, Director Full Legal Name, DOB, Nationality, and Residential Address.
+- System automatically creates record in `leads` table and triggers Telegram + Email alerts (`hello@officialum1.com`).
+- Client receives branded HTML order confirmation email with Order ID.
+
+### Step 2: KYC & Compliance Verification
+- Collect Director Passport / Smart CNIC (English) + Residential Bank Statement (last 3 months).
+- Non-UK residents (Pakistani, GCC, etc.) are 100% legally eligible to be sole director/shareholder.
+
+### Step 3: London Registered Office Address Provision
+- **Provider:** Icon Offices (`https://iconoffices.co.uk/virtual-offices.php`)
+- **Location:** East Ham, London UK (`Suite / Office XX, High Street North, East Ham, London UK`).
+- **Plan:** Bronze Plan (Quarterly £12.87 or Annual Discounted ~£25–£35).
+- **Statutory Mail:** Companies House & HMRC official statutory letters scanned and emailed as PDF.
+- **Alternative:** Icon Offices All-Inclusive Formation (Option a) at £106.86 (£139 USD) covering address + full company incorporation.
+
+### Step 4: Companies House Presenter Filing
+- In Admin Panel > **Settings Tab**:
+  - `ch_presenter_id` (Presenter ID)
+  - `ch_auth_code` (Presenter Auth Code)
+  - `ch_credit_account_no` (Credit Account No)
+  - Status Indicator: `🟢 Active Presenter`
+- Presenter ID bypasses per-transaction debit/credit card payments on government portal.
+- Companies House consolidates filings into monthly invoice statement.
+- Company registration certificate (CRN) approved within 24–48 hours.
+
+---
+
+## 10. Financial Margins & 100% Full Upfront Payment Policy
+
+### Website Checkout Model (100% Upfront)
+OfficialUM1 operates on a strict **100% Full Upfront Payment** model at online checkout (matching global corporate standards like Stripe Atlas and Firstbase):
+
+| Package | Client Online Checkout Price | Real Fulfillment Cost | Instant Net Agency Profit |
+| :--- | :--- | :--- | :--- |
+| **Starter UK LTD** | **$269 USD** | ~$139 USD (£106.86) | **+$130 USD (~36,000 PKR)** |
+| **Stripe & Banking Pro** | **$349 USD** | ~$139 USD (£106.86) | **+$210 USD (~58,000 PKR)** |
+| **E-Commerce Elite** | **$499 USD** | ~$149 USD (£114.00) | **+$350 USD (~97,000 PKR)** |
+
+### Why 100% Full Upfront is Superior:
+1. **Zero Cashflow Risk:** Client funds ($269 / $349) arrive in full *before* filing fees or address subscriptions are purchased.
+2. **Instant Retained Earnings:** OfficialUM1 pockets +$130 to +$210 pure profit immediately on day one.
+3. **No Chasing Invoices:** Prevents clients disappearing or refusing final 50% after government registration is already issued.
+4. **Annual Address Renewal (Recurring Income):** Client billed $89/year recurring vs $35 wholesale cost = **+$54/year recurring profit per client**.
+
+---
+
+## 11. Operational Reference Contacts & Links
+- **Companies House Credit Control:** `chdfinance@companieshouse.gov.uk` | Phone: `0303 1234 500`
+- **Icon Offices Virtual Office Portal:** `https://iconoffices.co.uk/virtual-offices.php`
+- **Companies House Public Registry:** `https://find-and-update.company-information.service.gov.uk`
+- **Admin Settings Tab:** `components/admin/tabs/SettingsTab.tsx`
+

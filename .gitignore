@@ -44,3 +44,8 @@ next-env.d.ts
 .env*.local
 *.key
 officialum1-*.json
+scratch/
+__pycache__/
+*.pyc
+*.png
+officialum_admin_mobile/android/build/
