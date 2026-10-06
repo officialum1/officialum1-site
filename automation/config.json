@@ -1,4 +1,13 @@
 {
+  "sendport": {
+    "api_key": "ENV_SENDPORT_API_KEY",
+    "api_url": "https://getsendport.com/api/v1/emails",
+    "from_email": "Muhammad Umar <hello@officialum1.com>",
+    "sender_name": "Muhammad Umar | OfficialUM1 LLC",
+    "reply_to": "hello@officialum1.com",
+    "track_opens": true,
+    "track_clicks": true
+  },
   "smtp": {
     "host": "smtp.titan.email",
     "port": 465,
@@ -15,6 +24,7 @@
     "max_leads_per_batch": 10
   },
   "outreach": {
+    "provider": "sendport",
     "min_delay_seconds": 90,
     "max_delay_seconds": 180,
     "max_emails_per_hour": 10,

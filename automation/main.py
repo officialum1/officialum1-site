@@ -268,12 +268,35 @@ def load_all_worldwide_leads():
     return all_leads
 
 def send_email(smtp_cfg, to_email, subject, body_text):
+    from_email = smtp_cfg.get("from_email", smtp_cfg.get("reply_to", "hello@officialum1.com"))
+    sender_name = smtp_cfg.get("sender_name", "Muhammad Umar | OfficialUM1 LLC")
+    reply_to = smtp_cfg.get("reply_to", "hello@officialum1.com")
+
+    # Try Sendport API first
+    try:
+        from sendport_client import send_via_sendport
+        res = send_via_sendport(
+            to=to_email,
+            subject=subject,
+            text=body_text,
+            from_email=f"{sender_name} <{from_email}>",
+            reply_to=reply_to,
+            track_opens=True,
+            track_clicks=True
+        )
+        if res.get("success"):
+            return
+        else:
+            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+    except Exception as e:
+        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
+
+    # Fallback to SMTP
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    from_email = smtp_cfg.get("from_email", smtp_cfg.get("reply_to", "hello@officialum1.com"))
-    msg["From"] = f"{smtp_cfg.get('sender_name', 'Muhammad Umar')} <{from_email}>"
+    msg["From"] = f"{sender_name} <{from_email}>"
     msg["To"] = to_email
-    msg["Reply-To"] = smtp_cfg.get("reply_to", "hello@officialum1.com")
+    msg["Reply-To"] = reply_to
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain="officialum1.com")
 
@@ -289,6 +312,7 @@ def send_email(smtp_cfg, to_email, subject, body_text):
             server.starttls()
             server.login(smtp_cfg["email"], smtp_cfg["password"])
             server.sendmail(envelope_from, [to_email], msg.as_string())
+
 
 def execute_outreach_batch(leads, max_count=30, delay_range=(15, 25)):
     cfg = load_config()

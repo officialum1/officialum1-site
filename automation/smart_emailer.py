@@ -106,7 +106,8 @@ Email: hello@officialum1.com
 def send_outreach_email(
     smtp_config: Dict[str, Any],
     lead: Dict[str, Any],
-    template_id: str = "4"
+    template_id: str = "4",
+    use_sendport: bool = True
 ) -> bool:
     recipient_email = lead["emails"][0] if lead.get("emails") else lead.get("buyerEmail")
     if not recipient_email:
@@ -119,12 +120,33 @@ def send_outreach_email(
     subject = template["subject"].format(client_name=client_name, website_domain=domain)
     body = template["body"].format(client_name=client_name, website_domain=domain)
 
-    # Clean text/plain message to ensure primary inbox delivery
-    msg = MIMEText(body, 'plain', 'utf-8')
     sender_name = smtp_config.get('sender_name', 'Muhammad Umar | OfficialUM1 LLC')
-    sender_email = smtp_config.get('email', 'no-reply@officialum1.com')
+    sender_email = smtp_config.get('email', 'hello@officialum1.com')
     reply_to = smtp_config.get('reply_to', 'hello@officialum1.com')
 
+    # Try Sendport API first if enabled
+    if use_sendport:
+        try:
+            from sendport_client import send_via_sendport
+            res = send_via_sendport(
+                to=recipient_email,
+                subject=subject,
+                text=body,
+                from_email=f"{sender_name} <{sender_email}>",
+                reply_to=reply_to,
+                track_opens=True,
+                track_clicks=True
+            )
+            if res.get("success"):
+                print(f"  ⚡ [Sendport] Delivered to {recipient_email}")
+                return True
+            else:
+                print(f"  ⚠️ [Sendport Note]: {res.get('error')} -> Falling back to SMTP...")
+        except Exception as e:
+            print(f"  ⚠️ [Sendport Exception]: {e} -> Falling back to SMTP...")
+
+    # Clean text/plain message to ensure primary inbox delivery via SMTP
+    msg = MIMEText(body, 'plain', 'utf-8')
     msg['From'] = f"{sender_name} <{sender_email}>"
     msg['To'] = recipient_email
     msg['Reply-To'] = reply_to
@@ -148,3 +170,4 @@ def send_outreach_email(
     except Exception as e:
         print(f"  ❌ SMTP Delivery Error to {recipient_email}: {e}")
         return False
+
