@@ -138,36 +138,19 @@ def send_outreach_email(
                 track_clicks=True
             )
             if res.get("success"):
-                print(f"  ⚡ [Sendport] Delivered to {recipient_email}")
-                return True
+                data = res.get("data", {})
+                if data.get("status") in ("delivered", "queued", "sent"):
+                    print(f"  ⚡ [Sendport] Delivered to {recipient_email}")
+                    return True
+                else:
+                    print(f"  ⚠️ [Sendport Delivery Error]: {data.get('error')}")
+                    return False
             else:
-                print(f"  ⚠️ [Sendport Note]: {res.get('error')} -> Falling back to SMTP...")
+                print(f"  ⚠️ [Sendport Error]: {res.get('error')}")
+                return False
         except Exception as e:
-            print(f"  ⚠️ [Sendport Exception]: {e} -> Falling back to SMTP...")
+            print(f"  ⚠️ [Sendport Exception]: {e}")
+            return False
 
-    # Clean text/plain message to ensure primary inbox delivery via SMTP
-    msg = MIMEText(body, 'plain', 'utf-8')
-    msg['From'] = f"{sender_name} <{sender_email}>"
-    msg['To'] = recipient_email
-    msg['Reply-To'] = reply_to
-    msg['Subject'] = subject
-    msg['Date'] = formatdate(localtime=True)
-    msg['Message-ID'] = make_msgid(domain="officialum1.com")
-    msg['X-Mailer'] = "OfficialUM1 Performance Mailer v2.4"
-    msg['MIME-Version'] = "1.0"
-
-    try:
-        if smtp_config.get("use_ssl", True):
-            server = smtplib.SMTP_SSL(smtp_config["host"], smtp_config.get("port", 465), timeout=15)
-        else:
-            server = smtplib.SMTP(smtp_config["host"], smtp_config.get("port", 587), timeout=15)
-            server.starttls()
-
-        server.login(smtp_config["email"], smtp_config["password"])
-        server.send_message(msg)
-        server.quit()
-        return True
-    except Exception as e:
-        print(f"  ❌ SMTP Delivery Error to {recipient_email}: {e}")
-        return False
+    return False
 

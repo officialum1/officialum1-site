@@ -272,7 +272,7 @@ def send_email(smtp_cfg, to_email, subject, body_text):
     sender_name = smtp_cfg.get("sender_name", "Muhammad Umar | OfficialUM1 LLC")
     reply_to = smtp_cfg.get("reply_to", "hello@officialum1.com")
 
-    # Try Sendport API first
+    # Send EXCLUSIVELY via Sendport API (Never use Titan SMTP for cold outreach)
     try:
         from sendport_client import send_via_sendport
         res = send_via_sendport(
@@ -285,35 +285,21 @@ def send_email(smtp_cfg, to_email, subject, body_text):
             track_clicks=True
         )
         if res.get("success"):
-            msg_id = res.get("data", {}).get("id", "delivered") if isinstance(res.get("data"), dict) else "delivered"
-            print(f"  ⚡ [Delivered via Sendport API] ID: {msg_id}")
-            return
+            data = res.get("data", {})
+            status = data.get("status", "")
+            if status in ("delivered", "queued", "sent"):
+                msg_id = data.get("id", "delivered")
+                print(f"  ⚡ [Delivered via Sendport API] ID: {msg_id}")
+                return
+            else:
+                err = data.get("error", status)
+                raise RuntimeError(f"Sendport delivery failed: {err}")
         else:
-            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+            raise RuntimeError(f"Sendport API error: {res.get('error')}")
     except Exception as e:
-        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
-
-    # Fallback to SMTP
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = f"{sender_name} <{from_email}>"
-    msg["To"] = to_email
-    msg["Reply-To"] = reply_to
-    msg["Date"] = formatdate(localtime=True)
-    msg["Message-ID"] = make_msgid(domain="officialum1.com")
-
-    msg.attach(MIMEText(body_text, "plain", "utf-8"))
-
-    envelope_from = smtp_cfg.get("email", from_email)
-    if smtp_cfg.get("use_ssl", True):
-        with smtplib.SMTP_SSL(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
-            server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(envelope_from, [to_email], msg.as_string())
-    else:
-        with smtplib.SMTP(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
-            server.starttls()
-            server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(envelope_from, [to_email], msg.as_string())
+        # STRICT SAFETY: Do NOT fall back to Titan SMTP to protect personal/business mailbox from bounces
+        print(f"  ❌ [Sendport Error]: {e}")
+        raise e
 
 
 def execute_outreach_batch(leads, max_count=500, delay_range=None):

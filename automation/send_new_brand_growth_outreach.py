@@ -114,31 +114,16 @@ def send_email(smtp_cfg, to_email, subject, body_text):
             track_clicks=True
         )
         if res.get("success"):
-            return
+            data = res.get("data", {})
+            if data.get("status") in ("delivered", "queued", "sent"):
+                return
+            else:
+                raise RuntimeError(f"Sendport delivery failed: {data.get('error')}")
         else:
-            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+            raise RuntimeError(f"Sendport API error: {res.get('error')}")
     except Exception as e:
-        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = f"{sender_name} <{sender_email}>"
-    msg["To"] = to_email
-    msg["Reply-To"] = reply_to
-    msg["Date"] = formatdate(localtime=True)
-    msg["Message-ID"] = make_msgid(domain="officialum1.com")
-
-    msg.attach(MIMEText(body_text, "plain", "utf-8"))
-
-    if smtp_cfg.get("use_ssl", True):
-        with smtplib.SMTP_SSL(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
-            server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(smtp_cfg["email"], [to_email], msg.as_string())
-    else:
-        with smtplib.SMTP(smtp_cfg["host"], smtp_cfg["port"], timeout=20) as server:
-            server.starttls()
-            server.login(smtp_cfg["email"], smtp_cfg["password"])
-            server.sendmail(smtp_cfg["email"], [to_email], msg.as_string())
+        print(f"  ❌ [Sendport Error]: {e}")
+        raise e
 
 def run_new_brand_campaign(max_emails=25, delay_range=(15, 30)):
     cfg = load_config()

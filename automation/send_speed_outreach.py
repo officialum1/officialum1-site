@@ -135,30 +135,17 @@ def send_email(smtp_cfg, lead, step="initial", dry_run=False):
             track_clicks=True
         )
         if res.get("success"):
-            return True
+            data = res.get("data", {})
+            if data.get("status") in ("delivered", "queued", "sent"):
+                return True
+            else:
+                print(f"  [Sendport Delivery Error]: {data.get('error')}")
+                return False
         else:
-            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+            print(f"  [Sendport Error]: {res.get('error')}")
+            return False
     except Exception as e:
-        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
-
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = f"{sender_name} <{sender_email}>"
-    msg["To"] = recipient_email
-    msg["Reply-To"] = smtp_cfg.get("reply_to", "hello@officialum1.com")
-    msg["Date"] = formatdate(localtime=True)
-    msg["Message-ID"] = make_msgid(domain="officialum1.com")
-
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-
-    try:
-        server = smtplib.SMTP_SSL(smtp_cfg["host"], smtp_cfg["port"], timeout=20)
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-        server.quit()
-        return True
-    except Exception as e:
-        print(f"  [SMTP Error]: {e}")
+        print(f"  [Sendport Error]: {e}")
         return False
 
 def main():

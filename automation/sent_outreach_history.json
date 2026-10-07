@@ -1828,5 +1828,131 @@
     "campaign": "TOURISM",
     "status": "DELIVERED",
     "timestamp": "2026-10-07 14:38:02"
+  },
+  {
+    "clientName": "Yassine",
+    "company": "Morocco Sahara Luxury Camp",
+    "domain": "moroccosaharacamp.com",
+    "email": "contact@moroccosaharacamp.com",
+    "campaign": "AFRICA_SAFARI",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:38:33"
+  },
+  {
+    "clientName": "Francois",
+    "company": "Cape Winelands Luxury Chauffeur & Tours",
+    "domain": "capewinelandstours.co.za",
+    "email": "info@capewinelandstours.co.za",
+    "campaign": "AFRICA_SAFARI",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:38:47"
+  },
+  {
+    "clientName": "Emmanuel",
+    "company": "Gorilla Trekking Rwanda Specialist",
+    "domain": "gorillatrekkingrwanda.com",
+    "email": "info@gorillatrekkingrwanda.com",
+    "campaign": "AFRICA_SAFARI",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:39:06"
+  },
+  {
+    "clientName": "Ethan Walker",
+    "company": "Echo Point Marketing",
+    "domain": "echopointmarketing.com",
+    "email": "ethan@echopointmarketing.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:39:36"
+  },
+  {
+    "clientName": "Grace Griffin",
+    "company": "Radiant Digital Group",
+    "domain": "radiantdigitalgroup.com",
+    "email": "grace@radiantdigitalgroup.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:39:54"
+  },
+  {
+    "clientName": "Henry Stewart",
+    "company": "Summit Crest Media",
+    "domain": "summitcrestmedia.com",
+    "email": "henry@summitcrestmedia.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:40:18"
+  },
+  {
+    "clientName": "Layla Wood",
+    "company": "DirectPath Digital",
+    "domain": "directpathdigital.com",
+    "email": "layla@directpathdigital.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:40:38"
+  },
+  {
+    "clientName": "David Miller",
+    "company": "Nexus Creative Agency",
+    "domain": "nexuscreativeagency.com",
+    "email": "david@nexuscreativeagency.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:41:11"
+  },
+  {
+    "clientName": "Marcus Vance",
+    "company": "Vanguard Search Partners",
+    "domain": "vanguardsearchpartners.com",
+    "email": "marcus@vanguardsearchpartners.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:41:34"
+  },
+  {
+    "clientName": "Olivia Sterling",
+    "company": "Sterling Growth Co",
+    "domain": "sterlinggrowthco.com",
+    "email": "olivia@sterlinggrowthco.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:41:50"
+  },
+  {
+    "clientName": "Daniel Kim",
+    "company": "Prism Digital Labs",
+    "domain": "prismdigitallabs.com",
+    "email": "daniel@prismdigitallabs.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:42:05"
+  },
+  {
+    "clientName": "Megan Brooks",
+    "company": "Aurora Growth Partners",
+    "domain": "auroragrowthpartners.com",
+    "email": "megan@auroragrowthpartners.com",
+    "campaign": "AUTHORITY",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:42:23"
+  },
+  {
+    "clientName": "Marcus Brody",
+    "company": "LuxeAura Living",
+    "domain": "luxeauraliving.com",
+    "email": "marcus@luxeauraliving.com",
+    "campaign": "SPEED",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:42:48"
+  },
+  {
+    "clientName": "Damian Ward",
+    "company": "Heritage Leather Goods",
+    "domain": "heritageleathergoods.co.uk",
+    "email": "damian@heritageleathergoods.co.uk",
+    "campaign": "SPEED",
+    "status": "DELIVERED",
+    "timestamp": "2026-10-07 14:43:08"
   }
 ]

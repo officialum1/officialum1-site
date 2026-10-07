@@ -9,11 +9,11 @@
     "track_clicks": true
   },
   "smtp": {
-    "host": "smtp.titan.email",
-    "port": 465,
-    "use_ssl": true,
+    "host": "",
+    "port": 0,
+    "use_ssl": false,
     "email": "hello@officialum1.com",
-    "password": "w5$DX+qsQa3?Fm3",
+    "password": "",
     "from_email": "hello@officialum1.com",
     "sender_name": "Muhammad Umar | OfficialUM1 LLC",
     "reply_to": "hello@officialum1.com"
