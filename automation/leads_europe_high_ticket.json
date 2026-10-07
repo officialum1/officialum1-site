@@ -94,5 +94,85 @@
     "country": "Norway / Finland (Troms\u00f8 & Lapland)",
     "niche": "Northern Lights & Luxury Fjord Glamping",
     "dealSize": "\u20ac3,500 - \u20ac7,500 per booking"
+  },
+  {
+    "clientName": "Jean-Pierre",
+    "company": "Chalet Mont Blanc Prestige",
+    "domain": "chaletmontblancprestige.com",
+    "emails": [
+      "jp@chaletmontblancprestige.com"
+    ],
+    "location": "Chamonix, France",
+    "niche": "Ultra-Luxury Ski Chalet"
+  },
+  {
+    "clientName": "Matteo",
+    "company": "Amalfi Blue Yacht Charters",
+    "domain": "amalfibluecharters.it",
+    "emails": [
+      "matteo@amalfibluecharters.it"
+    ],
+    "location": "Amalfi Coast, Italy",
+    "niche": "Private Mediterranean Yacht Rentals"
+  },
+  {
+    "clientName": "Claire",
+    "company": "Chalet Matterhorn Peak",
+    "domain": "chaletmatterhornpeak.ch",
+    "emails": [
+      "claire@chaletmatterhornpeak.ch"
+    ],
+    "location": "Zermatt, Switzerland",
+    "niche": "5-Star Alpine Ski Chalet"
+  },
+  {
+    "clientName": "Lukas",
+    "company": "Kitzbuhel Alpine Lodge",
+    "domain": "kitzbuhelalpinelodge.at",
+    "emails": [
+      "lukas@kitzbuhelalpinelodge.at"
+    ],
+    "location": "Kitzb\u00fchel, Austria",
+    "niche": "Private Luxury Winter Chalet"
+  },
+  {
+    "clientName": "Sofia",
+    "company": "Santorini Horizon Villas",
+    "domain": "santorinihorizonvillas.gr",
+    "emails": [
+      "sofia@santorinihorizonvillas.gr"
+    ],
+    "location": "Santorini, Greece",
+    "niche": "Cliffside Luxury Infinity Villas"
+  },
+  {
+    "clientName": "Henrik",
+    "company": "Fjord Haven Luxury Lodges",
+    "domain": "fjordhavenlodges.no",
+    "emails": [
+      "henrik@fjordhavenlodges.no"
+    ],
+    "location": "Geiranger, Norway",
+    "niche": "Exclusive Fjord Eco-Lodge"
+  },
+  {
+    "clientName": "Antoine",
+    "company": "Cote d'Azur Private Marine",
+    "domain": "cotedazurprivatemarine.fr",
+    "emails": [
+      "antoine@cotedazurprivatemarine.fr"
+    ],
+    "location": "Cannes, France",
+    "niche": "Superyacht Charters & French Riviera"
+  },
+  {
+    "clientName": "Isabella",
+    "company": "Lake Como Villa Sereno",
+    "domain": "lakecomovillasereno.it",
+    "emails": [
+      "isabella@lakecomovillasereno.it"
+    ],
+    "location": "Lake Como, Italy",
+    "niche": "Historic Waterfront Luxury Villa"
   }
 ]

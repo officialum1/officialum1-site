@@ -25,9 +25,10 @@
   },
   "outreach": {
     "provider": "sendport",
-    "min_delay_seconds": 90,
-    "max_delay_seconds": 180,
-    "max_emails_per_hour": 10,
+    "min_delay_seconds": 12,
+    "max_delay_seconds": 22,
+    "max_emails_per_hour": 35,
+    "daily_send_limit": 500,
     "auto_sync_crm": true
   }
 }

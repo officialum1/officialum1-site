@@ -1,5 +1,93 @@
 [
   {
+    "id": "lead_1791409082577",
+    "name": "Usman",
+    "contact": "info@rakdesertsafari.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: rakdesertsafari.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:38:02",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:38:02.000Z"
+  },
+  {
+    "id": "lead_1791409062459",
+    "name": "Rehan",
+    "contact": "info@luxuryridedubai.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: luxuryridedubai.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:37:42",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:37:42.000Z"
+  },
+  {
+    "id": "lead_1791409041261",
+    "name": "Amir",
+    "contact": "info@dubaifalconry.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: dubaifalconry.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:37:21",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:37:21.000Z"
+  },
+  {
+    "id": "lead_1791409019626",
+    "name": "Shahid",
+    "contact": "booking@redsanddesertsafari.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: redsanddesertsafari.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:36:59",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:36:59.000Z"
+  },
+  {
+    "id": "lead_1791409000732",
+    "name": "Sheraz",
+    "contact": "info@dubaicanalcruise.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: dubaicanalcruise.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:36:40",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:36:40.000Z"
+  },
+  {
+    "id": "lead_1791408982447",
+    "name": "Rizwan",
+    "contact": "info@goldendunestourism.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: goldendunestourism.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:36:22",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:36:22.000Z"
+  },
+  {
+    "id": "lead_1791408958801",
+    "name": "Farooq",
+    "contact": "contact@desertfoxsafari.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: desertfoxsafari.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:35:58",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:35:58.000Z"
+  },
+  {
+    "id": "lead_1791408932298",
+    "name": "Adil",
+    "contact": "info@dunebuggydubaiadventure.com",
+    "source": "Dubai & Global Tourism Direct Booking",
+    "status": "In Progress",
+    "notes": "Domain: dunebuggydubaiadventure.com\nCampaign: Dubai & Global Tourism Direct Booking\nStatus: In Progress\nOutreach Time: 2026-10-07 14:35:32",
+    "value": "2500",
+    "createdBy": "OutreachAutomation",
+    "createdAt": "2026-10-07T21:35:32.000Z"
+  },
+  {
     "id": "lead_1790148022497",
     "name": "Jawad",
     "contact": "charter@dubaivipyachts.com",

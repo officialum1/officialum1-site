@@ -94,5 +94,65 @@
     "country": "Namibia (Sossusvlei & Skeleton Coast)",
     "niche": "Fly-in Desert Safari & Stargazing Lodges",
     "dealSize": "$4,500 - $9,000 per booking"
+  },
+  {
+    "clientName": "Kofi",
+    "company": "Serengeti Horizon Tented Camp",
+    "domain": "serengetihorizoncamp.com",
+    "emails": [
+      "kofi@serengetihorizoncamp.com"
+    ],
+    "location": "Serengeti, Tanzania",
+    "niche": "Luxury Great Migration Tented Camp"
+  },
+  {
+    "clientName": "Tendai",
+    "company": "Okavango Delta Water Lodge",
+    "domain": "okavangowaterlodge.com",
+    "emails": [
+      "tendai@okavangowaterlodge.com"
+    ],
+    "location": "Okavango, Botswana",
+    "niche": "Exclusive Fly-In Water Safari Lodge"
+  },
+  {
+    "clientName": "Amina",
+    "company": "Maasai Mara Ridge Camp",
+    "domain": "maasaimararidgecamp.com",
+    "emails": [
+      "amina@maasaimararidgecamp.com"
+    ],
+    "location": "Maasai Mara, Kenya",
+    "niche": "5-Star Private Game Reserve Camp"
+  },
+  {
+    "clientName": "Jabu",
+    "company": "Kruger Sabi Sands Private Reserve",
+    "domain": "krugersabisandsreserve.co.za",
+    "emails": [
+      "jabu@krugersabisandsreserve.co.za"
+    ],
+    "location": "Kruger, South Africa",
+    "niche": "Big Five Luxury Safari Lodge"
+  },
+  {
+    "clientName": "Farai",
+    "company": "Victoria Falls Gorge Lodge",
+    "domain": "vicfallsgorgelodge.com",
+    "emails": [
+      "farai@vicfallsgorgelodge.com"
+    ],
+    "location": "Victoria Falls, Zimbabwe",
+    "niche": "Luxury Riverfront Safari Lodge"
+  },
+  {
+    "clientName": "Bakhita",
+    "company": "Ngorongoro Crater View Lodge",
+    "domain": "ngorongorocraterview.com",
+    "emails": [
+      "bakhita@ngorongorocraterview.com"
+    ],
+    "location": "Ngorongoro, Tanzania",
+    "niche": "Crater Rim Eco Safari Lodge"
   }
 ]

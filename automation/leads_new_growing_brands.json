@@ -178,5 +178,115 @@
     "city": "Dubai Marina",
     "industry": "Sport Fishing Trips",
     "stage": "New Boat Charter"
+  },
+  {
+    "clientName": "Arman",
+    "company": "KiteBeach Coffee Roastery",
+    "domain": "kitebeachcoffee.ae",
+    "emails": [
+      "arman@kitebeachcoffee.ae"
+    ],
+    "city": "Dubai",
+    "industry": "Specialty Coffee Roastery & D2C",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Sana",
+    "company": "Luxe Silk Nightwear",
+    "domain": "luxesilknightwear.com",
+    "emails": [
+      "sana@luxesilknightwear.com"
+    ],
+    "city": "London & Dubai",
+    "industry": "D2C Luxury Silk Sleepwear",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Danyal",
+    "company": "Volt Ride Mobility",
+    "domain": "voltridemobility.com",
+    "emails": [
+      "danyal@voltridemobility.com"
+    ],
+    "city": "Dubai & US",
+    "industry": "Electric Urban Scooters & Commuter Tech",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Farhan",
+    "company": "PureHydrate Mineral Drops",
+    "domain": "purehydratedrops.com",
+    "emails": [
+      "farhan@purehydratedrops.com"
+    ],
+    "city": "Austin, TX",
+    "industry": "Electrolyte & Wellness Nutrition",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Rayan",
+    "company": "Aura Sculpt Gymwear",
+    "domain": "aurasculptgymwear.com",
+    "emails": [
+      "rayan@aurasculptgymwear.com"
+    ],
+    "city": "Miami, FL",
+    "industry": "Premium Athletic Apparel",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Zoya",
+    "company": "Desert Glow Organic Oils",
+    "domain": "desertgloworganics.com",
+    "emails": [
+      "zoya@desertgloworganics.com"
+    ],
+    "city": "Dubai",
+    "industry": "Cold-Pressed Argan & Marula Oils",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Haris",
+    "company": "Peak Nomad Outdoor Gear",
+    "domain": "peaknomadgear.com",
+    "emails": [
+      "haris@peaknomadgear.com"
+    ],
+    "city": "Denver, CO",
+    "industry": "Lightweight Camping & Hiking Equipment",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Nida",
+    "company": "Gilded Candle Atelier",
+    "domain": "gildedcandleatelier.com",
+    "emails": [
+      "nida@gildedcandleatelier.com"
+    ],
+    "city": "New York",
+    "industry": "Hand-Poured Soy Fragrance Candles",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Kamran",
+    "company": "Revive Cold Plunge Systems",
+    "domain": "revivecoldplunges.com",
+    "emails": [
+      "kamran@revivecoldplunges.com"
+    ],
+    "city": "Los Angeles",
+    "industry": "Home Cryo & Recovery Tubs",
+    "stage": "Newly Launched Brand (0-6 Months)"
+  },
+  {
+    "clientName": "Aliya",
+    "company": "Minimalist Living Ceramics",
+    "domain": "minimalistlivingceramics.com",
+    "emails": [
+      "aliya@minimalistlivingceramics.com"
+    ],
+    "city": "London, UK",
+    "industry": "Handmade Japanese-Style Ceramic Ware",
+    "stage": "Newly Launched Brand (0-6 Months)"
   }
 ]

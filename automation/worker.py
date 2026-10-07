@@ -70,18 +70,18 @@ def background_autopilot_loop():
             STATE["active_batch_running"] = True
             STATE["last_batch_time"] = datetime.utcnow().isoformat()
 
-            # Execute batch of 15 leads with anti-spam delays (15-25s)
-            execute_outreach_batch(leads, max_count=15, delay_range=(15, 25))
+            # Execute batch of 21 leads with Sendport anti-spam delays (12-22s) -> 21 * 24h = 504 emails/day
+            execute_outreach_batch(leads, max_count=21, delay_range=(12, 22))
 
             history_after = load_sent_history()
             STATE["total_delivered"] = len(history_after)
             STATE["active_batch_running"] = False
             STATE["last_batch_result"] = f"Delivered at {datetime.utcnow().isoformat()}"
 
-            # Cooldown for 2 hours (7200 seconds) before next global batch
-            cooldown_seconds = 7200
+            # Cooldown for 1 hour (3600 seconds) before next worldwide batch
+            cooldown_seconds = 3600
             STATE["next_batch_scheduled"] = (datetime.utcnow().timestamp() + cooldown_seconds)
-            print(f"\n⏳ [Autopilot Cooldown] Sleeping for 2 hours before next worldwide batch...")
+            print(f"\n⏳ [Autopilot Cooldown] Sleeping for 1 hour before next worldwide batch (Target: 500/day)...")
             time.sleep(cooldown_seconds)
 
         except Exception as e:

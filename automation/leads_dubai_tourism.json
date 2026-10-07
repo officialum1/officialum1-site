@@ -366,5 +366,125 @@
     ],
     "city": "Dubai",
     "niche": "Destination Management & Corporate Tours"
+  },
+  {
+    "clientName": "Tariq",
+    "company": "Royal Mirage Desert Safaris",
+    "domain": "royalmiragedesert.com",
+    "emails": [
+      "tariq@royalmiragedesert.com"
+    ],
+    "city": "Dubai Desert",
+    "location": "Dubai Desert",
+    "niche": "Luxury Dune Buggy & VIP Safari",
+    "industry": "Luxury Dune Buggy & VIP Safari"
+  },
+  {
+    "clientName": "Rashid",
+    "company": "Arabian Gulf Yacht Fleet",
+    "domain": "arabiangulfyachts.ae",
+    "emails": [
+      "info@arabiangulfyachts.ae"
+    ],
+    "city": "Dubai Marina",
+    "location": "Dubai Marina",
+    "niche": "Private Luxury Yacht Charters",
+    "industry": "Private Luxury Yacht Charters"
+  },
+  {
+    "clientName": "Sultan",
+    "company": "Oasis Dune Adventures",
+    "domain": "oasisduneadventures.com",
+    "emails": [
+      "sultan@oasisduneadventures.com"
+    ],
+    "city": "Dubai Desert",
+    "location": "Dubai Desert",
+    "niche": "Desert Quad Biking & Glamping",
+    "industry": "Desert Quad Biking & Glamping"
+  },
+  {
+    "clientName": "Karim",
+    "company": "Azure Waves Marine Dubai",
+    "domain": "azurewavesmarine.ae",
+    "emails": [
+      "bookings@azurewavesmarine.ae"
+    ],
+    "city": "Dubai Harbour",
+    "location": "Dubai Harbour",
+    "niche": "Superyacht Rentals & Events",
+    "industry": "Superyacht Rentals & Events"
+  },
+  {
+    "clientName": "Mansoor",
+    "company": "Falcon Crest Desert Camp",
+    "domain": "falconcrestcamp.com",
+    "emails": [
+      "experience@falconcrestcamp.com"
+    ],
+    "city": "Dubai",
+    "location": "Dubai",
+    "niche": "Heritage Desert Safaris & Falconry",
+    "industry": "Heritage Desert Safaris & Falconry"
+  },
+  {
+    "clientName": "Zubair",
+    "company": "Horizon Jet Ski & Water Sports",
+    "domain": "horizonjetskidubai.com",
+    "emails": [
+      "zubair@horizonjetskidubai.com"
+    ],
+    "city": "JBR Dubai",
+    "location": "JBR Dubai",
+    "niche": "Water Sports & Jet Ski Tours",
+    "industry": "Water Sports & Jet Ski Tours"
+  },
+  {
+    "clientName": "Faisal",
+    "company": "Emirates VIP Chauffeur Services",
+    "domain": "emiratesvipchauffeur.ae",
+    "emails": [
+      "faisal@emiratesvipchauffeur.ae"
+    ],
+    "city": "Downtown Dubai",
+    "location": "Downtown Dubai",
+    "niche": "Luxury Chauffeur & Airport Transfers",
+    "industry": "Luxury Chauffeur & Airport Transfers"
+  },
+  {
+    "clientName": "Omar",
+    "company": "Desert Starlight Luxury Camps",
+    "domain": "desertstarlightcamps.com",
+    "emails": [
+      "omar@desertstarlightcamps.com"
+    ],
+    "city": "Al Marmoom",
+    "location": "Al Marmoom",
+    "niche": "Luxury Stargazing & Bedouin Dinners",
+    "industry": "Luxury Stargazing & Bedouin Dinners"
+  },
+  {
+    "clientName": "Adnan",
+    "company": "Marina Breeze Yacht Rentals",
+    "domain": "marinabreezeyachts.ae",
+    "emails": [
+      "adnan@marinabreezeyachts.ae"
+    ],
+    "city": "Dubai Marina",
+    "location": "Dubai Marina",
+    "niche": "Sunset Yacht Charters",
+    "industry": "Sunset Yacht Charters"
+  },
+  {
+    "clientName": "Bilal",
+    "company": "Dune Rider Offroad Expeditions",
+    "domain": "duneriderdxb.com",
+    "emails": [
+      "bilal@duneriderdxb.com"
+    ],
+    "city": "Dubai",
+    "location": "Dubai",
+    "niche": "Offroad 4x4 Dune Bashing & ATV Tours",
+    "industry": "Offroad 4x4 Dune Bashing & ATV Tours"
   }
 ]

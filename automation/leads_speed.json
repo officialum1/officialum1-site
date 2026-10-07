@@ -328,5 +328,445 @@
     "cms": "WooCommerce",
     "pageSpeedScore": "32/100",
     "notes": "Outdoor survival and tactical flashlights shop with slow mobile checkout."
+  },
+  {
+    "clientName": "Marcus Brody",
+    "company": "LuxeAura Living",
+    "domain": "luxeauraliving.com",
+    "emails": [
+      "marcus@luxeauraliving.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "31/100",
+    "notes": "High bounce rate on mobile checkout"
+  },
+  {
+    "clientName": "Helena Cross",
+    "company": "Nordic Sleep Solutions",
+    "domain": "nordicsleepsolutions.com",
+    "emails": [
+      "helena@nordicsleepsolutions.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "27/100",
+    "notes": "LCP 4.8s on product pages"
+  },
+  {
+    "clientName": "Gavin Fletcher",
+    "company": "Timber & Craft Co",
+    "domain": "timberandcraftco.com",
+    "emails": [
+      "gavin@timberandcraftco.com"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "34/100",
+    "notes": "Heavy catalog uncompressed media"
+  },
+  {
+    "clientName": "Serena Blake",
+    "company": "Velvet Botanicals",
+    "domain": "velvetbotanicals.com",
+    "emails": [
+      "serena@velvetbotanicals.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "29/100",
+    "notes": "Cart page latency over 3.2s"
+  },
+  {
+    "clientName": "Tristan Meyer",
+    "company": "AeroFit Performance",
+    "domain": "aerofitperformance.com",
+    "emails": [
+      "tristan@aerofitperformance.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "35/100",
+    "notes": "Excessive render-blocking CSS"
+  },
+  {
+    "clientName": "Kendra Walsh",
+    "company": "Starlight Jewelry US",
+    "domain": "starlightjewelryus.com",
+    "emails": [
+      "kendra@starlightjewelryus.com"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "26/100",
+    "notes": "Slow mobile TTFB on cloud hosting"
+  },
+  {
+    "clientName": "Derrick Cole",
+    "company": "Urban Roasters Coffee",
+    "domain": "urbanroasterscoffee.com",
+    "emails": [
+      "derrick@urbanroasterscoffee.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "38/100",
+    "notes": "Subscription plugin speed bottleneck"
+  },
+  {
+    "clientName": "Camila Reyes",
+    "company": "Terra Organic Pantry",
+    "domain": "terraorganicpantry.com",
+    "emails": [
+      "camila@terraorganicpantry.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "30/100",
+    "notes": "Mobile conversion rate under 1.5%"
+  },
+  {
+    "clientName": "Julian Thorne",
+    "company": "Apex Tactical Outdoors",
+    "domain": "apextacticaloutdoors.com",
+    "emails": [
+      "julian@apextacticaloutdoors.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "25/100",
+    "notes": "Product page FID and CLS flags"
+  },
+  {
+    "clientName": "Brianna Scott",
+    "company": "Nova Glow Skincare",
+    "domain": "novaglowskincare.com",
+    "emails": [
+      "brianna@novaglowskincare.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "33/100",
+    "notes": "High script execution time"
+  },
+  {
+    "clientName": "Damian Ward",
+    "company": "Heritage Leather Goods",
+    "domain": "heritageleathergoods.co.uk",
+    "emails": [
+      "damian@heritageleathergoods.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "28/100",
+    "notes": "UK store high cart abandonment"
+  },
+  {
+    "clientName": "Elena Petrova",
+    "company": "Artisan Kitchen Studio",
+    "domain": "artisankitchenstudio.co.uk",
+    "emails": [
+      "elena@artisankitchenstudio.co.uk"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "32/100",
+    "notes": "Heavy unoptimized gallery scripts"
+  },
+  {
+    "clientName": "Malcolm Shaw",
+    "company": "Summit Bicycles UK",
+    "domain": "summitbicycles.co.uk",
+    "emails": [
+      "malcolm@summitbicycles.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "29/100",
+    "notes": "Mobile load time 5.2 seconds"
+  },
+  {
+    "clientName": "Valerie Quinn",
+    "company": "PureEssence Candles",
+    "domain": "pureessencecandles.com",
+    "emails": [
+      "valerie@pureessencecandles.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "36/100",
+    "notes": "Third party analytics blocking render"
+  },
+  {
+    "clientName": "Desmond Clark",
+    "company": "Ironclad Fitness Gear",
+    "domain": "ironcladfitnessgear.com",
+    "emails": [
+      "desmond@ironcladfitnessgear.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "31/100",
+    "notes": "Slow AJAX cart response"
+  },
+  {
+    "clientName": "Nadia Morales",
+    "company": "Luxe Pets Boutique",
+    "domain": "luxepetsboutique.com",
+    "emails": [
+      "nadia@luxepetsboutique.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "27/100",
+    "notes": "Checkout page TTFB exceeds 2.5s"
+  },
+  {
+    "clientName": "Toby Harrington",
+    "company": "Cotswold Fine Antiques",
+    "domain": "cotswoldfineantiques.co.uk",
+    "emails": [
+      "toby@cotswoldfineantiques.co.uk"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "30/100",
+    "notes": "High resolution imagery uncompressed"
+  },
+  {
+    "clientName": "Felicity Vance",
+    "company": "Solaris Eyewear UK",
+    "domain": "solariseyewear.co.uk",
+    "emails": [
+      "felicity@solariseyewear.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "34/100",
+    "notes": "Slow server response time"
+  },
+  {
+    "clientName": "Gideon Ross",
+    "company": "Vanguard Audio Equipment",
+    "domain": "vanguardaudioequipment.com",
+    "emails": [
+      "gideon@vanguardaudioequipment.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "28/100",
+    "notes": "Customizer scripts bloating DOM"
+  },
+  {
+    "clientName": "Miriam Vance",
+    "company": "Boutique Home Textiles",
+    "domain": "boutiquehometextiles.com",
+    "emails": [
+      "miriam@boutiquehometextiles.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "33/100",
+    "notes": "Mobile speed rating in red zone"
+  },
+  {
+    "clientName": "Lucas Bennett",
+    "company": "Velvet & Vine Boutique",
+    "domain": "velvetandvineboutique.com",
+    "emails": [
+      "lucas@velvetandvineboutique.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "26/100",
+    "notes": "High cart dropoff on mobile"
+  },
+  {
+    "clientName": "Maya Lin",
+    "company": "Zenith Athletic Wear",
+    "domain": "zenithathleticwear.com",
+    "emails": [
+      "maya@zenithathleticwear.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "32/100",
+    "notes": "LCP 5.1 seconds on checkout"
+  },
+  {
+    "clientName": "Noah Campbell",
+    "company": "Artisan Woodworks US",
+    "domain": "artisanwoodworksus.com",
+    "emails": [
+      "noah@artisanwoodworksus.com"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "29/100",
+    "notes": "Heavy catalog uncompressed PNGs"
+  },
+  {
+    "clientName": "Chloe Bennett",
+    "company": "Lumiere Organic Beauty",
+    "domain": "lumiereorganicbeauty.com",
+    "emails": [
+      "chloe@lumiereorganicbeauty.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "34/100",
+    "notes": "Third-party tracker script delays"
+  },
+  {
+    "clientName": "Ethan Hughes",
+    "company": "Apex Tactical Boots",
+    "domain": "apextacticalboots.com",
+    "emails": [
+      "ethan@apextacticalboots.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "27/100",
+    "notes": "Server response time exceeds 2.8s"
+  },
+  {
+    "clientName": "Zoe Martin",
+    "company": "Nordic Pure Supplements",
+    "domain": "nordicpuresupplements.com",
+    "emails": [
+      "zoe@nordicpuresupplements.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "35/100",
+    "notes": "Render blocking CSS on mobile"
+  },
+  {
+    "clientName": "Mason Rivera",
+    "company": "Solstice Outdoor Apparel",
+    "domain": "solsticeoutdoorapparel.com",
+    "emails": [
+      "mason@solsticeoutdoorapparel.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "31/100",
+    "notes": "Excessive DOM size on product grids"
+  },
+  {
+    "clientName": "Ella Cooper",
+    "company": "Gilded Pet Essentials",
+    "domain": "gildedpetessentials.com",
+    "emails": [
+      "ella@gildedpetessentials.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "28/100",
+    "notes": "Mobile bounce rate above 62%"
+  },
+  {
+    "clientName": "Henry Stewart",
+    "company": "Titan Fitness Equip",
+    "domain": "titanfitnessequip.com",
+    "emails": [
+      "henry@titanfitnessequip.com"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "33/100",
+    "notes": "Checkout page TTFB latency"
+  },
+  {
+    "clientName": "Aria Ramirez",
+    "company": "Aura Botanica Candles",
+    "domain": "aurabotanicacandles.com",
+    "emails": [
+      "aria@aurabotanicacandles.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "30/100",
+    "notes": "JavaScript payload over 4.5MB"
+  },
+  {
+    "clientName": "Logan Ward",
+    "company": "Heritage Coffee Roasters",
+    "domain": "heritagecoffeeroasters.co.uk",
+    "emails": [
+      "logan@heritagecoffeeroasters.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "27/100",
+    "notes": "UK store high checkout latency"
+  },
+  {
+    "clientName": "Lily Richardson",
+    "company": "Modern Haven Furnishings",
+    "domain": "modernhavenfurnishings.co.uk",
+    "emails": [
+      "lily@modernhavenfurnishings.co.uk"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "31/100",
+    "notes": "High resolution gallery uncompressed"
+  },
+  {
+    "clientName": "Caleb Morris",
+    "company": "Summit Cycling London",
+    "domain": "summitcyclinglondon.co.uk",
+    "emails": [
+      "caleb@summitcyclinglondon.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "29/100",
+    "notes": "Mobile load time 4.9 seconds"
+  },
+  {
+    "clientName": "Hannah Murphy",
+    "company": "Pure Silk Bedding UK",
+    "domain": "puresilkbedding.co.uk",
+    "emails": [
+      "hannah@puresilkbedding.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "33/100",
+    "notes": "Slow AJAX add-to-cart response"
+  },
+  {
+    "clientName": "Sebastian Wood",
+    "company": "Ironclad Watch Co",
+    "domain": "ironcladwatchco.com",
+    "emails": [
+      "sebastian@ironcladwatchco.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "28/100",
+    "notes": "Product page FID and CLS flags"
+  },
+  {
+    "clientName": "Layla Watson",
+    "company": "Luxe Glow Cosmetics",
+    "domain": "luxeglowcosmetics.com",
+    "emails": [
+      "layla@luxeglowcosmetics.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "35/100",
+    "notes": "Render blocking font files"
+  },
+  {
+    "clientName": "Julian Brooks",
+    "company": "Cotswold Vintage Leather",
+    "domain": "cotswoldvintageleather.co.uk",
+    "emails": [
+      "julian@cotswoldvintageleather.co.uk"
+    ],
+    "cms": "WordPress",
+    "pageSpeedScore": "30/100",
+    "notes": "Slow time to first byte"
+  },
+  {
+    "clientName": "Nora Gray",
+    "company": "Solaris Optics UK",
+    "domain": "solarisoptics.co.uk",
+    "emails": [
+      "nora@solarisoptics.co.uk"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "32/100",
+    "notes": "Mobile speed test flagged in red zone"
+  },
+  {
+    "clientName": "Finley Price",
+    "company": "Vanguard Studio Monitors",
+    "domain": "vanguardstudiomonitors.com",
+    "emails": [
+      "finley@vanguardstudiomonitors.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "26/100",
+    "notes": "High JavaScript execution overhead"
+  },
+  {
+    "clientName": "Alice Foster",
+    "company": "Boutique Ceramic Works",
+    "domain": "boutiqueceramicworks.com",
+    "emails": [
+      "alice@boutiqueceramicworks.com"
+    ],
+    "cms": "WooCommerce",
+    "pageSpeedScore": "34/100",
+    "notes": "Unused CSS and JS bloating assets"
   }
 ]

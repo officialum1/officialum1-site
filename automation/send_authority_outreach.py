@@ -127,6 +127,25 @@ def send_email(smtp_cfg, lead, step="initial", dry_run=False):
         print(f"  [DRY RUN PREVIEW] To: {recipient_email}")
         return True
 
+    # Try Sendport API first
+    try:
+        from sendport_client import send_via_sendport
+        res = send_via_sendport(
+            to=recipient_email,
+            subject=subject,
+            text=body,
+            from_email=f"{sender_name} <{sender_email}>",
+            reply_to=smtp_cfg.get("reply_to", "hello@officialum1.com"),
+            track_opens=True,
+            track_clicks=True
+        )
+        if res.get("success"):
+            return True
+        else:
+            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+    except Exception as e:
+        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"{sender_name} <{sender_email}>"

@@ -314,21 +314,39 @@ def send_email(smtp_cfg, to_email, subject, body_text):
             server.sendmail(envelope_from, [to_email], msg.as_string())
 
 
-def execute_outreach_batch(leads, max_count=30, delay_range=(15, 25)):
+def execute_outreach_batch(leads, max_count=500, delay_range=None):
     cfg = load_config()
+    outreach_cfg = cfg.get("outreach", {})
+    daily_limit = outreach_cfg.get("daily_send_limit", 500)
     smtp_cfg = cfg.get("smtp", {})
     sent_history = load_sent_history()
     already_sent = {h["email"].lower() for h in sent_history if "email" in h}
 
+    today_str = time.strftime("%Y-%m-%d")
+    sent_today = sum(1 for h in sent_history if h.get("timestamp", "").startswith(today_str) and h.get("status") == "DELIVERED")
+
+    if not delay_range:
+        min_del = outreach_cfg.get("min_delay_seconds", 12)
+        max_del = outreach_cfg.get("max_delay_seconds", 20)
+        delay_range = (min_del, max_del)
+
+    remaining_daily = max(0, daily_limit - sent_today)
+    effective_target = min(max_count, remaining_daily)
+
     print("=" * 75)
-    print(f" 🚀 OFFICIALUM1 LLC - UNIFIED WORLDWIDE OUTREACH RUNNER")
-    print(f" Target Batch Size: {max_count} | Available Leads: {len(leads)}")
+    print(f" 🚀 OFFICIALUM1 LLC - UNIFIED WORLDWIDE OUTREACH RUNNER (SENDPORT 2048-BIT)")
+    print(f" Daily Target: {daily_limit}/day | Delivered Today: {sent_today} | Target This Run: {effective_target}")
+    print(f" Total Available Worldwide Leads in Pool: {len(leads)}")
     print("=" * 75)
+
+    if remaining_daily <= 0:
+        print(f"🎯 Daily send limit of {daily_limit} emails already reached for today ({today_str})! Sleeping to protect sender reputation.")
+        return 0
 
     sent_count = 0
     for idx, lead in enumerate(leads, 1):
-        if sent_count >= max_count:
-            print(f"\n[OK] Reached batch limit of {max_count} emails.")
+        if sent_count >= effective_target:
+            print(f"\n[OK] Reached target limit of {effective_target} emails for this sprint.")
             break
 
         emails = lead.get("emails", [])
@@ -425,7 +443,10 @@ def main():
         choice = input("Enter Choice [0-7]: ").strip()
 
     if choice == "1":
-        execute_outreach_batch(all_leads, max_count=35)
+        limit = 500
+        if len(sys.argv) > 2 and sys.argv[2].isdigit():
+            limit = int(sys.argv[2])
+        execute_outreach_batch(all_leads, max_count=limit)
     elif choice == "2":
         leads = [l for l in all_leads if "NEW" in l.get("_dataset_key", "")]
         execute_outreach_batch(leads, max_count=20)

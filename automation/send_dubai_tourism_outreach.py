@@ -99,11 +99,34 @@ Website: https://officialum1.com/services/tourism-seo-dubai
 """
 
 def send_email(smtp_cfg, to_email, subject, body_text):
+    sender_name = smtp_cfg.get("sender_name", "Muhammad Umar | OfficialUM1 LLC")
+    sender_email = smtp_cfg.get("email", "hello@officialum1.com")
+    reply_to = smtp_cfg.get("reply_to", "hello@officialum1.com")
+
+    # Try Sendport API first
+    try:
+        from sendport_client import send_via_sendport
+        res = send_via_sendport(
+            to=to_email,
+            subject=subject,
+            text=body_text,
+            from_email=f"{sender_name} <{sender_email}>",
+            reply_to=reply_to,
+            track_opens=True,
+            track_clicks=True
+        )
+        if res.get("success"):
+            return
+        else:
+            print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
+    except Exception as e:
+        print(f"  [Sendport notice: {e}] -> Falling back to SMTP...")
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"] = f"{smtp_cfg['sender_name']} <{smtp_cfg['email']}>"
+    msg["From"] = f"{sender_name} <{sender_email}>"
     msg["To"] = to_email
-    msg["Reply-To"] = smtp_cfg["reply_to"]
+    msg["Reply-To"] = reply_to
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain="officialum1.com")
 
