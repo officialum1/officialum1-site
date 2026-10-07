@@ -285,6 +285,8 @@ def send_email(smtp_cfg, to_email, subject, body_text):
             track_clicks=True
         )
         if res.get("success"):
+            msg_id = res.get("data", {}).get("id", "delivered") if isinstance(res.get("data"), dict) else "delivered"
+            print(f"  ⚡ [Delivered via Sendport API] ID: {msg_id}")
             return
         else:
             print(f"  [Sendport: {res.get('error')}] -> Falling back to SMTP...")
